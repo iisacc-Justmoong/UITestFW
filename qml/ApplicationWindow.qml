@@ -1,12 +1,15 @@
 import QtQuick
 import QtQuick.Controls as Controls
 import QtQuick.Window
-import UITestFW 1.0
+import UIFramework 1.0
 
 Controls.ApplicationWindow {
     id: root
 
     readonly property bool isMobile: Qt.platform.os === "android" || Qt.platform.os === "ios"
+
+    property string styleSheet: ""
+    property url styleSheetUrl: ""
 
     property int desktopMinWidth: 900
     property int desktopMinHeight: 600
@@ -31,6 +34,9 @@ Controls.ApplicationWindow {
     palette.buttonText: Theme.textPrimary
     palette.highlight: Theme.accent
     palette.highlightedText: Theme.onAccent
+
+    onStyleSheetChanged: Theme.applyCss(styleSheet)
+    onStyleSheetUrlChanged: Theme.loadCss(styleSheetUrl)
 
     contentItem: Item {
         anchors.fill: parent

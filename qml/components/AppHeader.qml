@@ -1,7 +1,7 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
-import UITestFW 1.0
+import UIFramework 1.0
 
 ToolBar {
     id: root

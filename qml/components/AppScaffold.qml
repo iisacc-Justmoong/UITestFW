@@ -1,7 +1,7 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
-import UITestFW 1.0
+import UIFramework 1.0
 
 Item {
     id: root
@@ -10,15 +10,171 @@ Item {
     property string headerSubtitle: ""
     property var navModel: ["Overview", "Suites", "Runs", "Devices", "Reports", "Settings"]
     property int navIndex: 0
+    property bool navigationEnabled: true
+    property string navTitle: "Navigation"
+    property bool navTitleVisible: true
+    property int navWidth: 220
+    property int navDrawerWidth: 240
+    property int wideBreakpoint: 980
+    property Component navDelegate: null
+    property Component navHeader: null
+    property Component navFooter: null
+
+    signal navActivated(int index, var item)
 
     property alias headerActions: appHeader.actions
 
     default property alias content: contentArea.data
 
-    readonly property bool wide: width >= 980
+    readonly property bool wide: width >= wideBreakpoint
+    readonly property bool hasNav: navigationEnabled && navModel && (navModel.length !== undefined ? navModel.length > 0 : navModel.count > 0)
 
     implicitWidth: 1200
     implicitHeight: 760
+
+    onWideChanged: {
+        if (wide && navDrawer.opened)
+            navDrawer.close()
+    }
+
+    Component {
+        id: defaultNavDelegate
+
+        ItemDelegate {
+            property var item: modelData
+            property string itemLabel: typeof item === "string" ? item : (item.label || item.title || item.text || "")
+            property string itemIcon: typeof item === "object" ? (item.icon || item.iconName || item.symbol || "") : ""
+            property string itemBadge: typeof item === "object" && item.badge !== undefined ? String(item.badge) : ""
+            property bool itemEnabled: typeof item === "object" && item.enabled !== undefined ? item.enabled : true
+
+            width: parent ? parent.width : implicitWidth
+            text: itemLabel
+            enabled: itemEnabled
+            highlighted: index === root.navIndex
+            padding: 10
+
+            contentItem: RowLayout {
+                spacing: 8
+                Layout.fillWidth: true
+
+                Label {
+                    visible: itemIcon.length > 0
+                    text: itemIcon
+                    color: control.highlighted ? Theme.textPrimary : Theme.textTertiary
+                    font.family: Theme.fontDisplay
+                    font.pixelSize: 12
+                }
+
+                Label {
+                    text: control.text
+                    color: control.highlighted ? Theme.textPrimary : Theme.textSecondary
+                    font.family: Theme.fontBody
+                    font.pixelSize: 13
+                    Layout.fillWidth: true
+                    elide: Text.ElideRight
+                }
+
+                Rectangle {
+                    visible: itemBadge.length > 0
+                    radius: 8
+                    color: control.highlighted ? Theme.accent : Theme.borderSoft
+                    Layout.preferredHeight: 18
+                    Layout.preferredWidth: Math.max(18, badgeText.implicitWidth + 10)
+
+                    Label {
+                        id: badgeText
+                        anchors.centerIn: parent
+                        text: itemBadge
+                        color: control.highlighted ? Theme.onAccent : Theme.textPrimary
+                        font.family: Theme.fontBody
+                        font.pixelSize: 10
+                    }
+                }
+            }
+
+            background: Rectangle {
+                radius: Theme.radiusSm
+                color: control.highlighted ? Theme.accentMuted : "transparent"
+                border.color: control.highlighted ? Theme.border : "transparent"
+                border.width: 1
+            }
+
+            onClicked: {
+                root.navIndex = index
+                root.navActivated(index, item)
+            }
+        }
+    }
+
+    Component {
+        id: defaultDrawerDelegate
+
+        ItemDelegate {
+            property var item: modelData
+            property string itemLabel: typeof item === "string" ? item : (item.label || item.title || item.text || "")
+            property string itemIcon: typeof item === "object" ? (item.icon || item.iconName || item.symbol || "") : ""
+            property string itemBadge: typeof item === "object" && item.badge !== undefined ? String(item.badge) : ""
+            property bool itemEnabled: typeof item === "object" && item.enabled !== undefined ? item.enabled : true
+
+            width: parent ? parent.width : implicitWidth
+            text: itemLabel
+            enabled: itemEnabled
+            highlighted: index === root.navIndex
+            padding: 10
+
+            contentItem: RowLayout {
+                spacing: 8
+                Layout.fillWidth: true
+
+                Label {
+                    visible: itemIcon.length > 0
+                    text: itemIcon
+                    color: control.highlighted ? Theme.textPrimary : Theme.textTertiary
+                    font.family: Theme.fontDisplay
+                    font.pixelSize: 12
+                }
+
+                Label {
+                    text: control.text
+                    color: control.highlighted ? Theme.textPrimary : Theme.textSecondary
+                    font.family: Theme.fontBody
+                    font.pixelSize: 13
+                    Layout.fillWidth: true
+                    elide: Text.ElideRight
+                }
+
+                Rectangle {
+                    visible: itemBadge.length > 0
+                    radius: 8
+                    color: control.highlighted ? Theme.accent : Theme.borderSoft
+                    Layout.preferredHeight: 18
+                    Layout.preferredWidth: Math.max(18, badgeText.implicitWidth + 10)
+
+                    Label {
+                        id: badgeText
+                        anchors.centerIn: parent
+                        text: itemBadge
+                        color: control.highlighted ? Theme.onAccent : Theme.textPrimary
+                        font.family: Theme.fontBody
+                        font.pixelSize: 10
+                    }
+                }
+            }
+
+            background: Rectangle {
+                radius: Theme.radiusSm
+                color: control.highlighted ? Theme.accentMuted : "transparent"
+                border.color: control.highlighted ? Theme.border : "transparent"
+                border.width: 1
+            }
+
+            onClicked: {
+                root.navIndex = index
+                root.navActivated(index, item)
+                navDrawer.close()
+            }
+        }
+    }
 
     Rectangle {
         anchors.fill: parent
@@ -62,7 +218,7 @@ Item {
             id: appHeader
             title: root.headerTitle
             subtitle: root.headerSubtitle
-            menuVisible: !root.wide
+            menuVisible: root.hasNav && !root.wide
             Layout.fillWidth: true
             Layout.preferredHeight: implicitHeight
             onMenuClicked: navDrawer.open()
@@ -75,8 +231,8 @@ Item {
 
             Rectangle {
                 id: navRail
-                visible: root.wide
-                width: root.wide ? 220 : 0
+                visible: root.hasNav && root.wide
+                width: root.hasNav && root.wide ? root.navWidth : 0
                 anchors.top: parent.top
                 anchors.bottom: parent.bottom
                 anchors.left: parent.left
@@ -91,8 +247,16 @@ Item {
                     anchors.margins: 16
                     spacing: 12
 
+                    Loader {
+                        active: root.navHeader !== null
+                        sourceComponent: root.navHeader
+                        visible: active
+                        Layout.fillWidth: true
+                    }
+
                     Label {
-                        text: "Navigation"
+                        visible: root.navTitleVisible
+                        text: root.navTitle
                         color: Theme.textTertiary
                         font.family: Theme.fontBody
                         font.pixelSize: 11
@@ -102,29 +266,14 @@ Item {
 
                     Repeater {
                         model: root.navModel
+                        delegate: root.navDelegate ? root.navDelegate : defaultNavDelegate
+                    }
 
-                        delegate: ItemDelegate {
-                            width: parent.width
-                            text: modelData
-                            highlighted: index === root.navIndex
-                            padding: 10
-
-                        contentItem: Text {
-                            text: control.text
-                            color: control.highlighted ? Theme.textPrimary : Theme.textSecondary
-                            font.family: Theme.fontBody
-                            font.pixelSize: 13
-                        }
-
-                        background: Rectangle {
-                            radius: Theme.radiusSm
-                            color: control.highlighted ? Theme.accentMuted : "transparent"
-                            border.color: control.highlighted ? Theme.border : "transparent"
-                            border.width: 1
-                        }
-
-                            onClicked: root.navIndex = index
-                        }
+                    Loader {
+                        active: root.navFooter !== null
+                        sourceComponent: root.navFooter
+                        visible: active
+                        Layout.fillWidth: true
                     }
                 }
             }
@@ -134,7 +283,7 @@ Item {
                 anchors.top: parent.top
                 anchors.bottom: parent.bottom
                 anchors.right: parent.right
-                anchors.left: root.wide ? navRail.right : parent.left
+                anchors.left: root.hasNav && root.wide ? navRail.right : parent.left
                 anchors.margins: Theme.pageMargin
             }
 
@@ -156,12 +305,11 @@ Item {
 
     Drawer {
         id: navDrawer
-        width: 240
+        width: root.navDrawerWidth
         height: root.height
         edge: Qt.LeftEdge
         modal: true
-        interactive: !root.wide
-        visible: !root.wide
+        interactive: root.hasNav && !root.wide
 
         background: Rectangle {
             color: Theme.surfaceSolid
@@ -182,34 +330,33 @@ Item {
                 font.weight: Font.DemiBold
             }
 
+            Loader {
+                active: root.navHeader !== null
+                sourceComponent: root.navHeader
+                visible: active
+                Layout.fillWidth: true
+            }
+
+            Label {
+                visible: root.navTitleVisible
+                text: root.navTitle
+                color: Theme.textTertiary
+                font.family: Theme.fontBody
+                font.pixelSize: 11
+                font.weight: Font.DemiBold
+                font.letterSpacing: 1.2
+            }
+
             Repeater {
                 model: root.navModel
+                delegate: root.navDelegate ? root.navDelegate : defaultDrawerDelegate
+            }
 
-                delegate: ItemDelegate {
-                    width: parent.width
-                    text: modelData
-                    highlighted: index === root.navIndex
-                    padding: 10
-
-                    contentItem: Text {
-                        text: control.text
-                        color: control.highlighted ? Theme.textPrimary : Theme.textSecondary
-                        font.family: Theme.fontBody
-                        font.pixelSize: 13
-                    }
-
-                    background: Rectangle {
-                        radius: Theme.radiusSm
-                        color: control.highlighted ? Theme.accentMuted : "transparent"
-                        border.color: control.highlighted ? Theme.border : "transparent"
-                        border.width: 1
-                    }
-
-                    onClicked: {
-                        root.navIndex = index
-                        navDrawer.close()
-                    }
-                }
+            Loader {
+                active: root.navFooter !== null
+                sourceComponent: root.navFooter
+                visible: active
+                Layout.fillWidth: true
             }
         }
     }

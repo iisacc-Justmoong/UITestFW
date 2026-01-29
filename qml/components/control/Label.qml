@@ -1,6 +1,5 @@
 import QtQuick
 import UIFramework 1.0
-import UIFramework 1.0 as UIF
 
 Text {
     id: control
@@ -10,7 +9,7 @@ Text {
     font.pixelSize: 12
     elide: Text.ElideRight
     QtObject {
-        Component.onCompleted: UIF.Debug.log("Label", "created")
+        Component.onCompleted: Debug.log("Label", "created")
     }
 
 }

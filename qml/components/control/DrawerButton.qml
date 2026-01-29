@@ -1,7 +1,6 @@
 import QtQuick
 import QtQuick.Layouts
 import UIFramework 1.0
-import UIFramework 1.0 as UIF
 
 AbstractButton {
     id: control
@@ -70,7 +69,7 @@ AbstractButton {
         }
     }
     QtObject {
-        Component.onCompleted: UIF.Debug.log("DrawerButton", "created")
+        Component.onCompleted: Debug.log("DrawerButton", "created")
     }
 
 }

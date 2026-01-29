@@ -1,7 +1,6 @@
 import QtQuick
 import QtQuick.Layouts
 import UIFramework 1.0
-import UIFramework 1.0 as UIF
 
 ApplicationWindow {
     id: root
@@ -33,7 +32,7 @@ ApplicationWindow {
         onNavActivated: root.navActivated(index, item)
     }
     QtObject {
-        Component.onCompleted: UIF.Debug.log("AppShell", "created")
+        Component.onCompleted: Debug.log("AppShell", "created")
     }
 
 }

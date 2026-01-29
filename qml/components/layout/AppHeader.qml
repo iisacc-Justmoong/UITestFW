@@ -2,7 +2,6 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 import UIFramework 1.0
-import UIFramework 1.0 as UIF
 
 ToolBar {
     id: root
@@ -86,7 +85,7 @@ ToolBar {
         }
     }
     QtObject {
-        Component.onCompleted: UIF.Debug.log("AppHeader", "created")
+        Component.onCompleted: Debug.log("AppHeader", "created")
     }
 
 }

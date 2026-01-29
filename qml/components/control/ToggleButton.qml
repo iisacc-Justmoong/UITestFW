@@ -1,6 +1,5 @@
 import QtQuick
 import UIFramework 1.0
-import UIFramework 1.0 as UIF
 
 AbstractButton {
     id: control
@@ -18,7 +17,7 @@ AbstractButton {
     borderColor: control.checked ? checkedBorderColor : Theme.border
     borderColorHover: control.checked ? checkedBorderColor : Theme.border
     QtObject {
-        Component.onCompleted: UIF.Debug.log("ToggleButton", "created")
+        Component.onCompleted: Debug.log("ToggleButton", "created")
     }
 
 }

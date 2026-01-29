@@ -1,6 +1,6 @@
 import QtQuick
 import QtQuick.Controls
-import UIFramework 1.0 as UIF
+import UIFramework 1.0
 
 Item {
     id: root
@@ -62,7 +62,7 @@ Item {
         if (stackView.depth > 1) {
             stackView.pop()
             if (path.length > 1)
-                path.pop()
+                setPathInternal(path.slice(0, path.length - 1))
         }
     }
 
@@ -70,7 +70,7 @@ Item {
         if (stackView.depth > 1) {
             stackView.pop(stackView.get(0))
             if (path.length > 1)
-                path = [path[0]]
+                setPathInternal([path[0]])
         }
     }
 
@@ -242,22 +242,31 @@ Item {
         _syncingPath = false
     }
 
-    function updatePathStack(pathValue, params, mode) {
+    function setPathInternal(nextPath) {
         _syncingPath = true
-        if (mode === "set" || path.length === 0) {
-            path = [pathValue]
-        } else if (mode === "replace") {
-            if (path.length === 0)
-                path = [pathValue]
-            else
-                path[path.length - 1] = pathValue
-        } else {
-            path.push(pathValue)
-        }
+        path = nextPath
         _syncingPath = false
     }
+
+    function updatePathStack(pathValue, params, mode) {
+        if (mode === "set" || path.length === 0) {
+            setPathInternal([pathValue])
+        } else if (mode === "replace") {
+            if (path.length === 0)
+                setPathInternal([pathValue])
+            else {
+                var next = path.slice(0)
+                next[next.length - 1] = pathValue
+                setPathInternal(next)
+            }
+        } else {
+            var nextPush = path.slice(0)
+            nextPush.push(pathValue)
+            setPathInternal(nextPush)
+        }
+    }
     QtObject {
-        Component.onCompleted: UIF.Debug.log("PageRouter", "created")
+        Component.onCompleted: Debug.log("PageRouter", "created")
     }
 
 }

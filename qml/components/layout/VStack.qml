@@ -1,6 +1,6 @@
 import QtQuick
 import QtQuick.Layouts
-import UIFramework 1.0 as UIF
+import UIFramework 1.0
 
 Item {
     id: root
@@ -11,6 +11,8 @@ Item {
     property int alignment: Qt.AlignHCenter
     // alignmentName supports SwiftUI-style names: leading, center, trailing.
     property string alignmentName: ""
+    property bool __isVStack: true
+    property var _managedAlignmentChildren: []
 
     default property alias content: contentColumn.data
 
@@ -32,12 +34,35 @@ Item {
 
     function updateAlignment() {
         var normalized = normalizeAlignment(root.alignment, root.alignmentName)
-        for (var i = 0; i < contentColumn.children.length; i++) {
+        var current = contentColumn.children
+        var kept = []
+        for (var i = 0; i < current.length; i++) {
+            var child = current[i]
+            if (child && child.Layout !== undefined)
+                kept.push(child)
+        }
+        root._managedAlignmentChildren = root._managedAlignmentChildren.filter(function(item) {
+            return kept.indexOf(item) !== -1
+        })
+
+        for (var i = 0; i < current.length; i++) {
             var child = contentColumn.children[i]
             if (!child || child.Layout === undefined)
                 continue
-            if (child.Layout.alignment === 0)
+            var idx = root._managedAlignmentChildren.indexOf(child)
+            if (child.Layout.alignment === 0) {
                 child.Layout.alignment = normalized
+                if (idx === -1)
+                    root._managedAlignmentChildren.push(child)
+                continue
+            }
+            if (idx !== -1) {
+                if (child.Layout.alignment !== normalized) {
+                    root._managedAlignmentChildren.splice(idx, 1)
+                    continue
+                }
+                child.Layout.alignment = normalized
+            }
         }
     }
 
@@ -81,7 +106,7 @@ Item {
         }
     }
     QtObject {
-        Component.onCompleted: UIF.Debug.log("VStack", "created")
+        Component.onCompleted: Debug.log("VStack", "created")
     }
 
 }

@@ -1,7 +1,6 @@
 import QtQuick
 import QtQuick.Controls as Controls
 import UIFramework 1.0
-import UIFramework 1.0 as UIF
 
 Controls.AbstractButton {
     id: control
@@ -66,7 +65,7 @@ Controls.AbstractButton {
     }
 
     QtObject {
-        Component.onCompleted: UIF.Debug.log("AbstractButton", "created")
+        Component.onCompleted: Debug.log("AbstractButton", "created")
     }
 
 }

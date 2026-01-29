@@ -11,7 +11,8 @@ Item {
     property int acceptedButtons: Qt.LeftButton
 
     anchors.fill: parent
-    visible: false
+    visible: true
+    opacity: 0.0
 
     function fire(eventData) {
         if (!root.enabled || !root.action)

@@ -369,7 +369,7 @@ UIF.AppShell {
         Item { Layout.fillHeight: true }
     }
     QtObject {
-        Component.onCompleted: UIF.Debug.log("Main", "created")
+        Component.onCompleted: Debug.log("Main", "created")
     }
 
 }

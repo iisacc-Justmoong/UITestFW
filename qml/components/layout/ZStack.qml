@@ -1,5 +1,5 @@
 import QtQuick
-import UIFramework 1.0 as UIF
+import UIFramework 1.0
 
 Item {
     id: root
@@ -119,7 +119,7 @@ Item {
         }
     }
     QtObject {
-        Component.onCompleted: UIF.Debug.log("ZStack", "created")
+        Component.onCompleted: Debug.log("ZStack", "created")
     }
 
 }

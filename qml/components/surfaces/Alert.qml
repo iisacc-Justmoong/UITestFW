@@ -2,7 +2,6 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 import UIFramework 1.0
-import UIFramework 1.0 as UIF
 
 Item {
     id: root
@@ -128,7 +127,7 @@ Item {
         }
     }
     QtObject {
-        Component.onCompleted: UIF.Debug.log("Alert", "created")
+        Component.onCompleted: Debug.log("Alert", "created")
     }
 
 }

@@ -2,7 +2,6 @@ import QtQuick
 import QtQuick.Controls as Controls
 import QtQuick.Window
 import UIFramework 1.0
-import UIFramework 1.0 as UIF
 
 Controls.ApplicationWindow {
     id: root
@@ -22,8 +21,6 @@ Controls.ApplicationWindow {
     readonly property bool isCompact: widthClass === compact || heightClass === compact
     readonly property bool isExpanded: widthClass === expanded && heightClass === expanded
 
-    property string styleSheet: ""
-    property url styleSheetUrl: ""
 
     property int desktopMinWidth: 900
     property int desktopMinHeight: 600
@@ -36,10 +33,7 @@ Controls.ApplicationWindow {
     minimumWidth: isMobilePlatform ? mobileMinWidth : desktopMinWidth
     minimumHeight: isMobilePlatform ? mobileMinHeight : desktopMinHeight
 
-    default property alias content: contentSlot.data
-
-    onStyleSheetChanged: Theme.applyCss(styleSheet)
-    onStyleSheetUrlChanged: Theme.loadCss(styleSheetUrl)
+    default property alias content: root.contentItem.data
 
     function matchesMedia(rule) {
         if (!rule)
@@ -58,17 +52,9 @@ Controls.ApplicationWindow {
         return false
     }
 
-    contentItem: Item {
-        anchors.fill: parent
-        anchors.margins: root.safeMargin
-
-        Item {
-            id: contentSlot
-            anchors.fill: parent
-        }
-    }
+    padding: root.safeMargin
     QtObject {
-        Component.onCompleted: UIF.Debug.log("ApplicationWindow", "created")
+        Component.onCompleted: Debug.log("ApplicationWindow", "created")
     }
 
 }

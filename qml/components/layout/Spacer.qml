@@ -1,6 +1,6 @@
 import QtQuick
 import QtQuick.Layouts
-import UIFramework 1.0 as UIF
+import UIFramework 1.0
 
 Item {
     id: root
@@ -38,23 +38,35 @@ Item {
         if (!parent)
             return
 
+        var className = parent.metaObject ? parent.metaObject.className : ""
+        var inLayout = className.indexOf("RowLayout") !== -1 || className.indexOf("ColumnLayout") !== -1
+        if (!(parent.__isVStack === true || parent.__isHStack === true || inLayout) && stackAxis !== "")
+            stackAxis = ""
+
         if (parent.__isZStack === true) {
             anchors.fill = parent
             return
         }
 
-        if (stackAxis === "vertical") {
+        var resolvedAxis = stackAxis
+        if (resolvedAxis === "") {
+            if (parent.__isVStack === true || (parent.parent && parent.parent.__isVStack === true))
+                resolvedAxis = "vertical"
+            else if (parent.__isHStack === true || (parent.parent && parent.parent.__isHStack === true))
+                resolvedAxis = "horizontal"
+        }
+
+        if (resolvedAxis === "vertical") {
             _fillHeight = true
             _minHeight = minLength
             return
         }
-        if (stackAxis === "horizontal") {
+        if (resolvedAxis === "horizontal") {
             _fillWidth = true
             _minWidth = minLength
             return
         }
 
-        var className = parent.metaObject ? parent.metaObject.className : ""
         if (className.indexOf("RowLayout") !== -1) {
             _fillWidth = true
             _minWidth = minLength
@@ -64,7 +76,7 @@ Item {
         }
     }
     QtObject {
-        Component.onCompleted: UIF.Debug.log("Spacer", "created")
+        Component.onCompleted: Debug.log("Spacer", "created")
     }
 
 }

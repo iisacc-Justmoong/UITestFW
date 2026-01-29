@@ -2,9 +2,14 @@
 
 ## Project Structure & Module Organization
 - `main.cpp` boots the Qt application and loads the QML module entrypoint.
+- `backend/` holds C++ singletons and helpers exposed to QML (e.g., `Backend`, `Platform`, `RenderMonitor`).
 - `qml/` holds UI source. `qml/Main.qml` is the app window root.
-- `qml/components/` contains reusable UI building blocks (e.g., `AppScaffold.qml`).
-- `CMakeLists.txt` defines the build, Qt modules, and QML module metadata.
+- `qml/components/` is split by concern:
+  - `buttons/` (e.g., `AbstractButton.qml`, `LabelButton.qml`)
+  - `layout/` (e.g., `AppScaffold.qml`, `VStack.qml`)
+  - `navigation/` (e.g., `PageRouter.qml`, `Link.qml`)
+  - `surfaces/` (e.g., `AppCard.qml`)
+- `CMakeLists.txt` includes per-directory `CMakeLists.txt` to assemble sources and QML files.
 - `cmake-build-debug/` is a local build output folder (generated; do not edit by hand).
 
 ## Build, Test, and Development Commands
@@ -23,6 +28,18 @@ _No automated tests are set up yet._
 - Properties and IDs: `camelCase` (e.g., `headerTitle`, `contentWrap`).
 - Keep UI colors and spacing centralized within components when practical.
 - Prefer Qt Quick Controls 2 types (`ApplicationWindow`, `ToolBar`, `Drawer`).
+- QML components include a short API usage comment at the end of each file.
+
+## Navigation & Routing
+- `PageRouter` (QML singleton) provides StackView-based routing with Svelte-like paths:
+  - static: `/reports`
+  - param: `/runs/[id]`
+  - rest: `/logs/[...path]`
+- `Link` component mimics HTML `<a>`: set `href` and `router`, wrap child content.
+- `AppScaffold` can drive routing when `navModel` items include `path` and `pageRouter` is set.
+
+## Backend Notes
+- `RenderMonitor` (QML singleton) attaches to a `QQuickWindow` to report FPS and frame timing.
 
 ## Testing Guidelines
 - No test framework is configured. If you add tests, document:

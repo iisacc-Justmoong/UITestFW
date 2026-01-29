@@ -12,11 +12,13 @@ qt_standard_project_setup()
 qt_add_library(UIFramework STATIC)
 add_library(UIFramework::UIFramework ALIAS UIFramework)
 
+include(${CMAKE_CURRENT_LIST_DIR}/backend/CMakeLists.txt)
 include(${CMAKE_CURRENT_LIST_DIR}/qml/CMakeLists.txt)
 
 target_include_directories(UIFramework
     PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/backend>
         $<INSTALL_INTERFACE:include/UIFramework>
 )
 
@@ -24,10 +26,8 @@ qt_add_qml_module(UIFramework
     URI UIFramework
     VERSION 1.0
     SOURCES
-        backend.h
-        backend.cpp
-        platforminfo.h
-        platforminfo.cpp
+        ${UIFRAMEWORK_BACKEND_SOURCES}
+        ${UIFRAMEWORK_BACKEND_HEADERS}
     QML_FILES
         ${UIFRAMEWORK_QML_FILES}
 )
@@ -94,9 +94,8 @@ install(EXPORT UIFrameworkTargets
 qt_install_qml_module(UIFramework)
 
 install(FILES
-    backend.h
-    platforminfo.h
-    DESTINATION include/UIFramework
+    ${UIFRAMEWORK_BACKEND_HEADERS}
+    DESTINATION include/UIFramework/backend
 )
 
 configure_package_config_file(

@@ -8,6 +8,10 @@ Text {
     font.family: Theme.fontBody
     font.pixelSize: 12
     elide: Text.ElideRight
+    QtObject {
+        Component.onCompleted: UIF.Debug.log("Label", "created")
+    }
+
 }
 
 // API usage (external):

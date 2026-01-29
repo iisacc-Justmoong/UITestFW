@@ -67,6 +67,10 @@ Item {
             root.updateAlignment()
         }
     }
+    QtObject {
+        Component.onCompleted: UIF.Debug.log("VStack", "created")
+    }
+
 }
 
 // API usage (external):

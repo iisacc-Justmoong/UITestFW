@@ -33,6 +33,10 @@ AbstractButton {
             Layout.alignment: Qt.AlignVCenter
         }
     }
+    QtObject {
+        Component.onCompleted: UIF.Debug.log("IconButton", "created")
+    }
+
 }
 
 // API usage (external):

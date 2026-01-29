@@ -125,6 +125,10 @@ Item {
             }
         }
     }
+    QtObject {
+        Component.onCompleted: UIF.Debug.log("Alert", "created")
+    }
+
 }
 
 // API usage (external):

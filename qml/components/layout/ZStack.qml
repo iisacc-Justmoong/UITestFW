@@ -117,6 +117,10 @@ Item {
             root.updateAlignment()
         }
     }
+    QtObject {
+        Component.onCompleted: UIF.Debug.log("ZStack", "created")
+    }
+
 }
 
 // API usage (external):

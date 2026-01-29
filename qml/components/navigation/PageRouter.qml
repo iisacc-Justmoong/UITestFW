@@ -255,6 +255,10 @@ Item {
         }
         _syncingPath = false
     }
+    QtObject {
+        Component.onCompleted: UIF.Debug.log("PageRouter", "created")
+    }
+
 }
 
 // API usage (external):

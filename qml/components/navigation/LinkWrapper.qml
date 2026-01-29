@@ -43,6 +43,10 @@ Item {
                 root.router.go(root.href, root.params)
         }
     }
+    QtObject {
+        Component.onCompleted: UIF.Debug.log("LinkWrapper", "created")
+    }
+
 }
 
 // API usage (external):

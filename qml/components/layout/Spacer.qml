@@ -48,6 +48,10 @@ Item {
             _minHeight = minLength
         }
     }
+    QtObject {
+        Component.onCompleted: UIF.Debug.log("Spacer", "created")
+    }
+
 }
 
 // API usage (external):

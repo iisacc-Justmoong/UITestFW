@@ -68,6 +68,10 @@ AbstractButton {
             }
         }
     }
+    QtObject {
+        Component.onCompleted: UIF.Debug.log("DrawerButton", "created")
+    }
+
 }
 
 // API usage (external):

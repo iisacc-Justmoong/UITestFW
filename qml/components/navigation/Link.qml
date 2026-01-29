@@ -64,6 +64,10 @@ AbstractButton {
             anchors.left: parent.left
         }
     }
+    QtObject {
+        Component.onCompleted: UIF.Debug.log("Link", "created")
+    }
+
 }
 
 // API usage (external):

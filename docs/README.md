@@ -47,6 +47,7 @@ Use the links below to navigate.
 - `docs/backend/RenderMonitor.md`
 - `docs/backend/PageMonitor.md`
 - `docs/backend/ViewModels.md`
+- `docs/backend/Debug.md`
 
 ## MVVM
 - `docs/mvvm.md`

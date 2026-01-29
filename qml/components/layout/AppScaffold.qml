@@ -379,6 +379,10 @@ Item {
             }
         }
     }
+    QtObject {
+        Component.onCompleted: UIF.Debug.log("AppScaffold", "created")
+    }
+
 }
 
 // API usage (external):

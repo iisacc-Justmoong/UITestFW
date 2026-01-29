@@ -59,6 +59,10 @@ Rectangle {
             Layout.fillHeight: true
         }
     }
+    QtObject {
+        Component.onCompleted: UIF.Debug.log("AppCard", "created")
+    }
+
 }
 
 // API usage (external):

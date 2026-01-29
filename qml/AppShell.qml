@@ -31,6 +31,10 @@ ApplicationWindow {
         navModel: root.navItems
         onNavActivated: root.navActivated(index, item)
     }
+    QtObject {
+        Component.onCompleted: UIF.Debug.log("AppShell", "created")
+    }
+
 }
 
 // API usage (external):

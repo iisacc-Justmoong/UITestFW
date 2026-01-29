@@ -46,6 +46,10 @@ AbstractButton {
             x: control.checked ? parent.width - width - 3 : 3
         }
     }
+    QtObject {
+        Component.onCompleted: UIF.Debug.log("ToggleSwitch", "created")
+    }
+
 }
 
 // API usage (external):

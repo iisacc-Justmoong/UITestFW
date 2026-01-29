@@ -66,6 +66,10 @@ Controls.ApplicationWindow {
             anchors.fill: parent
         }
     }
+    QtObject {
+        Component.onCompleted: UIF.Debug.log("ApplicationWindow", "created")
+    }
+
 }
 
 // API usage (external):

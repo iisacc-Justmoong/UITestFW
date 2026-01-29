@@ -11,6 +11,19 @@ This example is **not built** by default. It exists only to demonstrate the MVVM
 
 ---
 
+## Plain-language explanation (non-developers)
+
+Think of the app like a restaurant:
+- **Model** is the kitchen (where the real data lives).
+- **ViewModel** is the waiter (it knows how to ask the kitchen and deliver answers).
+- **View (QML)** is the menu/table (what the user actually sees and clicks).
+- **ViewModels registry** is the host stand (it helps the table find the right waiter).
+
+This example shows how data flows from the kitchen → waiter → table without the table
+needing to walk into the kitchen.
+
+---
+
 ## Files
 
 ### `backend/ExampleModel.h` / `backend/ExampleModel.cpp`

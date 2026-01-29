@@ -46,6 +46,10 @@ AbstractButton {
             Layout.alignment: Qt.AlignVCenter
         }
     }
+    QtObject {
+        Component.onCompleted: UIF.Debug.log("CheckBox", "created")
+    }
+
 }
 
 // API usage (external):

@@ -5,6 +5,10 @@ Link {
     id: control
 
     property alias to: control.href
+    QtObject {
+        Component.onCompleted: UIF.Debug.log("NavigationLink", "created")
+    }
+
 }
 
 // API usage (external):

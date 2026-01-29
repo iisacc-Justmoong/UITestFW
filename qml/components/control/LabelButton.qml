@@ -26,6 +26,10 @@ AbstractButton {
         verticalAlignment: Text.AlignVCenter
         elide: Text.ElideRight
     }
+    QtObject {
+        Component.onCompleted: UIF.Debug.log("LabelButton", "created")
+    }
+
 }
 
 // API usage (external):

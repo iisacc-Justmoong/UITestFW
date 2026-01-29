@@ -84,6 +84,10 @@ ToolBar {
             Layout.alignment: Qt.AlignVCenter | Qt.AlignRight
         }
     }
+    QtObject {
+        Component.onCompleted: UIF.Debug.log("AppHeader", "created")
+    }
+
 }
 
 // API usage (external):

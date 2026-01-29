@@ -16,6 +16,10 @@ AbstractButton {
     backgroundColorPressed: control.checked ? Theme.accentMuted : Theme.surfaceAlt
     borderColor: control.checked ? checkedBorderColor : Theme.border
     borderColorHover: control.checked ? checkedBorderColor : Theme.border
+    QtObject {
+        Component.onCompleted: UIF.Debug.log("ToggleButton", "created")
+    }
+
 }
 
 // API usage (external):

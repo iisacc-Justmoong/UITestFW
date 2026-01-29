@@ -64,6 +64,10 @@ Controls.AbstractButton {
         border.width: control.borderWidth
     }
 
+    QtObject {
+        Component.onCompleted: UIF.Debug.log("AbstractButton", "created")
+    }
+
 }
 
 // API usage (external):

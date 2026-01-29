@@ -361,3 +361,7 @@ Item {
         }
     }
 }
+
+// API usage (external):
+// import UIFramework 1.0 as UIF
+// UIF.AppScaffold { headerTitle: "UITestFW"; navModel: ["Overview"] }

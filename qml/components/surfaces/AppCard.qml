@@ -60,3 +60,7 @@ Rectangle {
         }
     }
 }
+
+// API usage (external):
+// import UIFramework 1.0 as UIF
+// UIF.AppCard { title: "Summary"; subtitle: "Detail" }

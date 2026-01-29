@@ -172,3 +172,7 @@ QtObject {
         return cleaned
     }
 }
+
+// API usage (external):
+// import UIFramework 1.0 as UIF
+// Rectangle { color: UIF.Theme.window }

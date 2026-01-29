@@ -32,3 +32,7 @@ ApplicationWindow {
         onNavActivated: root.navActivated(index, item)
     }
 }
+
+// API usage (external):
+// import UIFramework 1.0 as UIF
+// UIF.AppShell { title: "UITestFW"; navItems: ["Overview"] }

@@ -67,3 +67,7 @@ Controls.ApplicationWindow {
         }
     }
 }
+
+// API usage (external):
+// import UIFramework 1.0 as UIF
+// UIF.ApplicationWindow { title: "App" }

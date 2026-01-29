@@ -12,6 +12,8 @@ qt_standard_project_setup()
 qt_add_library(UIFramework STATIC)
 add_library(UIFramework::UIFramework ALIAS UIFramework)
 
+include(${CMAKE_CURRENT_LIST_DIR}/qml/CMakeLists.txt)
+
 target_include_directories(UIFramework
     PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}>
@@ -27,12 +29,7 @@ qt_add_qml_module(UIFramework
         platforminfo.h
         platforminfo.cpp
     QML_FILES
-        qml/AppShell.qml
-        qml/ApplicationWindow.qml
-        qml/Theme.qml
-        qml/components/AppCard.qml
-        qml/components/AppHeader.qml
-        qml/components/AppScaffold.qml
+        ${UIFRAMEWORK_QML_FILES}
 )
 
 target_link_libraries(UIFramework
@@ -54,7 +51,7 @@ if(UIFRAMEWORK_BUILD_DEMO)
         URI UITestFW
         VERSION 1.0
         QML_FILES
-            qml/Main.qml
+            ${UITESTFW_QML_FILES}
     )
 
     target_link_libraries(UITestFW

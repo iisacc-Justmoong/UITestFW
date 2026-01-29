@@ -369,3 +369,7 @@ UIF.AppShell {
         Item { Layout.fillHeight: true }
     }
 }
+
+// API usage (external):
+// import UITestFW 1.0
+// Main { visible: true }

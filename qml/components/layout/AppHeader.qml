@@ -82,3 +82,7 @@ ToolBar {
         }
     }
 }
+
+// API usage (external):
+// import UIFramework 1.0 as UIF
+// UIF.AppHeader { title: "Dashboard"; subtitle: "Overview" }

@@ -4,4 +4,6 @@ set(UIFRAMEWORK_BUTTON_QML_FILES
     ${CMAKE_CURRENT_LIST_DIR}/IconButton.qml
     ${CMAKE_CURRENT_LIST_DIR}/ToggleButton.qml
     ${CMAKE_CURRENT_LIST_DIR}/DrawerButton.qml
+    ${CMAKE_CURRENT_LIST_DIR}/ToggleSwitch.qml
+    ${CMAKE_CURRENT_LIST_DIR}/CheckBox.qml
 )

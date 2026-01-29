@@ -1,4 +1,4 @@
-include(${CMAKE_CURRENT_LIST_DIR}/buttons/CMakeLists.txt)
+include(${CMAKE_CURRENT_LIST_DIR}/control/CMakeLists.txt)
 include(${CMAKE_CURRENT_LIST_DIR}/layout/CMakeLists.txt)
 include(${CMAKE_CURRENT_LIST_DIR}/navigation/CMakeLists.txt)
 include(${CMAKE_CURRENT_LIST_DIR}/surfaces/CMakeLists.txt)

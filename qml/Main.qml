@@ -370,6 +370,21 @@ UIF.AppShell {
     }
 }
 
+// Routing example (A -> B):
+// import UIFramework 1.0 as UIF
+// UIF.ApplicationWindow {
+//     UIF.PageRouter {
+//         id: pageRouter
+//         anchors.fill: parent
+//         routes: [
+//             { path: "/a", component: pageA },
+//             { path: "/b", component: pageB }
+//         ]
+//         initialPath: "/a"
+//     }
+//     Component { id: pageA; UIF.Link { href: "/b"; router: pageRouter; Text { text: "Go to B" } } }
+//     Component { id: pageB; Text { text: "Page B" } }
+// }
 // API usage (external):
 // import UITestFW 1.0
 // Main { visible: true }

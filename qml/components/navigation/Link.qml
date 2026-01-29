@@ -8,6 +8,7 @@ AbstractButton {
     property string href: "/"
     property var params: ({})
     property bool replace: false
+    property var targetComponent: null
 
     property color linkColor: Theme.accent
     property color hoverColor: Theme.textPrimary
@@ -21,7 +22,16 @@ AbstractButton {
     background: Item { }
 
     onClicked: {
-        if (!router || !href)
+        if (!router)
+            return
+        if (targetComponent) {
+            if (replace)
+                router.replaceWith(targetComponent, params)
+            else
+                router.goTo(targetComponent, params)
+            return
+        }
+        if (!href)
             return
         if (replace)
             router.replace(href, params)

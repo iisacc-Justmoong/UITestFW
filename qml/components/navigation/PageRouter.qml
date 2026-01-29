@@ -6,6 +6,8 @@ Item {
 
     property var routes: []
     property string initialPath: "/"
+    // SwiftUI-like navigation stack (array of paths).
+    property var path: []
     readonly property string currentPath: stackView.currentItem && stackView.currentItem.routePath !== undefined
         ? stackView.currentItem.routePath
         : ""
@@ -17,21 +19,58 @@ Item {
     property url notFoundSource: ""
 
     readonly property bool canGoBack: stackView.depth > 1
+    readonly property int depth: stackView.depth
 
     signal navigated(string path, var params)
     signal navigationFailed(string path)
+    signal componentNavigated(var component)
 
     function go(path, params) {
-        navigate(path, params, false)
+        navigate(path, params, "push")
     }
 
     function replace(path, params) {
-        navigate(path, params, true)
+        navigate(path, params, "replace")
+    }
+
+    function setRoot(path, params) {
+        navigate(path, params, "set")
+    }
+
+    function goTo(component, params) {
+        navigateComponent(component, params, "push")
+    }
+
+    function replaceWith(component, params) {
+        navigateComponent(component, params, "replace")
+    }
+
+    function setRootComponent(component, params) {
+        navigateComponent(component, params, "set")
     }
 
     function back() {
-        if (stackView.depth > 1)
+        pop()
+    }
+
+    function push(path, params) {
+        navigate(path, params, "push")
+    }
+
+    function pop() {
+        if (stackView.depth > 1) {
             stackView.pop()
+            if (path.length > 1)
+                path.pop()
+        }
+    }
+
+    function popToRoot() {
+        if (stackView.depth > 1) {
+            stackView.pop(stackView.get(0))
+            if (path.length > 1)
+                path = [path[0]]
+        }
     }
 
     function normalizePath(path) {
@@ -98,38 +137,64 @@ Item {
         return null
     }
 
-    function navigate(path, params, useReplace) {
+    function navigate(path, params, mode) {
         var resolved = resolveRoute(path)
         var targetParams = params || (resolved ? resolved.params : {})
+        var normalized = normalizePath(path)
         if (!resolved) {
             if (notFoundComponent || notFoundSource) {
                 var fallback = notFoundComponent ? notFoundComponent : notFoundSource
-                if (useReplace)
-                    stackView.replace(fallback, { routePath: normalizePath(path), routeParams: targetParams })
-                else
-                    stackView.push(fallback, { routePath: normalizePath(path), routeParams: targetParams })
-                navigated(normalizePath(path), targetParams)
+                if (mode === "replace")
+                    stackView.replace(fallback, { routePath: normalized, routeParams: targetParams })
+                else if (mode === "set") {
+                    stackView.clear()
+                    stackView.push(fallback, { routePath: normalized, routeParams: targetParams })
+                } else {
+                    stackView.push(fallback, { routePath: normalized, routeParams: targetParams })
+                }
+                updatePathStack(normalized, targetParams, mode)
+                navigated(normalized, targetParams)
                 return
             }
-            navigationFailed(normalizePath(path))
+            navigationFailed(normalized)
             return
         }
         var route = resolved.route
         var target = route.component ? route.component : route.source
         if (!target) {
-            navigationFailed(normalizePath(path))
+            navigationFailed(normalized)
             return
         }
-        if (useReplace)
-            stackView.replace(target, { routePath: normalizePath(path), routeParams: targetParams, route: route })
-        else
-            stackView.push(target, { routePath: normalizePath(path), routeParams: targetParams, route: route })
-        navigated(normalizePath(path), targetParams)
+        if (mode === "replace") {
+            stackView.replace(target, { routePath: normalized, routeParams: targetParams, route: route })
+        } else if (mode === "set") {
+            stackView.clear()
+            stackView.push(target, { routePath: normalized, routeParams: targetParams, route: route })
+        } else {
+            stackView.push(target, { routePath: normalized, routeParams: targetParams, route: route })
+        }
+        updatePathStack(normalized, targetParams, mode)
+        navigated(normalized, targetParams)
+    }
+
+    function navigateComponent(component, params, mode) {
+        if (!component)
+            return
+        var targetParams = params || {}
+        if (mode === "replace") {
+            stackView.replace(component, targetParams)
+        } else if (mode === "set") {
+            stackView.clear()
+            stackView.push(component, targetParams)
+        } else {
+            stackView.push(component, targetParams)
+        }
+        componentNavigated(component)
     }
 
     Component.onCompleted: {
         if (initialPath)
-            go(initialPath)
+            setRoot(initialPath)
     }
 
     StackView {
@@ -137,6 +202,58 @@ Item {
         anchors.fill: parent
         clip: true
         focus: true
+    }
+
+    property bool _syncingPath: false
+
+    onPathChanged: {
+        if (_syncingPath)
+            return
+        rebuildFromPath()
+    }
+
+    function rebuildFromPath() {
+        if (!path || path.length === 0)
+            return
+        _syncingPath = true
+        stackView.clear()
+        for (var i = 0; i < path.length; i++) {
+            var entry = path[i]
+            var entryPath = typeof entry === "string" ? entry : entry.path
+            var entryParams = typeof entry === "object" && entry.params !== undefined ? entry.params : undefined
+            var resolved = resolveRoute(entryPath)
+            var normalized = normalizePath(entryPath)
+            if (!resolved) {
+                var fallback = notFoundComponent ? notFoundComponent : notFoundSource
+                if (fallback)
+                    stackView.push(fallback, { routePath: normalized, routeParams: entryParams || {} })
+                else
+                    navigationFailed(normalized)
+                continue
+            }
+            var target = resolved.route.component ? resolved.route.component : resolved.route.source
+            if (!target) {
+                navigationFailed(normalized)
+                continue
+            }
+            stackView.push(target, { routePath: normalized, routeParams: entryParams || resolved.params, route: resolved.route })
+        }
+        _syncingPath = false
+    }
+
+    function updatePathStack(pathValue, params, mode) {
+        _syncingPath = true
+        if (mode === "set" || path.length === 0) {
+            path = [pathValue]
+        } else if (mode === "replace") {
+            if (path.length === 0)
+                path = [pathValue]
+            else
+                path[path.length - 1] = pathValue
+        } else {
+            path.push(pathValue)
+        }
+        _syncingPath = false
     }
 }
 

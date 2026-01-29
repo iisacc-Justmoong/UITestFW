@@ -1,0 +1,23 @@
+#include "ExampleBootstrap.h"
+
+#include <QQmlEngine>
+#include <QtQml>
+
+#include "ExampleModel.h"
+#include "ExampleViewModel.h"
+#include "backend/viewmodelregistry.h"
+
+void setupExampleViewModel(QQmlEngine *engine)
+{
+    if (!engine)
+        return;
+
+    auto *registry = qmlSingletonInstance<ViewModelRegistry>(engine, "UIFramework", 1, 0, "ViewModels");
+    if (!registry)
+        return;
+
+    auto *model = new ExampleModel(registry);
+    auto *viewModel = new ExampleViewModel(model, registry);
+
+    registry->set(QStringLiteral("Example"), viewModel);
+}

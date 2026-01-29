@@ -1,4 +1,7 @@
 set(UIFRAMEWORK_LAYOUT_QML_FILES
     ${CMAKE_CURRENT_LIST_DIR}/AppHeader.qml
     ${CMAKE_CURRENT_LIST_DIR}/AppScaffold.qml
+    ${CMAKE_CURRENT_LIST_DIR}/VStack.qml
+    ${CMAKE_CURRENT_LIST_DIR}/HStack.qml
+    ${CMAKE_CURRENT_LIST_DIR}/ZStack.qml
 )

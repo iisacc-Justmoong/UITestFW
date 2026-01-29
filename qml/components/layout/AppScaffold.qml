@@ -19,6 +19,7 @@ Item {
     property Component navDelegate: null
     property Component navHeader: null
     property Component navFooter: null
+    property var pageRouter: null
 
     signal navActivated(int index, var item)
 
@@ -31,6 +32,18 @@ Item {
 
     implicitWidth: 1200
     implicitHeight: 760
+
+    function routeForItem(item) {
+        if (item && typeof item === "object")
+            return item.path || item.route || ""
+        return ""
+    }
+
+    function paramsForItem(item) {
+        if (item && typeof item === "object" && item.params !== undefined)
+            return item.params
+        return ({})
+    }
 
     onWideChanged: {
         if (wide && navDrawer.opened)
@@ -102,6 +115,9 @@ Item {
             onClicked: {
                 root.navIndex = index
                 root.navActivated(index, item)
+                var path = root.routeForItem(item)
+                if (root.pageRouter && path)
+                    root.pageRouter.go(path, root.paramsForItem(item))
             }
         }
     }
@@ -171,6 +187,9 @@ Item {
             onClicked: {
                 root.navIndex = index
                 root.navActivated(index, item)
+                var path = root.routeForItem(item)
+                if (root.pageRouter && path)
+                    root.pageRouter.go(path, root.paramsForItem(item))
                 navDrawer.close()
             }
         }

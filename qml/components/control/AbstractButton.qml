@@ -34,6 +34,7 @@ Controls.AbstractButton {
     implicitHeight: Math.max(36, contentItem.implicitHeight + topPadding + bottomPadding)
     implicitWidth: contentItem.implicitWidth + leftPadding + rightPadding
 
+
     contentItem: Text {
         text: control.text
         color: control.enabled ? control.textColor : control.textColorDisabled
@@ -62,6 +63,7 @@ Controls.AbstractButton {
                 : control.borderColor
         border.width: control.borderWidth
     }
+
 }
 
 // API usage (external):

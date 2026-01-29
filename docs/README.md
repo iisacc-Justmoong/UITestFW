@@ -14,6 +14,7 @@ Use the links below to navigate.
 
 ## Controls
 - `docs/components/control/AbstractButton.md`
+- `docs/components/control/EventListner.md`
 - `docs/components/control/Label.md`
 - `docs/components/control/LabelButton.md`
 - `docs/components/control/IconButton.md`

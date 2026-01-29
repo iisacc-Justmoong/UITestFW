@@ -16,6 +16,7 @@ ToolBar {
 
     implicitHeight: Theme.headerHeight
 
+
     background: Rectangle {
         color: Theme.glass
         border.color: Theme.border
@@ -47,7 +48,9 @@ ToolBar {
                 border.width: 1
             }
 
-            onClicked: root.menuClicked()
+            onClicked: {
+                root.menuClicked()
+            }
         }
 
         ColumnLayout {

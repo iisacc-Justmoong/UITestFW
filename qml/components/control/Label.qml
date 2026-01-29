@@ -1,5 +1,6 @@
 import QtQuick
 import UIFramework 1.0
+import UIFramework 1.0 as UIF
 
 Text {
     id: control

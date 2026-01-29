@@ -1,4 +1,4 @@
 set(UIFRAMEWORK_SURFACE_QML_FILES
-    ${CMAKE_CURRENT_LIST_DIR}/AppCard.qml
-        ${CMAKE_CURRENT_LIST_DIR}/Alert.qml
+    qml/components/surfaces/AppCard.qml
+    qml/components/surfaces/Alert.qml
 )

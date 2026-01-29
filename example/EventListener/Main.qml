@@ -13,45 +13,49 @@ ApplicationWindow {
     ScrollView {
         anchors.fill: parent
 
-        ColumnLayout {
-            width: parent.width
-            spacing: 16
-            padding: 16
+        Item {
+            anchors.fill: parent
+            anchors.margins: 16
 
-            GroupBox {
-                title: "Basic Click"
-                Layout.fillWidth: true
-                contentItem: Loader { source: "BasicClick.qml" }
-            }
+            ColumnLayout {
+                anchors.fill: parent
+                spacing: 16
 
-            GroupBox {
-                title: "Hover Card"
-                Layout.fillWidth: true
-                contentItem: Loader { source: "HoverCard.qml" }
-            }
+                GroupBox {
+                    title: "Basic Click"
+                    Layout.fillWidth: true
+                    contentItem: Loader { source: "BasicClick.qml" }
+                }
 
-            GroupBox {
-                title: "Press / Release"
-                Layout.fillWidth: true
-                contentItem: Loader { source: "PressRelease.qml" }
-            }
+                GroupBox {
+                    title: "Hover Card"
+                    Layout.fillWidth: true
+                    contentItem: Loader { source: "HoverCard.qml" }
+                }
 
-            GroupBox {
-                title: "Right Click"
-                Layout.fillWidth: true
-                contentItem: Loader { source: "RightClick.qml" }
-            }
+                GroupBox {
+                    title: "Press / Release"
+                    Layout.fillWidth: true
+                    contentItem: Loader { source: "PressRelease.qml" }
+                }
 
-            GroupBox {
-                title: "Key Press"
-                Layout.fillWidth: true
-                contentItem: Loader { source: "KeyPress.qml" }
-            }
+                GroupBox {
+                    title: "Right Click"
+                    Layout.fillWidth: true
+                    contentItem: Loader { source: "RightClick.qml" }
+                }
 
-            GroupBox {
-                title: "Multi Trigger"
-                Layout.fillWidth: true
-                contentItem: Loader { source: "MultiTrigger.qml" }
+                GroupBox {
+                    title: "Key Press"
+                    Layout.fillWidth: true
+                    contentItem: Loader { source: "KeyPress.qml" }
+                }
+
+                GroupBox {
+                    title: "Multi Trigger"
+                    Layout.fillWidth: true
+                    contentItem: Loader { source: "MultiTrigger.qml" }
+                }
             }
         }
     }

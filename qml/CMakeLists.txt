@@ -1,11 +1,11 @@
 set(UIFRAMEWORK_QML_FILES
-    ${CMAKE_CURRENT_LIST_DIR}/AppShell.qml
-    ${CMAKE_CURRENT_LIST_DIR}/ApplicationWindow.qml
-    ${CMAKE_CURRENT_LIST_DIR}/Theme.qml
+    qml/AppShell.qml
+    qml/ApplicationWindow.qml
+    qml/Theme.qml
 )
 
 set(UITESTFW_QML_FILES
-    ${CMAKE_CURRENT_LIST_DIR}/Main.qml
+    qml/Main.qml
 )
 
 include(${CMAKE_CURRENT_LIST_DIR}/components/CMakeLists.txt)

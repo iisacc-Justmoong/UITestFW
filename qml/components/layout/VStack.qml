@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Layouts
+import UIFramework 1.0 as UIF
 
 Item {
     id: root
@@ -24,7 +25,10 @@ Item {
 
     onAlignmentChanged: updateAlignment()
     onAlignmentNameChanged: updateAlignment()
-    Component.onCompleted: updateAlignment()
+    Component.onCompleted: {
+        updateAlignment()
+        updateStackAxis()
+    }
 
     function updateAlignment() {
         var normalized = normalizeAlignment(root.alignment, root.alignmentName)
@@ -34,6 +38,14 @@ Item {
                 continue
             if (child.Layout.alignment === 0)
                 child.Layout.alignment = normalized
+        }
+    }
+
+    function updateStackAxis() {
+        for (var i = 0; i < contentColumn.children.length; i++) {
+            var child = contentColumn.children[i]
+            if (child && child.stackAxis !== undefined)
+                child.stackAxis = "vertical"
         }
     }
 
@@ -65,6 +77,7 @@ Item {
         target: contentColumn
         function onChildrenChanged() {
             root.updateAlignment()
+            root.updateStackAxis()
         }
     }
     QtObject {

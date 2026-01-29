@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Controls
+import UIFramework 1.0 as UIF
 
 Item {
     id: root

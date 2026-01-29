@@ -1,6 +1,6 @@
 # EventListner
 
-Location: `qml/components/control/EventListener.qml`
+Location: `qml/components/control/EventListner.qml`
 
 Lightweight event listener you can embed inside any component to attach trigger → action behavior
 without modifying the parent component.

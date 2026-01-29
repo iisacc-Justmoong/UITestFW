@@ -2,6 +2,7 @@ import QtQuick
 import QtQuick.Controls as Controls
 import QtQuick.Window
 import UIFramework 1.0
+import UIFramework 1.0 as UIF
 
 Controls.ApplicationWindow {
     id: root
@@ -11,15 +12,15 @@ Controls.ApplicationWindow {
     readonly property bool isMobilePlatform: platform === "android" || platform === "ios"
     readonly property bool isDesktopPlatform: platform === "osx" || platform === "windows" || platform === "linux"
 
-    readonly property int Compact: 0
-    readonly property int Medium: 1
-    readonly property int Expanded: 2
+    readonly property int compact: 0
+    readonly property int medium: 1
+    readonly property int expanded: 2
 
-    readonly property int widthClass: width < 600 ? Compact : (width < 1000 ? Medium : Expanded)
-    readonly property int heightClass: height < 600 ? Compact : (height < 900 ? Medium : Expanded)
+    readonly property int widthClass: width < 600 ? compact : (width < 1000 ? medium : expanded)
+    readonly property int heightClass: height < 600 ? compact : (height < 900 ? medium : expanded)
 
-    readonly property bool isCompact: widthClass === Compact || heightClass === Compact
-    readonly property bool isExpanded: widthClass === Expanded && heightClass === Expanded
+    readonly property bool isCompact: widthClass === compact || heightClass === compact
+    readonly property bool isExpanded: widthClass === expanded && heightClass === expanded
 
     property string styleSheet: ""
     property url styleSheetUrl: ""
@@ -53,7 +54,7 @@ Controls.ApplicationWindow {
         if (token === "expanded")
             return isExpanded
         if (token === "medium")
-            return widthClass === Medium || heightClass === Medium
+            return widthClass === medium || heightClass === medium
         return false
     }
 

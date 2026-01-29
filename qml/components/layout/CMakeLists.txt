@@ -1,8 +1,8 @@
 set(UIFRAMEWORK_LAYOUT_QML_FILES
-    ${CMAKE_CURRENT_LIST_DIR}/AppHeader.qml
-    ${CMAKE_CURRENT_LIST_DIR}/AppScaffold.qml
-    ${CMAKE_CURRENT_LIST_DIR}/VStack.qml
-    ${CMAKE_CURRENT_LIST_DIR}/HStack.qml
-    ${CMAKE_CURRENT_LIST_DIR}/ZStack.qml
-    ${CMAKE_CURRENT_LIST_DIR}/Spacer.qml
+    qml/components/layout/AppHeader.qml
+    qml/components/layout/AppScaffold.qml
+    qml/components/layout/VStack.qml
+    qml/components/layout/HStack.qml
+    qml/components/layout/ZStack.qml
+    qml/components/layout/Spacer.qml
 )

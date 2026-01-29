@@ -51,3 +51,8 @@ Use the links below to navigate.
 
 ## MVVM
 - `docs/mvvm.md`
+
+## Policies
+- `docs/policies/event.md`
+- `docs/policies/debug.md`
+- `docs/policies/routing.md`

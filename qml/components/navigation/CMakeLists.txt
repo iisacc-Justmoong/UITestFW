@@ -1,6 +1,6 @@
 set(UIFRAMEWORK_NAVIGATION_QML_FILES
-    ${CMAKE_CURRENT_LIST_DIR}/PageRouter.qml
-    ${CMAKE_CURRENT_LIST_DIR}/Link.qml
-    ${CMAKE_CURRENT_LIST_DIR}/LinkWrapper.qml
-    ${CMAKE_CURRENT_LIST_DIR}/NavigationLink.qml
+    qml/components/navigation/PageRouter.qml
+    qml/components/navigation/Link.qml
+    qml/components/navigation/LinkWrapper.qml
+    qml/components/navigation/NavigationLink.qml
 )

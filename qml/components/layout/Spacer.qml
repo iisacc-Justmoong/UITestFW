@@ -1,11 +1,14 @@
 import QtQuick
 import QtQuick.Layouts
+import UIFramework 1.0 as UIF
 
 Item {
     id: root
 
     // SwiftUI-like API: minLength applies along the stack axis.
     property int minLength: 0
+    // Used by VStack/HStack to force axis without relying on parent meta info.
+    property string stackAxis: ""
 
     implicitWidth: 0
     implicitHeight: 0
@@ -21,6 +24,7 @@ Item {
     property int _minHeight: 0
 
     onMinLengthChanged: updateLayout()
+    onStackAxisChanged: updateLayout()
     onParentChanged: updateLayout()
     Component.onCompleted: updateLayout()
 
@@ -36,6 +40,17 @@ Item {
 
         if (parent.__isZStack === true) {
             anchors.fill = parent
+            return
+        }
+
+        if (stackAxis === "vertical") {
+            _fillHeight = true
+            _minHeight = minLength
+            return
+        }
+        if (stackAxis === "horizontal") {
+            _fillWidth = true
+            _minWidth = minLength
             return
         }
 

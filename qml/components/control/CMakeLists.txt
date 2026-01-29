@@ -1,11 +1,11 @@
 set(UIFRAMEWORK_BUTTON_QML_FILES
-    ${CMAKE_CURRENT_LIST_DIR}/AbstractButton.qml
-        ${CMAKE_CURRENT_LIST_DIR}/EventListener.qml
-    ${CMAKE_CURRENT_LIST_DIR}/Label.qml
-    ${CMAKE_CURRENT_LIST_DIR}/LabelButton.qml
-    ${CMAKE_CURRENT_LIST_DIR}/IconButton.qml
-    ${CMAKE_CURRENT_LIST_DIR}/ToggleButton.qml
-    ${CMAKE_CURRENT_LIST_DIR}/DrawerButton.qml
-    ${CMAKE_CURRENT_LIST_DIR}/ToggleSwitch.qml
-    ${CMAKE_CURRENT_LIST_DIR}/CheckBox.qml
+    qml/components/control/AbstractButton.qml
+    qml/components/control/EventListner.qml
+    qml/components/control/Label.qml
+    qml/components/control/LabelButton.qml
+    qml/components/control/IconButton.qml
+    qml/components/control/ToggleButton.qml
+    qml/components/control/DrawerButton.qml
+    qml/components/control/ToggleSwitch.qml
+    qml/components/control/CheckBox.qml
 )

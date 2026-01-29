@@ -1,6 +1,6 @@
 set(UIFRAMEWORK_BUTTON_QML_FILES
     ${CMAKE_CURRENT_LIST_DIR}/AbstractButton.qml
-    ${CMAKE_CURRENT_LIST_DIR}/EventListner.qml
+        ${CMAKE_CURRENT_LIST_DIR}/EventListener.qml
     ${CMAKE_CURRENT_LIST_DIR}/Label.qml
     ${CMAKE_CURRENT_LIST_DIR}/LabelButton.qml
     ${CMAKE_CURRENT_LIST_DIR}/IconButton.qml

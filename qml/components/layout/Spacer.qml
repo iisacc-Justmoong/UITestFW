@@ -1,0 +1,55 @@
+import QtQuick
+import QtQuick.Layouts
+
+Item {
+    id: root
+
+    // SwiftUI-like API: minLength applies along the stack axis.
+    property int minLength: 0
+
+    implicitWidth: 0
+    implicitHeight: 0
+
+    Layout.fillWidth: root._fillWidth
+    Layout.fillHeight: root._fillHeight
+    Layout.minimumWidth: root._minWidth
+    Layout.minimumHeight: root._minHeight
+
+    property bool _fillWidth: false
+    property bool _fillHeight: false
+    property int _minWidth: 0
+    property int _minHeight: 0
+
+    onMinLengthChanged: updateLayout()
+    onParentChanged: updateLayout()
+    Component.onCompleted: updateLayout()
+
+    function updateLayout() {
+        _fillWidth = false
+        _fillHeight = false
+        _minWidth = 0
+        _minHeight = 0
+        anchors.fill = null
+
+        if (!parent)
+            return
+
+        if (parent.__isZStack === true) {
+            anchors.fill = parent
+            return
+        }
+
+        var className = parent.metaObject ? parent.metaObject.className : ""
+        if (className.indexOf("RowLayout") !== -1) {
+            _fillWidth = true
+            _minWidth = minLength
+        } else if (className.indexOf("ColumnLayout") !== -1) {
+            _fillHeight = true
+            _minHeight = minLength
+        }
+    }
+}
+
+// API usage (external):
+// import UIFramework 1.0 as UIF
+// UIF.Spacer { minLength: 12 }

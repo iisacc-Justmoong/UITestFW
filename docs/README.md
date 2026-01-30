@@ -18,10 +18,11 @@ Use the links below to navigate.
 - `docs/components/control/Label.md`
 - `docs/components/control/LabelButton.md`
 - `docs/components/control/IconButton.md`
-- `docs/components/control/ToggleButton.md`
-- `docs/components/control/DrawerButton.md`
+- `docs/components/control/LabelMenuButton.md`
+- `docs/components/control/IconMenuButton.md`
 - `docs/components/control/ToggleSwitch.md`
 - `docs/components/control/CheckBox.md`
+- `docs/components/control/RadioButton.md`
 
 ## Layout
 - `docs/components/layout/AppHeader.md`

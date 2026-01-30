@@ -1,6 +1,6 @@
 # IconButton
 
-Location: `qml/components/control/IconButton.qml`
+Location: `qml/components/control/buttons/IconButton.qml`
 
 Button with optional icon + text.
 

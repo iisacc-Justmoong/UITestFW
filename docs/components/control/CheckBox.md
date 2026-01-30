@@ -1,6 +1,6 @@
 # CheckBox
 
-Location: `qml/components/control/CheckBox.qml`
+Location: `qml/components/control/check/CheckBox.qml`
 
 Checkbox with label.
 

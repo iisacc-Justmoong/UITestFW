@@ -1,6 +1,6 @@
 # Label
 
-Location: `qml/components/control/Label.qml`
+Location: `qml/components/control/display/Label.qml`
 
 Text wrapper with default theme font and color.
 

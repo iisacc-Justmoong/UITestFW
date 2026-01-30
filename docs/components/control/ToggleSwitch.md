@@ -1,6 +1,6 @@
 # ToggleSwitch
 
-Location: `qml/components/control/ToggleSwitch.qml`
+Location: `qml/components/control/check/ToggleSwitch.qml`
 
 Minimal on/off switch. Only enabled/disabled + checked state.
 

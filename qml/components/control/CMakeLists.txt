@@ -1,11 +1,11 @@
-set(UIFRAMEWORK_BUTTON_QML_FILES
-    qml/components/control/AbstractButton.qml
-    qml/components/control/EventListner.qml
-    qml/components/control/Label.qml
-    qml/components/control/LabelButton.qml
-    qml/components/control/IconButton.qml
-    qml/components/control/ToggleButton.qml
-    qml/components/control/DrawerButton.qml
-    qml/components/control/ToggleSwitch.qml
-    qml/components/control/CheckBox.qml
+include(${CMAKE_CURRENT_LIST_DIR}/buttons/CMakeLists.txt)
+include(${CMAKE_CURRENT_LIST_DIR}/check/CMakeLists.txt)
+include(${CMAKE_CURRENT_LIST_DIR}/display/CMakeLists.txt)
+include(${CMAKE_CURRENT_LIST_DIR}/util/CMakeLists.txt)
+
+set(UIFRAMEWORK_CONTROL_QML_FILES
+    ${UIFRAMEWORK_CONTROL_BUTTON_QML_FILES}
+    ${UIFRAMEWORK_CONTROL_CHECK_QML_FILES}
+    ${UIFRAMEWORK_CONTROL_DISPLAY_QML_FILES}
+    ${UIFRAMEWORK_CONTROL_UTIL_QML_FILES}
 )

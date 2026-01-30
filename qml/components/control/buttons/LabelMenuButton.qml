@@ -7,7 +7,6 @@ AbstractButton {
 
     checkable: true
 
-    property string icon: ""
     property string badge: ""
     property bool active: checked
 
@@ -31,15 +30,6 @@ AbstractButton {
     contentItem: RowLayout {
         spacing: 8
         Layout.alignment: Qt.AlignVCenter | Qt.AlignLeft
-
-        Text {
-            visible: control.icon.length > 0
-            text: control.icon
-            color: control.active ? Theme.textPrimary : Theme.textTertiary
-            font.family: Theme.fontDisplay
-            font.pixelSize: 12
-            Layout.alignment: Qt.AlignVCenter
-        }
 
         Text {
             text: control.text
@@ -68,12 +58,13 @@ AbstractButton {
             }
         }
     }
+
     QtObject {
-        Component.onCompleted: Debug.log("DrawerButton", "created")
+        Component.onCompleted: Debug.log("LabelMenuButton", "created")
     }
 
 }
 
 // API usage (external):
 // import UIFramework 1.0 as UIF
-// UIF.DrawerButton { text: "Overview"; icon: "●"; active: true }
+// UIF.LabelMenuButton { text: "Overview"; badge: "3"; active: true }

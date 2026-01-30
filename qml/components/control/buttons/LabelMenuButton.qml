@@ -7,6 +7,7 @@ AbstractButton {
 
     checkable: true
 
+    property bool useTone: false
     property string badge: ""
     property bool active: checked
 
@@ -20,12 +21,21 @@ AbstractButton {
             active = checked
     }
 
-    textColor: control.active ? Theme.textPrimary : Theme.textSecondary
-    backgroundColor: control.active ? Theme.accentMuted : "transparent"
-    backgroundColorHover: control.active ? Theme.accentMuted : Theme.surfaceAlt
-    backgroundColorPressed: Theme.accentMuted
-    borderColor: control.active ? Theme.border : "transparent"
-    borderColorHover: control.active ? Theme.border : Theme.borderSoft
+    readonly property color inactiveTextColor: useTone ? control.toneTextColor : Theme.textSecondary
+    readonly property color inactiveBackgroundColor: useTone ? control.toneBackgroundColor : "transparent"
+    readonly property color inactiveBackgroundHover: useTone ? control.toneBackgroundColorHover : Theme.surfaceAlt
+    readonly property color inactiveBackgroundPressed: useTone ? control.toneBackgroundColorPressed : Theme.accentMuted
+    readonly property color inactiveBorderColor: useTone ? control.toneBorderColor : "transparent"
+    readonly property color inactiveBorderHover: useTone ? control.toneBorderColorHover : Theme.borderSoft
+
+    readonly property color resolvedTextColor: control.active ? Theme.textPrimary : control.inactiveTextColor
+
+    textColor: control.effectiveEnabled ? control.resolvedTextColor : control.textColorDisabled
+    backgroundColor: control.active ? Theme.accentMuted : control.inactiveBackgroundColor
+    backgroundColorHover: control.active ? Theme.accentMuted : control.inactiveBackgroundHover
+    backgroundColorPressed: control.active ? Theme.accentMuted : control.inactiveBackgroundPressed
+    borderColor: control.active ? Theme.border : control.inactiveBorderColor
+    borderColorHover: control.active ? Theme.border : control.inactiveBorderHover
 
     contentItem: RowLayout {
         spacing: 8

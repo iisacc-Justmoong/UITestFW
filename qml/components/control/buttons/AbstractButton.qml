@@ -5,21 +5,79 @@ import UIFramework 1.0
 Controls.AbstractButton {
     id: control
 
+    enum ButtonTone {
+        Accent,
+        Default,
+        Borderless,
+        Destructive,
+        Disabled
+    }
+
+    property int tone: AbstractButton.Default
+    property bool effectiveEnabled: enabled && tone !== AbstractButton.Disabled
+
+    readonly property color toneTextColor: {
+        if (tone === AbstractButton.Accent || tone === AbstractButton.Destructive)
+            return Theme.onAccent
+        return Theme.textPrimary
+    }
+    readonly property color toneBackgroundColor: {
+        if (tone === AbstractButton.Accent)
+            return Theme.accent
+        if (tone === AbstractButton.Destructive)
+            return Theme.danger
+        if (tone === AbstractButton.Borderless)
+            return "transparent"
+        return Theme.surfaceSolid
+    }
+    readonly property color toneBackgroundColorHover: {
+        if (tone === AbstractButton.Accent)
+            return Qt.darker(Theme.accent, 1.12)
+        if (tone === AbstractButton.Destructive)
+            return Qt.darker(Theme.danger, 1.12)
+        if (tone === AbstractButton.Borderless)
+            return Theme.surfaceAlt
+        return Theme.surfaceAlt
+    }
+    readonly property color toneBackgroundColorPressed: {
+        if (tone === AbstractButton.Accent)
+            return Qt.darker(Theme.accent, 1.2)
+        if (tone === AbstractButton.Destructive)
+            return Qt.darker(Theme.danger, 1.2)
+        if (tone === AbstractButton.Borderless)
+            return Theme.accentMuted
+        return Theme.accentMuted
+    }
+    readonly property color toneBorderColor: {
+        if (tone === AbstractButton.Borderless)
+            return "transparent"
+        if (tone === AbstractButton.Accent)
+            return Qt.darker(Theme.accent, 1.2)
+        if (tone === AbstractButton.Destructive)
+            return Qt.darker(Theme.danger, 1.2)
+        return Theme.border
+    }
+    readonly property color toneBorderColorHover: {
+        if (tone === AbstractButton.Borderless)
+            return "transparent"
+        return Theme.border
+    }
+
     property int horizontalPadding: 14
     property int verticalPadding: 10
     property int cornerRadius: Theme.radiusMd
     property int borderWidth: 1
 
-    property color textColor: Theme.textPrimary
+    property color textColor: control.toneTextColor
     property color textColorDisabled: Theme.textTertiary
 
-    property color backgroundColor: Theme.surfaceSolid
-    property color backgroundColorHover: Theme.surfaceAlt
-    property color backgroundColorPressed: Theme.accentMuted
+    property color backgroundColor: control.toneBackgroundColor
+    property color backgroundColorHover: control.toneBackgroundColorHover
+    property color backgroundColorPressed: control.toneBackgroundColorPressed
     property color backgroundColorDisabled: Theme.surfaceAlt
 
-    property color borderColor: Theme.border
-    property color borderColorHover: Theme.border
+    property color borderColor: control.toneBorderColor
+    property color borderColorHover: control.toneBorderColorHover
     property color borderColorDisabled: Theme.borderSoft
 
     hoverEnabled: true
@@ -37,7 +95,7 @@ Controls.AbstractButton {
 
     contentItem: Text {
         text: control.text
-        color: control.enabled ? control.textColor : control.textColorDisabled
+        color: control.effectiveEnabled ? control.textColor : control.textColorDisabled
         font.family: Theme.fontBody
         font.pixelSize: 12
         font.weight: Font.DemiBold
@@ -49,14 +107,14 @@ Controls.AbstractButton {
     background: Rectangle {
         radius: control.cornerRadius
         antialiasing: true
-        color: !control.enabled
+        color: !control.effectiveEnabled
             ? control.backgroundColorDisabled
             : control.down
                 ? control.backgroundColorPressed
                 : control.hovered
                     ? control.backgroundColorHover
                     : control.backgroundColor
-        border.color: !control.enabled
+        border.color: !control.effectiveEnabled
             ? control.borderColorDisabled
             : control.hovered
                 ? control.borderColorHover
@@ -72,4 +130,4 @@ Controls.AbstractButton {
 
 // API usage (external):
 // import UIFramework 1.0 as UIF
-// UIF.AbstractButton { text: "Action" }
+// UIF.AbstractButton { text: "Action"; tone: UIF.AbstractButton.Accent }

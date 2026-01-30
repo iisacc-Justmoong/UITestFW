@@ -4,17 +4,22 @@ import UIFramework 1.0
 AbstractButton {
     id: control
 
-    property color accentColor: Theme.accent
-    property color accentHoverColor: Theme.textPrimary
+    property bool useTone: false
+    property color accentColor: control.tone === AbstractButton.Destructive ? Theme.danger : Theme.accent
+    property color accentHoverColor: control.tone === AbstractButton.Destructive
+        ? Qt.darker(Theme.danger, 1.12)
+        : Theme.textPrimary
+    readonly property color resolvedTextColor: useTone
+        ? (control.hovered || control.down ? Theme.textPrimary : control.toneTextColor)
+        : (control.hovered || control.down ? control.accentHoverColor : control.accentColor)
 
-    textColor: control.enabled
-        ? (control.hovered || control.down ? control.accentHoverColor : control.accentColor)
-        : Theme.textTertiary
-    backgroundColor: "transparent"
-    backgroundColorHover: "transparent"
-    backgroundColorPressed: "transparent"
-    backgroundColorDisabled: "transparent"
-    borderWidth: 0
+    tone: AbstractButton.Borderless
+    textColor: control.effectiveEnabled ? control.resolvedTextColor : control.textColorDisabled
+    backgroundColor: useTone ? control.toneBackgroundColor : "transparent"
+    backgroundColorHover: useTone ? control.toneBackgroundColorHover : "transparent"
+    backgroundColorPressed: useTone ? control.toneBackgroundColorPressed : "transparent"
+    backgroundColorDisabled: useTone ? Theme.surfaceAlt : "transparent"
+    borderWidth: useTone ? 1 : 0
 
     contentItem: Text {
         text: control.text

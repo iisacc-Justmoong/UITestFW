@@ -24,7 +24,7 @@ AbstractButton {
 
         Text {
             text: control.text
-            color: control.enabled ? control.textColor : control.textColorDisabled
+            color: control.effectiveEnabled ? control.textColor : control.textColorDisabled
             font.family: Theme.fontBody
             font.pixelSize: 12
             font.weight: Font.DemiBold

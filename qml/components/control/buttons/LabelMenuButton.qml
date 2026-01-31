@@ -24,18 +24,18 @@ AbstractButton {
     readonly property color inactiveTextColor: useTone ? control.toneTextColor : Theme.textSecondary
     readonly property color inactiveBackgroundColor: useTone ? control.toneBackgroundColor : "transparent"
     readonly property color inactiveBackgroundHover: useTone ? control.toneBackgroundColorHover : Theme.surfaceAlt
-    readonly property color inactiveBackgroundPressed: useTone ? control.toneBackgroundColorPressed : Theme.accentMuted
+    readonly property color inactiveBackgroundPressed: useTone ? control.toneBackgroundColorPressed : Theme.accent
     readonly property color inactiveBorderColor: useTone ? control.toneBorderColor : "transparent"
-    readonly property color inactiveBorderHover: useTone ? control.toneBorderColorHover : Theme.borderSoft
+    readonly property color inactiveBorderHover: useTone ? control.toneBorderColorHover : Theme.surfaceSolid
 
     readonly property color resolvedTextColor: control.active ? Theme.textPrimary : control.inactiveTextColor
 
     textColor: control.effectiveEnabled ? control.resolvedTextColor : control.textColorDisabled
-    backgroundColor: control.active ? Theme.accentMuted : control.inactiveBackgroundColor
-    backgroundColorHover: control.active ? Theme.accentMuted : control.inactiveBackgroundHover
-    backgroundColorPressed: control.active ? Theme.accentMuted : control.inactiveBackgroundPressed
-    borderColor: control.active ? Theme.border : control.inactiveBorderColor
-    borderColorHover: control.active ? Theme.border : control.inactiveBorderHover
+    backgroundColor: control.active ? Theme.accent : control.inactiveBackgroundColor
+    backgroundColorHover: control.active ? Theme.accent : control.inactiveBackgroundHover
+    backgroundColorPressed: control.active ? Theme.accent : control.inactiveBackgroundPressed
+    borderColor: control.active ? Theme.surfaceAlt : control.inactiveBorderColor
+    borderColorHover: control.active ? Theme.surfaceAlt : control.inactiveBorderHover
 
     contentItem: RowLayout {
         spacing: 8
@@ -54,7 +54,7 @@ AbstractButton {
         Rectangle {
             visible: control.badge.length > 0
             radius: 8
-            color: control.active ? Theme.accent : Theme.borderSoft
+            color: control.active ? Theme.accent : Theme.surfaceSolid
             Layout.preferredHeight: 18
             Layout.preferredWidth: Math.max(18, badgeText.implicitWidth + 10)
 
@@ -62,7 +62,7 @@ AbstractButton {
                 id: badgeText
                 anchors.centerIn: parent
                 text: control.badge
-                color: control.active ? Theme.onAccent : Theme.textPrimary
+                color: control.active ? Theme.textPrimary : Theme.textPrimary
                 font.family: Theme.fontBody
                 font.pixelSize: 10
             }

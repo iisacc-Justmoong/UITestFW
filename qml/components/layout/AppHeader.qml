@@ -14,12 +14,12 @@ ToolBar {
 
     default property alias actions: actionRow.data
 
-    implicitHeight: Theme.headerHeight
+    implicitHeight: Theme.textTitle
 
 
     background: Rectangle {
-        color: Theme.glass
-        border.color: Theme.border
+        color: Theme.windowAlt
+        border.color: Theme.surfaceAlt
         border.width: 1
     }
 
@@ -44,7 +44,7 @@ ToolBar {
             background: Rectangle {
                 radius: Theme.radiusSm
                 color: control.down ? Theme.surfaceAlt : Theme.surfaceSolid
-                border.color: Theme.border
+                border.color: Theme.surfaceAlt
                 border.width: 1
             }
 

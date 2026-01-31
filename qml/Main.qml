@@ -26,11 +26,11 @@ UIF.AppShell {
             Layout.fillWidth: true
             Layout.preferredHeight: 180
             radius: UIF.Theme.radiusXl
-            border.color: UIF.Theme.border
+            border.color: UIF.Theme.surfaceAlt
             border.width: 1
 
             gradient: Gradient {
-                GradientStop { position: 0.0; color: UIF.Theme.accentMuted }
+                GradientStop { position: 0.0; color: UIF.Theme.accent }
                 GradientStop { position: 1.0; color: UIF.Theme.surfaceAlt }
             }
 
@@ -80,7 +80,7 @@ UIF.AppShell {
 
                             contentItem: Text {
                                 text: control.text
-                                color: UIF.Theme.onAccent
+                                color: UIF.Theme.textPrimary
                                 font.family: UIF.Theme.fontBody
                                 font.pixelSize: 12
                                 font.weight: Font.DemiBold
@@ -88,7 +88,7 @@ UIF.AppShell {
 
                             background: Rectangle {
                                 radius: UIF.Theme.radiusMd
-                                color: control.down ? UIF.Theme.accentMuted : UIF.Theme.accent
+                                color: control.down ? UIF.Theme.accent : UIF.Theme.accent
                             }
                         }
 
@@ -107,7 +107,7 @@ UIF.AppShell {
                             background: Rectangle {
                                 radius: UIF.Theme.radiusMd
                                 color: control.down ? UIF.Theme.surfaceAlt : "transparent"
-                                border.color: UIF.Theme.border
+                                border.color: UIF.Theme.surfaceAlt
                                 border.width: 1
                             }
                         }
@@ -119,7 +119,7 @@ UIF.AppShell {
                     height: 120
                     radius: 60
                     color: UIF.Theme.surfaceAlt
-                    border.color: UIF.Theme.border
+                    border.color: UIF.Theme.surfaceAlt
                     border.width: 1
 
                     Column {
@@ -193,7 +193,7 @@ UIF.AppShell {
                             width: 64
                             height: 6
                             radius: 3
-                            color: UIF.Theme.borderSoft
+                            color: UIF.Theme.surfaceSolid
 
                             Rectangle {
                                 width: parent.width * 0.7
@@ -319,7 +319,7 @@ UIF.AppShell {
                         Layout.fillWidth: true
                         height: 6
                         radius: 3
-                        color: UIF.Theme.borderSoft
+                        color: UIF.Theme.surfaceSolid
 
                         Rectangle {
                             width: parent.width * 0.65
@@ -353,7 +353,7 @@ UIF.AppShell {
                         Layout.fillWidth: true
                         height: 6
                         radius: 3
-                        color: UIF.Theme.borderSoft
+                        color: UIF.Theme.surfaceSolid
 
                         Rectangle {
                             width: parent.width * 0.4

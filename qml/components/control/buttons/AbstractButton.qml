@@ -18,7 +18,7 @@ Controls.AbstractButton {
 
     readonly property color toneTextColor: {
         if (tone === AbstractButton.Accent || tone === AbstractButton.Destructive)
-            return Theme.onAccent
+            return Theme.textPrimary
         return Theme.textPrimary
     }
     readonly property color toneBackgroundColor: {
@@ -45,8 +45,8 @@ Controls.AbstractButton {
         if (tone === AbstractButton.Destructive)
             return Qt.darker(Theme.danger, 1.2)
         if (tone === AbstractButton.Borderless)
-            return Theme.accentMuted
-        return Theme.accentMuted
+            return Theme.accent
+        return Theme.accent
     }
     readonly property color toneBorderColor: {
         if (tone === AbstractButton.Borderless)
@@ -55,12 +55,12 @@ Controls.AbstractButton {
             return Qt.darker(Theme.accent, 1.2)
         if (tone === AbstractButton.Destructive)
             return Qt.darker(Theme.danger, 1.2)
-        return Theme.border
+        return Theme.surfaceAlt
     }
     readonly property color toneBorderColorHover: {
         if (tone === AbstractButton.Borderless)
             return "transparent"
-        return Theme.border
+        return Theme.surfaceAlt
     }
 
     property int horizontalPadding: 14
@@ -78,7 +78,7 @@ Controls.AbstractButton {
 
     property color borderColor: control.toneBorderColor
     property color borderColorHover: control.toneBorderColorHover
-    property color borderColorDisabled: Theme.borderSoft
+    property color borderColorDisabled: Theme.surfaceSolid
 
     hoverEnabled: true
     focusPolicy: Qt.StrongFocus

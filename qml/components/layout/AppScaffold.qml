@@ -90,7 +90,7 @@ Item {
                 Rectangle {
                     visible: itemBadge.length > 0
                     radius: 8
-                    color: control.highlighted ? Theme.accent : Theme.borderSoft
+                    color: control.highlighted ? Theme.accent : Theme.surfaceSolid
                     Layout.preferredHeight: 18
                     Layout.preferredWidth: Math.max(18, badgeText.implicitWidth + 10)
 
@@ -98,7 +98,7 @@ Item {
                         id: badgeText
                         anchors.centerIn: parent
                         text: itemBadge
-                        color: control.highlighted ? Theme.onAccent : Theme.textPrimary
+                        color: control.highlighted ? Theme.textPrimary : Theme.textPrimary
                         font.family: Theme.fontBody
                         font.pixelSize: 10
                     }
@@ -107,8 +107,8 @@ Item {
 
             background: Rectangle {
                 radius: Theme.radiusSm
-                color: control.highlighted ? Theme.accentMuted : "transparent"
-                border.color: control.highlighted ? Theme.border : "transparent"
+                color: control.highlighted ? Theme.accent : "transparent"
+                border.color: control.highlighted ? Theme.surfaceAlt : "transparent"
                 border.width: 1
             }
 
@@ -162,7 +162,7 @@ Item {
                 Rectangle {
                     visible: itemBadge.length > 0
                     radius: 8
-                    color: control.highlighted ? Theme.accent : Theme.borderSoft
+                    color: control.highlighted ? Theme.accent : Theme.surfaceSolid
                     Layout.preferredHeight: 18
                     Layout.preferredWidth: Math.max(18, badgeText.implicitWidth + 10)
 
@@ -170,7 +170,7 @@ Item {
                         id: badgeText
                         anchors.centerIn: parent
                         text: itemBadge
-                        color: control.highlighted ? Theme.onAccent : Theme.textPrimary
+                        color: control.highlighted ? Theme.textPrimary : Theme.textPrimary
                         font.family: Theme.fontBody
                         font.pixelSize: 10
                     }
@@ -179,8 +179,8 @@ Item {
 
             background: Rectangle {
                 radius: Theme.radiusSm
-                color: control.highlighted ? Theme.accentMuted : "transparent"
-                border.color: control.highlighted ? Theme.border : "transparent"
+                color: control.highlighted ? Theme.accent : "transparent"
+                border.color: control.highlighted ? Theme.surfaceAlt : "transparent"
                 border.width: 1
             }
 
@@ -209,7 +209,7 @@ Item {
             width: 520
             height: 520
             radius: 260
-            color: Theme.accentGlow
+            color: Theme.accent
             anchors.right: parent.right
             anchors.top: parent.top
             anchors.rightMargin: -140
@@ -220,7 +220,7 @@ Item {
             width: 640
             height: 380
             radius: 220
-            color: Theme.accentMuted
+            color: Theme.accent
             opacity: 0.3
             anchors.left: parent.left
             anchors.bottom: parent.bottom
@@ -255,10 +255,10 @@ Item {
                 anchors.top: parent.top
                 anchors.bottom: parent.bottom
                 anchors.left: parent.left
-                anchors.margins: Theme.pageMargin
+                anchors.margins: Theme.radiusXl
                 radius: Theme.radiusLg
                 color: Theme.surfaceSolid
-                border.color: Theme.border
+                border.color: Theme.surfaceAlt
                 border.width: 1
 
                 ColumnLayout {
@@ -303,21 +303,21 @@ Item {
                 anchors.bottom: parent.bottom
                 anchors.right: parent.right
                 anchors.left: root.hasNav && root.wide ? navRail.right : parent.left
-                anchors.margins: Theme.pageMargin
+                anchors.margins: Theme.radiusXl
             }
 
             Rectangle {
                 anchors.fill: contentWrap
                 radius: Theme.radiusXl
                 color: Theme.surfaceAlt
-                border.color: Theme.border
+                border.color: Theme.surfaceAlt
                 border.width: 1
             }
 
             Item {
                 id: contentArea
                 anchors.fill: contentWrap
-                anchors.margins: Theme.contentMargin
+                anchors.margins: Theme.radiusLg
             }
         }
     }
@@ -332,13 +332,13 @@ Item {
 
         background: Rectangle {
             color: Theme.surfaceSolid
-            border.color: Theme.border
+            border.color: Theme.surfaceAlt
             border.width: 1
         }
 
         ColumnLayout {
             anchors.fill: parent
-            anchors.margins: Theme.pageMargin
+            anchors.margins: Theme.radiusXl
             spacing: 12
 
             Label {

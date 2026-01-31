@@ -46,7 +46,7 @@ Item {
         width: Math.min(root.maxWidth, Math.max(root.minWidth, root.width - 48))
         radius: Theme.radiusLg
         color: Theme.surfaceSolid
-        border.color: Theme.border
+        border.color: Theme.surfaceAlt
         border.width: 1
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.verticalCenter: parent.verticalCenter
@@ -88,7 +88,7 @@ Item {
                 Layout.fillWidth: true
                 height: 1
                 radius: 1
-                color: Theme.borderSoft
+                color: Theme.surfaceSolid
                 visible: root.primaryText.length > 0 || root.secondaryText.length > 0
             }
 
@@ -107,7 +107,7 @@ Item {
                     backgroundColor: "transparent"
                     backgroundColorHover: Theme.surfaceAlt
                     backgroundColorPressed: Theme.surfaceAlt
-                    borderColor: Theme.border
+                    borderColor: Theme.surfaceAlt
                     onClicked: root.secondaryClicked()
                 }
 
@@ -118,8 +118,8 @@ Item {
                     Layout.preferredWidth: 100
                     backgroundColor: Theme.accent
                     backgroundColorHover: Theme.accent
-                    backgroundColorPressed: Theme.accentMuted
-                    textColor: Theme.onAccent
+                    backgroundColorPressed: Theme.accent
+                    textColor: Theme.textPrimary
                     borderWidth: 0
                     onClicked: root.primaryClicked()
                 }

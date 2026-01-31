@@ -12,10 +12,10 @@ AbstractButton {
     property int knobSize: 18
 
     property color onColor: Theme.accent
-    property color offColor: Theme.borderSoft
+    property color offColor: Theme.surfaceSolid
     property color disabledColor: Theme.surfaceAlt
     property color knobColor: Theme.surfaceSolid
-    property color knobDisabledColor: Theme.borderSoft
+    property color knobDisabledColor: Theme.surfaceSolid
 
     leftPadding: 0
     rightPadding: 0
@@ -34,7 +34,7 @@ AbstractButton {
         color: control.enabled
             ? (control.checked ? control.onColor : control.offColor)
             : control.disabledColor
-        border.color: control.enabled ? "transparent" : Theme.border
+        border.color: control.enabled ? "transparent" : Theme.surfaceAlt
         border.width: control.enabled ? 0 : 1
 
         Rectangle {

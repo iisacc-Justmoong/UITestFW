@@ -13,7 +13,7 @@ Rectangle {
 
     radius: Theme.radiusLg
     color: Theme.surfaceSolid
-    border.color: Theme.border
+    border.color: Theme.surfaceAlt
     border.width: 1
 
     ColumnLayout {
@@ -50,7 +50,7 @@ Rectangle {
             Layout.fillWidth: true
             height: 1
             radius: 1
-            color: Theme.borderSoft
+            color: Theme.surfaceSolid
         }
 
         Item {

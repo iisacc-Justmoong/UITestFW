@@ -9,7 +9,7 @@ AbstractButton {
 
     property int indicatorSize: 18
     property int dotSize: 8
-    property color dotColor: Theme.onAccent
+    property color dotColor: Theme.textPrimary
     property color checkedColor: Theme.accent
     property color uncheckedColor: "transparent"
     property color disabledColor: Theme.surfaceAlt
@@ -25,7 +25,7 @@ AbstractButton {
             color: control.enabled
                 ? (control.checked ? control.checkedColor : control.uncheckedColor)
                 : control.disabledColor
-            border.color: Theme.border
+            border.color: Theme.surfaceAlt
             border.width: 1
 
             Rectangle {

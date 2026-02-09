@@ -5,9 +5,9 @@ AbstractButton {
     id: control
 
     tone: AbstractButton.Accent
-    horizontalPadding: 12
-    verticalPadding: 7
-    spacing: 0
+    horizontalPadding: Theme.gap12
+    verticalPadding: Theme.gap7
+    spacing: Theme.gapNone
     cornerRadius: Theme.radiusMd
     borderWidth: 0
     implicitHeight: contentItem.implicitHeight + topPadding + bottomPadding
@@ -31,8 +31,8 @@ AbstractButton {
         text: control.text
         color: control.effectiveEnabled ? control.textColor : control.textColorDisabled
         font.family: Theme.fontBody
-        font.pixelSize: 13
-        font.weight: Font.Normal
+        font.pixelSize: Theme.textBody
+        font.weight: Theme.textBodyWeight
         horizontalAlignment: Text.AlignHCenter
         verticalAlignment: Text.AlignVCenter
         elide: Text.ElideRight

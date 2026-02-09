@@ -14,9 +14,9 @@ AbstractButton {
                 ? Theme.textPrimary
                 : Theme.textPrimary
 
-    horizontalPadding: 7
-    verticalPadding: 7
-    spacing: 4
+    horizontalPadding: Theme.gap7
+    verticalPadding: Theme.gap7
+    spacing: Theme.gap4
     cornerRadius: Theme.radiusMd
     borderWidth: 0
     implicitHeight: contentItem.implicitHeight + topPadding + bottomPadding
@@ -37,15 +37,15 @@ AbstractButton {
     backgroundColorDisabled: Theme.subSurface
 
     contentItem: RowLayout {
-        spacing: 4
+        spacing: Theme.gap4
         Layout.alignment: Qt.AlignVCenter | Qt.AlignHCenter
 
         Text {
             text: control.text
             color: control.effectiveEnabled ? control.textColor : control.textColorDisabled
             font.family: Theme.fontBody
-            font.pixelSize: 13
-            font.weight: Font.Normal
+            font.pixelSize: Theme.textBody
+            font.weight: Theme.textBodyWeight
             elide: Text.ElideRight
             Layout.alignment: Qt.AlignVCenter
         }

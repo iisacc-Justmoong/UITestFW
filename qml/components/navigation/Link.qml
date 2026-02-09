@@ -56,8 +56,8 @@ AbstractButton {
                 ? (control.hovered ? control.hoverColor : control.linkColor)
                 : control.disabledColor
             font.family: Theme.fontBody
-            font.pixelSize: 12
-            font.weight: Font.Medium
+            font.pixelSize: Theme.textDescription
+            font.weight: Theme.textDescriptionWeight
             font.underline: control.underline
             anchors.verticalCenter: parent.verticalCenter
             anchors.left: parent.left

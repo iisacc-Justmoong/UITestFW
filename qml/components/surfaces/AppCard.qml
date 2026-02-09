@@ -8,13 +8,13 @@ Rectangle {
 
     property string title: ""
     property string subtitle: ""
-    readonly property int cardPadding: 18
-    readonly property int sectionSpacing: 10
+    readonly property int cardPadding: Theme.gap18
+    readonly property int sectionSpacing: Theme.gap10
 
     default property alias content: contentSlot.data
 
     implicitWidth: Math.max(
-                       280,
+                       Theme.dialogMinWidth,
                        cardPadding * 2 + Math.max(headerBlock.implicitWidth, contentSlot.childrenRect.width)
                    )
     implicitHeight: cardPadding * 2
@@ -28,7 +28,7 @@ Rectangle {
     radius: Theme.radiusLg
     color: Theme.surfaceSolid
     border.color: Theme.surfaceAlt
-    border.width: 1
+    border.width: Theme.strokeThin
 
     ColumnLayout {
         anchors.fill: parent
@@ -37,15 +37,15 @@ Rectangle {
 
         ColumnLayout {
             id: headerBlock
-            spacing: 4
+            spacing: Theme.gap4
             Layout.fillWidth: true
 
             Label {
                 text: root.title
                 color: Theme.textPrimary
                 font.family: Theme.fontDisplay
-                font.pixelSize: 17
-                font.weight: Font.DemiBold
+                font.pixelSize: Theme.textHeader
+                font.weight: Theme.textHeaderWeight
                 elide: Text.ElideRight
                 Layout.fillWidth: true
             }
@@ -55,7 +55,8 @@ Rectangle {
                 text: root.subtitle
                 color: Theme.textSecondary
                 font.family: Theme.fontBody
-                font.pixelSize: 12
+                font.pixelSize: Theme.textDescription
+                font.weight: Theme.textDescriptionWeight
                 elide: Text.ElideRight
                 Layout.fillWidth: true
             }
@@ -64,8 +65,8 @@ Rectangle {
         Rectangle {
             id: separator
             Layout.fillWidth: true
-            height: 1
-            radius: 1
+            height: Theme.strokeThin
+            radius: Theme.strokeThin
             color: Theme.surfaceSolid
         }
 

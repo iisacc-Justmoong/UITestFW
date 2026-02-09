@@ -15,12 +15,12 @@ AbstractInputBar {
         && !readOnly
         && text.length > 0
 
-    implicitWidth: 206
-    fieldMinHeight: 22
-    insetHorizontal: 7
-    insetVertical: 3
-    sideSpacing: 5
-    cornerRadius: 5
+    implicitWidth: Theme.inputWidthMd
+    fieldMinHeight: Theme.controlHeightSm
+    insetHorizontal: Theme.gap7
+    insetVertical: Theme.gap3
+    sideSpacing: Theme.gap5
+    cornerRadius: Theme.radiusControl
     borderWidth: 0
 
     textColor: Theme.textPrimary
@@ -42,9 +42,9 @@ AbstractInputBar {
 
     cursorDelegate: Rectangle {
         id: cursorHandle
-        width: 1
-        height: 16
-        radius: 0.5
+        width: Theme.strokeThin
+        height: Theme.iconSm
+        radius: Theme.radiusHairline
         color: Theme.textTertiary
         visible: control.focused && control.enabled && !control.readOnly
         opacity: visible ? 1.0 : 0.0
@@ -73,8 +73,8 @@ AbstractInputBar {
 
     trailingItems: Item {
         id: clearButton
-        width: control.showClearButton ? 16 : 0
-        height: 16
+        width: control.showClearButton ? Theme.iconSm : 0
+        height: Theme.iconSm
         visible: width > 0
 
         Canvas {

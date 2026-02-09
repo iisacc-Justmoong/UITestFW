@@ -7,22 +7,22 @@ Controls.Switch {
 
     text: ""
 
-    property int trackWidth: 38
-    property int trackHeight: 22
-    property int trackPadding: 2
-    property int knobSize: 18
-    property int transitionDuration: 140
+    property int trackWidth: Theme.toggleTrackWidth
+    property int trackHeight: Theme.controlHeightSm
+    property int trackPadding: Theme.gap2
+    property int knobSize: Theme.controlIndicatorSize
+    property int transitionDuration: Theme.toggleTransitionDuration
 
     property color onColor: Theme.accent
     property color offColor: Theme.surfaceSolid
     property color disabledTrackColor: Theme.surfaceAlt
-    property color trackShadowColor: "#40000000"
+    property color trackShadowColor: Theme.shadowStrong
     property color knobFillColor: Theme.textPrimary
-    property color knobStrokeColor: "#D0D7E2"
+    property color knobStrokeColor: Theme.strokeSoft
     readonly property int knobXOff: trackPadding
     readonly property int knobXOn: Math.max(trackPadding, trackWidth - knobSize - trackPadding)
 
-    spacing: text.length > 0 ? 8 : 0
+    spacing: text.length > 0 ? Theme.gap8 : Theme.gapNone
     leftPadding: 0
     rightPadding: 0
     topPadding: 0
@@ -53,7 +53,7 @@ Controls.Switch {
                 : control.checked
                     ? control.onColor
                     : control.offColor
-            border.width: 0
+            border.width: Theme.gapNone
             antialiasing: true
         }
 
@@ -102,6 +102,7 @@ Controls.Switch {
         color: control.enabled ? Theme.textPrimary : Theme.textOctonary
         font.family: Theme.fontBody
         font.pixelSize: Theme.textBody
+        font.weight: Theme.textBodyWeight
         verticalAlignment: Text.AlignVCenter
         visible: control.text.length > 0
         elide: Text.ElideRight

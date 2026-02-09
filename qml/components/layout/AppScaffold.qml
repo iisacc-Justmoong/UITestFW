@@ -65,10 +65,10 @@ Item {
             text: itemLabel
             enabled: itemEnabled
             highlighted: index === root.navIndex
-            padding: 10
+            padding: Theme.gap10
 
             contentItem: RowLayout {
-                spacing: 8
+                spacing: Theme.gap8
                 Layout.fillWidth: true
 
                 Label {
@@ -76,24 +76,26 @@ Item {
                     text: itemIcon
                     color: control.highlighted ? Theme.textPrimary : Theme.textTertiary
                     font.family: Theme.fontDisplay
-                    font.pixelSize: 12
+                    font.pixelSize: Theme.textDescription
+                    font.weight: Theme.textDescriptionWeight
                 }
 
                 Label {
                     text: control.text
                     color: control.highlighted ? Theme.textPrimary : Theme.textSecondary
                     font.family: Theme.fontBody
-                    font.pixelSize: 13
+                    font.pixelSize: Theme.textBody
+                    font.weight: Theme.textBodyWeight
                     Layout.fillWidth: true
                     elide: Text.ElideRight
                 }
 
                 Rectangle {
                     visible: itemBadge.length > 0
-                    radius: 8
+                    radius: Theme.radiusMd
                     color: control.highlighted ? Theme.accent : Theme.surfaceSolid
-                    Layout.preferredHeight: 18
-                    Layout.preferredWidth: Math.max(18, badgeText.implicitWidth + 10)
+                    Layout.preferredHeight: Theme.textDisplaySm
+                    Layout.preferredWidth: Math.max(Theme.textDisplaySm, badgeText.implicitWidth + Theme.gap10)
 
                     Label {
                         id: badgeText
@@ -101,7 +103,8 @@ Item {
                         text: itemBadge
                         color: control.highlighted ? Theme.textPrimary : Theme.textPrimary
                         font.family: Theme.fontBody
-                        font.pixelSize: 10
+                        font.pixelSize: Theme.textOverline
+                        font.weight: Theme.textOverlineWeight
                     }
                 }
             }
@@ -110,7 +113,7 @@ Item {
                 radius: Theme.radiusSm
                 color: control.highlighted ? Theme.accent : "transparent"
                 border.color: control.highlighted ? Theme.surfaceAlt : "transparent"
-                border.width: 1
+                border.width: Theme.strokeThin
             }
 
             onClicked: {
@@ -138,10 +141,10 @@ Item {
             text: itemLabel
             enabled: itemEnabled
             highlighted: index === root.navIndex
-            padding: 10
+            padding: Theme.gap10
 
             contentItem: RowLayout {
-                spacing: 8
+                spacing: Theme.gap8
                 Layout.fillWidth: true
 
                 Label {
@@ -149,24 +152,26 @@ Item {
                     text: itemIcon
                     color: control.highlighted ? Theme.textPrimary : Theme.textTertiary
                     font.family: Theme.fontDisplay
-                    font.pixelSize: 12
+                    font.pixelSize: Theme.textDescription
+                    font.weight: Theme.textDescriptionWeight
                 }
 
                 Label {
                     text: control.text
                     color: control.highlighted ? Theme.textPrimary : Theme.textSecondary
                     font.family: Theme.fontBody
-                    font.pixelSize: 13
+                    font.pixelSize: Theme.textBody
+                    font.weight: Theme.textBodyWeight
                     Layout.fillWidth: true
                     elide: Text.ElideRight
                 }
 
                 Rectangle {
                     visible: itemBadge.length > 0
-                    radius: 8
+                    radius: Theme.radiusMd
                     color: control.highlighted ? Theme.accent : Theme.surfaceSolid
-                    Layout.preferredHeight: 18
-                    Layout.preferredWidth: Math.max(18, badgeText.implicitWidth + 10)
+                    Layout.preferredHeight: Theme.textDisplaySm
+                    Layout.preferredWidth: Math.max(Theme.textDisplaySm, badgeText.implicitWidth + Theme.gap10)
 
                     Label {
                         id: badgeText
@@ -174,7 +179,8 @@ Item {
                         text: itemBadge
                         color: control.highlighted ? Theme.textPrimary : Theme.textPrimary
                         font.family: Theme.fontBody
-                        font.pixelSize: 10
+                        font.pixelSize: Theme.textOverline
+                        font.weight: Theme.textOverlineWeight
                     }
                 }
             }
@@ -183,7 +189,7 @@ Item {
                 radius: Theme.radiusSm
                 color: control.highlighted ? Theme.accent : "transparent"
                 border.color: control.highlighted ? Theme.surfaceAlt : "transparent"
-                border.width: 1
+                border.width: Theme.strokeThin
             }
 
             onClicked: {
@@ -208,32 +214,32 @@ Item {
         }
 
         Rectangle {
-            width: 520
-            height: 520
-            radius: 260
+            width: Theme.scaffoldBlobPrimarySize
+            height: Theme.scaffoldBlobPrimarySize
+            radius: Theme.scaffoldBlobPrimaryRadius
             color: Theme.accent
             anchors.right: parent.right
             anchors.top: parent.top
-            anchors.rightMargin: -140
-            anchors.topMargin: -200
+            anchors.rightMargin: Theme.scaffoldBlobPrimaryRightMargin
+            anchors.topMargin: Theme.scaffoldBlobPrimaryTopMargin
         }
 
         Rectangle {
-            width: 640
-            height: 380
-            radius: 220
+            width: Theme.scaffoldBlobSecondaryWidth
+            height: Theme.scaffoldBlobSecondaryHeight
+            radius: Theme.scaffoldBlobSecondaryRadius
             color: Theme.accent
-            opacity: 0.3
+            opacity: Theme.scaffoldBlobSecondaryOpacity
             anchors.left: parent.left
             anchors.bottom: parent.bottom
-            anchors.leftMargin: -200
-            anchors.bottomMargin: -180
+            anchors.leftMargin: Theme.scaffoldBlobSecondaryLeftMargin
+            anchors.bottomMargin: Theme.scaffoldBlobSecondaryBottomMargin
         }
     }
 
     ColumnLayout {
         anchors.fill: parent
-        spacing: 0
+        spacing: Theme.gapNone
 
         AppHeader {
             id: appHeader
@@ -261,12 +267,12 @@ Item {
                 radius: Theme.radiusLg
                 color: Theme.surfaceSolid
                 border.color: Theme.surfaceAlt
-                border.width: 1
+                border.width: Theme.strokeThin
 
                 ColumnLayout {
                     anchors.fill: parent
-                    anchors.margins: 16
-                    spacing: 12
+                    anchors.margins: Theme.gap16
+                    spacing: Theme.gap12
 
                     Loader {
                         active: root.navHeader !== null
@@ -280,9 +286,9 @@ Item {
                         text: root.navTitle
                         color: Theme.textTertiary
                         font.family: Theme.fontBody
-                        font.pixelSize: 11
-                        font.weight: Font.DemiBold
-                        font.letterSpacing: 1.2
+                        font.pixelSize: Theme.textCaption
+                        font.weight: Theme.textCaptionWeight
+                        font.letterSpacing: Theme.textCaptionLetterSpacing
                     }
 
                     Repeater {
@@ -313,7 +319,7 @@ Item {
                 radius: Theme.radiusXl
                 color: Theme.surfaceAlt
                 border.color: Theme.surfaceAlt
-                border.width: 1
+                border.width: Theme.strokeThin
             }
 
             Item {
@@ -335,20 +341,20 @@ Item {
         background: Rectangle {
             color: Theme.surfaceSolid
             border.color: Theme.surfaceAlt
-            border.width: 1
+            border.width: Theme.strokeThin
         }
 
         ColumnLayout {
             anchors.fill: parent
             anchors.margins: Theme.radiusXl
-            spacing: 12
+            spacing: Theme.gap12
 
             Label {
                 text: root.headerTitle
                 color: Theme.textPrimary
                 font.family: Theme.fontDisplay
-                font.pixelSize: 18
-                font.weight: Font.DemiBold
+                font.pixelSize: Theme.textDisplaySm
+                font.weight: Theme.textDisplaySmWeight
             }
 
             Loader {
@@ -363,9 +369,9 @@ Item {
                 text: root.navTitle
                 color: Theme.textTertiary
                 font.family: Theme.fontBody
-                font.pixelSize: 11
-                font.weight: Font.DemiBold
-                font.letterSpacing: 1.2
+                font.pixelSize: Theme.textCaption
+                font.weight: Theme.textCaptionWeight
+                font.letterSpacing: Theme.textCaptionLetterSpacing
             }
 
             Repeater {

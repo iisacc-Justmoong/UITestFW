@@ -14,8 +14,8 @@ Item {
     property bool primaryEnabled: true
     property bool secondaryEnabled: true
     property bool dismissOnBackground: false
-    property int maxWidth: 360
-    property int minWidth: 280
+    property int maxWidth: Theme.dialogMaxWidth
+    property int minWidth: Theme.dialogMinWidth
 
     signal primaryClicked()
     signal secondaryClicked()
@@ -28,7 +28,7 @@ Item {
 
     Rectangle {
         anchors.fill: parent
-        color: Qt.rgba(0, 0, 0, 0.35)
+        color: Theme.overlayBackdrop
         visible: root.open
 
         MouseArea {
@@ -43,30 +43,30 @@ Item {
 
     Rectangle {
         id: alertCard
-        width: Math.min(root.maxWidth, Math.max(root.minWidth, root.width - 48))
+        width: Math.min(root.maxWidth, Math.max(root.minWidth, root.width - (Theme.gap24 * 2)))
         radius: Theme.radiusLg
         color: Theme.surfaceSolid
         border.color: Theme.surfaceAlt
-        border.width: 1
+        border.width: Theme.strokeThin
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.verticalCenter: parent.verticalCenter
 
         ColumnLayout {
             anchors.fill: parent
-            anchors.margins: 20
-            spacing: 12
+            anchors.margins: Theme.gap20
+            spacing: Theme.gap12
 
             ColumnLayout {
                 Layout.fillWidth: true
-                spacing: 6
+                spacing: Theme.gap6
 
                 Label {
                     text: root.title
                     visible: root.title.length > 0
                     color: Theme.textPrimary
                     font.family: Theme.fontDisplay
-                    font.pixelSize: 16
-                    font.weight: Font.DemiBold
+                    font.pixelSize: Theme.textBodyLg
+                    font.weight: Theme.textBodyLgWeight
                     wrapMode: Text.WordWrap
                     Layout.fillWidth: true
                     horizontalAlignment: Text.AlignHCenter
@@ -77,7 +77,8 @@ Item {
                     visible: root.message.length > 0
                     color: Theme.textSecondary
                     font.family: Theme.fontBody
-                    font.pixelSize: 12
+                    font.pixelSize: Theme.textDescription
+                    font.weight: Theme.textDescriptionWeight
                     wrapMode: Text.WordWrap
                     Layout.fillWidth: true
                     horizontalAlignment: Text.AlignHCenter
@@ -86,15 +87,15 @@ Item {
 
             Rectangle {
                 Layout.fillWidth: true
-                height: 1
-                radius: 1
+                height: Theme.strokeThin
+                radius: Theme.strokeThin
                 color: Theme.surfaceSolid
                 visible: root.primaryText.length > 0 || root.secondaryText.length > 0
             }
 
             RowLayout {
                 Layout.fillWidth: true
-                spacing: 8
+                spacing: Theme.gap8
                 visible: root.primaryText.length > 0 || root.secondaryText.length > 0
                 Layout.alignment: Qt.AlignRight
 
@@ -103,7 +104,7 @@ Item {
                     visible: root.secondaryText.length > 0
                     text: root.secondaryText
                     enabled: root.secondaryEnabled
-                    Layout.preferredWidth: 100
+                    Layout.preferredWidth: Theme.buttonMinWidth
                     backgroundColor: "transparent"
                     backgroundColorHover: Theme.surfaceAlt
                     backgroundColorPressed: Theme.surfaceAlt
@@ -115,12 +116,12 @@ Item {
                     id: primaryButton
                     text: root.primaryText
                     enabled: root.primaryEnabled
-                    Layout.preferredWidth: 100
+                    Layout.preferredWidth: Theme.buttonMinWidth
                     backgroundColor: Theme.accent
                     backgroundColorHover: Theme.accent
                     backgroundColorPressed: Theme.accent
                     textColor: Theme.textPrimary
-                    borderWidth: 0
+                    borderWidth: Theme.gapNone
                     onClicked: root.primaryClicked()
                 }
             }

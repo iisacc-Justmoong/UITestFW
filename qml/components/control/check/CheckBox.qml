@@ -8,7 +8,7 @@ AbstractButton {
     checkable: true
     tone: AbstractButton.Borderless
 
-    property int boxSize: 18
+    property int boxSize: Theme.controlIndicatorSize
     property color checkColor: Theme.textPrimary
     property color checkedColor: Theme.accent
     property color uncheckedColor: "transparent"
@@ -17,13 +17,13 @@ AbstractButton {
     property color boxBorderColor: Theme.surfaceAlt
     property color boxBorderColorDisabled: Theme.surfaceAlt
     property color checkMarkColorDisabled: Theme.textTertiary
-    property int checkMarkStrokeWidth: 2
+    property int checkMarkStrokeWidth: Theme.gap2
 
     leftPadding: 0
     rightPadding: 0
     topPadding: 0
     bottomPadding: 0
-    spacing: 0
+    spacing: Theme.gapNone
     borderWidth: 0
     backgroundColor: "transparent"
     backgroundColorHover: "transparent"
@@ -35,18 +35,18 @@ AbstractButton {
     background: Item { }
 
     contentItem: RowLayout {
-        spacing: control.text.length > 0 ? 8 : 0
+        spacing: control.text.length > 0 ? Theme.gap8 : Theme.gapNone
         Layout.alignment: Qt.AlignVCenter
 
         Rectangle {
             width: control.boxSize
             height: control.boxSize
-            radius: 4
+            radius: Theme.radiusSm
             color: control.enabled
                 ? (control.checked ? control.checkedColor : control.uncheckedColor)
                 : (control.checked ? control.disabledCheckedColor : control.disabledUncheckedColor)
             border.color: control.enabled ? control.boxBorderColor : control.boxBorderColorDisabled
-            border.width: 1
+            border.width: Theme.strokeThin
             antialiasing: true
 
             Canvas {
@@ -78,7 +78,8 @@ AbstractButton {
             text: control.text
             color: control.enabled ? Theme.textPrimary : Theme.textTertiary
             font.family: Theme.fontBody
-            font.pixelSize: 12
+            font.pixelSize: Theme.textDescription
+            font.weight: Theme.textDescriptionWeight
             visible: control.text.length > 0
             Layout.alignment: Qt.AlignVCenter
         }

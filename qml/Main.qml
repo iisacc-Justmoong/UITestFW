@@ -17,8 +17,10 @@ UIF.ApplicationWindow {
     property string eventLastTrigger: "none"
 
     Component.onCompleted: {
+        UIF.FontPolicy.enforceApplicationFallback()
         UIF.Debug.enabled = true
         UIF.Debug.log("Main", "gallery-opened")
+        UIF.Debug.log("Main", "font-family", UIF.FontPolicy.effectiveFamily)
         UIF.RenderMonitor.attachWindow(root)
         UIF.PageMonitor.record("/gallery")
     }
@@ -45,15 +47,15 @@ UIF.ApplicationWindow {
     Component {
         id: routeOverview
         Rectangle {
-            color: Qt.rgba(255 / 255, 255 / 255, 255 / 255, 0.03)
+            color: UIF.Theme.surfaceGhost
             border.color: UIF.Theme.surfaceAlt
-            border.width: 1
+            border.width: UIF.Theme.strokeThin
             radius: UIF.Theme.radiusMd
             UIF.Label {
                 anchors.centerIn: parent
                 text: "Router: Overview"
                 color: UIF.Theme.textPrimary
-                font.pixelSize: 13
+                font.pixelSize: UIF.Theme.textBody
             }
         }
     }
@@ -61,15 +63,15 @@ UIF.ApplicationWindow {
     Component {
         id: routeReports
         Rectangle {
-            color: Qt.rgba(0 / 255, 122 / 255, 255 / 255, 0.12)
+            color: UIF.Theme.accentTint
             border.color: UIF.Theme.accent
-            border.width: 1
+            border.width: UIF.Theme.strokeThin
             radius: UIF.Theme.radiusMd
             UIF.Label {
                 anchors.centerIn: parent
                 text: "Router: Reports"
                 color: UIF.Theme.textPrimary
-                font.pixelSize: 13
+                font.pixelSize: UIF.Theme.textBody
             }
         }
     }
@@ -77,15 +79,15 @@ UIF.ApplicationWindow {
     Component {
         id: routeSettings
         Rectangle {
-            color: Qt.rgba(255 / 255, 69 / 255, 58 / 255, 0.12)
+            color: UIF.Theme.dangerTint
             border.color: UIF.Theme.danger
-            border.width: 1
+            border.width: UIF.Theme.strokeThin
             radius: UIF.Theme.radiusMd
             UIF.Label {
                 anchors.centerIn: parent
                 text: "Router: Settings"
                 color: UIF.Theme.textPrimary
-                font.pixelSize: 13
+                font.pixelSize: UIF.Theme.textBody
             }
         }
     }
@@ -102,10 +104,10 @@ UIF.ApplicationWindow {
                 id: gallery
                 anchors.left: parent.left
                 anchors.right: parent.right
-                anchors.margins: 12
+                anchors.margins: UIF.Theme.gap12
                 columns: width >= 1320 ? 2 : 1
-                rowSpacing: 12
-                columnSpacing: 12
+                rowSpacing: UIF.Theme.gap12
+                columnSpacing: UIF.Theme.gap12
 
                 UIF.AppCard {
                     title: "Runtime"
@@ -114,13 +116,13 @@ UIF.ApplicationWindow {
                     Layout.columnSpan: gallery.columns
 
                     ColumnLayout {
-                        spacing: 8
+                        spacing: UIF.Theme.gap8
                         Layout.fillWidth: true
 
                         UIF.Label {
                             text: "Platform: " + UIF.Platform.os + " / " + UIF.Platform.arch
                             color: UIF.Theme.textPrimary
-                            font.pixelSize: 13
+                            font.pixelSize: UIF.Theme.textBody
                         }
 
                         UIF.Label {
@@ -128,18 +130,18 @@ UIF.ApplicationWindow {
                                 + " fps=" + Number(UIF.RenderMonitor.fps).toFixed(1)
                                 + " frameMs=" + Number(UIF.RenderMonitor.lastFrameMs).toFixed(2)
                             color: UIF.Theme.textSecondary
-                            font.pixelSize: 12
+                            font.pixelSize: UIF.Theme.textDescription
                         }
 
                         UIF.Label {
                             text: "PageMonitor: current=" + UIF.PageMonitor.current
                                 + " count=" + UIF.PageMonitor.count
                             color: UIF.Theme.textSecondary
-                            font.pixelSize: 12
+                            font.pixelSize: UIF.Theme.textDescription
                         }
 
                         RowLayout {
-                            spacing: 8
+                            spacing: UIF.Theme.gap8
 
                             UIF.LabelButton {
                                 text: "Open Alert"
@@ -170,8 +172,8 @@ UIF.ApplicationWindow {
 
                     GridLayout {
                         columns: 4
-                        rowSpacing: 10
-                        columnSpacing: 24
+                        rowSpacing: UIF.Theme.gap10
+                        columnSpacing: UIF.Theme.gap24
                         Layout.fillWidth: true
 
                         UIF.LabelButton { text: "Button"; tone: UIF.AbstractButton.Accent }
@@ -209,49 +211,49 @@ UIF.ApplicationWindow {
 
                     GridLayout {
                         columns: 5
-                        rowSpacing: 8
-                        columnSpacing: 10
+                        rowSpacing: UIF.Theme.gap8
+                        columnSpacing: UIF.Theme.gap10
                         Layout.fillWidth: true
 
                         UIF.Label {
                             text: "Type"
                             color: UIF.Theme.textOctonary
-                            font.pixelSize: 12
+                            font.pixelSize: UIF.Theme.textDescription
                         }
                         UIF.Label {
                             text: "Empty"
                             color: UIF.Theme.textOctonary
-                            font.pixelSize: 12
+                            font.pixelSize: UIF.Theme.textDescription
                         }
                         UIF.Label {
                             text: "Filled"
                             color: UIF.Theme.textOctonary
-                            font.pixelSize: 12
+                            font.pixelSize: UIF.Theme.textDescription
                         }
                         UIF.Label {
                             text: "ReadOnly"
                             color: UIF.Theme.textOctonary
-                            font.pixelSize: 12
+                            font.pixelSize: UIF.Theme.textDescription
                         }
                         UIF.Label {
                             text: "Disabled"
                             color: UIF.Theme.textOctonary
-                            font.pixelSize: 12
+                            font.pixelSize: UIF.Theme.textDescription
                         }
 
-                        UIF.Label { text: "Text"; color: UIF.Theme.textPrimary; font.pixelSize: 12 }
-                        UIF.InputField { Layout.preferredWidth: 206; placeholderText: "Placeholder" }
-                        UIF.InputField { Layout.preferredWidth: 206; text: "Typed value" }
-                        UIF.InputField { Layout.preferredWidth: 206; text: "Typed value"; readOnly: true }
-                        UIF.InputField { Layout.preferredWidth: 206; placeholderText: "Placeholder"; enabled: false }
+                        UIF.Label { text: "Text"; color: UIF.Theme.textPrimary; font.pixelSize: UIF.Theme.textDescription }
+                        UIF.InputField { Layout.preferredWidth: UIF.Theme.inputWidthMd; placeholderText: "Placeholder" }
+                        UIF.InputField { Layout.preferredWidth: UIF.Theme.inputWidthMd; text: "Typed value" }
+                        UIF.InputField { Layout.preferredWidth: UIF.Theme.inputWidthMd; text: "Typed value"; readOnly: true }
+                        UIF.InputField { Layout.preferredWidth: UIF.Theme.inputWidthMd; placeholderText: "Placeholder"; enabled: false }
 
-                        UIF.Label { text: "Search"; color: UIF.Theme.textPrimary; font.pixelSize: 12 }
+                        UIF.Label { text: "Search"; color: UIF.Theme.textPrimary; font.pixelSize: UIF.Theme.textDescription }
                         UIF.InputField {
-                            Layout.preferredWidth: 206
+                            Layout.preferredWidth: UIF.Theme.inputWidthMd
                             placeholderText: "Search"
                             leadingItems: Item {
-                                width: 16
-                                height: 16
+                                width: UIF.Theme.iconSm
+                                height: UIF.Theme.iconSm
 
                                 Canvas {
                                     anchors.fill: parent
@@ -277,11 +279,11 @@ UIF.ApplicationWindow {
                             }
                         }
                         UIF.InputField {
-                            Layout.preferredWidth: 206
+                            Layout.preferredWidth: UIF.Theme.inputWidthMd
                             text: "network logs"
                             leadingItems: Item {
-                                width: 16
-                                height: 16
+                                width: UIF.Theme.iconSm
+                                height: UIF.Theme.iconSm
 
                                 Canvas {
                                     anchors.fill: parent
@@ -307,12 +309,12 @@ UIF.ApplicationWindow {
                             }
                         }
                         UIF.InputField {
-                            Layout.preferredWidth: 206
+                            Layout.preferredWidth: UIF.Theme.inputWidthMd
                             text: "network logs"
                             readOnly: true
                             leadingItems: Item {
-                                width: 16
-                                height: 16
+                                width: UIF.Theme.iconSm
+                                height: UIF.Theme.iconSm
 
                                 Canvas {
                                     anchors.fill: parent
@@ -338,12 +340,12 @@ UIF.ApplicationWindow {
                             }
                         }
                         UIF.InputField {
-                            Layout.preferredWidth: 206
+                            Layout.preferredWidth: UIF.Theme.inputWidthMd
                             placeholderText: "Search"
                             enabled: false
                             leadingItems: Item {
-                                width: 16
-                                height: 16
+                                width: UIF.Theme.iconSm
+                                height: UIF.Theme.iconSm
 
                                 Canvas {
                                     anchors.fill: parent
@@ -369,23 +371,23 @@ UIF.ApplicationWindow {
                             }
                         }
 
-                        UIF.Label { text: "Password"; color: UIF.Theme.textPrimary; font.pixelSize: 12 }
-                        UIF.InputField { Layout.preferredWidth: 206; placeholderText: "Password"; echoMode: TextInput.Password }
-                        UIF.InputField { Layout.preferredWidth: 206; text: "password123"; echoMode: TextInput.Password }
-                        UIF.InputField { Layout.preferredWidth: 206; text: "password123"; echoMode: TextInput.Password; readOnly: true }
-                        UIF.InputField { Layout.preferredWidth: 206; placeholderText: "Password"; echoMode: TextInput.Password; enabled: false }
+                        UIF.Label { text: "Password"; color: UIF.Theme.textPrimary; font.pixelSize: UIF.Theme.textDescription }
+                        UIF.InputField { Layout.preferredWidth: UIF.Theme.inputWidthMd; placeholderText: "Password"; echoMode: TextInput.Password }
+                        UIF.InputField { Layout.preferredWidth: UIF.Theme.inputWidthMd; text: "password123"; echoMode: TextInput.Password }
+                        UIF.InputField { Layout.preferredWidth: UIF.Theme.inputWidthMd; text: "password123"; echoMode: TextInput.Password; readOnly: true }
+                        UIF.InputField { Layout.preferredWidth: UIF.Theme.inputWidthMd; placeholderText: "Password"; echoMode: TextInput.Password; enabled: false }
 
-                        UIF.Label { text: "URL"; color: UIF.Theme.textPrimary; font.pixelSize: 12 }
-                        UIF.InputField { Layout.preferredWidth: 206; placeholderText: "https://example.com"; inputMethodHints: Qt.ImhUrlCharactersOnly }
-                        UIF.InputField { Layout.preferredWidth: 206; text: "https://api.local/v1"; inputMethodHints: Qt.ImhUrlCharactersOnly }
-                        UIF.InputField { Layout.preferredWidth: 206; text: "https://api.local/v1"; inputMethodHints: Qt.ImhUrlCharactersOnly; readOnly: true }
-                        UIF.InputField { Layout.preferredWidth: 206; placeholderText: "https://example.com"; inputMethodHints: Qt.ImhUrlCharactersOnly; enabled: false }
+                        UIF.Label { text: "URL"; color: UIF.Theme.textPrimary; font.pixelSize: UIF.Theme.textDescription }
+                        UIF.InputField { Layout.preferredWidth: UIF.Theme.inputWidthMd; placeholderText: "https://example.com"; inputMethodHints: Qt.ImhUrlCharactersOnly }
+                        UIF.InputField { Layout.preferredWidth: UIF.Theme.inputWidthMd; text: "https://api.local/v1"; inputMethodHints: Qt.ImhUrlCharactersOnly }
+                        UIF.InputField { Layout.preferredWidth: UIF.Theme.inputWidthMd; text: "https://api.local/v1"; inputMethodHints: Qt.ImhUrlCharactersOnly; readOnly: true }
+                        UIF.InputField { Layout.preferredWidth: UIF.Theme.inputWidthMd; placeholderText: "https://example.com"; inputMethodHints: Qt.ImhUrlCharactersOnly; enabled: false }
 
-                        UIF.Label { text: "Numeric"; color: UIF.Theme.textPrimary; font.pixelSize: 12 }
-                        UIF.InputField { Layout.preferredWidth: 206; placeholderText: "0"; inputMethodHints: Qt.ImhDigitsOnly }
-                        UIF.InputField { Layout.preferredWidth: 206; text: "1024"; inputMethodHints: Qt.ImhDigitsOnly }
-                        UIF.InputField { Layout.preferredWidth: 206; text: "1024"; inputMethodHints: Qt.ImhDigitsOnly; readOnly: true }
-                        UIF.InputField { Layout.preferredWidth: 206; placeholderText: "0"; inputMethodHints: Qt.ImhDigitsOnly; enabled: false }
+                        UIF.Label { text: "Numeric"; color: UIF.Theme.textPrimary; font.pixelSize: UIF.Theme.textDescription }
+                        UIF.InputField { Layout.preferredWidth: UIF.Theme.inputWidthMd; placeholderText: "0"; inputMethodHints: Qt.ImhDigitsOnly }
+                        UIF.InputField { Layout.preferredWidth: UIF.Theme.inputWidthMd; text: "1024"; inputMethodHints: Qt.ImhDigitsOnly }
+                        UIF.InputField { Layout.preferredWidth: UIF.Theme.inputWidthMd; text: "1024"; inputMethodHints: Qt.ImhDigitsOnly; readOnly: true }
+                        UIF.InputField { Layout.preferredWidth: UIF.Theme.inputWidthMd; placeholderText: "0"; inputMethodHints: Qt.ImhDigitsOnly; enabled: false }
                     }
                 }
 
@@ -395,18 +397,18 @@ UIF.ApplicationWindow {
                     Layout.fillWidth: true
 
                     ColumnLayout {
-                        spacing: 8
+                        spacing: UIF.Theme.gap8
                         Layout.fillWidth: true
 
                         RowLayout {
-                            spacing: 10
+                            spacing: UIF.Theme.gap10
                             UIF.CheckBox { text: "Check On"; checked: true }
                             UIF.CheckBox { text: "Check Off"; checked: false }
                             UIF.CheckBox { text: "Check Disabled"; checked: true; enabled: false }
                         }
 
                         RowLayout {
-                            spacing: 10
+                            spacing: UIF.Theme.gap10
                             UIF.RadioButton { checked: true; enabled: true }
                             UIF.RadioButton { checked: false; enabled: true }
                             UIF.RadioButton { checked: true; enabled: false }
@@ -415,7 +417,7 @@ UIF.ApplicationWindow {
                         }
 
                         RowLayout {
-                            spacing: 10
+                            spacing: UIF.Theme.gap10
                             UIF.ToggleSwitch { checked: true }
                             UIF.ToggleSwitch { checked: false }
                             UIF.ToggleSwitch { checked: true; enabled: false }
@@ -429,39 +431,39 @@ UIF.ApplicationWindow {
                     Layout.fillWidth: true
 
                     ColumnLayout {
-                        spacing: 10
+                        spacing: UIF.Theme.gap10
                         Layout.fillWidth: true
 
                         UIF.VStack {
-                            spacing: 6
+                            spacing: UIF.Theme.gap6
                             alignmentName: "leading"
                             Layout.fillWidth: true
-                            Rectangle { width: 110; height: 24; radius: 6; color: UIF.Theme.surfaceAlt }
-                            Rectangle { width: 140; height: 24; radius: 6; color: UIF.Theme.surfaceSolid }
+                            Rectangle { width: 110; height: 24; radius: UIF.Theme.radiusBase; color: UIF.Theme.surfaceAlt }
+                            Rectangle { width: 140; height: 24; radius: UIF.Theme.radiusBase; color: UIF.Theme.surfaceSolid }
                         }
 
                         UIF.HStack {
-                            spacing: 6
+                            spacing: UIF.Theme.gap6
                             alignmentName: "center"
                             Layout.fillWidth: true
-                            Rectangle { width: 80; height: 22; radius: 6; color: UIF.Theme.surfaceAlt }
+                            Rectangle { width: 80; height: 22; radius: UIF.Theme.radiusBase; color: UIF.Theme.surfaceAlt }
                             UIF.Spacer { minLength: 24 }
-                            Rectangle { width: 80; height: 22; radius: 6; color: UIF.Theme.accent }
+                            Rectangle { width: 80; height: 22; radius: UIF.Theme.radiusBase; color: UIF.Theme.accent }
                         }
 
                         Rectangle {
                             Layout.fillWidth: true
                             Layout.preferredHeight: 120
                             radius: UIF.Theme.radiusMd
-                            color: Qt.rgba(255 / 255, 255 / 255, 255 / 255, 0.03)
+                            color: UIF.Theme.surfaceGhost
                             border.color: UIF.Theme.surfaceAlt
-                            border.width: 1
+                            border.width: UIF.Theme.strokeThin
 
                             UIF.ZStack {
                                 anchors.fill: parent
                                 alignmentName: "center"
-                                Rectangle { width: 80; height: 80; radius: 8; color: Qt.rgba(0 / 255, 122 / 255, 255 / 255, 0.25) }
-                                Rectangle { width: 52; height: 52; radius: 8; color: Qt.rgba(255 / 255, 69 / 255, 58 / 255, 0.35) }
+                                Rectangle { width: 80; height: 80; radius: UIF.Theme.radiusMd; color: UIF.Theme.accentOverlay }
+                                Rectangle { width: 52; height: 52; radius: UIF.Theme.radiusMd; color: UIF.Theme.dangerOverlay }
                             }
                         }
                     }
@@ -474,21 +476,21 @@ UIF.ApplicationWindow {
                     Layout.columnSpan: gallery.columns
 
                     ColumnLayout {
-                        spacing: 8
+                        spacing: UIF.Theme.gap8
                         Layout.fillWidth: true
 
                         Rectangle {
                             Layout.fillWidth: true
                             Layout.preferredHeight: 160
                             radius: UIF.Theme.radiusMd
-                            color: Qt.rgba(255 / 255, 255 / 255, 255 / 255, 0.03)
+                            color: UIF.Theme.surfaceGhost
                             border.color: UIF.Theme.surfaceAlt
-                            border.width: 1
+                            border.width: UIF.Theme.strokeThin
 
                             UIF.PageRouter {
                                 id: demoRouter
                                 anchors.fill: parent
-                                anchors.margins: 8
+                                anchors.margins: UIF.Theme.gap8
                                 routes: [
                                     { path: "/overview", component: routeOverview },
                                     { path: "/reports", component: routeReports },
@@ -499,7 +501,7 @@ UIF.ApplicationWindow {
                         }
 
                         RowLayout {
-                            spacing: 10
+                            spacing: UIF.Theme.gap10
 
                             UIF.NavigationLink {
                                 text: "Overview"
@@ -519,15 +521,15 @@ UIF.ApplicationWindow {
                                 Rectangle {
                                     width: 130
                                     height: 30
-                                    radius: 6
+                                    radius: UIF.Theme.radiusBase
                                     color: UIF.Theme.surfaceSolid
                                     border.color: UIF.Theme.surfaceAlt
-                                    border.width: 1
+                                    border.width: UIF.Theme.strokeThin
                                     UIF.Label {
                                         anchors.centerIn: parent
                                         text: "Settings (wrap)"
                                         color: UIF.Theme.textPrimary
-                                        font.pixelSize: 12
+                                        font.pixelSize: UIF.Theme.textDescription
                                     }
                                 }
                             }
@@ -568,7 +570,7 @@ UIF.ApplicationWindow {
                         Layout.fillHeight: true
                         radius: UIF.Theme.radiusMd
                         border.color: UIF.Theme.surfaceAlt
-                        border.width: 1
+                        border.width: UIF.Theme.strokeThin
                         color: "transparent"
                         clip: true
 
@@ -585,18 +587,18 @@ UIF.ApplicationWindow {
 
                             ColumnLayout {
                                 anchors.fill: parent
-                                spacing: 8
+                                spacing: UIF.Theme.gap8
 
                                 UIF.Label {
                                     text: "Scaffold content slot"
                                     color: UIF.Theme.textPrimary
-                                    font.pixelSize: 13
+                                    font.pixelSize: UIF.Theme.textBody
                                 }
 
                                 UIF.HStack {
-                                    spacing: 8
-                                    Rectangle { width: 90; height: 28; radius: 6; color: UIF.Theme.accent }
-                                    Rectangle { width: 90; height: 28; radius: 6; color: UIF.Theme.surfaceSolid }
+                                    spacing: UIF.Theme.gap8
+                                    Rectangle { width: 90; height: 28; radius: UIF.Theme.radiusBase; color: UIF.Theme.accent }
+                                    Rectangle { width: 90; height: 28; radius: UIF.Theme.radiusBase; color: UIF.Theme.surfaceSolid }
                                 }
                             }
                         }
@@ -609,7 +611,7 @@ UIF.ApplicationWindow {
                     Layout.fillWidth: true
 
                     ColumnLayout {
-                        spacing: 8
+                        spacing: UIF.Theme.gap8
                         Layout.fillWidth: true
 
                         Rectangle {
@@ -619,13 +621,13 @@ UIF.ApplicationWindow {
                             radius: UIF.Theme.radiusMd
                             color: UIF.Theme.surfaceSolid
                             border.color: UIF.Theme.surfaceAlt
-                            border.width: 1
+                            border.width: UIF.Theme.strokeThin
 
                             UIF.Label {
                                 anchors.centerIn: parent
                                 text: "Click here (" + root.eventClickCount + ")"
                                 color: UIF.Theme.textPrimary
-                                font.pixelSize: 13
+                                font.pixelSize: UIF.Theme.textBody
                             }
 
                             UIF.EventListener {
@@ -640,7 +642,7 @@ UIF.ApplicationWindow {
                         UIF.Label {
                             text: "Last trigger: " + root.eventLastTrigger
                             color: UIF.Theme.textSecondary
-                            font.pixelSize: 12
+                            font.pixelSize: UIF.Theme.textDescription
                         }
                     }
                 }

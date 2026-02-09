@@ -14,13 +14,13 @@ FocusScope {
     property alias selectByMouse: inputField.selectByMouse
     property alias cursorPosition: inputField.cursorPosition
 
-    property int fieldMinHeight: 36
-    property int insetHorizontal: 12
-    property int insetVertical: 8
-    property int sideSpacing: 8
+    property int fieldMinHeight: Theme.controlHeightMd
+    property int insetHorizontal: Theme.gap12
+    property int insetVertical: Theme.gap8
+    property int sideSpacing: Theme.gap8
 
     property int cornerRadius: Theme.radiusMd
-    property int borderWidth: 1
+    property int borderWidth: Theme.strokeThin
 
     property color textColor: Theme.textPrimary
     property color textColorDisabled: Theme.textTertiary
@@ -56,7 +56,7 @@ FocusScope {
     }
 
     implicitHeight: Math.max(fieldMinHeight, inputField.implicitHeight + insetVertical * 2)
-    implicitWidth: Math.max(180, inputField.implicitWidth + leftInset + rightInset)
+    implicitWidth: Math.max(Theme.inputMinWidth, inputField.implicitWidth + leftInset + rightInset)
     activeFocusOnTab: true
 
     Rectangle {
@@ -124,6 +124,7 @@ FocusScope {
         cursorVisible: control.focused && control.enabled && !readOnly
         font.family: Theme.fontBody
         font.pixelSize: Theme.textBody
+        font.weight: Theme.textBodyWeight
         activeFocusOnTab: true
         clip: true
         selectByMouse: true
@@ -141,6 +142,7 @@ FocusScope {
         opacity: control.placeholderOpacity
         font.family: inputField.font.family
         font.pixelSize: inputField.font.pixelSize
+        font.weight: inputField.font.weight
         elide: Text.ElideRight
         visible: inputField.text.length === 0 && inputField.preeditText.length === 0
         verticalAlignment: Text.AlignVCenter

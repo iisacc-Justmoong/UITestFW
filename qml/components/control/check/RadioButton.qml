@@ -12,8 +12,8 @@ AbstractButton {
     property bool state: checked
     property bool available: enabled
 
-    property int indicatorSize: 18
-    property int dotSize: 8
+    property int indicatorSize: Theme.controlIndicatorSize
+    property int dotSize: Theme.gap8
 
     property color onColor: Theme.accent
     property color offColor: Theme.textPrimary
@@ -51,7 +51,7 @@ AbstractButton {
     rightPadding: 0
     topPadding: 0
     bottomPadding: 0
-    spacing: 0
+    spacing: Theme.gapNone
     borderWidth: 0
     backgroundColor: "transparent"
     backgroundColorHover: "transparent"
@@ -63,7 +63,7 @@ AbstractButton {
     background: Item { }
 
     contentItem: RowLayout {
-        spacing: control.text.length > 0 ? 8 : 0
+        spacing: control.text.length > 0 ? Theme.gap8 : Theme.gapNone
         Layout.alignment: Qt.AlignVCenter
 
         Rectangle {
@@ -71,7 +71,7 @@ AbstractButton {
             height: control.indicatorSize
             radius: width / 2
             color: control.indicatorColor
-            border.width: 0
+            border.width: Theme.gapNone
             antialiasing: true
 
             Rectangle {
@@ -89,7 +89,8 @@ AbstractButton {
             text: control.text
             color: control.enabled ? Theme.textPrimary : Theme.textOctonary
             font.family: Theme.fontBody
-            font.pixelSize: 13
+            font.pixelSize: Theme.textBody
+            font.weight: Theme.textBodyWeight
             visible: control.text.length > 0
             Layout.alignment: Qt.AlignVCenter
             elide: Text.ElideRight

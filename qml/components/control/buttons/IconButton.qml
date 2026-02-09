@@ -18,7 +18,7 @@ AbstractButton {
     property url url: ""
     property alias iconSource: control.url
     property string iconGlyph: ""
-    property int iconSize: 16
+    property int iconSize: Theme.iconSm
     readonly property url resolvedIconSource: control.url.toString().length > 0
         ? control.url
         : control.toneIconSource
@@ -30,9 +30,9 @@ AbstractButton {
                     control.iconSize)
     }
 
-    horizontalPadding: 7
-    verticalPadding: 7
-    spacing: 0
+    horizontalPadding: Theme.gap7
+    verticalPadding: Theme.gap7
+    spacing: Theme.gapNone
     cornerRadius: Theme.radiusMd
     borderWidth: 0
     implicitHeight: contentItem.implicitHeight + topPadding + bottomPadding
@@ -52,7 +52,7 @@ AbstractButton {
     backgroundColorDisabled: Theme.subSurface
 
     contentItem: RowLayout {
-        spacing: control.text.length > 0 ? 4 : 0
+        spacing: control.text.length > 0 ? Theme.gap4 : Theme.gapNone
         Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
 
         Image {
@@ -79,6 +79,7 @@ AbstractButton {
             color: control.effectiveEnabled ? control.textColor : control.textColorDisabled
             font.family: Theme.fontBody
             font.pixelSize: control.iconSize
+            font.weight: Font.Normal
             Layout.alignment: Qt.AlignVCenter
         }
 
@@ -86,8 +87,8 @@ AbstractButton {
             text: control.text
             color: control.effectiveEnabled ? control.textColor : control.textColorDisabled
             font.family: Theme.fontBody
-            font.pixelSize: 13
-            font.weight: Font.Normal
+            font.pixelSize: Theme.textBody
+            font.weight: Theme.textBodyWeight
             elide: Text.ElideRight
             visible: control.text.length > 0
             Layout.alignment: Qt.AlignVCenter

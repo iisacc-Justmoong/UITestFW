@@ -7,7 +7,7 @@ Item {
 
     // SwiftUI-like API: spacing == -1 uses defaultSpacing; alignment is horizontal only.
     property int spacing: -1
-    property int defaultSpacing: 8
+    property int defaultSpacing: Theme.gap8
     property int alignment: Qt.AlignHCenter
     // alignmentName supports SwiftUI-style names: leading, center, trailing.
     property string alignmentName: ""

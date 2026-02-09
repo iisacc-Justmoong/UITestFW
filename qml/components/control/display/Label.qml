@@ -6,7 +6,8 @@ Text {
 
     color: Theme.textPrimary
     font.family: Theme.fontBody
-    font.pixelSize: 12
+    font.pixelSize: Theme.textDescription
+    font.weight: Theme.textDescriptionWeight
     elide: Text.ElideRight
     QtObject {
         Component.onCompleted: Debug.log("Label", "created")

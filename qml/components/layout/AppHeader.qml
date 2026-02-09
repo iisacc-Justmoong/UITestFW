@@ -14,40 +14,40 @@ ToolBar {
 
     default property alias actions: actionRow.data
 
-    implicitHeight: Math.max(56, contentRow.implicitHeight + 32)
+    implicitHeight: Math.max(Theme.headerMinHeight, contentRow.implicitHeight + Theme.headerExtraHeight)
 
 
     background: Rectangle {
         color: Theme.windowAlt
         border.color: Theme.surfaceAlt
-        border.width: 1
+        border.width: Theme.strokeThin
     }
 
     RowLayout {
         id: contentRow
         anchors.fill: parent
-        anchors.margins: 16
-        spacing: 12
+        anchors.margins: Theme.gap16
+        spacing: Theme.gap12
 
         ToolButton {
             id: menuButton
             visible: root.menuVisible
             text: "Menu"
-            padding: 10
+            padding: Theme.gap10
 
             contentItem: Text {
                 text: menuButton.text
                 color: Theme.textPrimary
                 font.family: Theme.fontBody
-                font.pixelSize: 12
-                font.weight: Font.Medium
+                font.pixelSize: Theme.textDescription
+                font.weight: Theme.textDescriptionWeight
             }
 
             background: Rectangle {
                 radius: Theme.radiusSm
                 color: menuButton.down ? Theme.surfaceAlt : Theme.surfaceSolid
                 border.color: Theme.surfaceAlt
-                border.width: 1
+                border.width: Theme.strokeThin
             }
 
             onClicked: {
@@ -56,15 +56,15 @@ ToolBar {
         }
 
         ColumnLayout {
-            spacing: 2
+            spacing: Theme.gap2
             Layout.fillWidth: true
 
             Label {
                 text: root.title
                 color: Theme.textPrimary
                 font.family: Theme.fontDisplay
-                font.pixelSize: 20
-                font.weight: Font.DemiBold
+                font.pixelSize: Theme.textDisplay
+                font.weight: Theme.textDisplayWeight
                 elide: Text.ElideRight
                 Layout.fillWidth: true
             }
@@ -74,7 +74,8 @@ ToolBar {
                 text: root.subtitle
                 color: Theme.textSecondary
                 font.family: Theme.fontBody
-                font.pixelSize: 12
+                font.pixelSize: Theme.textDescription
+                font.weight: Theme.textDescriptionWeight
                 elide: Text.ElideRight
                 Layout.fillWidth: true
             }
@@ -82,7 +83,7 @@ ToolBar {
 
         RowLayout {
             id: actionRow
-            spacing: 8
+            spacing: Theme.gap8
             Layout.alignment: Qt.AlignVCenter | Qt.AlignRight
         }
     }

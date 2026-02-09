@@ -63,10 +63,10 @@ Controls.AbstractButton {
         return Theme.surfaceAlt
     }
 
-    horizontalPadding: 14
-    verticalPadding: 10
+    horizontalPadding: Theme.gap14
+    verticalPadding: Theme.gap10
     property int cornerRadius: Theme.radiusMd
-    property int borderWidth: 1
+    property int borderWidth: Theme.strokeThin
 
     property color textColor: control.toneTextColor
     property color textColorDisabled: Theme.textOctonary
@@ -88,9 +88,9 @@ Controls.AbstractButton {
     rightPadding: horizontalPadding
     topPadding: verticalPadding
     bottomPadding: verticalPadding
-    spacing: 8
+    spacing: Theme.gap8
 
-    implicitHeight: Math.max(36, contentItem.implicitHeight + topPadding + bottomPadding)
+    implicitHeight: Math.max(Theme.controlHeightMd, contentItem.implicitHeight + topPadding + bottomPadding)
     implicitWidth: contentItem.implicitWidth + leftPadding + rightPadding
 
     onEffectiveEnabledChanged: {
@@ -103,8 +103,8 @@ Controls.AbstractButton {
         text: control.text
         color: control.effectiveEnabled ? control.textColor : control.textColorDisabled
         font.family: Theme.fontBody
-        font.pixelSize: 12
-        font.weight: Font.DemiBold
+        font.pixelSize: Theme.textDescription
+        font.weight: Theme.textDescriptionWeight
         horizontalAlignment: Text.AlignHCenter
         verticalAlignment: Text.AlignVCenter
         elide: Text.ElideRight

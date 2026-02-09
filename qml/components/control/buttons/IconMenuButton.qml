@@ -9,10 +9,6 @@ AbstractButton {
     readonly property url iconSourceDefault: Qt.resolvedUrl("assets/view-more-symbolic-default.svg")
     readonly property url iconSourceBorderless: Qt.resolvedUrl("assets/view-more-symbolic-borderless.svg")
     readonly property url iconSourceDisabled: Qt.resolvedUrl("assets/view-more-symbolic-disabled.svg")
-    readonly property url indicatorSourceDefault: Qt.resolvedUrl("assets/pan-down-symbolic-default.svg")
-    readonly property url indicatorSourceAccent: Qt.resolvedUrl("assets/pan-down-symbolic-accent.svg")
-    readonly property url indicatorSourceBorderless: Qt.resolvedUrl("assets/pan-down-symbolic-borderless.svg")
-    readonly property url indicatorSourceDisabled: Qt.resolvedUrl("assets/pan-down-symbolic-disabled.svg")
 
     property url url: ""
     property alias iconSource: control.url
@@ -28,16 +24,13 @@ AbstractButton {
     readonly property string renderedIconSource: SvgManager.icon(
                                                      control.resolvedIconSource.toString(),
                                                      control.iconSize)
-    readonly property url resolvedIndicatorSource: !control.effectiveEnabled
-        ? control.indicatorSourceDisabled
+    readonly property color indicatorColor: !control.effectiveEnabled
+        ? Theme.textOctonary
         : control.tone === AbstractButton.Borderless
-            ? control.indicatorSourceBorderless
+            ? Theme.accent
             : control.tone === AbstractButton.Accent || control.tone === AbstractButton.Destructive
-                ? control.indicatorSourceAccent
-                : control.indicatorSourceDefault
-    readonly property string renderedIndicatorSource: SvgManager.icon(
-                                                          control.resolvedIndicatorSource.toString(),
-                                                          16)
+                ? Theme.textPrimary
+                : Theme.textPrimary
 
     horizontalPadding: 7
     verticalPadding: 7
@@ -67,10 +60,18 @@ AbstractButton {
         Image {
             visible: control.iconGlyph.length === 0
             source: control.renderedIconSource
+            sourceSize.width: control.iconSize
+            sourceSize.height: control.iconSize
             width: control.iconSize
             height: control.iconSize
             fillMode: Image.PreserveAspectFit
             smooth: true
+            Layout.preferredWidth: control.iconSize
+            Layout.preferredHeight: control.iconSize
+            Layout.minimumWidth: control.iconSize
+            Layout.minimumHeight: control.iconSize
+            Layout.maximumWidth: control.iconSize
+            Layout.maximumHeight: control.iconSize
             Layout.alignment: Qt.AlignVCenter
         }
 
@@ -83,15 +84,36 @@ AbstractButton {
             Layout.alignment: Qt.AlignVCenter
         }
 
-        Image {
-            source: control.renderedIndicatorSource
+        Canvas {
+            id: indicatorCanvas
             width: 16
             height: 16
-            fillMode: Image.PreserveAspectFit
-            smooth: true
+            Layout.preferredWidth: 16
+            Layout.preferredHeight: 16
+            Layout.minimumWidth: 16
+            Layout.minimumHeight: 16
+            Layout.maximumWidth: 16
+            Layout.maximumHeight: 16
             Layout.alignment: Qt.AlignVCenter
+            antialiasing: true
+
+            onPaint: {
+                const ctx = getContext("2d")
+                ctx.clearRect(0, 0, width, height)
+                ctx.beginPath()
+                ctx.moveTo(4.5, 6.25)
+                ctx.lineTo(8.0, 9.75)
+                ctx.lineTo(11.5, 6.25)
+                ctx.lineWidth = 1.6
+                ctx.lineCap = "round"
+                ctx.lineJoin = "round"
+                ctx.strokeStyle = control.indicatorColor
+                ctx.stroke()
+            }
         }
     }
+
+    onIndicatorColorChanged: indicatorCanvas.requestPaint()
 
     QtObject {
         Component.onCompleted: Debug.log("IconMenuButton", "created")

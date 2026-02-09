@@ -54,10 +54,18 @@ AbstractButton {
         Image {
             visible: control.iconGlyph.length === 0
             source: control.renderedIconSource
+            sourceSize.width: control.iconSize
+            sourceSize.height: control.iconSize
             width: control.iconSize
             height: control.iconSize
             fillMode: Image.PreserveAspectFit
             smooth: true
+            Layout.preferredWidth: control.iconSize
+            Layout.preferredHeight: control.iconSize
+            Layout.minimumWidth: control.iconSize
+            Layout.minimumHeight: control.iconSize
+            Layout.maximumWidth: control.iconSize
+            Layout.maximumHeight: control.iconSize
             Layout.alignment: Qt.AlignVCenter
         }
 

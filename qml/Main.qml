@@ -141,19 +141,19 @@ UIF.ApplicationWindow {
                         RowLayout {
                             spacing: 8
 
-                            UIF.AbstractButton {
+                            UIF.LabelButton {
                                 text: "Open Alert"
                                 tone: UIF.AbstractButton.Accent
                                 onClicked: root.alertOpen = true
                             }
 
-                            UIF.AbstractButton {
+                            UIF.LabelButton {
                                 text: "Stop RenderMonitor"
                                 tone: UIF.AbstractButton.Default
                                 onClicked: UIF.RenderMonitor.stop()
                             }
 
-                            UIF.AbstractButton {
+                            UIF.LabelButton {
                                 text: "Start RenderMonitor"
                                 tone: UIF.AbstractButton.Default
                                 onClicked: UIF.RenderMonitor.start()
@@ -164,58 +164,40 @@ UIF.ApplicationWindow {
 
                 UIF.AppCard {
                     title: "Buttons"
-                    subtitle: "Abstract, Label, Icon, LabelMenu, IconMenu"
+                    subtitle: "4 types x 5 states (20 cases)"
                     Layout.fillWidth: true
                     Layout.columnSpan: gallery.columns
 
-                    ColumnLayout {
-                        spacing: 10
+                    GridLayout {
+                        columns: 4
+                        rowSpacing: 10
+                        columnSpacing: 24
                         Layout.fillWidth: true
 
-                        RowLayout {
-                            spacing: 8
-                            UIF.AbstractButton { text: "Accent"; tone: UIF.AbstractButton.Accent }
-                            UIF.AbstractButton { text: "Default"; tone: UIF.AbstractButton.Default }
-                            UIF.AbstractButton { text: "Borderless"; tone: UIF.AbstractButton.Borderless }
-                            UIF.AbstractButton { text: "Destructive"; tone: UIF.AbstractButton.Destructive }
-                            UIF.AbstractButton { text: "Disabled"; tone: UIF.AbstractButton.Disabled }
-                        }
+                        UIF.LabelButton { text: "Button"; tone: UIF.AbstractButton.Accent }
+                        UIF.IconButton { tone: UIF.AbstractButton.Accent }
+                        UIF.LabelMenuButton { text: "Open"; tone: UIF.AbstractButton.Accent }
+                        UIF.IconMenuButton { tone: UIF.AbstractButton.Accent }
 
-                        RowLayout {
-                            spacing: 8
-                            UIF.LabelButton { text: "Button"; tone: UIF.AbstractButton.Accent }
-                            UIF.LabelButton { text: "Button"; tone: UIF.AbstractButton.Default }
-                            UIF.LabelButton { text: "Button"; tone: UIF.AbstractButton.Borderless }
-                            UIF.LabelButton { text: "Button"; tone: UIF.AbstractButton.Destructive }
-                            UIF.LabelButton { text: "Button"; tone: UIF.AbstractButton.Disabled }
-                        }
+                        UIF.LabelButton { text: "Button"; tone: UIF.AbstractButton.Default }
+                        UIF.IconButton { tone: UIF.AbstractButton.Default }
+                        UIF.LabelMenuButton { text: "Open"; tone: UIF.AbstractButton.Default }
+                        UIF.IconMenuButton { tone: UIF.AbstractButton.Default }
 
-                        RowLayout {
-                            spacing: 8
-                            UIF.IconButton { tone: UIF.AbstractButton.Accent; url: "qrc:/qt/qml/UIFramework/qml/components/control/buttons/assets/view-more-symbolic-default.svg" }
-                            UIF.IconButton { tone: UIF.AbstractButton.Default; url: "qrc:/qt/qml/UIFramework/qml/components/control/buttons/assets/view-more-symbolic-default.svg" }
-                            UIF.IconButton { tone: UIF.AbstractButton.Borderless; url: "qrc:/qt/qml/UIFramework/qml/components/control/buttons/assets/view-more-symbolic-borderless.svg" }
-                            UIF.IconButton { tone: UIF.AbstractButton.Destructive; url: "qrc:/qt/qml/UIFramework/qml/components/control/buttons/assets/view-more-symbolic-default.svg" }
-                            UIF.IconButton { tone: UIF.AbstractButton.Disabled; url: "qrc:/qt/qml/UIFramework/qml/components/control/buttons/assets/view-more-symbolic-disabled.svg" }
-                        }
+                        UIF.LabelButton { text: "Button"; tone: UIF.AbstractButton.Borderless }
+                        UIF.IconButton { tone: UIF.AbstractButton.Borderless }
+                        UIF.LabelMenuButton { text: "Open"; tone: UIF.AbstractButton.Borderless }
+                        UIF.IconMenuButton { tone: UIF.AbstractButton.Borderless }
 
-                        RowLayout {
-                            spacing: 8
-                            UIF.LabelMenuButton { text: "Open"; tone: UIF.AbstractButton.Accent }
-                            UIF.LabelMenuButton { text: "Open"; tone: UIF.AbstractButton.Default }
-                            UIF.LabelMenuButton { text: "Open"; tone: UIF.AbstractButton.Borderless }
-                            UIF.LabelMenuButton { text: "Open"; tone: UIF.AbstractButton.Destructive }
-                            UIF.LabelMenuButton { text: "Open"; tone: UIF.AbstractButton.Disabled }
-                        }
+                        UIF.LabelButton { text: "Button"; tone: UIF.AbstractButton.Destructive }
+                        UIF.IconButton { tone: UIF.AbstractButton.Destructive }
+                        UIF.LabelMenuButton { text: "Open"; tone: UIF.AbstractButton.Destructive }
+                        UIF.IconMenuButton { tone: UIF.AbstractButton.Destructive }
 
-                        RowLayout {
-                            spacing: 8
-                            UIF.IconMenuButton { tone: UIF.AbstractButton.Accent; url: "qrc:/qt/qml/UIFramework/qml/components/control/buttons/assets/view-more-symbolic-default.svg" }
-                            UIF.IconMenuButton { tone: UIF.AbstractButton.Default; url: "qrc:/qt/qml/UIFramework/qml/components/control/buttons/assets/view-more-symbolic-default.svg" }
-                            UIF.IconMenuButton { tone: UIF.AbstractButton.Borderless; url: "qrc:/qt/qml/UIFramework/qml/components/control/buttons/assets/view-more-symbolic-borderless.svg" }
-                            UIF.IconMenuButton { tone: UIF.AbstractButton.Destructive; url: "qrc:/qt/qml/UIFramework/qml/components/control/buttons/assets/view-more-symbolic-default.svg" }
-                            UIF.IconMenuButton { tone: UIF.AbstractButton.Disabled; url: "qrc:/qt/qml/UIFramework/qml/components/control/buttons/assets/view-more-symbolic-disabled.svg" }
-                        }
+                        UIF.LabelButton { text: "Button"; tone: UIF.AbstractButton.Disabled }
+                        UIF.IconButton { tone: UIF.AbstractButton.Disabled }
+                        UIF.LabelMenuButton { text: "Open"; tone: UIF.AbstractButton.Disabled }
+                        UIF.IconMenuButton { tone: UIF.AbstractButton.Disabled }
                     }
                 }
 

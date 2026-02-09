@@ -6,9 +6,9 @@ AbstractButton {
     id: control
 
     tone: AbstractButton.Accent
-    readonly property url iconSourceDefault: Qt.resolvedUrl("assets/view-more-symbolic-default.svg")
-    readonly property url iconSourceBorderless: Qt.resolvedUrl("assets/view-more-symbolic-borderless.svg")
-    readonly property url iconSourceDisabled: Qt.resolvedUrl("assets/view-more-symbolic-disabled.svg")
+    readonly property url iconSourceDefault: "qrc:/qt/qml/UIFramework/resources/iconset/view-more-symbolic-default.svg"
+    readonly property url iconSourceBorderless: "qrc:/qt/qml/UIFramework/resources/iconset/view-more-symbolic-borderless.svg"
+    readonly property url iconSourceDisabled: "qrc:/qt/qml/UIFramework/resources/iconset/view-more-symbolic-disabled.svg"
 
     property url url: ""
     property alias iconSource: control.url
@@ -123,4 +123,4 @@ AbstractButton {
 
 // API usage (external):
 // import UIFramework 1.0 as UIF
-// UIF.IconMenuButton { tone: UIF.AbstractButton.Default; url: "qrc:/qt/qml/UIFramework/qml/components/control/buttons/assets/view-more-symbolic-default.svg" }
+// UIF.IconMenuButton { tone: UIF.AbstractButton.Default; url: "qrc:/qt/qml/UIFramework/resources/iconset/view-more-symbolic-default.svg" }

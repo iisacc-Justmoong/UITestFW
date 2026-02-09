@@ -7,11 +7,11 @@ set(UIFRAMEWORK_CONTROL_BUTTON_QML_FILES
 )
 
 set(UIFRAMEWORK_CONTROL_BUTTON_RESOURCE_FILES
-    qml/components/control/buttons/assets/view-more-symbolic-default.svg
-    qml/components/control/buttons/assets/view-more-symbolic-borderless.svg
-    qml/components/control/buttons/assets/view-more-symbolic-disabled.svg
-    qml/components/control/buttons/assets/pan-down-symbolic-default.svg
-    qml/components/control/buttons/assets/pan-down-symbolic-accent.svg
-    qml/components/control/buttons/assets/pan-down-symbolic-borderless.svg
-    qml/components/control/buttons/assets/pan-down-symbolic-disabled.svg
+    resources/iconset/view-more-symbolic-default.svg
+    resources/iconset/view-more-symbolic-borderless.svg
+    resources/iconset/view-more-symbolic-disabled.svg
+    resources/iconset/pan-down-symbolic-default.svg
+    resources/iconset/pan-down-symbolic-accent.svg
+    resources/iconset/pan-down-symbolic-borderless.svg
+    resources/iconset/pan-down-symbolic-disabled.svg
 )

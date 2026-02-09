@@ -63,8 +63,8 @@ Controls.AbstractButton {
         return Theme.surfaceAlt
     }
 
-    property int horizontalPadding: 14
-    property int verticalPadding: 10
+    horizontalPadding: 14
+    verticalPadding: 10
     property int cornerRadius: Theme.radiusMd
     property int borderWidth: 1
 

@@ -15,12 +15,16 @@ AbstractButton {
             ? control.iconSourceBorderless
             : control.iconSourceDefault
 
-    property url iconSource: ""
-    property string icon: ""
+    property url url: ""
+    property alias iconSource: control.url
+    property string iconGlyph: ""
     property int iconSize: 16
-    readonly property url resolvedIconSource: control.iconSource.toString().length > 0
-        ? control.iconSource
+    readonly property url resolvedIconSource: control.url.toString().length > 0
+        ? control.url
         : control.toneIconSource
+    readonly property string renderedIconSource: SvgManager.icon(
+                                                     control.resolvedIconSource.toString(),
+                                                     control.iconSize)
 
     horizontalPadding: 7
     verticalPadding: 7
@@ -48,10 +52,8 @@ AbstractButton {
         Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
 
         Image {
-            visible: control.icon.length === 0
-            source: control.resolvedIconSource
-            sourceSize.width: control.iconSize
-            sourceSize.height: control.iconSize
+            visible: control.iconGlyph.length === 0
+            source: control.renderedIconSource
             width: control.iconSize
             height: control.iconSize
             fillMode: Image.PreserveAspectFit
@@ -60,8 +62,8 @@ AbstractButton {
         }
 
         Text {
-            visible: control.icon.length > 0
-            text: control.icon
+            visible: control.iconGlyph.length > 0
+            text: control.iconGlyph
             color: control.effectiveEnabled ? control.textColor : control.textColorDisabled
             font.family: "Pretendard"
             font.pixelSize: control.iconSize
@@ -87,4 +89,4 @@ AbstractButton {
 
 // API usage (external):
 // import UIFramework 1.0 as UIF
-// UIF.IconButton { tone: UIF.AbstractButton.Accent }
+// UIF.IconButton { tone: UIF.AbstractButton.Accent; url: "qrc:/qt/qml/UIFramework/qml/components/control/buttons/assets/view-more-symbolic-default.svg" }

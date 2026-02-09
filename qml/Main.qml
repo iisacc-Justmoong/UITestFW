@@ -1,273 +1,249 @@
+pragma ComponentBehavior: Bound
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 import UIFramework 1.0 as UIF
 
-UIF.AppShell {
+UIF.ApplicationWindow {
     id: root
 
     visible: true
-    width: 1200
-    height: 760
-    title: "UITestFW"
-    subtitle: "Qt Quick UI shell for test automation"
-    navItems: ["Overview", "Suites", "Runs", "Devices", "Reports", "Settings"]
+    width: 1480
+    height: 980
+    title: "UIFramework Visual Gallery"
 
-    property bool ready: false
+    property bool alertOpen: false
+    property int eventClickCount: 0
+    property string eventLastTrigger: "none"
 
-    Component.onCompleted: ready = true
+    Component.onCompleted: {
+        UIF.Debug.enabled = true
+        UIF.Debug.log("Main", "gallery-opened")
+        UIF.RenderMonitor.attachWindow(root)
+        UIF.PageMonitor.record("/gallery")
+    }
 
-    ColumnLayout {
+    UIF.Alert {
+        id: sampleAlert
         anchors.fill: parent
-        spacing: 24
+        open: root.alertOpen
+        title: "Sample Alert"
+        message: "Alert component preview"
+        primaryText: "Close"
+        secondaryText: "Cancel"
+        onPrimaryClicked: {
+            root.alertOpen = false
+        }
+        onSecondaryClicked: {
+            root.alertOpen = false
+        }
+        onDismissed: {
+            root.alertOpen = false
+        }
+    }
 
+    Component {
+        id: routeOverview
         Rectangle {
-            id: hero
-            Layout.fillWidth: true
-            Layout.preferredHeight: 180
-            radius: UIF.Theme.radiusXl
+            color: Qt.rgba(255 / 255, 255 / 255, 255 / 255, 0.03)
             border.color: UIF.Theme.surfaceAlt
             border.width: 1
-
-            gradient: Gradient {
-                GradientStop { position: 0.0; color: UIF.Theme.accent }
-                GradientStop { position: 1.0; color: UIF.Theme.surfaceAlt }
-            }
-
-            opacity: root.ready ? 1 : 0
-            scale: root.ready ? 1 : 0.98
-
-            Behavior on opacity {
-                NumberAnimation { duration: 420; easing.type: Easing.OutCubic }
-            }
-
-            Behavior on scale {
-                NumberAnimation { duration: 420; easing.type: Easing.OutCubic }
-            }
-
-            RowLayout {
-                anchors.fill: parent
-                anchors.margins: 24
-                spacing: 20
-
-                ColumnLayout {
-                    Layout.fillWidth: true
-                    spacing: 10
-
-                    Label {
-                        text: "UI Test Lab"
-                        color: UIF.Theme.textPrimary
-                        font.family: UIF.Theme.fontDisplay
-                        font.pixelSize: 26
-                        font.weight: Font.DemiBold
-                    }
-
-                    Label {
-                        text: "Track suites, run devices, and capture evidence with a QML-first shell."
-                        color: UIF.Theme.textSecondary
-                        font.family: UIF.Theme.fontBody
-                        font.pixelSize: 13
-                        wrapMode: Text.WordWrap
-                        Layout.maximumWidth: 520
-                    }
-
-                    RowLayout {
-                        spacing: 12
-
-                        Button {
-                            text: "New suite"
-                            padding: 12
-
-                            contentItem: Text {
-                                text: control.text
-                                color: UIF.Theme.textPrimary
-                                font.family: UIF.Theme.fontBody
-                                font.pixelSize: 12
-                                font.weight: Font.DemiBold
-                            }
-
-                            background: Rectangle {
-                                radius: UIF.Theme.radiusMd
-                                color: control.down ? UIF.Theme.accent : UIF.Theme.accent
-                            }
-                        }
-
-                        Button {
-                            text: "Open runner"
-                            padding: 12
-
-                            contentItem: Text {
-                                text: control.text
-                                color: UIF.Theme.textPrimary
-                                font.family: UIF.Theme.fontBody
-                                font.pixelSize: 12
-                                font.weight: Font.DemiBold
-                            }
-
-                            background: Rectangle {
-                                radius: UIF.Theme.radiusMd
-                                color: control.down ? UIF.Theme.surfaceAlt : "transparent"
-                                border.color: UIF.Theme.surfaceAlt
-                                border.width: 1
-                            }
-                        }
-                    }
-                }
-
-                Rectangle {
-                    width: 120
-                    height: 120
-                    radius: 60
-                    color: UIF.Theme.surfaceAlt
-                    border.color: UIF.Theme.surfaceAlt
-                    border.width: 1
-
-                    Column {
-                        anchors.centerIn: parent
-                        spacing: 6
-
-                        Label {
-                            text: "QML"
-                            color: UIF.Theme.textPrimary
-                            font.family: UIF.Theme.fontDisplay
-                            font.pixelSize: 20
-                            font.weight: Font.DemiBold
-                            horizontalAlignment: Text.AlignHCenter
-                        }
-
-                        Rectangle {
-                            width: 56
-                            height: 6
-                            radius: 3
-                            color: UIF.Theme.accent
-                            anchors.horizontalCenter: parent.horizontalCenter
-                        }
-                    }
-                }
+            radius: UIF.Theme.radiusMd
+            UIF.Label {
+                anchors.centerIn: parent
+                text: "Router: Overview"
+                color: UIF.Theme.textPrimary
+                font.pixelSize: 13
             }
         }
+    }
 
-        GridLayout {
-            id: statsGrid
-            columns: root.width >= 1200 ? 3 : root.width >= 900 ? 2 : 1
-            columnSpacing: 18
-            rowSpacing: 18
-            Layout.fillWidth: true
+    Component {
+        id: routeReports
+        Rectangle {
+            color: Qt.rgba(0 / 255, 122 / 255, 255 / 255, 0.12)
+            border.color: UIF.Theme.accent
+            border.width: 1
+            radius: UIF.Theme.radiusMd
+            UIF.Label {
+                anchors.centerIn: parent
+                text: "Router: Reports"
+                color: UIF.Theme.textPrimary
+                font.pixelSize: 13
+            }
+        }
+    }
 
-            Repeater {
-                model: [
-                    { title: "Suites", subtitle: "Active catalogs", value: "12", detail: "4 running" },
-                    { title: "Devices", subtitle: "Available now", value: "18", detail: "3 offline" },
-                    { title: "Runs", subtitle: "Last 24 hours", value: "46", detail: "+12%" }
-                ]
+    Component {
+        id: routeSettings
+        Rectangle {
+            color: Qt.rgba(255 / 255, 69 / 255, 58 / 255, 0.12)
+            border.color: UIF.Theme.danger
+            border.width: 1
+            radius: UIF.Theme.radiusMd
+            UIF.Label {
+                anchors.centerIn: parent
+                text: "Router: Settings"
+                color: UIF.Theme.textPrimary
+                font.pixelSize: 13
+            }
+        }
+    }
 
-                delegate: UIF.AppCard {
-                    title: modelData.title
-                    subtitle: modelData.subtitle
+    ScrollView {
+        anchors.fill: parent
+        clip: true
+
+        Item {
+            width: Math.max(root.width - 24, 1040)
+            implicitHeight: gallery.implicitHeight + 24
+
+            GridLayout {
+                id: gallery
+                anchors.left: parent.left
+                anchors.right: parent.right
+                anchors.margins: 12
+                columns: width >= 1320 ? 2 : 1
+                rowSpacing: 12
+                columnSpacing: 12
+
+                UIF.AppCard {
+                    title: "Runtime"
+                    subtitle: "Backend singletons and monitoring"
                     Layout.fillWidth: true
-                    Layout.preferredHeight: 150
+                    Layout.columnSpan: gallery.columns
 
-                    opacity: 0
-
-                    SequentialAnimation on opacity {
-                        running: root.ready
-                        PauseAnimation { duration: index * 80 }
-                        NumberAnimation { to: 1; duration: 360; easing.type: Easing.OutCubic }
-                    }
-
-                    RowLayout {
+                    ColumnLayout {
                         spacing: 8
                         Layout.fillWidth: true
 
-                        Label {
-                            text: modelData.value
+                        UIF.Label {
+                            text: "Platform: " + UIF.Platform.os + " / " + UIF.Platform.arch
                             color: UIF.Theme.textPrimary
-                            font.family: UIF.Theme.fontDisplay
-                            font.pixelSize: 28
-                            font.weight: Font.DemiBold
+                            font.pixelSize: 13
                         }
 
-                        Item { Layout.fillWidth: true }
+                        UIF.Label {
+                            text: "RenderMonitor: active=" + UIF.RenderMonitor.active
+                                + " fps=" + Number(UIF.RenderMonitor.fps).toFixed(1)
+                                + " frameMs=" + Number(UIF.RenderMonitor.lastFrameMs).toFixed(2)
+                            color: UIF.Theme.textSecondary
+                            font.pixelSize: 12
+                        }
 
-                        Rectangle {
-                            width: 64
-                            height: 6
-                            radius: 3
-                            color: UIF.Theme.surfaceSolid
+                        UIF.Label {
+                            text: "PageMonitor: current=" + UIF.PageMonitor.current
+                                + " count=" + UIF.PageMonitor.count
+                            color: UIF.Theme.textSecondary
+                            font.pixelSize: 12
+                        }
 
-                            Rectangle {
-                                width: parent.width * 0.7
-                                height: parent.height
-                                radius: 3
-                                color: UIF.Theme.accent
+                        RowLayout {
+                            spacing: 8
+
+                            UIF.AbstractButton {
+                                text: "Open Alert"
+                                tone: UIF.AbstractButton.Accent
+                                onClicked: root.alertOpen = true
+                            }
+
+                            UIF.AbstractButton {
+                                text: "Stop RenderMonitor"
+                                tone: UIF.AbstractButton.Default
+                                onClicked: UIF.RenderMonitor.stop()
+                            }
+
+                            UIF.AbstractButton {
+                                text: "Start RenderMonitor"
+                                tone: UIF.AbstractButton.Default
+                                onClicked: UIF.RenderMonitor.start()
                             }
                         }
                     }
+                }
 
-                    Label {
-                        text: modelData.detail
-                        color: UIF.Theme.textSecondary
-                        font.family: UIF.Theme.fontBody
-                        font.pixelSize: 12
+                UIF.AppCard {
+                    title: "Buttons"
+                    subtitle: "Abstract, Label, Icon, LabelMenu, IconMenu"
+                    Layout.fillWidth: true
+                    Layout.columnSpan: gallery.columns
+
+                    ColumnLayout {
+                        spacing: 10
+                        Layout.fillWidth: true
+
+                        RowLayout {
+                            spacing: 8
+                            UIF.AbstractButton { text: "Accent"; tone: UIF.AbstractButton.Accent }
+                            UIF.AbstractButton { text: "Default"; tone: UIF.AbstractButton.Default }
+                            UIF.AbstractButton { text: "Borderless"; tone: UIF.AbstractButton.Borderless }
+                            UIF.AbstractButton { text: "Destructive"; tone: UIF.AbstractButton.Destructive }
+                            UIF.AbstractButton { text: "Disabled"; tone: UIF.AbstractButton.Disabled }
+                        }
+
+                        RowLayout {
+                            spacing: 8
+                            UIF.LabelButton { text: "Button"; tone: UIF.AbstractButton.Accent }
+                            UIF.LabelButton { text: "Button"; tone: UIF.AbstractButton.Default }
+                            UIF.LabelButton { text: "Button"; tone: UIF.AbstractButton.Borderless }
+                            UIF.LabelButton { text: "Button"; tone: UIF.AbstractButton.Destructive }
+                            UIF.LabelButton { text: "Button"; tone: UIF.AbstractButton.Disabled }
+                        }
+
+                        RowLayout {
+                            spacing: 8
+                            UIF.IconButton { tone: UIF.AbstractButton.Accent; url: "qrc:/qt/qml/UIFramework/qml/components/control/buttons/assets/view-more-symbolic-default.svg" }
+                            UIF.IconButton { tone: UIF.AbstractButton.Default; url: "qrc:/qt/qml/UIFramework/qml/components/control/buttons/assets/view-more-symbolic-default.svg" }
+                            UIF.IconButton { tone: UIF.AbstractButton.Borderless; url: "qrc:/qt/qml/UIFramework/qml/components/control/buttons/assets/view-more-symbolic-borderless.svg" }
+                            UIF.IconButton { tone: UIF.AbstractButton.Destructive; url: "qrc:/qt/qml/UIFramework/qml/components/control/buttons/assets/view-more-symbolic-default.svg" }
+                            UIF.IconButton { tone: UIF.AbstractButton.Disabled; url: "qrc:/qt/qml/UIFramework/qml/components/control/buttons/assets/view-more-symbolic-disabled.svg" }
+                        }
+
+                        RowLayout {
+                            spacing: 8
+                            UIF.LabelMenuButton { text: "Open"; tone: UIF.AbstractButton.Accent }
+                            UIF.LabelMenuButton { text: "Open"; tone: UIF.AbstractButton.Default }
+                            UIF.LabelMenuButton { text: "Open"; tone: UIF.AbstractButton.Borderless }
+                            UIF.LabelMenuButton { text: "Open"; tone: UIF.AbstractButton.Destructive }
+                            UIF.LabelMenuButton { text: "Open"; tone: UIF.AbstractButton.Disabled }
+                        }
+
+                        RowLayout {
+                            spacing: 8
+                            UIF.IconMenuButton { tone: UIF.AbstractButton.Accent; url: "qrc:/qt/qml/UIFramework/qml/components/control/buttons/assets/view-more-symbolic-default.svg" }
+                            UIF.IconMenuButton { tone: UIF.AbstractButton.Default; url: "qrc:/qt/qml/UIFramework/qml/components/control/buttons/assets/view-more-symbolic-default.svg" }
+                            UIF.IconMenuButton { tone: UIF.AbstractButton.Borderless; url: "qrc:/qt/qml/UIFramework/qml/components/control/buttons/assets/view-more-symbolic-borderless.svg" }
+                            UIF.IconMenuButton { tone: UIF.AbstractButton.Destructive; url: "qrc:/qt/qml/UIFramework/qml/components/control/buttons/assets/view-more-symbolic-default.svg" }
+                            UIF.IconMenuButton { tone: UIF.AbstractButton.Disabled; url: "qrc:/qt/qml/UIFramework/qml/components/control/buttons/assets/view-more-symbolic-disabled.svg" }
+                        }
                     }
                 }
-            }
-        }
 
-        GridLayout {
-            id: detailGrid
-            columns: root.width >= 1200 ? 2 : 1
-            columnSpacing: 18
-            rowSpacing: 18
-            Layout.fillWidth: true
-
-            UIF.AppCard {
-                title: "Recent runs"
-                subtitle: "Last 3 executions"
-                Layout.fillWidth: true
-                Layout.preferredHeight: 220
-
-                opacity: 0
-
-                SequentialAnimation on opacity {
-                    running: root.ready
-                    PauseAnimation { duration: 120 }
-                    NumberAnimation { to: 1; duration: 420; easing.type: Easing.OutCubic }
-                }
-
-                ColumnLayout {
-                    spacing: 10
+                UIF.AppCard {
+                    title: "Input Bars"
+                    subtitle: "AbstractInputBar base component"
                     Layout.fillWidth: true
 
-                    Repeater {
-                        model: [
-                            { name: "Login smoke", status: "Running", time: "02:14" },
-                            { name: "Checkout flow", status: "Queued", time: "00:47" },
-                            { name: "Search variants", status: "Passed", time: "00:19" }
-                        ]
+                    ColumnLayout {
+                        spacing: 10
+                        Layout.fillWidth: true
 
-                        delegate: RowLayout {
-                            spacing: 10
+                        UIF.AbstractInputBar {
                             Layout.fillWidth: true
-
-                            Rectangle {
-                                width: 8
-                                height: 8
-                                radius: 4
-                                color: modelData.status === "Passed" ? UIF.Theme.success : modelData.status === "Running" ? UIF.Theme.accent : UIF.Theme.warning
-                            }
-
-                            Label {
-                                text: modelData.name
-                                color: UIF.Theme.textPrimary
+                            placeholderText: "Search"
+                            leadingItems: Text {
+                                text: "S"
+                                color: UIF.Theme.textTertiary
                                 font.family: UIF.Theme.fontBody
-                                font.pixelSize: 13
-                                Layout.fillWidth: true
-                                elide: Text.ElideRight
+                                font.pixelSize: 12
                             }
+                        }
 
-                            Label {
-                                text: modelData.time
+                        UIF.AbstractInputBar {
+                            Layout.fillWidth: true
+                            text: "Sample text"
+                            trailingItems: Text {
+                                text: "X"
                                 color: UIF.Theme.textTertiary
                                 font.family: UIF.Theme.fontBody
                                 font.pixelSize: 12
@@ -275,120 +251,271 @@ UIF.AppShell {
                         }
                     }
                 }
-            }
 
-            UIF.AppCard {
-                title: "Device pool"
-                subtitle: "Live capacity"
-                Layout.fillWidth: true
-                Layout.preferredHeight: 220
-
-                opacity: 0
-
-                SequentialAnimation on opacity {
-                    running: root.ready
-                    PauseAnimation { duration: 180 }
-                    NumberAnimation { to: 1; duration: 420; easing.type: Easing.OutCubic }
-                }
-
-                ColumnLayout {
-                    spacing: 12
+                UIF.AppCard {
+                    title: "Check Controls"
+                    subtitle: "CheckBox, RadioButton, ToggleSwitch"
                     Layout.fillWidth: true
 
-                    RowLayout {
+                    ColumnLayout {
                         spacing: 8
                         Layout.fillWidth: true
 
-                        Label {
-                            text: "Pixel 8"
-                            color: UIF.Theme.textPrimary
-                            font.family: UIF.Theme.fontBody
-                            font.pixelSize: 13
-                            Layout.fillWidth: true
+                        RowLayout {
+                            spacing: 10
+                            UIF.CheckBox { text: "Check On"; checked: true }
+                            UIF.CheckBox { text: "Check Off"; checked: false }
+                            UIF.CheckBox { text: "Check Disabled"; checked: true; enabled: false }
                         }
 
-                        Label {
-                            text: "6 slots"
-                            color: UIF.Theme.textTertiary
-                            font.family: UIF.Theme.fontBody
-                            font.pixelSize: 12
+                        RowLayout {
+                            spacing: 10
+                            UIF.RadioButton { checked: true; enabled: true }
+                            UIF.RadioButton { checked: false; enabled: true }
+                            UIF.RadioButton { checked: true; enabled: false }
+                            UIF.RadioButton { checked: false; enabled: false }
+                            UIF.RadioButton { text: "Radio Label"; checked: true }
+                        }
+
+                        RowLayout {
+                            spacing: 10
+                            UIF.ToggleSwitch { checked: true }
+                            UIF.ToggleSwitch { checked: false }
+                            UIF.ToggleSwitch { checked: true; enabled: false }
                         }
                     }
+                }
 
-                    Rectangle {
+                UIF.AppCard {
+                    title: "Layout Primitives"
+                    subtitle: "VStack, HStack, ZStack, Spacer"
+                    Layout.fillWidth: true
+
+                    ColumnLayout {
+                        spacing: 10
                         Layout.fillWidth: true
-                        height: 6
-                        radius: 3
-                        color: UIF.Theme.surfaceSolid
+
+                        UIF.VStack {
+                            spacing: 6
+                            alignmentName: "leading"
+                            Layout.fillWidth: true
+                            Rectangle { width: 110; height: 24; radius: 6; color: UIF.Theme.surfaceAlt }
+                            Rectangle { width: 140; height: 24; radius: 6; color: UIF.Theme.surfaceSolid }
+                        }
+
+                        UIF.HStack {
+                            spacing: 6
+                            alignmentName: "center"
+                            Layout.fillWidth: true
+                            Rectangle { width: 80; height: 22; radius: 6; color: UIF.Theme.surfaceAlt }
+                            UIF.Spacer { minLength: 24 }
+                            Rectangle { width: 80; height: 22; radius: 6; color: UIF.Theme.accent }
+                        }
 
                         Rectangle {
-                            width: parent.width * 0.65
-                            height: parent.height
-                            radius: 3
-                            color: UIF.Theme.success
+                            Layout.fillWidth: true
+                            Layout.preferredHeight: 120
+                            radius: UIF.Theme.radiusMd
+                            color: Qt.rgba(255 / 255, 255 / 255, 255 / 255, 0.03)
+                            border.color: UIF.Theme.surfaceAlt
+                            border.width: 1
+
+                            UIF.ZStack {
+                                anchors.fill: parent
+                                alignmentName: "center"
+                                Rectangle { width: 80; height: 80; radius: 8; color: Qt.rgba(0 / 255, 122 / 255, 255 / 255, 0.25) }
+                                Rectangle { width: 52; height: 52; radius: 8; color: Qt.rgba(255 / 255, 69 / 255, 58 / 255, 0.35) }
+                            }
                         }
                     }
+                }
 
-                    RowLayout {
+                UIF.AppCard {
+                    title: "Navigation"
+                    subtitle: "PageRouter, Link, NavigationLink, LinkWrapper"
+                    Layout.fillWidth: true
+                    Layout.columnSpan: gallery.columns
+
+                    ColumnLayout {
                         spacing: 8
                         Layout.fillWidth: true
 
-                        Label {
-                            text: "iPhone 15"
-                            color: UIF.Theme.textPrimary
-                            font.family: UIF.Theme.fontBody
-                            font.pixelSize: 13
+                        Rectangle {
                             Layout.fillWidth: true
+                            Layout.preferredHeight: 160
+                            radius: UIF.Theme.radiusMd
+                            color: Qt.rgba(255 / 255, 255 / 255, 255 / 255, 0.03)
+                            border.color: UIF.Theme.surfaceAlt
+                            border.width: 1
+
+                            UIF.PageRouter {
+                                id: demoRouter
+                                anchors.fill: parent
+                                anchors.margins: 8
+                                routes: [
+                                    { path: "/overview", component: routeOverview },
+                                    { path: "/reports", component: routeReports },
+                                    { path: "/settings", component: routeSettings }
+                                ]
+                                initialPath: "/overview"
+                            }
                         }
 
-                        Label {
-                            text: "4 slots"
-                            color: UIF.Theme.textTertiary
-                            font.family: UIF.Theme.fontBody
-                            font.pixelSize: 12
+                        RowLayout {
+                            spacing: 10
+
+                            UIF.NavigationLink {
+                                text: "Overview"
+                                to: "/overview"
+                                router: demoRouter
+                            }
+
+                            UIF.Link {
+                                text: "Reports"
+                                href: "/reports"
+                                router: demoRouter
+                            }
+
+                            UIF.LinkWrapper {
+                                router: demoRouter
+                                href: "/settings"
+                                Rectangle {
+                                    width: 130
+                                    height: 30
+                                    radius: 6
+                                    color: UIF.Theme.surfaceSolid
+                                    border.color: UIF.Theme.surfaceAlt
+                                    border.width: 1
+                                    UIF.Label {
+                                        anchors.centerIn: parent
+                                        text: "Settings (wrap)"
+                                        color: UIF.Theme.textPrimary
+                                        font.pixelSize: 12
+                                    }
+                                }
+                            }
                         }
                     }
+                }
+
+                UIF.AppCard {
+                    title: "Header"
+                    subtitle: "AppHeader action slot"
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: 96
+
+                    UIF.AppHeader {
+                        anchors.fill: parent
+                        title: "Header Preview"
+                        subtitle: "Action slot + menu button"
+                        menuVisible: true
+                        onMenuClicked: UIF.Debug.log("Header", "menu-clicked")
+
+                        UIF.LabelButton {
+                            text: "Action"
+                            tone: UIF.AbstractButton.Borderless
+                            onClicked: UIF.Debug.log("Header", "action-clicked")
+                        }
+                    }
+                }
+
+                UIF.AppCard {
+                    title: "Scaffold"
+                    subtitle: "Embedded AppScaffold preview"
+                    Layout.fillWidth: true
+                    Layout.columnSpan: gallery.columns
+                    Layout.preferredHeight: 420
 
                     Rectangle {
                         Layout.fillWidth: true
-                        height: 6
-                        radius: 3
-                        color: UIF.Theme.surfaceSolid
+                        Layout.fillHeight: true
+                        radius: UIF.Theme.radiusMd
+                        border.color: UIF.Theme.surfaceAlt
+                        border.width: 1
+                        color: "transparent"
+                        clip: true
+
+                        UIF.AppScaffold {
+                            anchors.fill: parent
+                            headerTitle: "Scaffold Preview"
+                            headerSubtitle: "Navigation + content"
+                            navModel: [
+                                { label: "Overview", icon: "◉", badge: "4" },
+                                { label: "Reports", icon: "▣", badge: "2" },
+                                { label: "Settings", icon: "⚙", badge: "1" }
+                            ]
+                            navTitle: "Preview"
+
+                            ColumnLayout {
+                                anchors.fill: parent
+                                spacing: 8
+
+                                UIF.Label {
+                                    text: "Scaffold content slot"
+                                    color: UIF.Theme.textPrimary
+                                    font.pixelSize: 13
+                                }
+
+                                UIF.HStack {
+                                    spacing: 8
+                                    Rectangle { width: 90; height: 28; radius: 6; color: UIF.Theme.accent }
+                                    Rectangle { width: 90; height: 28; radius: 6; color: UIF.Theme.surfaceSolid }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                UIF.AppCard {
+                    title: "Event Listener"
+                    subtitle: "EventListner trigger handling"
+                    Layout.fillWidth: true
+
+                    ColumnLayout {
+                        spacing: 8
+                        Layout.fillWidth: true
 
                         Rectangle {
-                            width: parent.width * 0.4
-                            height: parent.height
-                            radius: 3
-                            color: UIF.Theme.accent
+                            id: listenerSurface
+                            Layout.fillWidth: true
+                            Layout.preferredHeight: 72
+                            radius: UIF.Theme.radiusMd
+                            color: UIF.Theme.surfaceSolid
+                            border.color: UIF.Theme.surfaceAlt
+                            border.width: 1
+
+                            UIF.Label {
+                                anchors.centerIn: parent
+                                text: "Click here (" + root.eventClickCount + ")"
+                                color: UIF.Theme.textPrimary
+                                font.pixelSize: 13
+                            }
+
+                            UIF.EventListner {
+                                trigger: "clicked"
+                                action: function(mouse) {
+                                    root.eventClickCount += 1
+                                    root.eventLastTrigger = "clicked @" + mouse.x + "," + mouse.y
+                                }
+                            }
+                        }
+
+                        UIF.Label {
+                            text: "Last trigger: " + root.eventLastTrigger
+                            color: UIF.Theme.textSecondary
+                            font.pixelSize: 12
                         }
                     }
                 }
             }
         }
-
-        Item { Layout.fillHeight: true }
     }
+
     QtObject {
-        Component.onCompleted: Debug.log("Main", "created")
+        Component.onCompleted: UIF.Debug.log("Main", "created")
     }
-
 }
 
-// Routing example (A -> B):
-// import UIFramework 1.0 as UIF
-// UIF.ApplicationWindow {
-//     UIF.PageRouter {
-//         id: pageRouter
-//         anchors.fill: parent
-//         routes: [
-//             { path: "/a", component: pageA },
-//             { path: "/b", component: pageB }
-//         ]
-//         initialPath: "/a"
-//     }
-//     Component { id: pageA; UIF.Link { href: "/b"; router: pageRouter; Text { text: "Go to B" } } }
-//     Component { id: pageB; Text { text: "Page B" } }
-// }
 // API usage (external):
 // import UITestFW 1.0
 // Main { visible: true }

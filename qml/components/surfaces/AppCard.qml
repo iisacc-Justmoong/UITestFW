@@ -8,8 +8,22 @@ Rectangle {
 
     property string title: ""
     property string subtitle: ""
+    readonly property int cardPadding: 18
+    readonly property int sectionSpacing: 10
 
     default property alias content: contentSlot.data
+
+    implicitWidth: Math.max(
+                       280,
+                       cardPadding * 2 + Math.max(headerBlock.implicitWidth, contentSlot.childrenRect.width)
+                   )
+    implicitHeight: cardPadding * 2
+                    + headerBlock.implicitHeight
+                    + sectionSpacing
+                    + separator.height
+                    + sectionSpacing
+                    + Math.max(1, contentSlot.childrenRect.height)
+    clip: true
 
     radius: Theme.radiusLg
     color: Theme.surfaceSolid
@@ -18,10 +32,11 @@ Rectangle {
 
     ColumnLayout {
         anchors.fill: parent
-        anchors.margins: 18
-        spacing: 10
+        anchors.margins: root.cardPadding
+        spacing: root.sectionSpacing
 
         ColumnLayout {
+            id: headerBlock
             spacing: 4
             Layout.fillWidth: true
 
@@ -47,6 +62,7 @@ Rectangle {
         }
 
         Rectangle {
+            id: separator
             Layout.fillWidth: true
             height: 1
             radius: 1
@@ -56,7 +72,8 @@ Rectangle {
         Item {
             id: contentSlot
             Layout.fillWidth: true
-            Layout.fillHeight: true
+            Layout.preferredHeight: Math.max(1, childrenRect.height)
+            implicitHeight: Math.max(1, childrenRect.height)
         }
     }
     QtObject {

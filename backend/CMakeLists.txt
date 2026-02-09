@@ -5,6 +5,7 @@ set(UIFRAMEWORK_BACKEND_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/pagemonitor.cpp
     ${CMAKE_CURRENT_LIST_DIR}/viewmodelregistry.cpp
     ${CMAKE_CURRENT_LIST_DIR}/debuglogger.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/svgmanager.cpp
 )
 
 set(UIFRAMEWORK_BACKEND_HEADERS
@@ -14,4 +15,5 @@ set(UIFRAMEWORK_BACKEND_HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/pagemonitor.h
     ${CMAKE_CURRENT_LIST_DIR}/viewmodelregistry.h
     ${CMAKE_CURRENT_LIST_DIR}/debuglogger.h
+    ${CMAKE_CURRENT_LIST_DIR}/svgmanager.h
 )

@@ -1,0 +1,305 @@
+#include "backend/svgmanager.h"
+
+#include <QBuffer>
+#include <QEventLoop>
+#include <QFile>
+#include <QGuiApplication>
+#include <QImage>
+#include <QNetworkAccessManager>
+#include <QNetworkReply>
+#include <QNetworkRequest>
+#include <QPainter>
+#include <QScreen>
+#include <QSvgRenderer>
+#include <QTimer>
+#include <QUrl>
+
+SvgManager::SvgManager(QObject *parent)
+    : QObject(parent)
+    , m_network(new QNetworkAccessManager(this))
+{
+}
+
+QString SvgManager::icon(const QString &svgUrl, int logicalSize, qreal scale)
+{
+    setLastError(QString());
+
+    const QString trimmedUrl = svgUrl.trimmed();
+    if (trimmedUrl.isEmpty()) {
+        setLastError(QStringLiteral("Empty SVG URL"));
+        return QString();
+    }
+
+    const int targetLogicalSize = qBound(1, logicalSize, 2048);
+    const qreal targetScale = resolveScale(scale);
+    const QString cacheKey = makeCacheKey(trimmedUrl, targetLogicalSize, targetScale);
+
+    const auto it = m_cache.constFind(cacheKey);
+    if (it != m_cache.constEnd()) {
+        touchCacheKey(cacheKey);
+        return *it;
+    }
+
+    const QByteArray svgPayload = loadSvgPayload(trimmedUrl);
+    if (svgPayload.isEmpty()) {
+        if (m_lastError.isEmpty())
+            setLastError(QStringLiteral("Failed to load SVG payload"));
+        return QString();
+    }
+
+    QSvgRenderer renderer(svgPayload);
+    if (!renderer.isValid()) {
+        setLastError(QStringLiteral("Invalid SVG payload"));
+        return QString();
+    }
+
+    const int rasterSize = qMax(1, qRound(static_cast<qreal>(targetLogicalSize) * targetScale));
+    QImage image(rasterSize, rasterSize, QImage::Format_ARGB32_Premultiplied);
+    image.fill(Qt::transparent);
+
+    QPainter painter(&image);
+    painter.setRenderHint(QPainter::Antialiasing, true);
+    painter.setRenderHint(QPainter::SmoothPixmapTransform, true);
+    renderer.render(&painter, QRectF(0.0, 0.0, rasterSize, rasterSize));
+    painter.end();
+
+    QByteArray pngData;
+    QBuffer buffer(&pngData);
+    if (!buffer.open(QIODevice::WriteOnly) || !image.save(&buffer, "PNG")) {
+        setLastError(QStringLiteral("Failed to encode SVG as PNG"));
+        return QString();
+    }
+
+    const QString dataUrl = QStringLiteral("data:image/png;base64,")
+        + QString::fromLatin1(pngData.toBase64());
+    insertCache(cacheKey, dataUrl);
+    return dataUrl;
+}
+
+qreal SvgManager::deviceScale() const
+{
+    const QScreen *screen = QGuiApplication::primaryScreen();
+    if (!screen)
+        return 1.0;
+    return qMax(1.0, screen->devicePixelRatio());
+}
+
+void SvgManager::clearCache()
+{
+    if (m_cache.isEmpty())
+        return;
+    m_cache.clear();
+    m_cacheOrder.clear();
+}
+
+QString SvgManager::lastError() const
+{
+    return m_lastError;
+}
+
+qreal SvgManager::minimumScale() const
+{
+    return m_minimumScale;
+}
+
+void SvgManager::setMinimumScale(qreal value)
+{
+    const qreal next = qBound(1.0, value, m_maximumScale);
+    if (qFuzzyCompare(m_minimumScale, next))
+        return;
+    m_minimumScale = next;
+    emit minimumScaleChanged();
+}
+
+qreal SvgManager::maximumScale() const
+{
+    return m_maximumScale;
+}
+
+void SvgManager::setMaximumScale(qreal value)
+{
+    const qreal next = qMax(1.0, value);
+    if (qFuzzyCompare(m_maximumScale, next))
+        return;
+    m_maximumScale = next;
+    if (m_minimumScale > m_maximumScale) {
+        m_minimumScale = m_maximumScale;
+        emit minimumScaleChanged();
+    }
+    emit maximumScaleChanged();
+}
+
+int SvgManager::cacheSize() const
+{
+    return m_cacheSize;
+}
+
+void SvgManager::setCacheSize(int value)
+{
+    const int next = qBound(0, value, 4096);
+    if (m_cacheSize == next)
+        return;
+    m_cacheSize = next;
+
+    if (m_cacheSize == 0) {
+        clearCache();
+    } else {
+        while (m_cacheOrder.size() > m_cacheSize) {
+            const QString oldest = m_cacheOrder.takeFirst();
+            m_cache.remove(oldest);
+        }
+    }
+
+    emit cacheSizeChanged();
+}
+
+qreal SvgManager::resolveScale(qreal requestedScale) const
+{
+    if (requestedScale > 0.0)
+        return qBound(1.0, requestedScale, m_maximumScale);
+
+    const qreal preferred = qMax(deviceScale(), m_minimumScale);
+    return qBound(1.0, preferred, m_maximumScale);
+}
+
+QByteArray SvgManager::loadSvgPayload(const QString &sourceUrl)
+{
+    if (sourceUrl.startsWith(QStringLiteral(":/"))) {
+        QFile file(sourceUrl);
+        if (!file.open(QIODevice::ReadOnly)) {
+            setLastError(file.errorString());
+            return QByteArray();
+        }
+        return file.readAll();
+    }
+
+    const QUrl parsed = QUrl::fromUserInput(sourceUrl);
+    if (!parsed.isValid()) {
+        setLastError(QStringLiteral("Invalid SVG URL"));
+        return QByteArray();
+    }
+
+    if (parsed.scheme() == QStringLiteral("qrc")) {
+        const QString qrcPath = QStringLiteral(":") + parsed.path();
+        QFile file(qrcPath);
+        if (!file.open(QIODevice::ReadOnly)) {
+            setLastError(file.errorString());
+            return QByteArray();
+        }
+        return file.readAll();
+    }
+
+    if (parsed.isLocalFile()) {
+        QFile file(parsed.toLocalFile());
+        if (!file.open(QIODevice::ReadOnly)) {
+            setLastError(file.errorString());
+            return QByteArray();
+        }
+        return file.readAll();
+    }
+
+    if (parsed.scheme() == QStringLiteral("data")) {
+        const QString text = parsed.toString();
+        const int commaIndex = text.indexOf(',');
+        if (commaIndex < 0) {
+            setLastError(QStringLiteral("Malformed SVG data URL"));
+            return QByteArray();
+        }
+
+        const QString header = text.left(commaIndex);
+        const QByteArray payload = text.mid(commaIndex + 1).toLatin1();
+        if (header.contains(QStringLiteral(";base64"), Qt::CaseInsensitive))
+            return QByteArray::fromBase64(payload);
+        return QUrl::fromPercentEncoding(payload).toUtf8();
+    }
+
+    return loadSvgFromUrl(parsed);
+}
+
+QByteArray SvgManager::loadSvgFromUrl(const QUrl &url)
+{
+    if (!m_network) {
+        setLastError(QStringLiteral("Network manager is unavailable"));
+        return QByteArray();
+    }
+
+    QNetworkRequest request(url);
+    request.setAttribute(QNetworkRequest::RedirectPolicyAttribute,
+                         QNetworkRequest::NoLessSafeRedirectPolicy);
+#if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
+    request.setTransferTimeout(5000);
+#endif
+
+    QNetworkReply *reply = m_network->get(request);
+    QEventLoop loop;
+    QTimer timer;
+    timer.setSingleShot(true);
+
+    connect(&timer, &QTimer::timeout, &loop, &QEventLoop::quit);
+    connect(reply, &QNetworkReply::finished, &loop, &QEventLoop::quit);
+
+    timer.start(6000);
+    loop.exec();
+
+    if (!timer.isActive()) {
+        reply->abort();
+        reply->deleteLater();
+        setLastError(QStringLiteral("SVG request timed out"));
+        return QByteArray();
+    }
+
+    if (reply->error() != QNetworkReply::NoError) {
+        const QString errorText = reply->errorString();
+        reply->deleteLater();
+        setLastError(errorText);
+        return QByteArray();
+    }
+
+    const QByteArray bytes = reply->readAll();
+    reply->deleteLater();
+    return bytes;
+}
+
+void SvgManager::insertCache(const QString &key, const QString &value)
+{
+    if (m_cacheSize == 0)
+        return;
+
+    if (m_cache.contains(key)) {
+        m_cache.insert(key, value);
+        touchCacheKey(key);
+        return;
+    }
+
+    m_cache.insert(key, value);
+    m_cacheOrder.append(key);
+
+    while (m_cacheOrder.size() > m_cacheSize) {
+        const QString oldest = m_cacheOrder.takeFirst();
+        m_cache.remove(oldest);
+    }
+}
+
+void SvgManager::touchCacheKey(const QString &key)
+{
+    const int index = m_cacheOrder.indexOf(key);
+    if (index < 0)
+        return;
+    m_cacheOrder.removeAt(index);
+    m_cacheOrder.append(key);
+}
+
+QString SvgManager::makeCacheKey(const QString &sourceUrl, int logicalSize, qreal scale) const
+{
+    return sourceUrl + QStringLiteral("|")
+        + QString::number(logicalSize) + QStringLiteral("|")
+        + QString::number(scale, 'f', 3);
+}
+
+void SvgManager::setLastError(const QString &message)
+{
+    if (m_lastError == message)
+        return;
+    m_lastError = message;
+    emit lastErrorChanged();
+}

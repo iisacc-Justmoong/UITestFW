@@ -1,5 +1,9 @@
+#include <QCoreApplication>
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
+#include <QtPlugin>
+
+Q_IMPORT_PLUGIN(UIFrameworkPlugin)
 
 int main(int argc, char *argv[])
 {
@@ -7,19 +11,14 @@ int main(int argc, char *argv[])
     app.setApplicationName(QStringLiteral("UITestFW"));
 
     QQmlApplicationEngine engine;
-    const QUrl moduleUrl(QStringLiteral("qrc:/qt/qml/UITestFW/Main.qml"));
     QObject::connect(
         &engine,
-        &QQmlApplicationEngine::objectCreated,
+        &QQmlApplicationEngine::objectCreationFailed,
         &app,
-        [&app, moduleUrl](QObject *obj, const QUrl &objUrl) {
-            if (!obj && objUrl == moduleUrl) {
-                app.exit(-1);
-            }
-        },
+        []() { QCoreApplication::exit(-1); },
         Qt::QueuedConnection);
 
-    engine.load(moduleUrl);
+    engine.loadFromModule(QStringLiteral("UITestFW"), QStringLiteral("Main"));
 
     return app.exec();
 }

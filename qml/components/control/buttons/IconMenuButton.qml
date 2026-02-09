@@ -14,16 +14,20 @@ AbstractButton {
     readonly property url indicatorSourceBorderless: Qt.resolvedUrl("assets/pan-down-symbolic-borderless.svg")
     readonly property url indicatorSourceDisabled: Qt.resolvedUrl("assets/pan-down-symbolic-disabled.svg")
 
-    property url iconSource: ""
-    property string icon: ""
+    property url url: ""
+    property alias iconSource: control.url
+    property string iconGlyph: ""
     property int iconSize: 16
-    readonly property url resolvedIconSource: control.iconSource.toString().length > 0
-        ? control.iconSource
+    readonly property url resolvedIconSource: control.url.toString().length > 0
+        ? control.url
         : !control.effectiveEnabled
             ? control.iconSourceDisabled
             : control.tone === AbstractButton.Borderless
                 ? control.iconSourceBorderless
                 : control.iconSourceDefault
+    readonly property string renderedIconSource: SvgManager.icon(
+                                                     control.resolvedIconSource.toString(),
+                                                     control.iconSize)
     readonly property url resolvedIndicatorSource: !control.effectiveEnabled
         ? control.indicatorSourceDisabled
         : control.tone === AbstractButton.Borderless
@@ -31,6 +35,9 @@ AbstractButton {
             : control.tone === AbstractButton.Accent || control.tone === AbstractButton.Destructive
                 ? control.indicatorSourceAccent
                 : control.indicatorSourceDefault
+    readonly property string renderedIndicatorSource: SvgManager.icon(
+                                                          control.resolvedIndicatorSource.toString(),
+                                                          16)
 
     horizontalPadding: 7
     verticalPadding: 7
@@ -58,10 +65,8 @@ AbstractButton {
         Layout.alignment: Qt.AlignVCenter | Qt.AlignHCenter
 
         Image {
-            visible: control.icon.length === 0
-            source: control.resolvedIconSource
-            sourceSize.width: control.iconSize
-            sourceSize.height: control.iconSize
+            visible: control.iconGlyph.length === 0
+            source: control.renderedIconSource
             width: control.iconSize
             height: control.iconSize
             fillMode: Image.PreserveAspectFit
@@ -70,8 +75,8 @@ AbstractButton {
         }
 
         Text {
-            visible: control.icon.length > 0
-            text: control.icon
+            visible: control.iconGlyph.length > 0
+            text: control.iconGlyph
             color: control.effectiveEnabled ? control.textColor : control.textColorDisabled
             font.family: "Pretendard"
             font.pixelSize: control.iconSize
@@ -79,9 +84,7 @@ AbstractButton {
         }
 
         Image {
-            source: control.resolvedIndicatorSource
-            sourceSize.width: 16
-            sourceSize.height: 16
+            source: control.renderedIndicatorSource
             width: 16
             height: 16
             fillMode: Image.PreserveAspectFit
@@ -98,4 +101,4 @@ AbstractButton {
 
 // API usage (external):
 // import UIFramework 1.0 as UIF
-// UIF.IconMenuButton { tone: UIF.AbstractButton.Default }
+// UIF.IconMenuButton { tone: UIF.AbstractButton.Default; url: "qrc:/qt/qml/UIFramework/qml/components/control/buttons/assets/view-more-symbolic-default.svg" }

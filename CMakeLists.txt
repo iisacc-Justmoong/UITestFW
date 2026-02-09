@@ -4,20 +4,13 @@ project(UITestFW LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-find_package(Qt6 6.5 REQUIRED COMPONENTS Quick QuickControls2 Test)
+find_package(Qt6 6.5 REQUIRED COMPONENTS Quick QuickControls2 Test Svg Network)
 include(CMakePackageConfigHelpers)
 
 qt_standard_project_setup()
 
 option(UIFRAMEWORK_FORCE_X86_QT_TOOLS "Force Qt host tools to run under x86_64 (Rosetta)" OFF)
 option(UIFRAMEWORK_ENABLE_DUMMY_AGL "Provide a dummy AGL framework when the system one is missing" ON)
-option(UIFRAMEWORK_TESTS_USE_X86_64 "Build tests as x86_64 to avoid NEON issues on some Qt builds" ON)
-
-if(APPLE AND UIFRAMEWORK_TESTS_USE_X86_64)
-    if(NOT CMAKE_OSX_ARCHITECTURES)
-        set(CMAKE_OSX_ARCHITECTURES "x86_64" CACHE STRING "Force x86_64 for tests" FORCE)
-    endif()
-endif()
 
 if(APPLE AND UIFRAMEWORK_ENABLE_DUMMY_AGL)
     if(NOT EXISTS "/System/Library/Frameworks/AGL.framework/AGL")
@@ -134,6 +127,7 @@ target_include_directories(UIFramework
 qt_add_qml_module(UIFramework
     URI UIFramework
     VERSION 1.0
+    RESOURCE_PREFIX "/qt/qml"
     OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/UIFramework"
     SOURCES
         ${UIFRAMEWORK_BACKEND_SOURCES}
@@ -149,6 +143,8 @@ target_link_libraries(UIFramework
         Qt6::Quick
         Qt6::QuickControls2
         Qt6::Qml
+        Qt6::Svg
+        Qt6::Network
 )
 
 option(UIFRAMEWORK_BUILD_DEMO "Build the UITestFW demo application" ON)
@@ -163,8 +159,8 @@ if(UIFRAMEWORK_BUILD_DEMO)
     qt_add_qml_module(UITestFW
         URI UITestFW
         VERSION 1.0
+        RESOURCE_PREFIX "/qt/qml"
         OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/UITestFW"
-        NO_IMPORT_SCAN
         QML_FILES
             ${UITESTFW_QML_FILES}
     )

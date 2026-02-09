@@ -1,23 +1,23 @@
+#include <QCoreApplication>
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
+#include <QtPlugin>
+
+Q_IMPORT_PLUGIN(UIFrameworkPlugin)
 
 int main(int argc, char *argv[])
 {
     QGuiApplication app(argc, argv);
 
     QQmlApplicationEngine engine;
-    const QUrl moduleUrl(QStringLiteral("qrc:/qt/qml/ExampleEventListener/Main.qml"));
     QObject::connect(
         &engine,
-        &QQmlApplicationEngine::objectCreated,
+        &QQmlApplicationEngine::objectCreationFailed,
         &app,
-        [moduleUrl](QObject *obj, const QUrl &objUrl) {
-            if (!obj && objUrl == moduleUrl)
-                QCoreApplication::exit(-1);
-        },
+        []() { QCoreApplication::exit(-1); },
         Qt::QueuedConnection);
 
-    engine.load(moduleUrl);
+    engine.loadFromModule(QStringLiteral("ExampleEventListener"), QStringLiteral("Main"));
 
     return app.exec();
 }

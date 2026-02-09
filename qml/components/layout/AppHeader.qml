@@ -14,7 +14,7 @@ ToolBar {
 
     default property alias actions: actionRow.data
 
-    implicitHeight: Theme.textTitle
+    implicitHeight: Math.max(56, contentRow.implicitHeight + 32)
 
 
     background: Rectangle {
@@ -24,17 +24,19 @@ ToolBar {
     }
 
     RowLayout {
+        id: contentRow
         anchors.fill: parent
         anchors.margins: 16
         spacing: 12
 
         ToolButton {
+            id: menuButton
             visible: root.menuVisible
             text: "Menu"
             padding: 10
 
             contentItem: Text {
-                text: control.text
+                text: menuButton.text
                 color: Theme.textPrimary
                 font.family: Theme.fontBody
                 font.pixelSize: 12
@@ -43,7 +45,7 @@ ToolBar {
 
             background: Rectangle {
                 radius: Theme.radiusSm
-                color: control.down ? Theme.surfaceAlt : Theme.surfaceSolid
+                color: menuButton.down ? Theme.surfaceAlt : Theme.surfaceSolid
                 border.color: Theme.surfaceAlt
                 border.width: 1
             }

@@ -18,7 +18,6 @@ AbstractButton {
     default property alias content: contentSlot.data
 
     hoverEnabled: true
-    cursorShape: Qt.PointingHandCursor
     background: Item { }
 
     onClicked: {

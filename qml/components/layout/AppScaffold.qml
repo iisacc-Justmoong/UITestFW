@@ -54,6 +54,7 @@ Item {
         id: defaultNavDelegate
 
         ItemDelegate {
+            id: control
             property var item: modelData
             property string itemLabel: typeof item === "string" ? item : (item.label || item.title || item.text || "")
             property string itemIcon: typeof item === "object" ? (item.icon || item.iconName || item.symbol || "") : ""
@@ -126,6 +127,7 @@ Item {
         id: defaultDrawerDelegate
 
         ItemDelegate {
+            id: control
             property var item: modelData
             property string itemLabel: typeof item === "string" ? item : (item.label || item.title || item.text || "")
             property string itemIcon: typeof item === "object" ? (item.icon || item.iconName || item.symbol || "") : ""

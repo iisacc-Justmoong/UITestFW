@@ -17,6 +17,9 @@ AbstractButton {
             : control.tone === AbstractButton.Accent || control.tone === AbstractButton.Destructive
                 ? control.indicatorSourceAccent
                 : control.indicatorSourceDefault
+    readonly property string renderedIndicatorSource: SvgManager.icon(
+                                                          control.resolvedIndicatorSource.toString(),
+                                                          16)
 
     horizontalPadding: 7
     verticalPadding: 7
@@ -55,9 +58,7 @@ AbstractButton {
         }
 
         Image {
-            source: control.resolvedIndicatorSource
-            sourceSize.width: 16
-            sourceSize.height: 16
+            source: control.renderedIndicatorSource
             width: 16
             height: 16
             fillMode: Image.PreserveAspectFit

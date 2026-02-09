@@ -7,7 +7,7 @@ Item {
 
     property var routes: []
     property string initialPath: "/"
-    // SwiftUI-like navigation stack (array of paths).
+    // SwiftUI-like navigation stack (array of path strings or { path, params } entries).
     property var path: []
     readonly property string currentPath: stackView.currentItem && stackView.currentItem.routePath !== undefined
         ? stackView.currentItem.routePath
@@ -248,20 +248,34 @@ Item {
         _syncingPath = false
     }
 
+    function createPathEntry(pathValue, params) {
+        if (pathValue && typeof pathValue === "object" && pathValue.path !== undefined) {
+            return {
+                path: normalizePath(pathValue.path),
+                params: pathValue.params !== undefined ? pathValue.params : ({})
+            }
+        }
+        return {
+            path: normalizePath(pathValue),
+            params: params !== undefined ? params : ({})
+        }
+    }
+
     function updatePathStack(pathValue, params, mode) {
+        var nextEntry = createPathEntry(pathValue, params)
         if (mode === "set" || path.length === 0) {
-            setPathInternal([pathValue])
+            setPathInternal([nextEntry])
         } else if (mode === "replace") {
             if (path.length === 0)
-                setPathInternal([pathValue])
+                setPathInternal([nextEntry])
             else {
                 var next = path.slice(0)
-                next[next.length - 1] = pathValue
+                next[next.length - 1] = nextEntry
                 setPathInternal(next)
             }
         } else {
             var nextPush = path.slice(0)
-            nextPush.push(pathValue)
+            nextPush.push(nextEntry)
             setPathInternal(nextPush)
         }
     }

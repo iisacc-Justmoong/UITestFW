@@ -1,5 +1,7 @@
 #include "backend/viewmodelregistry.h"
 
+#include <QSet>
+
 ViewModelRegistry::ViewModelRegistry(QObject *parent)
     : QObject(parent)
 {
@@ -18,6 +20,11 @@ void ViewModelRegistry::set(const QString &key, QObject *object)
     if (key.trimmed().isEmpty())
         return;
 
+    QObject *previous = nullptr;
+    auto existing = m_entries.constFind(key);
+    if (existing != m_entries.constEnd())
+        previous = existing.value();
+
     if (object && !object->parent())
         object->setParent(const_cast<ViewModelRegistry *>(this));
 
@@ -34,21 +41,39 @@ void ViewModelRegistry::set(const QString &key, QObject *object)
     if (changed)
         emit keysChanged();
 
+    maybeDisposeOwned(previous, key);
     prune();
 }
 
 void ViewModelRegistry::remove(const QString &key)
 {
-    if (m_entries.remove(key) > 0)
-        emit keysChanged();
+    auto it = m_entries.find(key);
+    if (it == m_entries.end())
+        return;
+
+    QObject *object = it.value();
+    m_entries.erase(it);
+    emit keysChanged();
+    maybeDisposeOwned(object);
 }
 
 void ViewModelRegistry::clear()
 {
     if (m_entries.isEmpty())
         return;
+
+    const auto entries = m_entries;
     m_entries.clear();
     emit keysChanged();
+
+    QSet<QObject *> processed;
+    for (auto it = entries.begin(); it != entries.end(); ++it) {
+        QObject *object = it.value();
+        if (!object || processed.contains(object))
+            continue;
+        processed.insert(object);
+        maybeDisposeOwned(object);
+    }
 }
 
 QStringList ViewModelRegistry::keys() const
@@ -69,4 +94,27 @@ void ViewModelRegistry::prune()
     }
     if (changed)
         emit keysChanged();
+}
+
+bool ViewModelRegistry::hasReference(QObject *object, const QString &exceptKey) const
+{
+    if (!object)
+        return false;
+    for (auto it = m_entries.constBegin(); it != m_entries.constEnd(); ++it) {
+        if (!exceptKey.isEmpty() && it.key() == exceptKey)
+            continue;
+        if (it.value() == object)
+            return true;
+    }
+    return false;
+}
+
+void ViewModelRegistry::maybeDisposeOwned(QObject *object, const QString &exceptKey)
+{
+    if (!object)
+        return;
+    if (hasReference(object, exceptKey))
+        return;
+    if (object->parent() == this)
+        object->deleteLater();
 }

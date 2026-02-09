@@ -33,7 +33,7 @@ Controls.ApplicationWindow {
     minimumWidth: isMobilePlatform ? mobileMinWidth : desktopMinWidth
     minimumHeight: isMobilePlatform ? mobileMinHeight : desktopMinHeight
 
-    default property alias content: root.contentItem.data
+    default property alias content: root.contentData
 
     function matchesMedia(rule) {
         if (!rule)
@@ -52,7 +52,6 @@ Controls.ApplicationWindow {
         return false
     }
 
-    padding: root.safeMargin
     QtObject {
         Component.onCompleted: Debug.log("ApplicationWindow", "created")
     }

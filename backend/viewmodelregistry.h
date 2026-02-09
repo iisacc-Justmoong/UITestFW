@@ -29,6 +29,8 @@ signals:
 
 private:
     void prune();
+    bool hasReference(QObject *object, const QString &exceptKey = QString()) const;
+    void maybeDisposeOwned(QObject *object, const QString &exceptKey = QString());
 
     QHash<QString, QPointer<QObject>> m_entries;
 };

@@ -2,7 +2,7 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
-import UIFramework 1.0 as UIF
+import UIFramework as UIF
 
 UIF.ApplicationWindow {
     id: root

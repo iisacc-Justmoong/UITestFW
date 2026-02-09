@@ -1,4 +1,5 @@
 #include "backend/fontpolicy.h"
+#include "backend/renderquality.h"
 
 #include <QCoreApplication>
 #include <QDebug>
@@ -33,6 +34,7 @@ void loadBundledFonts()
 
 int main(int argc, char *argv[])
 {
+    RenderQuality::configureGlobalDefaults();
     QGuiApplication app(argc, argv);
     app.setApplicationName(QStringLiteral("UITestFW"));
     loadBundledFonts();

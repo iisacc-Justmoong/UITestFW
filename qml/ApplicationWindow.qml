@@ -30,10 +30,27 @@ Controls.ApplicationWindow {
     property bool usePlatformSafeMargin: false
     property int safeMargin: usePlatformSafeMargin && isMobilePlatform ? 12 : 0
 
+    property string subtitle: ""
+    property var navItems: ["Overview", "Suites", "Runs", "Devices", "Reports", "Settings"]
+
+    property alias navIndex: scaffold.navIndex
+    property alias navigationEnabled: scaffold.navigationEnabled
+    property alias navTitle: scaffold.navTitle
+    property alias navTitleVisible: scaffold.navTitleVisible
+    property alias navWidth: scaffold.navWidth
+    property alias navDrawerWidth: scaffold.navDrawerWidth
+    property alias wideBreakpoint: scaffold.wideBreakpoint
+    property alias navDelegate: scaffold.navDelegate
+    property alias navHeader: scaffold.navHeader
+    property alias navFooter: scaffold.navFooter
+    property alias pageRouter: scaffold.pageRouter
+    property alias headerActions: scaffold.headerActions
+    default property alias content: scaffold.content
+
+    signal navActivated(int index, var item)
+
     minimumWidth: isMobilePlatform ? mobileMinWidth : desktopMinWidth
     minimumHeight: isMobilePlatform ? mobileMinHeight : desktopMinHeight
-
-    default property alias content: root.contentData
 
     function matchesMedia(rule) {
         if (!rule)
@@ -52,12 +69,49 @@ Controls.ApplicationWindow {
         return false
     }
 
+    readonly property real effectiveSupersampleScale: RenderQuality.enabled
+        ? Math.max(RenderQuality.minimumSupersampleScale,
+                   Math.min(RenderQuality.maximumSupersampleScale, RenderQuality.supersampleScale))
+        : 1.0
+
+    Item {
+        id: supersampleHost
+        anchors.fill: parent
+        anchors.margins: root.safeMargin
+        layer.enabled: RenderQuality.enabled && root.effectiveSupersampleScale > 1.0
+        layer.smooth: layer.enabled
+        layer.mipmap: layer.enabled
+        layer.textureSize: layer.enabled
+            ? Qt.size(
+                  Math.max(1, Math.round(width * root.effectiveSupersampleScale)),
+                  Math.max(1, Math.round(height * root.effectiveSupersampleScale)))
+            : Qt.size(
+                  Math.max(1, Math.round(width)),
+                  Math.max(1, Math.round(height)))
+
+        AppScaffold {
+            id: scaffold
+            anchors.fill: parent
+            headerTitle: root.title
+            headerSubtitle: root.subtitle
+            navModel: root.navItems
+            onNavActivated: root.navActivated(index, item)
+        }
+    }
+
     QtObject {
-        Component.onCompleted: Debug.log("ApplicationWindow", "created")
+        Component.onCompleted: {
+            RenderQuality.applyWindow(root)
+            if (SvgManager.minimumScale < root.effectiveSupersampleScale)
+                SvgManager.minimumScale = root.effectiveSupersampleScale
+            RuntimeEvents.attachWindow(root)
+            Debug.log("ApplicationWindow", "created")
+            Debug.log("ApplicationWindow", "supersample-scale", root.effectiveSupersampleScale)
+        }
     }
 
 }
 
 // API usage (external):
-// import UIFramework 1.0 as UIF
+// import UIFramework as UIF
 // UIF.ApplicationWindow { title: "App" }

@@ -2,7 +2,7 @@
 
 Location: `qml/AppShell.qml`
 
-Wrapper that combines `ApplicationWindow` + `AppScaffold` conveniences.
+Compatibility wrapper over `ApplicationWindow`. New code should use `UIF.ApplicationWindow` directly.
 
 ## Properties
 - `title`, `subtitle`
@@ -16,7 +16,7 @@ Wrapper that combines `ApplicationWindow` + `AppScaffold` conveniences.
 
 ## Usage
 ```qml
-UIF.AppShell {
+UIF.ApplicationWindow {
     title: "UITestFW"
     navItems: ["Overview", "Runs"]
     onNavActivated: (idx, item) => console.log(idx, item)

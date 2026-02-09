@@ -10,7 +10,7 @@ QtObject {
 
     //Window
 
-    readonly property color window: "#0e0f12"
+    readonly property color window: "#141414"
     readonly property color windowAlt: "#13161c"
     readonly property color subSurface: "#282828"
     readonly property color surfaceSolid: "#38383c"
@@ -27,13 +27,13 @@ QtObject {
 
     //Primary
 
-    readonly property color accent: "#007aff"
+    readonly property color accent: "#0a84ff"
     readonly property color success: "#32d74b"
     readonly property color warning: "#ffd60a"
     readonly property color danger: "#ff453a"
-    readonly property color accentTint: Qt.rgba(0 / 255, 122 / 255, 255 / 255, 0.12)
+    readonly property color accentTint: Qt.rgba(10 / 255, 132 / 255, 255 / 255, 0.12)
     readonly property color dangerTint: Qt.rgba(255 / 255, 69 / 255, 58 / 255, 0.12)
-    readonly property color accentOverlay: Qt.rgba(0 / 255, 122 / 255, 255 / 255, 0.25)
+    readonly property color accentOverlay: Qt.rgba(10 / 255, 132 / 255, 255 / 255, 0.25)
     readonly property color dangerOverlay: Qt.rgba(255 / 255, 69 / 255, 58 / 255, 0.35)
     readonly property color overlayBackdrop: Qt.rgba(0, 0, 0, 0.35)
     readonly property color shadowStrong: "#40000000"

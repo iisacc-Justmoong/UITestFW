@@ -2,12 +2,14 @@
 
 Location: `qml/components/control/buttons/IconButton.qml`
 
-Button with optional icon + text.
+Icon-first button variant aligned with the Figma Button component.
 
 ## Properties
-- `icon`, `iconSize`, `iconColor`
+- `tone` (`Accent`, `Default`, `Borderless`, `Destructive`, `Disabled`)
+- `iconSource` (optional override)
+- `icon` (optional text fallback)
 
 ## Usage
 ```qml
-UIF.IconButton { icon: "⚙"; text: "Settings" }
+UIF.IconButton { tone: UIF.AbstractButton.Accent }
 ```

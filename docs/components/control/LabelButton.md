@@ -2,17 +2,17 @@
 
 Location: `qml/components/control/buttons/LabelButton.qml`
 
-Text-only button styled like a link.
+Text button variant aligned with the Figma Button component.
 
 ## Properties
-- `useTone` (bool, default false)
-- `tone` (optional, when `useTone: true`)
+- `text`
+- `tone` (`Accent`, `Default`, `Borderless`, `Destructive`, `Disabled`)
 
 ## Usage
 ```qml
-UIF.LabelButton { text: "Learn more" }
+UIF.LabelButton { text: "Button"; tone: UIF.AbstractButton.Accent }
 ```
 
 ```qml
-UIF.LabelButton { text: "Delete"; useTone: true; tone: UIF.AbstractButton.Destructive }
+UIF.LabelButton { text: "Button"; tone: UIF.AbstractButton.Borderless }
 ```

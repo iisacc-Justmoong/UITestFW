@@ -2,23 +2,20 @@
 
 Location: `qml/components/control/buttons/LabelMenuButton.qml`
 
-Menu-style label button with optional badge. Uses the active state to drive emphasis.
+Label + chevron menu button variant aligned with the Figma Button component.
 
 ## Properties
-- `badge`
-- `active`
-- `useTone` (bool, default false)
+- `text`
+- `tone` (`Accent`, `Default`, `Borderless`, `Destructive`, `Disabled`)
 
 ## Usage
 ```qml
-UIF.LabelMenuButton { text: "Overview"; badge: "3"; active: true }
+UIF.LabelMenuButton { text: "Open"; tone: UIF.AbstractButton.Default }
 ```
 
 ```qml
 UIF.LabelMenuButton {
-    text: "All"
-    active: false
-    useTone: true
-    tone: UIF.AbstractButton.Default
+    text: "Open"
+    tone: UIF.AbstractButton.Borderless
 }
 ```

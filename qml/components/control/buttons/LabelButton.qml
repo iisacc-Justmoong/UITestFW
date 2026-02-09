@@ -4,29 +4,35 @@ import UIFramework 1.0
 AbstractButton {
     id: control
 
-    property bool useTone: false
-    property color accentColor: control.tone === AbstractButton.Destructive ? Theme.danger : Theme.accent
-    property color accentHoverColor: control.tone === AbstractButton.Destructive
-        ? Qt.darker(Theme.danger, 1.12)
-        : Theme.textPrimary
-    readonly property color resolvedTextColor: useTone
-        ? (control.hovered || control.down ? Theme.textPrimary : control.toneTextColor)
-        : (control.hovered || control.down ? control.accentHoverColor : control.accentColor)
+    tone: AbstractButton.Accent
+    horizontalPadding: 12
+    verticalPadding: 7
+    spacing: 0
+    cornerRadius: Theme.radiusMd
+    borderWidth: 0
+    implicitHeight: contentItem.implicitHeight + topPadding + bottomPadding
+    implicitWidth: contentItem.implicitWidth + leftPadding + rightPadding
 
-    tone: AbstractButton.Borderless
-    textColor: control.effectiveEnabled ? control.resolvedTextColor : control.textColorDisabled
-    backgroundColor: useTone ? control.toneBackgroundColor : "transparent"
-    backgroundColorHover: useTone ? control.toneBackgroundColorHover : "transparent"
-    backgroundColorPressed: useTone ? control.toneBackgroundColorPressed : "transparent"
-    backgroundColorDisabled: useTone ? Theme.surfaceAlt : "transparent"
-    borderWidth: useTone ? 1 : 0
+    textColor: control.tone === AbstractButton.Borderless ? Theme.accent : Theme.textPrimary
+    textColorDisabled: Theme.textOctonary
+
+    backgroundColor: control.tone === AbstractButton.Accent
+        ? Theme.accent
+        : control.tone === AbstractButton.Destructive
+            ? Theme.danger
+            : control.tone === AbstractButton.Borderless
+                ? "transparent"
+                : Theme.surfaceSolid
+    backgroundColorHover: control.backgroundColor
+    backgroundColorPressed: control.backgroundColor
+    backgroundColorDisabled: Theme.subSurface
 
     contentItem: Text {
         text: control.text
-        color: control.textColor
-        font.family: Theme.fontBody
-        font.pixelSize: 12
-        font.weight: Font.DemiBold
+        color: control.effectiveEnabled ? control.textColor : control.textColorDisabled
+        font.family: "Pretendard"
+        font.pixelSize: 13
+        font.weight: Font.Normal
         horizontalAlignment: Text.AlignHCenter
         verticalAlignment: Text.AlignVCenter
         elide: Text.ElideRight
@@ -39,4 +45,4 @@ AbstractButton {
 
 // API usage (external):
 // import UIFramework 1.0 as UIF
-// UIF.LabelButton { text: "Learn more" }
+// UIF.LabelButton { text: "Button"; tone: UIF.AbstractButton.Accent }

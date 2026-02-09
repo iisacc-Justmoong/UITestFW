@@ -5,67 +5,64 @@ import UIFramework 1.0
 AbstractButton {
     id: control
 
-    checkable: true
+    tone: AbstractButton.Accent
+    readonly property url indicatorSourceDefault: Qt.resolvedUrl("assets/pan-down-symbolic-default.svg")
+    readonly property url indicatorSourceAccent: Qt.resolvedUrl("assets/pan-down-symbolic-accent.svg")
+    readonly property url indicatorSourceBorderless: Qt.resolvedUrl("assets/pan-down-symbolic-borderless.svg")
+    readonly property url indicatorSourceDisabled: Qt.resolvedUrl("assets/pan-down-symbolic-disabled.svg")
+    readonly property url resolvedIndicatorSource: !control.effectiveEnabled
+        ? control.indicatorSourceDisabled
+        : control.tone === AbstractButton.Borderless
+            ? control.indicatorSourceBorderless
+            : control.tone === AbstractButton.Accent || control.tone === AbstractButton.Destructive
+                ? control.indicatorSourceAccent
+                : control.indicatorSourceDefault
 
-    property bool useTone: false
-    property string badge: ""
-    property bool active: checked
+    horizontalPadding: 7
+    verticalPadding: 7
+    spacing: 4
+    cornerRadius: Theme.radiusMd
+    borderWidth: 0
+    implicitHeight: contentItem.implicitHeight + topPadding + bottomPadding
+    implicitWidth: contentItem.implicitWidth + leftPadding + rightPadding
 
-    onActiveChanged: {
-        if (checked !== active)
-            checked = active
-    }
+    textColor: control.tone === AbstractButton.Borderless ? Theme.accent : Theme.textPrimary
+    textColorDisabled: Theme.textOctonary
 
-    onCheckedChanged: {
-        if (active !== checked)
-            active = checked
-    }
-
-    readonly property color inactiveTextColor: useTone ? control.toneTextColor : Theme.textSecondary
-    readonly property color inactiveBackgroundColor: useTone ? control.toneBackgroundColor : "transparent"
-    readonly property color inactiveBackgroundHover: useTone ? control.toneBackgroundColorHover : Theme.surfaceAlt
-    readonly property color inactiveBackgroundPressed: useTone ? control.toneBackgroundColorPressed : Theme.accent
-    readonly property color inactiveBorderColor: useTone ? control.toneBorderColor : "transparent"
-    readonly property color inactiveBorderHover: useTone ? control.toneBorderColorHover : Theme.surfaceSolid
-
-    readonly property color resolvedTextColor: control.active ? Theme.textPrimary : control.inactiveTextColor
-
-    textColor: control.effectiveEnabled ? control.resolvedTextColor : control.textColorDisabled
-    backgroundColor: control.active ? Theme.accent : control.inactiveBackgroundColor
-    backgroundColorHover: control.active ? Theme.accent : control.inactiveBackgroundHover
-    backgroundColorPressed: control.active ? Theme.accent : control.inactiveBackgroundPressed
-    borderColor: control.active ? Theme.surfaceAlt : control.inactiveBorderColor
-    borderColorHover: control.active ? Theme.surfaceAlt : control.inactiveBorderHover
+    backgroundColor: control.tone === AbstractButton.Accent
+        ? Theme.accent
+        : control.tone === AbstractButton.Destructive
+            ? Theme.danger
+            : control.tone === AbstractButton.Borderless
+                ? "transparent"
+                : Theme.surfaceSolid
+    backgroundColorHover: control.backgroundColor
+    backgroundColorPressed: control.backgroundColor
+    backgroundColorDisabled: Theme.subSurface
 
     contentItem: RowLayout {
-        spacing: 8
-        Layout.alignment: Qt.AlignVCenter | Qt.AlignLeft
+        spacing: 4
+        Layout.alignment: Qt.AlignVCenter | Qt.AlignHCenter
 
         Text {
             text: control.text
-            color: control.textColor
-            font.family: Theme.fontBody
+            color: control.effectiveEnabled ? control.textColor : control.textColorDisabled
+            font.family: "Pretendard"
             font.pixelSize: 13
+            font.weight: Font.Normal
             elide: Text.ElideRight
-            Layout.fillWidth: true
             Layout.alignment: Qt.AlignVCenter
         }
 
-        Rectangle {
-            visible: control.badge.length > 0
-            radius: 8
-            color: control.active ? Theme.accent : Theme.surfaceSolid
-            Layout.preferredHeight: 18
-            Layout.preferredWidth: Math.max(18, badgeText.implicitWidth + 10)
-
-            Text {
-                id: badgeText
-                anchors.centerIn: parent
-                text: control.badge
-                color: control.active ? Theme.textPrimary : Theme.textPrimary
-                font.family: Theme.fontBody
-                font.pixelSize: 10
-            }
+        Image {
+            source: control.resolvedIndicatorSource
+            sourceSize.width: 16
+            sourceSize.height: 16
+            width: 16
+            height: 16
+            fillMode: Image.PreserveAspectFit
+            smooth: true
+            Layout.alignment: Qt.AlignVCenter
         }
     }
 
@@ -77,4 +74,4 @@ AbstractButton {
 
 // API usage (external):
 // import UIFramework 1.0 as UIF
-// UIF.LabelMenuButton { text: "Overview"; badge: "3"; active: true }
+// UIF.LabelMenuButton { text: "Open"; tone: UIF.AbstractButton.Default }

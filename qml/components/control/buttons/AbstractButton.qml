@@ -69,16 +69,16 @@ Controls.AbstractButton {
     property int borderWidth: 1
 
     property color textColor: control.toneTextColor
-    property color textColorDisabled: Theme.textTertiary
+    property color textColorDisabled: Theme.textOctonary
 
     property color backgroundColor: control.toneBackgroundColor
     property color backgroundColorHover: control.toneBackgroundColorHover
     property color backgroundColorPressed: control.toneBackgroundColorPressed
-    property color backgroundColorDisabled: Theme.surfaceAlt
+    property color backgroundColorDisabled: Theme.subSurface
 
     property color borderColor: control.toneBorderColor
     property color borderColorHover: control.toneBorderColorHover
-    property color borderColorDisabled: Theme.surfaceSolid
+    property color borderColorDisabled: "transparent"
 
     hoverEnabled: true
     focusPolicy: Qt.StrongFocus

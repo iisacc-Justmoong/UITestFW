@@ -140,6 +140,8 @@ qt_add_qml_module(UIFramework
         ${UIFRAMEWORK_BACKEND_HEADERS}
     QML_FILES
         ${UIFRAMEWORK_QML_FILES}
+    RESOURCES
+        ${UIFRAMEWORK_RESOURCE_FILES}
 )
 
 target_link_libraries(UIFramework

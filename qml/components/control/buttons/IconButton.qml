@@ -5,19 +5,65 @@ import UIFramework 1.0
 AbstractButton {
     id: control
 
+    tone: AbstractButton.Accent
+    readonly property url iconSourceDefault: Qt.resolvedUrl("assets/view-more-symbolic-default.svg")
+    readonly property url iconSourceBorderless: Qt.resolvedUrl("assets/view-more-symbolic-borderless.svg")
+    readonly property url iconSourceDisabled: Qt.resolvedUrl("assets/view-more-symbolic-disabled.svg")
+    readonly property url toneIconSource: !control.effectiveEnabled
+        ? control.iconSourceDisabled
+        : control.tone === AbstractButton.Borderless
+            ? control.iconSourceBorderless
+            : control.iconSourceDefault
+
+    property url iconSource: ""
     property string icon: ""
-    property int iconSize: 14
-    property color iconColor: textColor
+    property int iconSize: 16
+    readonly property url resolvedIconSource: control.iconSource.toString().length > 0
+        ? control.iconSource
+        : control.toneIconSource
+
+    horizontalPadding: 7
+    verticalPadding: 7
+    spacing: 0
+    cornerRadius: Theme.radiusMd
+    borderWidth: 0
+    implicitHeight: contentItem.implicitHeight + topPadding + bottomPadding
+    implicitWidth: contentItem.implicitWidth + leftPadding + rightPadding
+
+    textColor: control.tone === AbstractButton.Borderless ? Theme.accent : Theme.textPrimary
+    textColorDisabled: Theme.textOctonary
+    backgroundColor: control.tone === AbstractButton.Accent
+        ? Theme.accent
+        : control.tone === AbstractButton.Destructive
+            ? Theme.danger
+            : control.tone === AbstractButton.Borderless
+                ? "transparent"
+                : Theme.surfaceSolid
+    backgroundColorHover: control.backgroundColor
+    backgroundColorPressed: control.backgroundColor
+    backgroundColorDisabled: Theme.subSurface
 
     contentItem: RowLayout {
-        spacing: control.spacing
+        spacing: control.text.length > 0 ? 4 : 0
         Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
+
+        Image {
+            visible: control.icon.length === 0
+            source: control.resolvedIconSource
+            sourceSize.width: control.iconSize
+            sourceSize.height: control.iconSize
+            width: control.iconSize
+            height: control.iconSize
+            fillMode: Image.PreserveAspectFit
+            smooth: true
+            Layout.alignment: Qt.AlignVCenter
+        }
 
         Text {
             visible: control.icon.length > 0
             text: control.icon
-            color: control.iconColor
-            font.family: Theme.fontDisplay
+            color: control.effectiveEnabled ? control.textColor : control.textColorDisabled
+            font.family: "Pretendard"
             font.pixelSize: control.iconSize
             Layout.alignment: Qt.AlignVCenter
         }
@@ -25,9 +71,9 @@ AbstractButton {
         Text {
             text: control.text
             color: control.effectiveEnabled ? control.textColor : control.textColorDisabled
-            font.family: Theme.fontBody
-            font.pixelSize: 12
-            font.weight: Font.DemiBold
+            font.family: "Pretendard"
+            font.pixelSize: 13
+            font.weight: Font.Normal
             elide: Text.ElideRight
             visible: control.text.length > 0
             Layout.alignment: Qt.AlignVCenter
@@ -41,4 +87,4 @@ AbstractButton {
 
 // API usage (external):
 // import UIFramework 1.0 as UIF
-// UIF.IconButton { icon: "⚙"; text: "Settings" }
+// UIF.IconButton { tone: UIF.AbstractButton.Accent }

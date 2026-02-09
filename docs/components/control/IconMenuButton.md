@@ -2,24 +2,21 @@
 
 Location: `qml/components/control/buttons/IconMenuButton.qml`
 
-Menu-style icon button with optional badge. Uses the active state to drive emphasis.
+Icon + chevron menu button variant aligned with the Figma Button component.
 
 ## Properties
 - `icon`
-- `badge`
-- `active`
-- `useTone` (bool, default false)
+- `tone` (`Accent`, `Default`, `Borderless`, `Destructive`, `Disabled`)
+- `iconSource` (optional override)
 
 ## Usage
 ```qml
-UIF.IconMenuButton { icon: "●"; badge: "3"; active: true }
+UIF.IconMenuButton { tone: UIF.AbstractButton.Default }
 ```
 
 ```qml
 UIF.IconMenuButton {
-    icon: "⚙"
-    active: false
-    useTone: true
+    icon: "⋮"
     tone: UIF.AbstractButton.Borderless
 }
 ```

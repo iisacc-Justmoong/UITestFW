@@ -11,6 +11,7 @@ QtObject {
 
     readonly property color window: "#0e0f12"
     readonly property color windowAlt: "#13161c"
+    readonly property color subSurface: "#282828"
     readonly property color surfaceSolid: "#38383c"
     readonly property color surfaceAlt: "#44444b"
 
@@ -19,8 +20,8 @@ QtObject {
     readonly property color textPrimary: "#FFFFFF"
     readonly property color textSecondary: "#F6F5F4"
     readonly property color textTertiary: "#DEDDDA"
-    readonly property color textSeptenary: "C0BFBC"
-    readonly property color textOctonary: "9A9996"
+    readonly property color textSeptenary: "#C0BFBC"
+    readonly property color textOctonary: "#9A9996"
 
     //Primary
 

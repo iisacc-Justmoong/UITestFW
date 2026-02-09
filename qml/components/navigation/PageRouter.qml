@@ -9,12 +9,10 @@ Item {
     property string initialPath: "/"
     // SwiftUI-like navigation stack (array of path strings or { path, params } entries).
     property var path: []
-    readonly property string currentPath: stackView.currentItem && stackView.currentItem.routePath !== undefined
-        ? stackView.currentItem.routePath
-        : ""
-    readonly property var currentParams: stackView.currentItem && stackView.currentItem.routeParams !== undefined
-        ? stackView.currentItem.routeParams
-        : ({})
+    property string _currentPath: ""
+    property var _currentParams: ({})
+    readonly property string currentPath: _currentPath
+    readonly property var currentParams: _currentParams
 
     property Component notFoundComponent: null
     property url notFoundSource: ""
@@ -61,16 +59,27 @@ Item {
     function pop() {
         if (stackView.depth > 1) {
             stackView.pop()
-            if (path.length > 1)
-                setPathInternal(path.slice(0, path.length - 1))
+            if (path.length > 1) {
+                var nextPath = path.slice(0, path.length - 1)
+                setPathInternal(nextPath)
+                applyCurrentFromPathEntry(nextPath[nextPath.length - 1])
+            } else if (path.length === 1) {
+                applyCurrentFromPathEntry(path[0])
+            } else {
+                setCurrent("", {})
+            }
         }
     }
 
     function popToRoot() {
         if (stackView.depth > 1) {
             stackView.pop(stackView.get(0))
-            if (path.length > 1)
+            if (path.length > 0) {
                 setPathInternal([path[0]])
+                applyCurrentFromPathEntry(path[0])
+            } else {
+                setCurrent("", {})
+            }
         }
     }
 
@@ -146,14 +155,15 @@ Item {
             if (notFoundComponent || notFoundSource) {
                 var fallback = notFoundComponent ? notFoundComponent : notFoundSource
                 if (mode === "replace")
-                    stackView.replace(fallback, { routePath: normalized, routeParams: targetParams })
+                    stackView.replace(fallback)
                 else if (mode === "set") {
                     stackView.clear()
-                    stackView.push(fallback, { routePath: normalized, routeParams: targetParams })
+                    stackView.push(fallback)
                 } else {
-                    stackView.push(fallback, { routePath: normalized, routeParams: targetParams })
+                    stackView.push(fallback)
                 }
                 updatePathStack(normalized, targetParams, mode)
+                setCurrent(normalized, targetParams)
                 navigated(normalized, targetParams)
                 return
             }
@@ -167,14 +177,15 @@ Item {
             return
         }
         if (mode === "replace") {
-            stackView.replace(target, { routePath: normalized, routeParams: targetParams, route: route })
+            stackView.replace(target)
         } else if (mode === "set") {
             stackView.clear()
-            stackView.push(target, { routePath: normalized, routeParams: targetParams, route: route })
+            stackView.push(target)
         } else {
-            stackView.push(target, { routePath: normalized, routeParams: targetParams, route: route })
+            stackView.push(target)
         }
         updatePathStack(normalized, targetParams, mode)
+        setCurrent(normalized, targetParams)
         navigated(normalized, targetParams)
     }
 
@@ -190,6 +201,7 @@ Item {
         } else {
             stackView.push(component, targetParams)
         }
+        setCurrent("", targetParams)
         componentNavigated(component)
     }
 
@@ -227,7 +239,7 @@ Item {
             if (!resolved) {
                 var fallback = notFoundComponent ? notFoundComponent : notFoundSource
                 if (fallback)
-                    stackView.push(fallback, { routePath: normalized, routeParams: entryParams || {} })
+                    stackView.push(fallback)
                 else
                     navigationFailed(normalized)
                 continue
@@ -237,15 +249,43 @@ Item {
                 navigationFailed(normalized)
                 continue
             }
-            stackView.push(target, { routePath: normalized, routeParams: entryParams || resolved.params, route: resolved.route })
+            stackView.push(target)
         }
         _syncingPath = false
+        applyCurrentFromPathEntry(path[path.length - 1])
     }
 
     function setPathInternal(nextPath) {
         _syncingPath = true
         path = nextPath
         _syncingPath = false
+    }
+
+    function applyCurrentFromPathEntry(entry) {
+        if (entry === undefined || entry === null) {
+            setCurrent("", {})
+            return
+        }
+        if (typeof entry === "string") {
+            setCurrent(normalizePath(entry), {})
+            return
+        }
+        if (typeof entry === "object") {
+            setCurrent(
+                normalizePath(entry.path !== undefined ? entry.path : "/"),
+                entry.params !== undefined ? entry.params : ({})
+            )
+            return
+        }
+        setCurrent("", {})
+    }
+
+    function setCurrent(pathValue, params) {
+        if (pathValue === undefined || pathValue === null || pathValue === "")
+            _currentPath = ""
+        else
+            _currentPath = normalizePath(pathValue)
+        _currentParams = params !== undefined ? params : ({})
     }
 
     function createPathEntry(pathValue, params) {

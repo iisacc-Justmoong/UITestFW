@@ -202,35 +202,190 @@ UIF.ApplicationWindow {
                 }
 
                 UIF.AppCard {
-                    title: "Input Bars"
-                    subtitle: "AbstractInputBar base component"
+                    title: "Input Fields"
+                    subtitle: "5 types x 4 states (20 cases)"
                     Layout.fillWidth: true
+                    Layout.columnSpan: gallery.columns
 
-                    ColumnLayout {
-                        spacing: 10
+                    GridLayout {
+                        columns: 5
+                        rowSpacing: 8
+                        columnSpacing: 10
                         Layout.fillWidth: true
 
-                        UIF.AbstractInputBar {
-                            Layout.fillWidth: true
+                        UIF.Label {
+                            text: "Type"
+                            color: UIF.Theme.textOctonary
+                            font.pixelSize: 12
+                        }
+                        UIF.Label {
+                            text: "Empty"
+                            color: UIF.Theme.textOctonary
+                            font.pixelSize: 12
+                        }
+                        UIF.Label {
+                            text: "Filled"
+                            color: UIF.Theme.textOctonary
+                            font.pixelSize: 12
+                        }
+                        UIF.Label {
+                            text: "ReadOnly"
+                            color: UIF.Theme.textOctonary
+                            font.pixelSize: 12
+                        }
+                        UIF.Label {
+                            text: "Disabled"
+                            color: UIF.Theme.textOctonary
+                            font.pixelSize: 12
+                        }
+
+                        UIF.Label { text: "Text"; color: UIF.Theme.textPrimary; font.pixelSize: 12 }
+                        UIF.InputField { Layout.preferredWidth: 206; placeholderText: "Placeholder" }
+                        UIF.InputField { Layout.preferredWidth: 206; text: "Typed value" }
+                        UIF.InputField { Layout.preferredWidth: 206; text: "Typed value"; readOnly: true }
+                        UIF.InputField { Layout.preferredWidth: 206; placeholderText: "Placeholder"; enabled: false }
+
+                        UIF.Label { text: "Search"; color: UIF.Theme.textPrimary; font.pixelSize: 12 }
+                        UIF.InputField {
+                            Layout.preferredWidth: 206
                             placeholderText: "Search"
-                            leadingItems: Text {
-                                text: "S"
-                                color: UIF.Theme.textTertiary
-                                font.family: UIF.Theme.fontBody
-                                font.pixelSize: 12
+                            leadingItems: Item {
+                                width: 16
+                                height: 16
+
+                                Canvas {
+                                    anchors.fill: parent
+                                    antialiasing: true
+                                    onPaint: {
+                                        const ctx = getContext("2d")
+                                        ctx.clearRect(0, 0, width, height)
+                                        ctx.beginPath()
+                                        ctx.arc(6.5, 6.5, 4.0, 0, Math.PI * 2, false)
+                                        ctx.lineWidth = 1.5
+                                        ctx.strokeStyle = UIF.Theme.textOctonary
+                                        ctx.stroke()
+
+                                        ctx.beginPath()
+                                        ctx.moveTo(9.8, 9.8)
+                                        ctx.lineTo(13.2, 13.2)
+                                        ctx.lineWidth = 1.5
+                                        ctx.lineCap = "round"
+                                        ctx.strokeStyle = UIF.Theme.textOctonary
+                                        ctx.stroke()
+                                    }
+                                }
+                            }
+                        }
+                        UIF.InputField {
+                            Layout.preferredWidth: 206
+                            text: "network logs"
+                            leadingItems: Item {
+                                width: 16
+                                height: 16
+
+                                Canvas {
+                                    anchors.fill: parent
+                                    antialiasing: true
+                                    onPaint: {
+                                        const ctx = getContext("2d")
+                                        ctx.clearRect(0, 0, width, height)
+                                        ctx.beginPath()
+                                        ctx.arc(6.5, 6.5, 4.0, 0, Math.PI * 2, false)
+                                        ctx.lineWidth = 1.5
+                                        ctx.strokeStyle = UIF.Theme.textOctonary
+                                        ctx.stroke()
+
+                                        ctx.beginPath()
+                                        ctx.moveTo(9.8, 9.8)
+                                        ctx.lineTo(13.2, 13.2)
+                                        ctx.lineWidth = 1.5
+                                        ctx.lineCap = "round"
+                                        ctx.strokeStyle = UIF.Theme.textOctonary
+                                        ctx.stroke()
+                                    }
+                                }
+                            }
+                        }
+                        UIF.InputField {
+                            Layout.preferredWidth: 206
+                            text: "network logs"
+                            readOnly: true
+                            leadingItems: Item {
+                                width: 16
+                                height: 16
+
+                                Canvas {
+                                    anchors.fill: parent
+                                    antialiasing: true
+                                    onPaint: {
+                                        const ctx = getContext("2d")
+                                        ctx.clearRect(0, 0, width, height)
+                                        ctx.beginPath()
+                                        ctx.arc(6.5, 6.5, 4.0, 0, Math.PI * 2, false)
+                                        ctx.lineWidth = 1.5
+                                        ctx.strokeStyle = UIF.Theme.textOctonary
+                                        ctx.stroke()
+
+                                        ctx.beginPath()
+                                        ctx.moveTo(9.8, 9.8)
+                                        ctx.lineTo(13.2, 13.2)
+                                        ctx.lineWidth = 1.5
+                                        ctx.lineCap = "round"
+                                        ctx.strokeStyle = UIF.Theme.textOctonary
+                                        ctx.stroke()
+                                    }
+                                }
+                            }
+                        }
+                        UIF.InputField {
+                            Layout.preferredWidth: 206
+                            placeholderText: "Search"
+                            enabled: false
+                            leadingItems: Item {
+                                width: 16
+                                height: 16
+
+                                Canvas {
+                                    anchors.fill: parent
+                                    antialiasing: true
+                                    onPaint: {
+                                        const ctx = getContext("2d")
+                                        ctx.clearRect(0, 0, width, height)
+                                        ctx.beginPath()
+                                        ctx.arc(6.5, 6.5, 4.0, 0, Math.PI * 2, false)
+                                        ctx.lineWidth = 1.5
+                                        ctx.strokeStyle = UIF.Theme.textOctonary
+                                        ctx.stroke()
+
+                                        ctx.beginPath()
+                                        ctx.moveTo(9.8, 9.8)
+                                        ctx.lineTo(13.2, 13.2)
+                                        ctx.lineWidth = 1.5
+                                        ctx.lineCap = "round"
+                                        ctx.strokeStyle = UIF.Theme.textOctonary
+                                        ctx.stroke()
+                                    }
+                                }
                             }
                         }
 
-                        UIF.AbstractInputBar {
-                            Layout.fillWidth: true
-                            text: "Sample text"
-                            trailingItems: Text {
-                                text: "X"
-                                color: UIF.Theme.textTertiary
-                                font.family: UIF.Theme.fontBody
-                                font.pixelSize: 12
-                            }
-                        }
+                        UIF.Label { text: "Password"; color: UIF.Theme.textPrimary; font.pixelSize: 12 }
+                        UIF.InputField { Layout.preferredWidth: 206; placeholderText: "Password"; echoMode: TextInput.Password }
+                        UIF.InputField { Layout.preferredWidth: 206; text: "password123"; echoMode: TextInput.Password }
+                        UIF.InputField { Layout.preferredWidth: 206; text: "password123"; echoMode: TextInput.Password; readOnly: true }
+                        UIF.InputField { Layout.preferredWidth: 206; placeholderText: "Password"; echoMode: TextInput.Password; enabled: false }
+
+                        UIF.Label { text: "URL"; color: UIF.Theme.textPrimary; font.pixelSize: 12 }
+                        UIF.InputField { Layout.preferredWidth: 206; placeholderText: "https://example.com"; inputMethodHints: Qt.ImhUrlCharactersOnly }
+                        UIF.InputField { Layout.preferredWidth: 206; text: "https://api.local/v1"; inputMethodHints: Qt.ImhUrlCharactersOnly }
+                        UIF.InputField { Layout.preferredWidth: 206; text: "https://api.local/v1"; inputMethodHints: Qt.ImhUrlCharactersOnly; readOnly: true }
+                        UIF.InputField { Layout.preferredWidth: 206; placeholderText: "https://example.com"; inputMethodHints: Qt.ImhUrlCharactersOnly; enabled: false }
+
+                        UIF.Label { text: "Numeric"; color: UIF.Theme.textPrimary; font.pixelSize: 12 }
+                        UIF.InputField { Layout.preferredWidth: 206; placeholderText: "0"; inputMethodHints: Qt.ImhDigitsOnly }
+                        UIF.InputField { Layout.preferredWidth: 206; text: "1024"; inputMethodHints: Qt.ImhDigitsOnly }
+                        UIF.InputField { Layout.preferredWidth: 206; text: "1024"; inputMethodHints: Qt.ImhDigitsOnly; readOnly: true }
+                        UIF.InputField { Layout.preferredWidth: 206; placeholderText: "0"; inputMethodHints: Qt.ImhDigitsOnly; enabled: false }
                     }
                 }
 

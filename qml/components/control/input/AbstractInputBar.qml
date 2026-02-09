@@ -26,6 +26,10 @@ FocusScope {
     property color textColorDisabled: Theme.textTertiary
     property color placeholderColor: Theme.textTertiary
     property color placeholderColorDisabled: Theme.textOctonary
+    property real placeholderOpacity: 1.0
+    property color selectionColor: Theme.accent
+    property color selectedTextColor: Theme.textPrimary
+    property Component cursorDelegate: null
 
     property color backgroundColor: Theme.subSurface
     property color backgroundColorFocused: Theme.surfaceSolid
@@ -82,6 +86,8 @@ FocusScope {
 
             Item {
                 id: leadingSlot
+                width: childrenRect.width
+                height: childrenRect.height
                 anchors.centerIn: parent
             }
         }
@@ -97,6 +103,8 @@ FocusScope {
 
             Item {
                 id: trailingSlot
+                width: childrenRect.width
+                height: childrenRect.height
                 anchors.centerIn: parent
             }
         }
@@ -110,8 +118,10 @@ FocusScope {
         anchors.topMargin: control.insetVertical
         anchors.bottomMargin: control.insetVertical
         color: control.enabled ? control.textColor : control.textColorDisabled
-        selectionColor: Theme.accent
-        selectedTextColor: Theme.textPrimary
+        selectionColor: control.selectionColor
+        selectedTextColor: control.selectedTextColor
+        cursorDelegate: control.cursorDelegate
+        cursorVisible: control.focused && control.enabled && !readOnly
         font.family: Theme.fontBody
         font.pixelSize: Theme.textBody
         activeFocusOnTab: true
@@ -128,6 +138,7 @@ FocusScope {
         anchors.right: inputField.right
         anchors.verticalCenter: inputField.verticalCenter
         color: control.enabled ? control.placeholderColor : control.placeholderColorDisabled
+        opacity: control.placeholderOpacity
         font.family: inputField.font.family
         font.pixelSize: inputField.font.pixelSize
         elide: Text.ElideRight

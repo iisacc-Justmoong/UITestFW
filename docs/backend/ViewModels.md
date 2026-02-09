@@ -1,6 +1,6 @@
 # ViewModels
 
-Location: `backend/viewmodelregistry.h` / `backend/viewmodelregistry.cpp`
+Location: `backend/state/viewmodelregistry.h` / `backend/state/viewmodelregistry.cpp`
 
 Registry for ViewModel instances, accessed by key.
 

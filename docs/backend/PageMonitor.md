@@ -1,6 +1,6 @@
 # PageMonitor
 
-Location: `backend/pagemonitor.h` / `backend/pagemonitor.cpp`
+Location: `backend/navigation/pagemonitor.h` / `backend/navigation/pagemonitor.cpp`
 
 Tracks navigation history for undo.
 

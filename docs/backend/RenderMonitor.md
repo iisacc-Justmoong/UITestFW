@@ -1,6 +1,6 @@
 # RenderMonitor
 
-Location: `backend/renderingmonitor.h` / `backend/renderingmonitor.cpp`
+Location: `backend/runtime/renderingmonitor.h` / `backend/runtime/renderingmonitor.cpp`
 
 Render timing metrics for a QQuickWindow.
 

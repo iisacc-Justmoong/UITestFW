@@ -1,4 +1,4 @@
-#include "backend/pagemonitor.h"
+#include "backend/navigation/pagemonitor.h"
 
 PageMonitor::PageMonitor(QObject *parent)
     : QObject(parent)

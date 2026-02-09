@@ -1,6 +1,6 @@
 # RenderQuality
 
-Location: `backend/renderquality.h` / `backend/renderquality.cpp`
+Location: `backend/runtime/renderquality.h` / `backend/runtime/renderquality.cpp`
 
 Global render-quality policy for HiDPI and supersampling.
 

@@ -1,6 +1,6 @@
 # Debug
 
-Location: `backend/debuglogger.h` / `backend/debuglogger.cpp`
+Location: `backend/runtime/debuglogger.h` / `backend/runtime/debuglogger.cpp`
 
 Debug logger singleton for QML and C++.
 

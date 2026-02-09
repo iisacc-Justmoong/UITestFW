@@ -1,4 +1,4 @@
-#include "backend/svgmanager.h"
+#include "backend/graphics/svgmanager.h"
 
 #include <QBuffer>
 #include <QFile>

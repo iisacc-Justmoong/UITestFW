@@ -121,6 +121,13 @@ target_include_directories(UIFramework
     PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/backend>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/backend/io>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/backend/fonts>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/backend/platform>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/backend/runtime>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/backend/navigation>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/backend/state>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/backend/graphics>
         $<INSTALL_INTERFACE:include/UIFramework>
 )
 
@@ -215,9 +222,11 @@ install(EXPORT UIFrameworkTargets
     DESTINATION lib/cmake/UIFramework
 )
 
-install(FILES
-    ${UIFRAMEWORK_BACKEND_HEADERS}
+install(
+    DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/backend/
     DESTINATION include/UIFramework/backend
+    FILES_MATCHING
+        PATTERN "*.h"
 )
 
 configure_package_config_file(

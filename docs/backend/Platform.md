@@ -1,6 +1,6 @@
 # Platform
 
-Location: `backend/platforminfo.h` / `backend/platforminfo.cpp`
+Location: `backend/platform/platforminfo.h` / `backend/platform/platforminfo.cpp`
 
 Platform information singleton.
 

@@ -1,5 +1,5 @@
-#include "backend/fontpolicy.h"
-#include "backend/renderquality.h"
+#include "backend/fonts/fontpolicy.h"
+#include "backend/runtime/renderquality.h"
 
 #include <QCoreApplication>
 #include <QDebug>

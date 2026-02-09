@@ -1,4 +1,4 @@
-#include "backend/platforminfo.h"
+#include "backend/platform/platforminfo.h"
 
 #include <QSysInfo>
 

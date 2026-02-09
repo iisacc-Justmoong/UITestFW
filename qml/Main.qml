@@ -15,6 +15,40 @@ UIF.ApplicationWindow {
     property bool alertOpen: false
     property int eventClickCount: 0
     property string eventLastTrigger: "none"
+    property bool metricsRenderScaleCompliant: UIF.RenderQuality.enabled
+        && UIF.RenderQuality.effectiveSupersampleScale() >= UIF.RenderQuality.minimumSupersampleScale
+        && UIF.RenderQuality.effectiveSupersampleScale() <= UIF.RenderQuality.maximumSupersampleScale
+        && UIF.RenderQuality.msaaSamples >= 0
+        && UIF.RenderQuality.msaaSamples <= 16
+    property bool metricsFontFallbackCompliant: UIF.FontPolicy.effectiveFamily.length > 0
+        && UIF.FontPolicy.resolveFamily("") === UIF.FontPolicy.effectiveFamily
+    property bool metricsThemeTextCompliant: UIF.Theme.isThemeTextStyleCompliant(UIF.Theme.textTitle, UIF.Theme.textTitleWeight, UIF.Theme.textTitleStyleName)
+        && UIF.Theme.isThemeTextStyleCompliant(UIF.Theme.textTitle2, UIF.Theme.textTitle2Weight, UIF.Theme.textTitle2StyleName)
+        && UIF.Theme.isThemeTextStyleCompliant(UIF.Theme.textHeader, UIF.Theme.textHeaderWeight, UIF.Theme.textHeaderStyleName)
+        && UIF.Theme.isThemeTextStyleCompliant(UIF.Theme.textHeader2, UIF.Theme.textHeader2Weight, UIF.Theme.textHeader2StyleName)
+        && UIF.Theme.isThemeTextStyleCompliant(UIF.Theme.textBody, UIF.Theme.textBodyWeight, UIF.Theme.textBodyStyleName)
+        && UIF.Theme.isThemeTextStyleCompliant(UIF.Theme.textDescription, UIF.Theme.textDescriptionWeight, UIF.Theme.textDescriptionStyleName)
+        && UIF.Theme.isThemeTextStyleCompliant(UIF.Theme.textCaption, UIF.Theme.textCaptionWeight, UIF.Theme.textCaptionStyleName)
+    property bool metricsRuntimeCompliant: UIF.RuntimeEvents.running
+        && UIF.RuntimeEvents.idleTimeoutMs >= 250
+        && UIF.RuntimeEvents.osSampleIntervalMs >= 250
+        && UIF.RuntimeEvents.pid > 0
+        && UIF.RuntimeEvents.osName.length > 0
+    property bool metricsSvgCompliant: UIF.SvgManager.minimumScale >= 1.0
+        && UIF.SvgManager.maximumScale >= UIF.SvgManager.minimumScale
+        && UIF.SvgManager.cacheSize >= 0
+    property bool metricsPageCompliant: UIF.PageMonitor.count >= 1
+        && UIF.PageMonitor.current.length > 0
+    property int metricsTotalChecks: 6
+    property int metricsPassedChecks: (metricsRenderScaleCompliant ? 1 : 0)
+        + (metricsFontFallbackCompliant ? 1 : 0)
+        + (metricsThemeTextCompliant ? 1 : 0)
+        + (metricsRuntimeCompliant ? 1 : 0)
+        + (metricsSvgCompliant ? 1 : 0)
+        + (metricsPageCompliant ? 1 : 0)
+    property bool metricsPass: metricsPassedChecks === metricsTotalChecks
+    property string metricsSummary: metricsPassedChecks + "/" + metricsTotalChecks
+    property var runtimeSnapshot: ({})
 
     Component.onCompleted: {
         UIF.FontPolicy.enforceApplicationFallback()
@@ -23,6 +57,15 @@ UIF.ApplicationWindow {
         UIF.Debug.log("Main", "font-family", UIF.FontPolicy.effectiveFamily)
         UIF.RenderMonitor.attachWindow(root)
         UIF.PageMonitor.record("/gallery")
+        root.runtimeSnapshot = UIF.RuntimeEvents.snapshot()
+    }
+
+    Timer {
+        id: metricsSampler
+        interval: 500
+        repeat: true
+        running: true
+        onTriggered: root.runtimeSnapshot = UIF.RuntimeEvents.snapshot()
     }
 
     UIF.Alert {
@@ -136,6 +179,50 @@ UIF.ApplicationWindow {
                         UIF.Label {
                             text: "PageMonitor: current=" + UIF.PageMonitor.current
                                 + " count=" + UIF.PageMonitor.count
+                            color: UIF.Theme.textSecondary
+                            font.pixelSize: UIF.Theme.textDescription
+                        }
+
+                        UIF.Label {
+                            text: "Metrics coverage: " + root.metricsSummary + (root.metricsPass ? " PASS" : " FAIL")
+                            color: root.metricsPass ? UIF.Theme.success : UIF.Theme.danger
+                            font.pixelSize: UIF.Theme.textDescription
+                        }
+
+                        UIF.Label {
+                            text: "RenderQuality: enabled=" + UIF.RenderQuality.enabled
+                                + " scale=" + Number(UIF.RenderQuality.effectiveSupersampleScale()).toFixed(2)
+                                + " range=" + Number(UIF.RenderQuality.minimumSupersampleScale).toFixed(2)
+                                + "~" + Number(UIF.RenderQuality.maximumSupersampleScale).toFixed(2)
+                                + " msaa=" + UIF.RenderQuality.msaaSamples
+                            color: UIF.Theme.textSecondary
+                            font.pixelSize: UIF.Theme.textDescription
+                        }
+
+                        UIF.Label {
+                            text: "RuntimeEvents: key=" + UIF.RuntimeEvents.keyPressCount + "/" + UIF.RuntimeEvents.keyReleaseCount
+                                + " mouse=" + UIF.RuntimeEvents.mouseMoveCount + "/" + UIF.RuntimeEvents.mousePressCount + "/" + UIF.RuntimeEvents.mouseReleaseCount
+                                + " ui=" + UIF.RuntimeEvents.uiCreatedCount + "/" + UIF.RuntimeEvents.uiShownCount + "/" + UIF.RuntimeEvents.uiHiddenCount + "/" + UIF.RuntimeEvents.uiDestroyedCount
+                            color: UIF.Theme.textSecondary
+                            font.pixelSize: UIF.Theme.textDescription
+                        }
+
+                        UIF.Label {
+                            text: "Runtime snapshot: pid=" + UIF.RuntimeEvents.pid
+                                + " idleMs=" + UIF.RuntimeEvents.idleForMs
+                                + " uptimeMs=" + (root.runtimeSnapshot.uptimeMs !== undefined ? root.runtimeSnapshot.uptimeMs : 0)
+                                + " rssBytes=" + UIF.RuntimeEvents.rssBytes
+                            color: UIF.Theme.textSecondary
+                            font.pixelSize: UIF.Theme.textDescription
+                        }
+
+                        UIF.Label {
+                            text: "Checks: scale=" + (root.metricsRenderScaleCompliant ? "OK" : "FAIL")
+                                + " font=" + (root.metricsFontFallbackCompliant ? "OK" : "FAIL")
+                                + " text=" + (root.metricsThemeTextCompliant ? "OK" : "FAIL")
+                                + " runtime=" + (root.metricsRuntimeCompliant ? "OK" : "FAIL")
+                                + " svg=" + (root.metricsSvgCompliant ? "OK" : "FAIL")
+                                + " page=" + (root.metricsPageCompliant ? "OK" : "FAIL")
                             color: UIF.Theme.textSecondary
                             font.pixelSize: UIF.Theme.textDescription
                         }

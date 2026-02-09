@@ -1,4 +1,4 @@
-#include "backend/viewmodelregistry.h"
+#include "backend/state/viewmodelregistry.h"
 
 #include <QSet>
 

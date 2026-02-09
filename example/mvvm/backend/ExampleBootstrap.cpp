@@ -5,7 +5,7 @@
 
 #include "ExampleModel.h"
 #include "ExampleViewModel.h"
-#include "backend/viewmodelregistry.h"
+#include "backend/state/viewmodelregistry.h"
 
 void setupExampleViewModel(QQmlEngine *engine)
 {

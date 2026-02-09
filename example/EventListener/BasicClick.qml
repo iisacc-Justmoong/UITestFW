@@ -3,7 +3,7 @@ import UIFramework 1.0 as UIF
 
 UIF.Label {
     text: "Click me"
-    UIF.EventListner {
+    UIF.EventListener {
         trigger: "clicked"
         action: () => console.log("Label clicked")
     }

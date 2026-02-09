@@ -22,9 +22,13 @@ AbstractButton {
     readonly property url resolvedIconSource: control.url.toString().length > 0
         ? control.url
         : control.toneIconSource
-    readonly property string renderedIconSource: SvgManager.icon(
-                                                     control.resolvedIconSource.toString(),
-                                                     control.iconSize)
+    readonly property int iconRevision: SvgManager.revision
+    readonly property string renderedIconSource: {
+        control.iconRevision
+        return SvgManager.icon(
+                    control.resolvedIconSource.toString(),
+                    control.iconSize)
+    }
 
     horizontalPadding: 7
     verticalPadding: 7
@@ -73,7 +77,7 @@ AbstractButton {
             visible: control.iconGlyph.length > 0
             text: control.iconGlyph
             color: control.effectiveEnabled ? control.textColor : control.textColorDisabled
-            font.family: "Pretendard"
+            font.family: Theme.fontBody
             font.pixelSize: control.iconSize
             Layout.alignment: Qt.AlignVCenter
         }
@@ -81,7 +85,7 @@ AbstractButton {
         Text {
             text: control.text
             color: control.effectiveEnabled ? control.textColor : control.textColorDisabled
-            font.family: "Pretendard"
+            font.family: Theme.fontBody
             font.pixelSize: 13
             font.weight: Font.Normal
             elide: Text.ElideRight

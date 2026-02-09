@@ -1,15 +1,15 @@
-# EventListner Examples
+# EventListener Examples
 
-This folder shows **multiple ways** to use `EventListner` in QML. These examples are not built; they
+This folder shows **multiple ways** to use `EventListener` in QML. These examples are not built; they
 are intended as reference snippets.
 
-> Note: component name is `EventListner` (spelled as in code).
+> Note: component name is `EventListener` (spelled as in code).
 
 ---
 
 ## Plain-language explanation (non-developers)
 
-Think of `EventListner` as a tiny “ear” you can place inside any UI element.
+Think of `EventListener` as a tiny “ear” you can place inside any UI element.
 When the element is clicked, hovered, or a key is pressed, the ear hears it
 and runs a simple action (like showing a message).
 
@@ -22,7 +22,7 @@ This lets designers attach behavior without changing the original component.
 ```qml
 UIF.Label {
     text: "Click me"
-    UIF.EventListner {
+    UIF.EventListener {
         trigger: "clicked"
         action: () => console.log("Label clicked")
     }
@@ -36,7 +36,7 @@ UIF.Label {
 ```qml
 Rectangle {
     width: 120; height: 40; color: "#333"
-    UIF.EventListner {
+    UIF.EventListener {
         trigger: "hoverChanged"
         action: (e) => console.log("hover:", e.containsMouse)
     }
@@ -50,11 +50,11 @@ Rectangle {
 ```qml
 UIF.Label {
     text: "Hold"
-    UIF.EventListner {
+    UIF.EventListener {
         trigger: "pressed"
         action: () => console.log("pressed")
     }
-    UIF.EventListner {
+    UIF.EventListener {
         trigger: "released"
         action: () => console.log("released")
     }
@@ -68,7 +68,7 @@ UIF.Label {
 ```qml
 UIF.Label {
     text: "Payload"
-    UIF.EventListner {
+    UIF.EventListener {
         trigger: "clicked"
         payload: { source: "payload-example", value: 42 }
         action: (data) => console.log(data.source, data.value)
@@ -83,7 +83,7 @@ UIF.Label {
 ```qml
 UIF.Label {
     text: "Right click"
-    UIF.EventListner {
+    UIF.EventListener {
         trigger: "clicked"
         acceptedButtons: Qt.RightButton
         action: () => console.log("right click")
@@ -100,7 +100,7 @@ TextInput {
     id: input
     focus: true
 
-    UIF.EventListner {
+    UIF.EventListener {
         trigger: "keyPressed"
         action: (event) => {
             if (event.key === Qt.Key_Return)
@@ -118,17 +118,17 @@ TextInput {
 Rectangle {
     width: 180; height: 60; color: "#222"
 
-    UIF.EventListner {
+    UIF.EventListener {
         trigger: "entered"
         action: () => console.log("hover enter")
     }
 
-    UIF.EventListner {
+    UIF.EventListener {
         trigger: "exited"
         action: () => console.log("hover exit")
     }
 
-    UIF.EventListner {
+    UIF.EventListener {
         trigger: "clicked"
         action: () => console.log("clicked")
     }
@@ -146,7 +146,7 @@ function onAction(tag) {
 
 UIF.Label {
     text: "Reusable"
-    UIF.EventListner {
+    UIF.EventListener {
         trigger: "clicked"
         action: () => onAction("label")
     }

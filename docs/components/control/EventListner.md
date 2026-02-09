@@ -1,38 +1,7 @@
-# EventListner
+# EventListner (Deprecated)
 
-Location: `qml/components/control/util/EventListner.qml`
+This file is kept for backward compatibility with older links.
 
-Lightweight event listener you can embed inside any component to attach trigger → action behavior
-without modifying the parent component.
+Use the canonical documentation instead:
 
-## Triggers
-- `clicked`
-- `pressed`
-- `released`
-- `entered`
-- `exited`
-- `hoverChanged`
-- `keyPressed`
-- `keyReleased`
-
-## Properties
-- `trigger` (string)
-- `action` (function)
-- `payload` (object)
-- `enabled` (bool)
-- `acceptedButtons` (Qt.MouseButton)
-
-## Usage
-```qml
-UIF.Label {
-    text: "Click me"
-    UIF.EventListner {
-        trigger: "clicked"
-        action: () => console.log("clicked")
-    }
-}
-```
-
-## Notes
-- `EventListner` attaches a `MouseArea` to the parent bounds.
-- For keyboard triggers, the parent must be focusable.
+- `docs/components/control/EventListener.md`

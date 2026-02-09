@@ -148,9 +148,12 @@ FocusScope {
 
     MouseArea {
         anchors.fill: parent
+        enabled: control.enabled
         acceptedButtons: Qt.LeftButton
-        cursorShape: Qt.IBeamCursor
+        cursorShape: control.enabled ? Qt.IBeamCursor : Qt.ArrowCursor
         onPressed: function(mouse) {
+            if (!control.enabled)
+                return
             control.forceInputFocus()
             mouse.accepted = false
         }

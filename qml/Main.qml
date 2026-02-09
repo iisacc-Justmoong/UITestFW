@@ -605,7 +605,7 @@ UIF.ApplicationWindow {
 
                 UIF.AppCard {
                     title: "Event Listener"
-                    subtitle: "EventListner trigger handling"
+                    subtitle: "EventListener trigger handling"
                     Layout.fillWidth: true
 
                     ColumnLayout {
@@ -628,7 +628,7 @@ UIF.ApplicationWindow {
                                 font.pixelSize: 13
                             }
 
-                            UIF.EventListner {
+                            UIF.EventListener {
                                 trigger: "clicked"
                                 action: function(mouse) {
                                     root.eventClickCount += 1

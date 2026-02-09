@@ -80,8 +80,9 @@ Controls.AbstractButton {
     property color borderColorHover: control.toneBorderColorHover
     property color borderColorDisabled: "transparent"
 
-    hoverEnabled: true
-    focusPolicy: Qt.StrongFocus
+    hoverEnabled: control.effectiveEnabled
+    focusPolicy: control.effectiveEnabled ? Qt.StrongFocus : Qt.NoFocus
+    activeFocusOnTab: control.effectiveEnabled
 
     leftPadding: horizontalPadding
     rightPadding: horizontalPadding
@@ -91,6 +92,11 @@ Controls.AbstractButton {
 
     implicitHeight: Math.max(36, contentItem.implicitHeight + topPadding + bottomPadding)
     implicitWidth: contentItem.implicitWidth + leftPadding + rightPadding
+
+    onEffectiveEnabledChanged: {
+        if (!control.effectiveEnabled && control.activeFocus)
+            control.focus = false
+    }
 
 
     contentItem: Text {
@@ -120,6 +126,13 @@ Controls.AbstractButton {
                 ? control.borderColorHover
                 : control.borderColor
         border.width: control.borderWidth
+    }
+
+    MouseArea {
+        anchors.fill: parent
+        enabled: !control.effectiveEnabled
+        acceptedButtons: Qt.AllButtons
+        hoverEnabled: enabled
     }
 
     QtObject {

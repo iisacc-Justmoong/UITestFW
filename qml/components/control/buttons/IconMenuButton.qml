@@ -21,9 +21,13 @@ AbstractButton {
             : control.tone === AbstractButton.Borderless
                 ? control.iconSourceBorderless
                 : control.iconSourceDefault
-    readonly property string renderedIconSource: SvgManager.icon(
-                                                     control.resolvedIconSource.toString(),
-                                                     control.iconSize)
+    readonly property int iconRevision: SvgManager.revision
+    readonly property string renderedIconSource: {
+        control.iconRevision
+        return SvgManager.icon(
+                    control.resolvedIconSource.toString(),
+                    control.iconSize)
+    }
     readonly property color indicatorColor: !control.effectiveEnabled
         ? Theme.textOctonary
         : control.tone === AbstractButton.Borderless
@@ -79,7 +83,7 @@ AbstractButton {
             visible: control.iconGlyph.length > 0
             text: control.iconGlyph
             color: control.effectiveEnabled ? control.textColor : control.textColorDisabled
-            font.family: "Pretendard"
+            font.family: Theme.fontBody
             font.pixelSize: control.iconSize
             Layout.alignment: Qt.AlignVCenter
         }

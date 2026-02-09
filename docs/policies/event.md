@@ -2,8 +2,8 @@
 
 **Goal:** Attach behavior without modifying component internals.
 
-## Rule 1 — Use EventListner for ad‑hoc behaviors
-- Place `EventListner { ... }` inside any component to bind triggers to actions.
+## Rule 1 — Use EventListener for ad‑hoc behaviors
+- Place `EventListener { ... }` inside any component to bind triggers to actions.
 - Avoid adding custom `onClicked` logic to base components unless it is core behavior.
 
 ## Rule 2 — Triggers

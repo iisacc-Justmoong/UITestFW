@@ -7,7 +7,7 @@
 
 Q_IMPORT_PLUGIN(UIFrameworkPlugin)
 
-class EventListnerTests : public QObject
+class EventListenerTests : public QObject
 {
     Q_OBJECT
 
@@ -15,7 +15,7 @@ private slots:
     void click_trigger();
 };
 
-void EventListnerTests::click_trigger()
+void EventListenerTests::click_trigger()
 {
     QQmlEngine engine;
     const QString importBase = QDir::cleanPath(QCoreApplication::applicationDirPath() + "/..");
@@ -32,7 +32,7 @@ Item {
 
     Rectangle {
         anchors.fill: parent
-        UIF.EventListner {
+        UIF.EventListener {
             objectName: "listener"
             trigger: "clicked"
             action: () => root.count++
@@ -53,5 +53,5 @@ Item {
     QCOMPARE(object->property("count").toInt(), 1);
 }
 
-QTEST_MAIN(EventListnerTests)
-#include "tst_eventlistner.moc"
+QTEST_MAIN(EventListenerTests)
+#include "tst_eventlistener.moc"

@@ -3,7 +3,7 @@ import UIFramework 1.0 as UIF
 
 UIF.Label {
     text: "Right click"
-    UIF.EventListner {
+    UIF.EventListener {
         trigger: "clicked"
         acceptedButtons: Qt.RightButton
         action: () => console.log("right click")

@@ -1,7 +1,6 @@
 #include "backend/svgmanager.h"
 
 #include <QBuffer>
-#include <QEventLoop>
 #include <QFile>
 #include <QGuiApplication>
 #include <QImage>
@@ -86,10 +85,13 @@ qreal SvgManager::deviceScale() const
 
 void SvgManager::clearCache()
 {
-    if (m_cache.isEmpty())
+    if (m_cache.isEmpty() && m_cacheOrder.isEmpty() && m_sourcePayloadCache.isEmpty())
         return;
     m_cache.clear();
     m_cacheOrder.clear();
+    m_sourcePayloadCache.clear();
+    m_revision += 1;
+    emit revisionChanged();
 }
 
 QString SvgManager::lastError() const
@@ -153,6 +155,11 @@ void SvgManager::setCacheSize(int value)
     emit cacheSizeChanged();
 }
 
+quint64 SvgManager::revision() const
+{
+    return m_revision;
+}
+
 qreal SvgManager::resolveScale(qreal requestedScale) const
 {
     if (requestedScale > 0.0)
@@ -213,14 +220,25 @@ QByteArray SvgManager::loadSvgPayload(const QString &sourceUrl)
         return QUrl::fromPercentEncoding(payload).toUtf8();
     }
 
-    return loadSvgFromUrl(parsed);
+    const QString remoteKey = parsed.toString(QUrl::FullyEncoded);
+    const auto payloadIt = m_sourcePayloadCache.constFind(remoteKey);
+    if (payloadIt != m_sourcePayloadCache.constEnd())
+        return *payloadIt;
+
+    requestSvgFromUrl(parsed, remoteKey);
+    if (m_pendingSourceUrls.contains(remoteKey) && m_lastError.isEmpty())
+        setLastError(QStringLiteral("SVG request pending"));
+    return QByteArray();
 }
 
-QByteArray SvgManager::loadSvgFromUrl(const QUrl &url)
+void SvgManager::requestSvgFromUrl(const QUrl &url, const QString &cacheKey)
 {
+    if (m_pendingSourceUrls.contains(cacheKey))
+        return;
+
     if (!m_network) {
         setLastError(QStringLiteral("Network manager is unavailable"));
-        return QByteArray();
+        return;
     }
 
     QNetworkRequest request(url);
@@ -231,33 +249,37 @@ QByteArray SvgManager::loadSvgFromUrl(const QUrl &url)
 #endif
 
     QNetworkReply *reply = m_network->get(request);
-    QEventLoop loop;
-    QTimer timer;
-    timer.setSingleShot(true);
+    m_pendingSourceUrls.insert(cacheKey);
 
-    connect(&timer, &QTimer::timeout, &loop, &QEventLoop::quit);
-    connect(reply, &QNetworkReply::finished, &loop, &QEventLoop::quit);
+    QTimer::singleShot(6000, reply, [this, reply]() {
+        if (!reply->isFinished()) {
+            reply->abort();
+            setLastError(QStringLiteral("SVG request timed out"));
+        }
+    });
 
-    timer.start(6000);
-    loop.exec();
+    connect(reply, &QNetworkReply::finished, this, [this, reply, cacheKey]() {
+        m_pendingSourceUrls.remove(cacheKey);
 
-    if (!timer.isActive()) {
-        reply->abort();
+        if (reply->error() != QNetworkReply::NoError) {
+            if (reply->error() != QNetworkReply::OperationCanceledError)
+                setLastError(reply->errorString());
+            reply->deleteLater();
+            return;
+        }
+
+        const QByteArray bytes = reply->readAll();
         reply->deleteLater();
-        setLastError(QStringLiteral("SVG request timed out"));
-        return QByteArray();
-    }
+        if (bytes.isEmpty()) {
+            setLastError(QStringLiteral("Received empty SVG payload"));
+            return;
+        }
 
-    if (reply->error() != QNetworkReply::NoError) {
-        const QString errorText = reply->errorString();
-        reply->deleteLater();
-        setLastError(errorText);
-        return QByteArray();
-    }
-
-    const QByteArray bytes = reply->readAll();
-    reply->deleteLater();
-    return bytes;
+        m_sourcePayloadCache.insert(cacheKey, bytes);
+        setLastError(QString());
+        m_revision += 1;
+        emit revisionChanged();
+    });
 }
 
 void SvgManager::insertCache(const QString &key, const QString &value)

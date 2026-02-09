@@ -4,9 +4,11 @@
 #include <QtQml/qqml.h>
 
 #include <QHash>
+#include <QSet>
 #include <QStringList>
 
 class QNetworkAccessManager;
+class QNetworkReply;
 class QUrl;
 
 class SvgManager : public QObject
@@ -19,6 +21,7 @@ class SvgManager : public QObject
     Q_PROPERTY(qreal minimumScale READ minimumScale WRITE setMinimumScale NOTIFY minimumScaleChanged)
     Q_PROPERTY(qreal maximumScale READ maximumScale WRITE setMaximumScale NOTIFY maximumScaleChanged)
     Q_PROPERTY(int cacheSize READ cacheSize WRITE setCacheSize NOTIFY cacheSizeChanged)
+    Q_PROPERTY(quint64 revision READ revision NOTIFY revisionChanged)
 
 public:
     explicit SvgManager(QObject *parent = nullptr);
@@ -38,16 +41,19 @@ public:
     int cacheSize() const;
     void setCacheSize(int value);
 
+    quint64 revision() const;
+
 signals:
     void lastErrorChanged();
     void minimumScaleChanged();
     void maximumScaleChanged();
     void cacheSizeChanged();
+    void revisionChanged();
 
 private:
     qreal resolveScale(qreal requestedScale) const;
     QByteArray loadSvgPayload(const QString &sourceUrl);
-    QByteArray loadSvgFromUrl(const QUrl &url);
+    void requestSvgFromUrl(const QUrl &url, const QString &cacheKey);
     void insertCache(const QString &key, const QString &value);
     void touchCacheKey(const QString &key);
     QString makeCacheKey(const QString &sourceUrl, int logicalSize, qreal scale) const;
@@ -56,8 +62,11 @@ private:
     QNetworkAccessManager *m_network = nullptr;
     QHash<QString, QString> m_cache;
     QStringList m_cacheOrder;
+    QHash<QString, QByteArray> m_sourcePayloadCache;
+    QSet<QString> m_pendingSourceUrls;
     QString m_lastError;
     qreal m_minimumScale = 3.0;
     qreal m_maximumScale = 4.0;
     int m_cacheSize = 256;
+    quint64 m_revision = 0;
 };

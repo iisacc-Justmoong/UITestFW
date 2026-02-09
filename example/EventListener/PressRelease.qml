@@ -11,12 +11,12 @@ Rectangle {
         text: "Hold"
     }
 
-    UIF.EventListner {
+    UIF.EventListener {
         trigger: "pressed"
         action: () => console.log("pressed")
     }
 
-    UIF.EventListner {
+    UIF.EventListener {
         trigger: "released"
         action: () => console.log("released")
     }

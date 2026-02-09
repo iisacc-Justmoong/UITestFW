@@ -8,7 +8,7 @@ TextInput {
     width: 200
     placeholderText: "Press Enter"
 
-    UIF.EventListner {
+    UIF.EventListener {
         trigger: "keyPressed"
         action: (event) => {
             if (event.key === Qt.Key_Return)

@@ -8,7 +8,7 @@ ApplicationWindow {
     visible: true
     width: 520
     height: 520
-    title: "EventListner Examples"
+    title: "EventListener Examples"
 
     ScrollView {
         anchors.fill: parent

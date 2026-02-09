@@ -43,7 +43,7 @@ AbstractButton {
         Text {
             text: control.text
             color: control.effectiveEnabled ? control.textColor : control.textColorDisabled
-            font.family: "Pretendard"
+            font.family: Theme.fontBody
             font.pixelSize: 13
             font.weight: Font.Normal
             elide: Text.ElideRight

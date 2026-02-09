@@ -7,7 +7,7 @@ Rectangle {
     radius: 8
     color: "#2a2a2a"
 
-    UIF.EventListner {
+    UIF.EventListener {
         trigger: "hoverChanged"
         action: (e) => console.log("hover:", e.containsMouse)
     }

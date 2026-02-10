@@ -113,4 +113,4 @@ Item {
 
 // API usage (external):
 // import UIFramework 1.0 as UIF
-// UIF.HStack { spacing: 12; Text { text: "Left" }; Text { text: "Right" } }
+// UIF.HStack { spacing: 12; UIF.Label { text: "Left"; style: body }; UIF.Label { text: "Right"; style: body } }

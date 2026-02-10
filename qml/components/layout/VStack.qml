@@ -113,4 +113,4 @@ Item {
 
 // API usage (external):
 // import UIFramework 1.0 as UIF
-// UIF.VStack { spacing: 8; Text { text: "Title" } }
+// UIF.VStack { spacing: 8; UIF.Label { text: "Title"; style: body } }

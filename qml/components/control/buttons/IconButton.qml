@@ -72,13 +72,15 @@ AbstractButton {
             Layout.alignment: Qt.AlignVCenter
         }
 
-        Text {
+        Label {
+            style: body
             visible: control.iconGlyph.length > 0
             text: control.iconGlyph
             color: control.effectiveEnabled ? control.textColor : control.textColorDisabled
-            font.family: Theme.fontBody
             font.pixelSize: control.iconSize
             font.weight: Font.Normal
+            lineHeight: control.iconSize
+            lineHeightMode: Text.FixedHeight
             Layout.alignment: Qt.AlignVCenter
         }
 

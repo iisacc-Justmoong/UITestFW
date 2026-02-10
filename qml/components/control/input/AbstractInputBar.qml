@@ -158,4 +158,4 @@ FocusScope {
 
 // API usage (external):
 // import UIFramework 1.0 as UIF
-// UIF.AbstractInputBar { placeholderText: "Search"; leadingItems: Text { text: "⌕" } }
+// UIF.AbstractInputBar { placeholderText: "Search"; leadingItems: UIF.Label { text: "⌕"; style: body } }

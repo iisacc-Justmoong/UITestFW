@@ -55,8 +55,8 @@ FocusScope {
     property color selectionColor: Theme.accent
     property color selectedTextColor: Theme.textPrimary
     property color backgroundColor: Theme.subSurface
-    property color backgroundColorFocused: Theme.surfaceSolid
-    property color backgroundColorDisabled: Theme.surfaceAlt
+    property color backgroundColorFocused: backgroundColor
+    property color backgroundColorDisabled: backgroundColor
 
     readonly property int resolvedWrapMode: TextEdit.Wrap
     readonly property int resolvedTextFormat: TextEdit.PlainText
@@ -125,11 +125,7 @@ FocusScope {
         Rectangle {
             anchors.fill: parent
             radius: control.cornerRadius
-            color: !control.enabled
-                ? control.backgroundColorDisabled
-                : control.focused
-                    ? control.backgroundColorFocused
-                    : control.backgroundColor
+            color: control.backgroundColor
         }
 
         Flickable {

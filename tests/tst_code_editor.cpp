@@ -38,6 +38,8 @@ Item {
         && editor.wrapMode === TextEdit.NoWrap
         && editor.textFormat === TextEdit.PlainText
         && editor.fontPixelSize === UIF.Theme.textBody
+        && editor.backgroundColorFocused === editor.backgroundColor
+        && editor.backgroundColorDisabled === editor.backgroundColor
 
     UIF.CodeEditor {
         id: editor

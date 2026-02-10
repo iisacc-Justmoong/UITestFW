@@ -42,8 +42,8 @@ FocusScope {
     property color selectionColor: Theme.accent
     property color selectedTextColor: Theme.textPrimary
     property color backgroundColor: Theme.subSurface
-    property color backgroundColorFocused: Theme.surfaceSolid
-    property color backgroundColorDisabled: Theme.surfaceAlt
+    property color backgroundColorFocused: backgroundColor
+    property color backgroundColorDisabled: backgroundColor
     property color headerTextColor: Theme.textTertiary
 
     property string fontFamily: "monospace"
@@ -98,11 +98,7 @@ FocusScope {
     Rectangle {
         anchors.fill: parent
         radius: control.cornerRadius
-        color: !control.enabled
-            ? control.backgroundColorDisabled
-            : control.focused
-                ? control.backgroundColorFocused
-                : control.backgroundColor
+        color: control.backgroundColor
 
         Label {
             id: snippetMeta

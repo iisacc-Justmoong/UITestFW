@@ -37,6 +37,8 @@ Item {
         && editor.effectiveWrapMode === TextEdit.Wrap
         && editor.effectiveTextFormat === TextEdit.PlainText
         && editor.enforceModeDefaults
+        && editor.backgroundColorFocused === editor.backgroundColor
+        && editor.backgroundColorDisabled === editor.backgroundColor
     property bool bodyTokenReady: editor.fontPixelSize === UIF.Theme.textBody
         && editor.fontWeight === UIF.Theme.textBodyWeight
         && editor.textLineHeight === UIF.Theme.textBodyLineHeight

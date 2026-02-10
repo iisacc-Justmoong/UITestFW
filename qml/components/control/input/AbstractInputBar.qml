@@ -31,8 +31,8 @@ FocusScope {
     property Component cursorDelegate: null
 
     property color backgroundColor: Theme.subSurface
-    property color backgroundColorFocused: Theme.surfaceSolid
-    property color backgroundColorDisabled: Theme.surfaceAlt
+    property color backgroundColorFocused: backgroundColor
+    property color backgroundColorDisabled: backgroundColor
 
     property alias leadingItems: leadingSlot.data
     property alias trailingItems: trailingSlot.data
@@ -58,11 +58,7 @@ FocusScope {
         id: backgroundRect
         anchors.fill: parent
         radius: control.cornerRadius
-        color: !control.enabled
-            ? control.backgroundColorDisabled
-            : control.focused
-                ? control.backgroundColorFocused
-                : control.backgroundColor
+        color: control.backgroundColor
 
         Item {
             id: leadingHost

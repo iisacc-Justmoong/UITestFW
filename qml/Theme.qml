@@ -25,11 +25,22 @@ QtObject {
     //Window
 
     readonly property color window: "#141414"
-    readonly property color windowAlt: "#13161c"
-    readonly property color subSurface: "#282828"
-    readonly property color surfaceSolid: "#38383c"
-    readonly property color surfaceAlt: "#44444b"
-    readonly property color surfaceGhost: "#08FFFFFF"
+
+    // Figma backgrounds (node-id: 147:29, 147:30, 147:31, 147:32, 147:33, 147:34, 147:36, 147:37)
+    readonly property color panelBackground01: "#CC252627" // rgba(37,38,39,0.8)
+    readonly property color panelBackground02: "#B3252627" // rgba(37,38,39,0.7)
+    readonly property color panelBackground03: "#99252627" // rgba(37,38,39,0.6)
+    readonly property color panelBackground04: "#80252627" // rgba(37,38,39,0.5)
+    readonly property color panelBackground05: "#66252627" // rgba(37,38,39,0.4)
+    readonly property color panelBackground06: "#4D252627" // rgba(37,38,39,0.3)
+    readonly property color panelBackground07: "#33252627" // rgba(37,38,39,0.2)
+    readonly property color panelBackground08: "#33252627" // rgba(37,38,39,0.2)
+
+    readonly property color windowAlt: panelBackground08
+    readonly property color subSurface: panelBackground01
+    readonly property color surfaceSolid: panelBackground02
+    readonly property color surfaceAlt: panelBackground03
+    readonly property color surfaceGhost: panelBackground07
 
     //Text Color (Figma tokens: TitleHeader / Body / Description / Caption / Disabled)
 

@@ -14,6 +14,7 @@ class ImportApiTests : public QObject
 private slots:
     void versionless_import_application_window_loads();
     void appshell_compat_loads();
+    void icon_name_mapping_loads();
 };
 
 static QObject *createFromQml(QQmlEngine &engine, const QByteArray &qml)
@@ -131,6 +132,77 @@ UIF.AppShell {
     QCOMPARE(root->property("title").toString(), QStringLiteral("Compat"));
     QCOMPARE(root->property("subtitle").toString(), QStringLiteral("Wrapper"));
     QVERIFY(root->property("navItems").isValid());
+}
+
+void ImportApiTests::icon_name_mapping_loads()
+{
+    QQmlEngine engine;
+    const QString importBase = QDir::cleanPath(QCoreApplication::applicationDirPath() + "/..");
+    engine.addImportPath(importBase);
+    const QByteArray qml = R"(
+import QtQuick
+import UIFramework as UIF
+
+Item {
+    id: root
+
+    property string iconRoot: "qrc:/qt/qml/UIFramework/resources/iconset/"
+    property string expectedByName: iconRoot + "view-more-symbolic-default.svg"
+    property string expectedByExt: iconRoot + "view-more-symbolic-borderless.svg"
+    property string expectedByGroup: iconRoot + "pan-down-symbolic-default.svg"
+    property string expectedByUrl: iconRoot + "pan-down-symbolic-accent.svg"
+    property string expectedMenuByName: iconRoot + "pan-down-symbolic-borderless.svg"
+    property bool themeAddsSvg: UIF.Theme.iconPath("pan-down-symbolic-disabled") === iconRoot + "pan-down-symbolic-disabled.svg"
+    property bool themeKeepsSvg: UIF.Theme.iconPath("pan-down-symbolic-disabled.svg") === iconRoot + "pan-down-symbolic-disabled.svg"
+
+    UIF.IconButton {
+        id: byName
+        iconName: "view-more-symbolic-default"
+        visible: false
+    }
+
+    UIF.IconButton {
+        id: byExt
+        iconName: "view-more-symbolic-borderless.svg"
+        visible: false
+    }
+
+    UIF.IconButton {
+        id: byGroupName
+        icon.name: "pan-down-symbolic-default"
+        visible: false
+    }
+
+    UIF.IconButton {
+        id: byUrl
+        iconSource: root.expectedByUrl
+        iconName: "view-more-symbolic-default"
+        visible: false
+    }
+
+    UIF.IconMenuButton {
+        id: menuByName
+        iconName: "pan-down-symbolic-borderless"
+        visible: false
+    }
+
+    property bool byNameOk: byName.resolvedIconSource.toString() === expectedByName
+    property bool byExtOk: byExt.resolvedIconSource.toString() === expectedByExt
+    property bool byGroupOk: byGroupName.resolvedIconSource.toString() === expectedByGroup
+    property bool byUrlOk: byUrl.resolvedIconSource.toString() === expectedByUrl
+    property bool menuByNameOk: menuByName.resolvedIconSource.toString() === expectedMenuByName
+}
+)";
+
+    QScopedPointer<QObject> root(createFromQml(engine, qml));
+    QVERIFY(root);
+    QVERIFY(root->property("themeAddsSvg").toBool());
+    QVERIFY(root->property("themeKeepsSvg").toBool());
+    QVERIFY(root->property("byNameOk").toBool());
+    QVERIFY(root->property("byExtOk").toBool());
+    QVERIFY(root->property("byGroupOk").toBool());
+    QVERIFY(root->property("byUrlOk").toBool());
+    QVERIFY(root->property("menuByNameOk").toBool());
 }
 
 QTEST_MAIN(ImportApiTests)

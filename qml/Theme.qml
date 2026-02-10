@@ -7,6 +7,20 @@ QtObject {
 
     readonly property string fontBody: FontPolicy.resolveFamily(FontPolicy.preferredFamily)
     readonly property string fontDisplay: FontPolicy.resolveFamily(FontPolicy.preferredFamily)
+    readonly property string iconSetBasePath: "qrc:/qt/qml/UIFramework/resources/iconset/"
+
+    function iconPath(iconName) {
+        const rawName = iconName === undefined || iconName === null ? "" : String(iconName)
+        const trimmedName = rawName.trim()
+        if (trimmedName.length === 0)
+            return ""
+        if (trimmedName.indexOf(":/") !== -1)
+            return trimmedName
+        const lowerName = trimmedName.toLowerCase()
+        if (lowerName.length >= 4 && lowerName.lastIndexOf(".svg") === lowerName.length - 4)
+            return iconSetBasePath + trimmedName
+        return iconSetBasePath + trimmedName + ".svg"
+    }
 
     //Window
 

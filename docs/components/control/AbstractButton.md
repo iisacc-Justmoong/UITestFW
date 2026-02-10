@@ -9,8 +9,7 @@ Base button for all custom controls. Provides theme-driven colors and padding.
 - `effectiveEnabled` (derived: `enabled && tone !== Disabled`)
 - `textColor`, `textColorDisabled`
 - `backgroundColor`, `backgroundColorHover`, `backgroundColorPressed`, `backgroundColorDisabled`
-- `borderColor`, `borderColorHover`, `borderColorDisabled`
-- `horizontalPadding`, `verticalPadding`, `cornerRadius`, `borderWidth`
+- `horizontalPadding`, `verticalPadding`, `cornerRadius`
 
 ## Tone
 `AbstractButton.ButtonTone` supports:

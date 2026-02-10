@@ -48,16 +48,14 @@ AbstractButton {
             anchors.fill: parent
         }
 
-        Text {
+        Label {
+            style: description
             id: textFallback
             visible: contentSlot.children.length === 0
             text: control.text
             color: control.enabled
                 ? (control.hovered ? control.hoverColor : control.linkColor)
                 : control.disabledColor
-            font.family: Theme.fontBody
-            font.pixelSize: Theme.textDescription
-            font.weight: Theme.textDescriptionWeight
             font.underline: control.underline
             anchors.verticalCenter: parent.verticalCenter
             anchors.left: parent.left
@@ -71,4 +69,4 @@ AbstractButton {
 
 // API usage (external):
 // import UIFramework 1.0 as UIF
-// UIF.Link { href: "/reports"; router: pageRouter; Text { text: "Reports" } }
+// UIF.Link { href: "/reports"; router: pageRouter; UIF.Label { text: "Reports"; style: description } }

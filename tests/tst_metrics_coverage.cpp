@@ -411,6 +411,7 @@ UIF.ApplicationWindow {
         && UIF.Theme.isThemeTextStyleCompliant(UIF.Theme.textBody, UIF.Theme.textBodyWeight, UIF.Theme.textBodyStyleName)
         && UIF.Theme.isThemeTextStyleCompliant(UIF.Theme.textDescription, UIF.Theme.textDescriptionWeight, UIF.Theme.textDescriptionStyleName)
         && UIF.Theme.isThemeTextStyleCompliant(UIF.Theme.textCaption, UIF.Theme.textCaptionWeight, UIF.Theme.textCaptionStyleName)
+        && UIF.Theme.isThemeTextStyleCompliant(UIF.Theme.textDisabled, UIF.Theme.textDisabledWeight, UIF.Theme.textDisabledStyleName)
 }
 )";
 

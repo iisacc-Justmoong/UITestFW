@@ -52,7 +52,6 @@ AbstractButton {
     topPadding: 0
     bottomPadding: 0
     spacing: Theme.gapNone
-    borderWidth: 0
     backgroundColor: "transparent"
     backgroundColorHover: "transparent"
     backgroundColorPressed: "transparent"
@@ -71,7 +70,6 @@ AbstractButton {
             height: control.indicatorSize
             radius: width / 2
             color: control.indicatorColor
-            border.width: Theme.gapNone
             antialiasing: true
 
             Rectangle {
@@ -85,12 +83,10 @@ AbstractButton {
             }
         }
 
-        Text {
+        Label {
+            style: body
             text: control.text
             color: control.enabled ? Theme.textPrimary : Theme.textOctonary
-            font.family: Theme.fontBody
-            font.pixelSize: Theme.textBody
-            font.weight: Theme.textBodyWeight
             visible: control.text.length > 0
             Layout.alignment: Qt.AlignVCenter
             elide: Text.ElideRight

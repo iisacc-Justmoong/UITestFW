@@ -46,8 +46,6 @@ Item {
         width: Math.min(root.maxWidth, Math.max(root.minWidth, root.width - (Theme.gap24 * 2)))
         radius: Theme.radiusLg
         color: Theme.surfaceSolid
-        border.color: Theme.surfaceAlt
-        border.width: Theme.strokeThin
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.verticalCenter: parent.verticalCenter
 
@@ -61,24 +59,20 @@ Item {
                 spacing: Theme.gap6
 
                 Label {
+                    style: header2
                     text: root.title
                     visible: root.title.length > 0
                     color: Theme.textPrimary
-                    font.family: Theme.fontDisplay
-                    font.pixelSize: Theme.textBodyLg
-                    font.weight: Theme.textBodyLgWeight
                     wrapMode: Text.WordWrap
                     Layout.fillWidth: true
                     horizontalAlignment: Text.AlignHCenter
                 }
 
                 Label {
+                    style: description
                     text: root.message
                     visible: root.message.length > 0
                     color: Theme.textSecondary
-                    font.family: Theme.fontBody
-                    font.pixelSize: Theme.textDescription
-                    font.weight: Theme.textDescriptionWeight
                     wrapMode: Text.WordWrap
                     Layout.fillWidth: true
                     horizontalAlignment: Text.AlignHCenter
@@ -108,7 +102,6 @@ Item {
                     backgroundColor: "transparent"
                     backgroundColorHover: Theme.surfaceAlt
                     backgroundColorPressed: Theme.surfaceAlt
-                    borderColor: Theme.surfaceAlt
                     onClicked: root.secondaryClicked()
                 }
 
@@ -121,7 +114,6 @@ Item {
                     backgroundColorHover: Theme.accent
                     backgroundColorPressed: Theme.accent
                     textColor: Theme.textPrimary
-                    borderWidth: Theme.gapNone
                     onClicked: root.primaryClicked()
                 }
             }

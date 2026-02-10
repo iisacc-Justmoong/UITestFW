@@ -18,7 +18,6 @@ Controls.Switch {
     property color disabledTrackColor: Theme.surfaceAlt
     property color trackShadowColor: Theme.shadowStrong
     property color knobFillColor: Theme.textPrimary
-    property color knobStrokeColor: Theme.strokeSoft
     readonly property int knobXOff: trackPadding
     readonly property int knobXOn: Math.max(trackPadding, trackWidth - knobSize - trackPadding)
 
@@ -53,7 +52,6 @@ Controls.Switch {
                 : control.checked
                     ? control.onColor
                     : control.offColor
-            border.width: Theme.gapNone
             antialiasing: true
         }
 
@@ -86,23 +84,17 @@ Controls.Switch {
                     ctx.arc(width * 0.5, height * 0.5, radius, 0, Math.PI * 2, false)
                     ctx.fillStyle = control.knobFillColor
                     ctx.fill()
-                    ctx.lineWidth = 1.5
-                    ctx.strokeStyle = control.knobStrokeColor
-                    ctx.stroke()
                 }
             }
         }
     }
 
     onKnobFillColorChanged: knobCanvas.requestPaint()
-    onKnobStrokeColorChanged: knobCanvas.requestPaint()
 
-    contentItem: Text {
+    contentItem: Label {
+        style: body
         text: control.text
         color: control.enabled ? Theme.textPrimary : Theme.textOctonary
-        font.family: Theme.fontBody
-        font.pixelSize: Theme.textBody
-        font.weight: Theme.textBodyWeight
         verticalAlignment: Text.AlignVCenter
         visible: control.text.length > 0
         elide: Text.ElideRight

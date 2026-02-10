@@ -21,7 +21,6 @@ AbstractInputBar {
     insetVertical: Theme.gap3
     sideSpacing: Theme.gap5
     cornerRadius: Theme.radiusControl
-    borderWidth: 0
 
     textColor: Theme.textPrimary
     textColorDisabled: Theme.textOctonary
@@ -32,10 +31,6 @@ AbstractInputBar {
     backgroundColor: Theme.subSurface
     backgroundColorFocused: Theme.subSurface
     backgroundColorDisabled: Theme.subSurface
-
-    borderColor: "transparent"
-    borderColorFocused: "transparent"
-    borderColorDisabled: "transparent"
 
     selectionColor: Theme.accent
     selectedTextColor: Theme.textPrimary

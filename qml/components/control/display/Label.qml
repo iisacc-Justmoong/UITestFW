@@ -1,14 +1,149 @@
 import QtQuick
 import UIFramework 1.0
 
-Text {
+Item {
     id: control
 
-    color: Theme.textPrimary
-    font.family: Theme.fontBody
-    font.pixelSize: Theme.textDescription
-    font.weight: Theme.textDescriptionWeight
-    elide: Text.ElideRight
+    // Style constants for API usage: UIF.Label { style: body }
+    readonly property int title: 0
+    readonly property int title2: 1
+    readonly property int header: 2
+    readonly property int header2: 3
+    readonly property int body: 4
+    readonly property int description: 5
+    readonly property int caption: 6
+    readonly property int disabled: 7
+
+    property int style: description
+
+    readonly property color resolvedStyleColor: {
+        if (style === title || style === title2 || style === header || style === header2)
+            return Theme.titleHeaderColor
+        if (style === body)
+            return Theme.bodyColor
+        if (style === caption)
+            return Theme.captionColor
+        if (style === disabled)
+            return Theme.disabledColor
+        return Theme.descriptionColor
+    }
+    readonly property int stylePixelSize: {
+        if (style === title)
+            return Theme.textTitle
+        if (style === title2)
+            return Theme.textTitle2
+        if (style === header)
+            return Theme.textHeader
+        if (style === header2)
+            return Theme.textHeader2
+        if (style === body)
+            return Theme.textBody
+        if (style === caption || style === disabled)
+            return Theme.textCaption
+        return Theme.textDescription
+    }
+    readonly property int styleWeight: {
+        if (style === title)
+            return Theme.textTitleWeight
+        if (style === title2)
+            return Theme.textTitle2Weight
+        if (style === header)
+            return Theme.textHeaderWeight
+        if (style === header2)
+            return Theme.textHeader2Weight
+        if (style === body)
+            return Theme.textBodyWeight
+        if (style === caption || style === disabled)
+            return Theme.textCaptionWeight
+        return Theme.textDescriptionWeight
+    }
+    readonly property string styleName: {
+        if (style === title)
+            return Theme.textTitleStyleName
+        if (style === title2)
+            return Theme.textTitle2StyleName
+        if (style === header)
+            return Theme.textHeaderStyleName
+        if (style === header2)
+            return Theme.textHeader2StyleName
+        if (style === body)
+            return Theme.textBodyStyleName
+        if (style === caption || style === disabled)
+            return Theme.textCaptionStyleName
+        return Theme.textDescriptionStyleName
+    }
+    readonly property int styleLineHeight: {
+        if (style === title)
+            return Theme.textTitleLineHeight
+        if (style === title2)
+            return Theme.textTitle2LineHeight
+        if (style === header)
+            return Theme.textHeaderLineHeight
+        if (style === header2)
+            return Theme.textHeader2LineHeight
+        if (style === body)
+            return Theme.textBodyLineHeight
+        if (style === caption || style === disabled)
+            return Theme.textCaptionLineHeight
+        return Theme.textDescriptionLineHeight
+    }
+    readonly property real styleLetterSpacing: {
+        if (style === title)
+            return Theme.textTitleLetterSpacing
+        if (style === title2)
+            return Theme.textTitle2LetterSpacing
+        if (style === header)
+            return Theme.textHeaderLetterSpacing
+        if (style === header2)
+            return Theme.textHeader2LetterSpacing
+        if (style === body)
+            return Theme.textBodyLetterSpacing
+        if (style === caption || style === disabled)
+            return Theme.textCaptionLetterSpacing
+        return Theme.textDescriptionLetterSpacing
+    }
+
+    property alias text: textNode.text
+    property alias color: textNode.color
+    property alias font: textNode.font
+    property alias elide: textNode.elide
+    property alias wrapMode: textNode.wrapMode
+    property alias horizontalAlignment: textNode.horizontalAlignment
+    property alias verticalAlignment: textNode.verticalAlignment
+    property alias lineHeight: textNode.lineHeight
+    property alias lineHeightMode: textNode.lineHeightMode
+    property alias maximumLineCount: textNode.maximumLineCount
+    property alias minimumPixelSize: textNode.minimumPixelSize
+    property alias minimumPointSize: textNode.minimumPointSize
+    property alias fontSizeMode: textNode.fontSizeMode
+    property alias renderType: textNode.renderType
+    property alias styleColor: textNode.styleColor
+    property alias textFormat: textNode.textFormat
+    property alias linkColor: textNode.linkColor
+
+    implicitWidth: textNode.implicitWidth
+    implicitHeight: textNode.implicitHeight
+
+    Text {
+        id: textNode
+        width: control.width > 0 ? control.width : implicitWidth
+        height: control.height > 0 ? control.height : implicitHeight
+        color: control.resolvedStyleColor
+        font.family: Theme.fontBody
+        font.pixelSize: control.stylePixelSize
+        font.weight: control.styleWeight
+        font.styleName: control.styleName
+        font.letterSpacing: control.styleLetterSpacing
+        lineHeight: control.styleLineHeight
+        lineHeightMode: Text.FixedHeight
+        elide: Text.ElideRight
+    }
+
+    onStyleChanged: {
+        if (!Theme.isThemeTextStyleCompliant(stylePixelSize, styleWeight, styleName))
+            Debug.warn("Label", "style-noncompliant", stylePixelSize, styleWeight, styleName)
+    }
+
     QtObject {
         Component.onCompleted: Debug.log("Label", "created")
     }
@@ -17,4 +152,4 @@ Text {
 
 // API usage (external):
 // import UIFramework 1.0 as UIF
-// UIF.Label { text: "Label" }
+// UIF.Label { text: "Label"; style: body }

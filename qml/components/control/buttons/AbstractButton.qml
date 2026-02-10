@@ -48,25 +48,9 @@ Controls.AbstractButton {
             return Theme.accent
         return Theme.accent
     }
-    readonly property color toneBorderColor: {
-        if (tone === AbstractButton.Borderless)
-            return "transparent"
-        if (tone === AbstractButton.Accent)
-            return Qt.darker(Theme.accent, 1.2)
-        if (tone === AbstractButton.Destructive)
-            return Qt.darker(Theme.danger, 1.2)
-        return Theme.surfaceAlt
-    }
-    readonly property color toneBorderColorHover: {
-        if (tone === AbstractButton.Borderless)
-            return "transparent"
-        return Theme.surfaceAlt
-    }
-
     horizontalPadding: Theme.gap14
     verticalPadding: Theme.gap10
     property int cornerRadius: Theme.radiusMd
-    property int borderWidth: Theme.strokeThin
 
     property color textColor: control.toneTextColor
     property color textColorDisabled: Theme.textOctonary
@@ -75,10 +59,6 @@ Controls.AbstractButton {
     property color backgroundColorHover: control.toneBackgroundColorHover
     property color backgroundColorPressed: control.toneBackgroundColorPressed
     property color backgroundColorDisabled: Theme.subSurface
-
-    property color borderColor: control.toneBorderColor
-    property color borderColorHover: control.toneBorderColorHover
-    property color borderColorDisabled: "transparent"
 
     hoverEnabled: control.effectiveEnabled
     focusPolicy: control.effectiveEnabled ? Qt.StrongFocus : Qt.NoFocus
@@ -99,12 +79,10 @@ Controls.AbstractButton {
     }
 
 
-    contentItem: Text {
+    contentItem: Label {
+        style: description
         text: control.text
         color: control.effectiveEnabled ? control.textColor : control.textColorDisabled
-        font.family: Theme.fontBody
-        font.pixelSize: Theme.textDescription
-        font.weight: Theme.textDescriptionWeight
         horizontalAlignment: Text.AlignHCenter
         verticalAlignment: Text.AlignVCenter
         elide: Text.ElideRight
@@ -120,12 +98,6 @@ Controls.AbstractButton {
                 : control.hovered
                     ? control.backgroundColorHover
                     : control.backgroundColor
-        border.color: !control.effectiveEnabled
-            ? control.borderColorDisabled
-            : control.hovered
-                ? control.borderColorHover
-                : control.borderColor
-        border.width: control.borderWidth
     }
 
     MouseArea {

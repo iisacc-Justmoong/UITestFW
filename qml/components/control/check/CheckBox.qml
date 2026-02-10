@@ -11,11 +11,9 @@ AbstractButton {
     property int boxSize: Theme.controlIndicatorSize
     property color checkColor: Theme.textPrimary
     property color checkedColor: Theme.accent
-    property color uncheckedColor: "transparent"
+    property color uncheckedColor: Theme.surfaceAlt
     property color disabledCheckedColor: Theme.surfaceAlt
-    property color disabledUncheckedColor: "transparent"
-    property color boxBorderColor: Theme.surfaceAlt
-    property color boxBorderColorDisabled: Theme.surfaceAlt
+    property color disabledUncheckedColor: Theme.subSurface
     property color checkMarkColorDisabled: Theme.textTertiary
     property int checkMarkStrokeWidth: Theme.gap2
 
@@ -24,7 +22,6 @@ AbstractButton {
     topPadding: 0
     bottomPadding: 0
     spacing: Theme.gapNone
-    borderWidth: 0
     backgroundColor: "transparent"
     backgroundColorHover: "transparent"
     backgroundColorPressed: "transparent"
@@ -45,8 +42,6 @@ AbstractButton {
             color: control.enabled
                 ? (control.checked ? control.checkedColor : control.uncheckedColor)
                 : (control.checked ? control.disabledCheckedColor : control.disabledUncheckedColor)
-            border.color: control.enabled ? control.boxBorderColor : control.boxBorderColorDisabled
-            border.width: Theme.strokeThin
             antialiasing: true
 
             Canvas {
@@ -74,12 +69,10 @@ AbstractButton {
             }
         }
 
-        Text {
+        Label {
+            style: description
             text: control.text
             color: control.enabled ? Theme.textPrimary : Theme.textTertiary
-            font.family: Theme.fontBody
-            font.pixelSize: Theme.textDescription
-            font.weight: Theme.textDescriptionWeight
             visible: control.text.length > 0
             Layout.alignment: Qt.AlignVCenter
         }

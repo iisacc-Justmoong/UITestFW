@@ -40,7 +40,6 @@ AbstractButton {
     verticalPadding: Theme.gap7
     spacing: Theme.gap4
     cornerRadius: Theme.radiusMd
-    borderWidth: 0
     implicitHeight: contentItem.implicitHeight + topPadding + bottomPadding
     implicitWidth: contentItem.implicitWidth + leftPadding + rightPadding
 

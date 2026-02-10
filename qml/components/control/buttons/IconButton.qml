@@ -34,7 +34,6 @@ AbstractButton {
     verticalPadding: Theme.gap7
     spacing: Theme.gapNone
     cornerRadius: Theme.radiusMd
-    borderWidth: 0
     implicitHeight: contentItem.implicitHeight + topPadding + bottomPadding
     implicitWidth: contentItem.implicitWidth + leftPadding + rightPadding
 
@@ -83,12 +82,10 @@ AbstractButton {
             Layout.alignment: Qt.AlignVCenter
         }
 
-        Text {
+        Label {
+            style: body
             text: control.text
             color: control.effectiveEnabled ? control.textColor : control.textColorDisabled
-            font.family: Theme.fontBody
-            font.pixelSize: Theme.textBody
-            font.weight: Theme.textBodyWeight
             elide: Text.ElideRight
             visible: control.text.length > 0
             Layout.alignment: Qt.AlignVCenter

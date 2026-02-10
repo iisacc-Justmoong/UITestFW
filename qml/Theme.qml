@@ -15,15 +15,34 @@ QtObject {
     readonly property color subSurface: "#282828"
     readonly property color surfaceSolid: "#38383c"
     readonly property color surfaceAlt: "#44444b"
-    readonly property color surfaceGhost: Qt.rgba(255 / 255, 255 / 255, 255 / 255, 0.03)
+    readonly property color surfaceGhost: "#08FFFFFF"
 
-    //Text
+    //Text Color (Figma tokens: TitleHeader / Body / Description / Caption / Disabled)
 
-    readonly property color textPrimary: "#FFFFFF"
-    readonly property color textSecondary: "#F6F5F4"
-    readonly property color textTertiary: "#DEDDDA"
-    readonly property color textSeptenary: "#C0BFBC"
-    readonly property color textOctonary: "#9A9996"
+    readonly property color textTokenBase: "#FFFFFF"
+    readonly property real textTokenTitleHeaderOpacity: 0.9
+    readonly property real textTokenBodyOpacity: 0.8
+    readonly property real textTokenDescriptionOpacity: 0.6
+    readonly property real textTokenCaptionOpacity: 0.5
+    readonly property real textTokenDisabledOpacity: 0.3
+
+    readonly property color textTokenTitleHeader: "#E5FFFFFF"
+    readonly property color textTokenBody: "#CCFFFFFF"
+    readonly property color textTokenDescription: "#99FFFFFF"
+    readonly property color textTokenCaption: "#80FFFFFF"
+    readonly property color textTokenDisabled: "#4DFFFFFF"
+
+    readonly property color titleHeaderColor: textTokenTitleHeader
+    readonly property color bodyColor: textTokenBody
+    readonly property color descriptionColor: textTokenDescription
+    readonly property color captionColor: textTokenCaption
+    readonly property color disabledColor: textTokenDisabled
+
+    readonly property color textPrimary: titleHeaderColor
+    readonly property color textSecondary: bodyColor
+    readonly property color textTertiary: descriptionColor
+    readonly property color textSeptenary: captionColor
+    readonly property color textOctonary: disabledColor
 
     //Primary
 
@@ -31,11 +50,11 @@ QtObject {
     readonly property color success: "#32d74b"
     readonly property color warning: "#ffd60a"
     readonly property color danger: "#ff453a"
-    readonly property color accentTint: Qt.rgba(10 / 255, 132 / 255, 255 / 255, 0.12)
-    readonly property color dangerTint: Qt.rgba(255 / 255, 69 / 255, 58 / 255, 0.12)
-    readonly property color accentOverlay: Qt.rgba(10 / 255, 132 / 255, 255 / 255, 0.25)
-    readonly property color dangerOverlay: Qt.rgba(255 / 255, 69 / 255, 58 / 255, 0.35)
-    readonly property color overlayBackdrop: Qt.rgba(0, 0, 0, 0.35)
+    readonly property color accentTint: "#1F0A84FF"
+    readonly property color dangerTint: "#1FFF453A"
+    readonly property color accentOverlay: "#400A84FF"
+    readonly property color dangerOverlay: "#59FF453A"
+    readonly property color overlayBackdrop: "#59000000"
     readonly property color shadowStrong: "#40000000"
     readonly property color strokeSoft: "#D0D7E2"
 
@@ -136,6 +155,12 @@ QtObject {
     readonly property string textCaptionStyleName: "Regular"
     readonly property int textCaptionLineHeight: 11
     readonly property real textCaptionLetterSpacing: 0
+
+    readonly property int textDisabled: textCaption
+    readonly property int textDisabledWeight: textCaptionWeight
+    readonly property string textDisabledStyleName: textCaptionStyleName
+    readonly property int textDisabledLineHeight: textCaptionLineHeight
+    readonly property real textDisabledLetterSpacing: textCaptionLetterSpacing
 
     readonly property int textOverline: textCaption
     readonly property int textOverlineWeight: textCaptionWeight

@@ -20,7 +20,6 @@ FocusScope {
     property int sideSpacing: Theme.gap8
 
     property int cornerRadius: Theme.radiusMd
-    property int borderWidth: Theme.strokeThin
 
     property color textColor: Theme.textPrimary
     property color textColorDisabled: Theme.textTertiary
@@ -34,10 +33,6 @@ FocusScope {
     property color backgroundColor: Theme.subSurface
     property color backgroundColorFocused: Theme.surfaceSolid
     property color backgroundColorDisabled: Theme.surfaceAlt
-
-    property color borderColor: Theme.surfaceAlt
-    property color borderColorFocused: Theme.accent
-    property color borderColorDisabled: Theme.surfaceAlt
 
     property alias leadingItems: leadingSlot.data
     property alias trailingItems: trailingSlot.data
@@ -68,12 +63,6 @@ FocusScope {
             : control.focused
                 ? control.backgroundColorFocused
                 : control.backgroundColor
-        border.width: control.borderWidth
-        border.color: !control.enabled
-            ? control.borderColorDisabled
-            : control.focused
-                ? control.borderColorFocused
-                : control.borderColor
 
         Item {
             id: leadingHost
@@ -133,7 +122,8 @@ FocusScope {
         Keys.onEnterPressed: control.accepted(text)
     }
 
-    Text {
+    Label {
+        style: body
         id: placeholderLabel
         anchors.left: inputField.left
         anchors.right: inputField.right

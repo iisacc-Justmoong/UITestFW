@@ -19,8 +19,6 @@ ToolBar {
 
     background: Rectangle {
         color: Theme.windowAlt
-        border.color: Theme.surfaceAlt
-        border.width: Theme.strokeThin
     }
 
     RowLayout {
@@ -35,19 +33,15 @@ ToolBar {
             text: "Menu"
             padding: Theme.gap10
 
-            contentItem: Text {
+            contentItem: Label {
+                style: description
                 text: menuButton.text
                 color: Theme.textPrimary
-                font.family: Theme.fontBody
-                font.pixelSize: Theme.textDescription
-                font.weight: Theme.textDescriptionWeight
             }
 
             background: Rectangle {
                 radius: Theme.radiusSm
                 color: menuButton.down ? Theme.surfaceAlt : Theme.surfaceSolid
-                border.color: Theme.surfaceAlt
-                border.width: Theme.strokeThin
             }
 
             onClicked: {
@@ -60,22 +54,18 @@ ToolBar {
             Layout.fillWidth: true
 
             Label {
+                style: title2
                 text: root.title
                 color: Theme.textPrimary
-                font.family: Theme.fontDisplay
-                font.pixelSize: Theme.textDisplay
-                font.weight: Theme.textDisplayWeight
                 elide: Text.ElideRight
                 Layout.fillWidth: true
             }
 
             Label {
+                style: description
                 visible: root.subtitle.length > 0
                 text: root.subtitle
                 color: Theme.textSecondary
-                font.family: Theme.fontBody
-                font.pixelSize: Theme.textDescription
-                font.weight: Theme.textDescriptionWeight
                 elide: Text.ElideRight
                 Layout.fillWidth: true
             }

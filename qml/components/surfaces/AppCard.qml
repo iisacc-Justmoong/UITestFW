@@ -27,8 +27,6 @@ Rectangle {
 
     radius: Theme.radiusLg
     color: Theme.surfaceSolid
-    border.color: Theme.surfaceAlt
-    border.width: Theme.strokeThin
 
     ColumnLayout {
         anchors.fill: parent
@@ -41,22 +39,18 @@ Rectangle {
             Layout.fillWidth: true
 
             Label {
+                style: header
                 text: root.title
                 color: Theme.textPrimary
-                font.family: Theme.fontDisplay
-                font.pixelSize: Theme.textHeader
-                font.weight: Theme.textHeaderWeight
                 elide: Text.ElideRight
                 Layout.fillWidth: true
             }
 
             Label {
+                style: description
                 visible: root.subtitle.length > 0
                 text: root.subtitle
                 color: Theme.textSecondary
-                font.family: Theme.fontBody
-                font.pixelSize: Theme.textDescription
-                font.weight: Theme.textDescriptionWeight
                 elide: Text.ElideRight
                 Layout.fillWidth: true
             }

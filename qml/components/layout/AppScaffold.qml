@@ -72,20 +72,16 @@ Item {
                 Layout.fillWidth: true
 
                 Label {
+                    style: description
                     visible: itemIcon.length > 0
                     text: itemIcon
                     color: control.highlighted ? Theme.textPrimary : Theme.textTertiary
-                    font.family: Theme.fontDisplay
-                    font.pixelSize: Theme.textDescription
-                    font.weight: Theme.textDescriptionWeight
                 }
 
                 Label {
+                    style: body
                     text: control.text
                     color: control.highlighted ? Theme.textPrimary : Theme.textSecondary
-                    font.family: Theme.fontBody
-                    font.pixelSize: Theme.textBody
-                    font.weight: Theme.textBodyWeight
                     Layout.fillWidth: true
                     elide: Text.ElideRight
                 }
@@ -98,13 +94,11 @@ Item {
                     Layout.preferredWidth: Math.max(Theme.textDisplaySm, badgeText.implicitWidth + Theme.gap10)
 
                     Label {
+                        style: caption
                         id: badgeText
                         anchors.centerIn: parent
                         text: itemBadge
                         color: control.highlighted ? Theme.textPrimary : Theme.textPrimary
-                        font.family: Theme.fontBody
-                        font.pixelSize: Theme.textOverline
-                        font.weight: Theme.textOverlineWeight
                     }
                 }
             }
@@ -112,8 +106,6 @@ Item {
             background: Rectangle {
                 radius: Theme.radiusSm
                 color: control.highlighted ? Theme.accent : "transparent"
-                border.color: control.highlighted ? Theme.surfaceAlt : "transparent"
-                border.width: Theme.strokeThin
             }
 
             onClicked: {
@@ -148,20 +140,16 @@ Item {
                 Layout.fillWidth: true
 
                 Label {
+                    style: description
                     visible: itemIcon.length > 0
                     text: itemIcon
                     color: control.highlighted ? Theme.textPrimary : Theme.textTertiary
-                    font.family: Theme.fontDisplay
-                    font.pixelSize: Theme.textDescription
-                    font.weight: Theme.textDescriptionWeight
                 }
 
                 Label {
+                    style: body
                     text: control.text
                     color: control.highlighted ? Theme.textPrimary : Theme.textSecondary
-                    font.family: Theme.fontBody
-                    font.pixelSize: Theme.textBody
-                    font.weight: Theme.textBodyWeight
                     Layout.fillWidth: true
                     elide: Text.ElideRight
                 }
@@ -174,13 +162,11 @@ Item {
                     Layout.preferredWidth: Math.max(Theme.textDisplaySm, badgeText.implicitWidth + Theme.gap10)
 
                     Label {
+                        style: caption
                         id: badgeText
                         anchors.centerIn: parent
                         text: itemBadge
                         color: control.highlighted ? Theme.textPrimary : Theme.textPrimary
-                        font.family: Theme.fontBody
-                        font.pixelSize: Theme.textOverline
-                        font.weight: Theme.textOverlineWeight
                     }
                 }
             }
@@ -188,8 +174,6 @@ Item {
             background: Rectangle {
                 radius: Theme.radiusSm
                 color: control.highlighted ? Theme.accent : "transparent"
-                border.color: control.highlighted ? Theme.surfaceAlt : "transparent"
-                border.width: Theme.strokeThin
             }
 
             onClicked: {
@@ -266,8 +250,6 @@ Item {
                 anchors.margins: Theme.radiusXl
                 radius: Theme.radiusLg
                 color: Theme.surfaceSolid
-                border.color: Theme.surfaceAlt
-                border.width: Theme.strokeThin
 
                 ColumnLayout {
                     anchors.fill: parent
@@ -282,13 +264,10 @@ Item {
                     }
 
                     Label {
+                        style: caption
                         visible: root.navTitleVisible
                         text: root.navTitle
                         color: Theme.textTertiary
-                        font.family: Theme.fontBody
-                        font.pixelSize: Theme.textCaption
-                        font.weight: Theme.textCaptionWeight
-                        font.letterSpacing: Theme.textCaptionLetterSpacing
                     }
 
                     Repeater {
@@ -318,8 +297,6 @@ Item {
                 anchors.fill: contentWrap
                 radius: Theme.radiusXl
                 color: Theme.surfaceAlt
-                border.color: Theme.surfaceAlt
-                border.width: Theme.strokeThin
             }
 
             Item {
@@ -340,8 +317,6 @@ Item {
 
         background: Rectangle {
             color: Theme.surfaceSolid
-            border.color: Theme.surfaceAlt
-            border.width: Theme.strokeThin
         }
 
         ColumnLayout {
@@ -350,11 +325,9 @@ Item {
             spacing: Theme.gap12
 
             Label {
+                style: header
                 text: root.headerTitle
                 color: Theme.textPrimary
-                font.family: Theme.fontDisplay
-                font.pixelSize: Theme.textDisplaySm
-                font.weight: Theme.textDisplaySmWeight
             }
 
             Loader {
@@ -365,13 +338,10 @@ Item {
             }
 
             Label {
+                style: caption
                 visible: root.navTitleVisible
                 text: root.navTitle
                 color: Theme.textTertiary
-                font.family: Theme.fontBody
-                font.pixelSize: Theme.textCaption
-                font.weight: Theme.textCaptionWeight
-                font.letterSpacing: Theme.textCaptionLetterSpacing
             }
 
             Repeater {

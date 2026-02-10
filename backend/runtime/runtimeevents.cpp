@@ -272,8 +272,6 @@ void RuntimeEvents::stop()
     if (qApp)
         qApp->removeEventFilter(this);
 
-    if (m_window)
-        m_window->removeEventFilter(this);
     m_window.clear();
 
     detachTrackedObjects();
@@ -295,13 +293,9 @@ void RuntimeEvents::attachWindow(QObject *window)
     if (m_window == quickWindow)
         return;
 
-    if (m_window)
-        m_window->removeEventFilter(this);
-
     detachTrackedObjects();
 
     m_window = quickWindow;
-    m_window->installEventFilter(this);
     connect(m_window,
             &QObject::destroyed,
             this,
@@ -456,8 +450,8 @@ bool RuntimeEvents::eventFilter(QObject *watched, QEvent *event)
     case QEvent::HoverMove: {
         auto *hoverEvent = static_cast<QHoverEvent *>(event);
         m_mouseMoveCount += 1;
-        updateMouseFromEvent(hoverEvent->position().x(),
-                             hoverEvent->position().y(),
+        updateMouseFromEvent(hoverEvent->globalPosition().x(),
+                             hoverEvent->globalPosition().y(),
                              m_lastMouseButtons,
                              m_lastMouseModifiers);
         emit mouseChanged();
@@ -503,7 +497,6 @@ void RuntimeEvents::trackUiObjectRecursive(QObject *object)
     info.visible = visibleProp.isValid() ? visibleProp.toBool() : true;
     m_trackedInfo.insert(object, info);
 
-    object->installEventFilter(this);
     connect(object,
             &QObject::destroyed,
             this,
@@ -520,11 +513,6 @@ void RuntimeEvents::trackUiObjectRecursive(QObject *object)
 
 void RuntimeEvents::detachTrackedObjects()
 {
-    const auto tracked = m_trackedObjects;
-    for (QObject *object : tracked) {
-        if (object)
-            object->removeEventFilter(this);
-    }
     m_trackedObjects.clear();
     m_trackedInfo.clear();
 }

@@ -149,18 +149,26 @@ Item {
 
     function navigate(path, params, mode) {
         var resolved = resolveRoute(path)
-        var targetParams = params || (resolved ? resolved.params : {})
+        var targetParams = ({})
+        if (resolved && resolved.params) {
+            for (var key in resolved.params)
+                targetParams[key] = resolved.params[key]
+        }
+        if (params) {
+            for (var paramKey in params)
+                targetParams[paramKey] = params[paramKey]
+        }
         var normalized = normalizePath(path)
         if (!resolved) {
             if (notFoundComponent || notFoundSource) {
                 var fallback = notFoundComponent ? notFoundComponent : notFoundSource
                 if (mode === "replace")
-                    stackView.replace(fallback)
+                    stackView.replace(fallback, targetParams)
                 else if (mode === "set") {
                     stackView.clear()
-                    stackView.push(fallback)
+                    stackView.push(fallback, targetParams)
                 } else {
-                    stackView.push(fallback)
+                    stackView.push(fallback, targetParams)
                 }
                 updatePathStack(normalized, targetParams, mode)
                 setCurrent(normalized, targetParams)
@@ -177,12 +185,12 @@ Item {
             return
         }
         if (mode === "replace") {
-            stackView.replace(target)
+            stackView.replace(target, targetParams)
         } else if (mode === "set") {
             stackView.clear()
-            stackView.push(target)
+            stackView.push(target, targetParams)
         } else {
-            stackView.push(target)
+            stackView.push(target, targetParams)
         }
         updatePathStack(normalized, targetParams, mode)
         setCurrent(normalized, targetParams)
@@ -201,6 +209,7 @@ Item {
         } else {
             stackView.push(component, targetParams)
         }
+        updateComponentPathStack(component, targetParams, mode)
         setCurrent("", targetParams)
         componentNavigated(component)
     }
@@ -226,20 +235,30 @@ Item {
     }
 
     function rebuildFromPath() {
-        if (!path || path.length === 0)
+        if (!path)
             return
         _syncingPath = true
         stackView.clear()
+        if (path.length === 0) {
+            _syncingPath = false
+            setCurrent("", {})
+            return
+        }
         for (var i = 0; i < path.length; i++) {
             var entry = path[i]
             var entryPath = typeof entry === "string" ? entry : entry.path
             var entryParams = typeof entry === "object" && entry.params !== undefined ? entry.params : undefined
+            var hasComponentEntry = typeof entry === "object" && entry.component !== undefined
+            if (hasComponentEntry && entry.component) {
+                stackView.push(entry.component, entryParams || {})
+                continue
+            }
             var resolved = resolveRoute(entryPath)
             var normalized = normalizePath(entryPath)
             if (!resolved) {
                 var fallback = notFoundComponent ? notFoundComponent : notFoundSource
                 if (fallback)
-                    stackView.push(fallback)
+                    stackView.push(fallback, entryParams || {})
                 else
                     navigationFailed(normalized)
                 continue
@@ -249,7 +268,8 @@ Item {
                 navigationFailed(normalized)
                 continue
             }
-            stackView.push(target)
+            var mergedParams = entryParams !== undefined ? entryParams : resolved.params
+            stackView.push(target, mergedParams || {})
         }
         _syncingPath = false
         applyCurrentFromPathEntry(path[path.length - 1])
@@ -271,8 +291,9 @@ Item {
             return
         }
         if (typeof entry === "object") {
+            var pathValue = entry.path !== undefined ? entry.path : ""
             setCurrent(
-                normalizePath(entry.path !== undefined ? entry.path : "/"),
+                pathValue === "" ? "" : normalizePath(pathValue),
                 entry.params !== undefined ? entry.params : ({})
             )
             return
@@ -291,8 +312,14 @@ Item {
     function createPathEntry(pathValue, params) {
         if (pathValue && typeof pathValue === "object" && pathValue.path !== undefined) {
             return {
-                path: normalizePath(pathValue.path),
+                path: pathValue.path === "" ? "" : normalizePath(pathValue.path),
                 params: pathValue.params !== undefined ? pathValue.params : ({})
+            }
+        }
+        if (pathValue === undefined || pathValue === null || pathValue === "") {
+            return {
+                path: "",
+                params: params !== undefined ? params : ({})
             }
         }
         return {
@@ -303,6 +330,33 @@ Item {
 
     function updatePathStack(pathValue, params, mode) {
         var nextEntry = createPathEntry(pathValue, params)
+        if (mode === "set" || path.length === 0) {
+            setPathInternal([nextEntry])
+        } else if (mode === "replace") {
+            if (path.length === 0)
+                setPathInternal([nextEntry])
+            else {
+                var next = path.slice(0)
+                next[next.length - 1] = nextEntry
+                setPathInternal(next)
+            }
+        } else {
+            var nextPush = path.slice(0)
+            nextPush.push(nextEntry)
+            setPathInternal(nextPush)
+        }
+    }
+
+    function createComponentPathEntry(component, params) {
+        return {
+            path: "",
+            params: params !== undefined ? params : ({}),
+            component: component
+        }
+    }
+
+    function updateComponentPathStack(component, params, mode) {
+        var nextEntry = createComponentPathEntry(component, params)
         if (mode === "set" || path.length === 0) {
             setPathInternal([nextEntry])
         } else if (mode === "replace") {

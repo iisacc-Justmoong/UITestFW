@@ -128,6 +128,7 @@ target_include_directories(UIFramework
         $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/backend/navigation>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/backend/state>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/backend/graphics>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/backend/text>
         $<INSTALL_INTERFACE:include/UIFramework>
 )
 

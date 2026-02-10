@@ -14,6 +14,15 @@ UIF.ApplicationWindow {
 
     property bool alertOpen: false
     property int eventClickCount: 0
+    property int eventPressCount: 0
+    property int eventReleaseCount: 0
+    property int eventEnterCount: 0
+    property int eventExitCount: 0
+    property int eventHoverChangeCount: 0
+    property int eventKeyPressCount: 0
+    property int eventKeyReleaseCount: 0
+    property bool eventHoverInside: false
+    property string eventLastKey: "none"
     property string eventLastTrigger: "none"
     property bool metricsRenderScaleCompliant: UIF.RenderQuality.enabled
         && UIF.RenderQuality.effectiveSupersampleScale() >= UIF.RenderQuality.minimumSupersampleScale
@@ -50,6 +59,16 @@ UIF.ApplicationWindow {
     property bool metricsPass: metricsPassedChecks === metricsTotalChecks
     property string metricsSummary: metricsPassedChecks + "/" + metricsTotalChecks
     property var runtimeSnapshot: ({})
+
+    function textModeName(mode) {
+        if (mode === textEditorPreview.plainTextMode)
+            return "plainTextMode"
+        if (mode === textEditorPreview.markdownMode)
+            return "markdownMode"
+        if (mode === textEditorPreview.richTextMode)
+            return "richTextMode"
+        return "unknown"
+    }
 
     Component.onCompleted: {
         UIF.FontPolicy.enforceApplicationFallback()
@@ -242,6 +261,72 @@ UIF.ApplicationWindow {
                                 tone: UIF.AbstractButton.Default
                                 onClicked: UIF.RenderMonitor.start()
                             }
+                        }
+                    }
+                }
+
+                UIF.AppCard {
+                    title: "Component State Matrix"
+                    subtitle: "All framework components and high-level states"
+                    Layout.fillWidth: true
+                    Layout.columnSpan: gallery.columns
+
+                    GridLayout {
+                        columns: width >= 1320 ? 2 : 1
+                        rowSpacing: UIF.Theme.gap6
+                        columnSpacing: UIF.Theme.gap10
+                        Layout.fillWidth: true
+
+                        UIF.Label {
+                            text: "Windows: ApplicationWindow(root)=" + root.visible
+                                + " Alert(open)=" + sampleAlert.open
+                                + " AppScaffold(navOpen)=" + scaffoldPreview.navigationOpen
+                            color: UIF.Theme.textSecondary
+                            style: description
+                        }
+
+                        UIF.Label {
+                            text: "Buttons: Label/Icon/LabelMenu/IconMenu shown with Accent, Default, Borderless, Destructive, Disabled"
+                            color: UIF.Theme.textSecondary
+                            style: description
+                        }
+
+                        UIF.Label {
+                            text: "Inputs: AbstractInputBar, InputField, TextEditor, CodeEditor shown with Empty/Filled/ReadOnly/Disabled variants"
+                            color: UIF.Theme.textSecondary
+                            style: description
+                        }
+
+                        UIF.Label {
+                            text: "Checks: CheckBox, RadioButton, ToggleSwitch shown with checked/unchecked/disabled states"
+                            color: UIF.Theme.textSecondary
+                            style: description
+                        }
+
+                        UIF.Label {
+                            text: "Layout: AppHeader, AppScaffold, VStack, HStack, ZStack, Spacer active in gallery"
+                            color: UIF.Theme.textSecondary
+                            style: description
+                        }
+
+                        UIF.Label {
+                            text: "Navigation: PageRouter(path=" + demoRouter.path.join("/")
+                                + "), Link, LinkWrapper, NavigationLink active"
+                            color: UIF.Theme.textSecondary
+                            style: description
+                        }
+
+                        UIF.Label {
+                            text: "Surface: AppCard and Alert active, Label style tokens applied across all cards"
+                            color: UIF.Theme.textSecondary
+                            style: description
+                        }
+
+                        UIF.Label {
+                            text: "Event listener states: trigger=" + root.eventLastTrigger
+                                + " key=" + root.eventLastKey
+                            color: UIF.Theme.textSecondary
+                            style: description
                         }
                     }
                 }
@@ -474,6 +559,146 @@ UIF.ApplicationWindow {
                 }
 
                 UIF.AppCard {
+                    title: "Text Editors"
+                    subtitle: "AbstractInputBar, TextEditor, CodeEditor with live state"
+                    Layout.fillWidth: true
+                    Layout.columnSpan: gallery.columns
+
+                    ColumnLayout {
+                        spacing: UIF.Theme.gap8
+                        Layout.fillWidth: true
+
+                        GridLayout {
+                            columns: width >= 1320 ? 3 : 1
+                            rowSpacing: UIF.Theme.gap8
+                            columnSpacing: UIF.Theme.gap10
+                            Layout.fillWidth: true
+
+                            ColumnLayout {
+                                spacing: UIF.Theme.gap6
+                                Layout.fillWidth: true
+
+                                UIF.Label {
+                                    text: "AbstractInputBar"
+                                    color: UIF.Theme.textSecondary
+                                    style: description
+                                }
+
+                                UIF.AbstractInputBar {
+                                    id: abstractInputPreview
+                                    Layout.fillWidth: true
+                                    placeholderText: "Type and observe state"
+                                    text: "base input"
+                                }
+                            }
+
+                            ColumnLayout {
+                                spacing: UIF.Theme.gap6
+                                Layout.fillWidth: true
+
+                                UIF.Label {
+                                    text: "TextEditor"
+                                    color: UIF.Theme.textSecondary
+                                    style: description
+                                }
+
+                                UIF.TextEditor {
+                                    id: textEditorPreview
+                                    Layout.fillWidth: true
+                                    Layout.preferredHeight: 190
+                                    mode: plainTextMode
+                                    showRenderedOutput: true
+                                    text: "Hello **bold**"
+                                }
+                            }
+
+                            ColumnLayout {
+                                spacing: UIF.Theme.gap6
+                                Layout.fillWidth: true
+
+                                UIF.Label {
+                                    text: "CodeEditor"
+                                    color: UIF.Theme.textSecondary
+                                    style: description
+                                }
+
+                                UIF.CodeEditor {
+                                    id: codeEditorPreview
+                                    Layout.fillWidth: true
+                                    Layout.preferredHeight: 190
+                                    snippetTitle: "snippet.ts"
+                                    snippetLanguage: "TypeScript"
+                                    text: "const ready = true;\nconsole.log(ready)"
+                                }
+                            }
+                        }
+
+                        UIF.Label {
+                            text: "AbstractInputBar state: focused=" + abstractInputPreview.focused
+                                + " readOnly=" + abstractInputPreview.readOnly
+                                + " enabled=" + abstractInputPreview.enabled
+                                + " length=" + abstractInputPreview.text.length
+                            color: UIF.Theme.textSecondary
+                            style: description
+                        }
+
+                        UIF.Label {
+                            text: "TextEditor state: mode=" + root.textModeName(textEditorPreview.mode)
+                                + " empty=" + textEditorPreview.empty
+                                + " previewVisible=" + textEditorPreview.previewVisible
+                                + " normalizedLen=" + textEditorPreview.normalizedInput.length
+                                + " renderedLen=" + textEditorPreview.renderedOutput.length
+                            color: UIF.Theme.textSecondary
+                            style: description
+                        }
+
+                        UIF.Label {
+                            text: "CodeEditor state: empty=" + codeEditorPreview.empty
+                                + " wrapMode=" + codeEditorPreview.wrapMode
+                                + " textFormat=" + codeEditorPreview.textFormat
+                                + " snippetHeader=" + codeEditorPreview.showSnippetHeader
+                                + " length=" + codeEditorPreview.text.length
+                            color: UIF.Theme.textSecondary
+                            style: description
+                        }
+
+                        RowLayout {
+                            spacing: UIF.Theme.gap8
+
+                            UIF.LabelButton {
+                                text: "Plain"
+                                tone: UIF.AbstractButton.Default
+                                onClicked: textEditorPreview.mode = textEditorPreview.plainTextMode
+                            }
+
+                            UIF.LabelButton {
+                                text: "Markdown"
+                                tone: UIF.AbstractButton.Default
+                                onClicked: textEditorPreview.mode = textEditorPreview.markdownMode
+                            }
+
+                            UIF.LabelButton {
+                                text: "Rich"
+                                tone: UIF.AbstractButton.Default
+                                onClicked: textEditorPreview.mode = textEditorPreview.richTextMode
+                            }
+
+                            UIF.LabelButton {
+                                text: textEditorPreview.showRenderedOutput ? "Hide Preview" : "Show Preview"
+                                tone: UIF.AbstractButton.Borderless
+                                onClicked: textEditorPreview.showRenderedOutput = !textEditorPreview.showRenderedOutput
+                            }
+
+                            UIF.LabelButton {
+                                text: "Reset Snippet"
+                                tone: UIF.AbstractButton.Borderless
+                                onClicked: codeEditorPreview.text = "const ready = true;\nconsole.log(ready)"
+                            }
+                        }
+                    }
+                }
+
+                UIF.AppCard {
                     title: "Check Controls"
                     subtitle: "CheckBox, RadioButton, ToggleSwitch"
                     Layout.fillWidth: true
@@ -649,6 +874,7 @@ UIF.ApplicationWindow {
                         clip: true
 
                         UIF.AppScaffold {
+                            id: scaffoldPreview
                             anchors.fill: parent
                             headerTitle: "Scaffold Preview"
                             headerSubtitle: "Navigation + content"
@@ -681,34 +907,234 @@ UIF.ApplicationWindow {
 
                 UIF.AppCard {
                     title: "Event Listener"
-                    subtitle: "EventListener trigger handling"
+                    subtitle: "EventListener trigger and state coverage"
                     Layout.fillWidth: true
+                    Layout.columnSpan: gallery.columns
 
                     ColumnLayout {
                         spacing: UIF.Theme.gap8
                         Layout.fillWidth: true
 
-                        Rectangle {
-                            id: listenerSurface
+                        GridLayout {
+                            columns: width >= 1320 ? 3 : 2
+                            rowSpacing: UIF.Theme.gap8
+                            columnSpacing: UIF.Theme.gap8
                             Layout.fillWidth: true
-                            Layout.preferredHeight: 72
-                            radius: UIF.Theme.radiusMd
-                            color: UIF.Theme.surfaceSolid
 
-                            UIF.Label {
-                                anchors.centerIn: parent
-                                text: "Click here (" + root.eventClickCount + ")"
-                                color: UIF.Theme.textPrimary
-                                style: body
-                            }
+                            Rectangle {
+                                Layout.fillWidth: true
+                                Layout.preferredHeight: 52
+                                radius: UIF.Theme.radiusMd
+                                color: UIF.Theme.surfaceSolid
 
-                            UIF.EventListener {
-                                trigger: "clicked"
-                                action: function(mouse) {
-                                    root.eventClickCount += 1
-                                    root.eventLastTrigger = "clicked @" + mouse.x + "," + mouse.y
+                                UIF.Label {
+                                    anchors.centerIn: parent
+                                    text: "clicked (" + root.eventClickCount + ")"
+                                    color: UIF.Theme.textPrimary
+                                    style: description
+                                }
+
+                                UIF.EventListener {
+                                    trigger: "clicked"
+                                    action: function(mouse) {
+                                        root.eventClickCount += 1
+                                        root.eventLastTrigger = "clicked @" + mouse.x + "," + mouse.y
+                                    }
                                 }
                             }
+
+                            Rectangle {
+                                Layout.fillWidth: true
+                                Layout.preferredHeight: 52
+                                radius: UIF.Theme.radiusMd
+                                color: UIF.Theme.surfaceSolid
+
+                                UIF.Label {
+                                    anchors.centerIn: parent
+                                    text: "pressed (" + root.eventPressCount + ")"
+                                    color: UIF.Theme.textPrimary
+                                    style: description
+                                }
+
+                                UIF.EventListener {
+                                    trigger: "pressed"
+                                    action: function(mouse) {
+                                        root.eventPressCount += 1
+                                        root.eventLastTrigger = "pressed @" + mouse.x + "," + mouse.y
+                                    }
+                                }
+                            }
+
+                            Rectangle {
+                                Layout.fillWidth: true
+                                Layout.preferredHeight: 52
+                                radius: UIF.Theme.radiusMd
+                                color: UIF.Theme.surfaceSolid
+
+                                UIF.Label {
+                                    anchors.centerIn: parent
+                                    text: "released (" + root.eventReleaseCount + ")"
+                                    color: UIF.Theme.textPrimary
+                                    style: description
+                                }
+
+                                UIF.EventListener {
+                                    trigger: "released"
+                                    action: function(mouse) {
+                                        root.eventReleaseCount += 1
+                                        root.eventLastTrigger = "released @" + mouse.x + "," + mouse.y
+                                    }
+                                }
+                            }
+
+                            Rectangle {
+                                Layout.fillWidth: true
+                                Layout.preferredHeight: 52
+                                radius: UIF.Theme.radiusMd
+                                color: UIF.Theme.surfaceSolid
+
+                                UIF.Label {
+                                    anchors.centerIn: parent
+                                    text: "entered (" + root.eventEnterCount + ")"
+                                    color: UIF.Theme.textPrimary
+                                    style: description
+                                }
+
+                                UIF.EventListener {
+                                    trigger: "entered"
+                                    action: function() {
+                                        root.eventEnterCount += 1
+                                        root.eventHoverInside = true
+                                        root.eventLastTrigger = "entered"
+                                    }
+                                }
+                            }
+
+                            Rectangle {
+                                Layout.fillWidth: true
+                                Layout.preferredHeight: 52
+                                radius: UIF.Theme.radiusMd
+                                color: UIF.Theme.surfaceSolid
+
+                                UIF.Label {
+                                    anchors.centerIn: parent
+                                    text: "exited (" + root.eventExitCount + ")"
+                                    color: UIF.Theme.textPrimary
+                                    style: description
+                                }
+
+                                UIF.EventListener {
+                                    trigger: "exited"
+                                    action: function() {
+                                        root.eventExitCount += 1
+                                        root.eventHoverInside = false
+                                        root.eventLastTrigger = "exited"
+                                    }
+                                }
+                            }
+
+                            Rectangle {
+                                Layout.fillWidth: true
+                                Layout.preferredHeight: 52
+                                radius: UIF.Theme.radiusMd
+                                color: UIF.Theme.surfaceSolid
+
+                                UIF.Label {
+                                    anchors.centerIn: parent
+                                    text: "hoverChanged (" + root.eventHoverChangeCount + ")"
+                                    color: UIF.Theme.textPrimary
+                                    style: description
+                                }
+
+                                UIF.EventListener {
+                                    trigger: "hoverChanged"
+                                    action: function(payload) {
+                                        root.eventHoverChangeCount += 1
+                                        root.eventHoverInside = payload.containsMouse
+                                        root.eventLastTrigger = "hoverChanged=" + payload.containsMouse
+                                    }
+                                }
+                            }
+                        }
+
+                        RowLayout {
+                            spacing: UIF.Theme.gap8
+                            Layout.fillWidth: true
+
+                            Rectangle {
+                                Layout.fillWidth: true
+                                Layout.preferredHeight: 56
+                                radius: UIF.Theme.radiusMd
+                                color: UIF.Theme.surfaceGhost
+
+                                UIF.Label {
+                                    anchors.centerIn: parent
+                                    text: "Key Press Surface"
+                                    color: UIF.Theme.textPrimary
+                                    style: description
+                                }
+
+                                UIF.EventListener {
+                                    id: keyPressListener
+                                    trigger: "keyPressed"
+                                    action: function(event) {
+                                        root.eventKeyPressCount += 1
+                                        root.eventLastKey = "pressed " + event.key
+                                        root.eventLastTrigger = "keyPressed " + event.key
+                                    }
+                                }
+
+                                MouseArea {
+                                    anchors.fill: parent
+                                    acceptedButtons: Qt.LeftButton
+                                    onClicked: keyPressListener.forceActiveFocus()
+                                }
+                            }
+
+                            Rectangle {
+                                Layout.fillWidth: true
+                                Layout.preferredHeight: 56
+                                radius: UIF.Theme.radiusMd
+                                color: UIF.Theme.surfaceGhost
+
+                                UIF.Label {
+                                    anchors.centerIn: parent
+                                    text: "Key Release Surface"
+                                    color: UIF.Theme.textPrimary
+                                    style: description
+                                }
+
+                                UIF.EventListener {
+                                    id: keyReleaseListener
+                                    trigger: "keyReleased"
+                                    action: function(event) {
+                                        root.eventKeyReleaseCount += 1
+                                        root.eventLastKey = "released " + event.key
+                                        root.eventLastTrigger = "keyReleased " + event.key
+                                    }
+                                }
+
+                                MouseArea {
+                                    anchors.fill: parent
+                                    acceptedButtons: Qt.LeftButton
+                                    onClicked: keyReleaseListener.forceActiveFocus()
+                                }
+                            }
+                        }
+
+                        UIF.Label {
+                            text: "Pointer state: hoverInside=" + root.eventHoverInside
+                                + " hoverChanged=" + root.eventHoverChangeCount
+                            color: UIF.Theme.textSecondary
+                            style: description
+                        }
+
+                        UIF.Label {
+                            text: "Key state: press=" + root.eventKeyPressCount
+                                + " release=" + root.eventKeyReleaseCount
+                                + " lastKey=" + root.eventLastKey
+                            color: UIF.Theme.textSecondary
+                            style: description
                         }
 
                         UIF.Label {

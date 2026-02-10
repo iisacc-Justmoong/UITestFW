@@ -9,6 +9,7 @@ set(UIFRAMEWORK_BACKEND_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/state/viewmodelregistry.cpp
     ${CMAKE_CURRENT_LIST_DIR}/runtime/debuglogger.cpp
     ${CMAKE_CURRENT_LIST_DIR}/graphics/svgmanager.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/text/textmarkup.cpp
 )
 
 set(UIFRAMEWORK_BACKEND_HEADERS
@@ -22,4 +23,5 @@ set(UIFRAMEWORK_BACKEND_HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/state/viewmodelregistry.h
     ${CMAKE_CURRENT_LIST_DIR}/runtime/debuglogger.h
     ${CMAKE_CURRENT_LIST_DIR}/graphics/svgmanager.h
+    ${CMAKE_CURRENT_LIST_DIR}/text/textmarkup.h
 )

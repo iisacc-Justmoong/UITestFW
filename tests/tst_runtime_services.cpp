@@ -25,6 +25,7 @@ class RuntimeServicesTests : public QObject
 private slots:
     void runtime_events_measurement_boundaries();
     void runtime_events_idle_and_reset_signal_contract();
+    void runtime_events_single_input_event_is_counted_once();
     void render_monitor_counts_frames_when_swapped();
     void render_monitor_active_signal_and_destroy_path();
     void debug_logger_enabled_signal_and_message_format();
@@ -166,6 +167,37 @@ void RuntimeServicesTests::runtime_events_idle_and_reset_signal_contract()
     QVERIFY(!events.anyKeyPressed());
     QVERIFY(!events.mouseButtonPressed());
     QCOMPARE(runningSpy.count(), 1);
+}
+
+void RuntimeServicesTests::runtime_events_single_input_event_is_counted_once()
+{
+    RuntimeEvents events;
+    QQuickWindow window;
+    events.attachWindow(&window);
+    QTRY_VERIFY(events.running());
+
+    events.resetCounters();
+
+    QKeyEvent keyPress(QEvent::KeyPress, Qt::Key_G, Qt::NoModifier, QStringLiteral("g"));
+    QKeyEvent keyRelease(QEvent::KeyRelease, Qt::Key_G, Qt::NoModifier, QStringLiteral("g"));
+    QCoreApplication::sendEvent(&window, &keyPress);
+    QCoreApplication::sendEvent(&window, &keyRelease);
+
+    const QPointF p(30.0, 22.0);
+    QMouseEvent mouseMove(QEvent::MouseMove, p, p, p, Qt::NoButton, Qt::NoButton, Qt::NoModifier);
+    QMouseEvent mousePress(QEvent::MouseButtonPress, p, p, p, Qt::LeftButton, Qt::LeftButton, Qt::NoModifier);
+    QMouseEvent mouseRelease(QEvent::MouseButtonRelease, p, p, p, Qt::LeftButton, Qt::NoButton, Qt::NoModifier);
+    QCoreApplication::sendEvent(&window, &mouseMove);
+    QCoreApplication::sendEvent(&window, &mousePress);
+    QCoreApplication::sendEvent(&window, &mouseRelease);
+
+    QCOMPARE(events.keyPressCount(), 1u);
+    QCOMPARE(events.keyReleaseCount(), 1u);
+    QCOMPARE(events.mouseMoveCount(), 1u);
+    QCOMPARE(events.mousePressCount(), 1u);
+    QCOMPARE(events.mouseReleaseCount(), 1u);
+    QCOMPARE(events.lastMouseX(), 30.0);
+    QCOMPARE(events.lastMouseY(), 22.0);
 }
 
 void RuntimeServicesTests::render_monitor_counts_frames_when_swapped()

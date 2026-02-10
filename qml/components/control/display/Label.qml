@@ -38,8 +38,10 @@ Item {
             return Theme.textHeader2
         if (style === body)
             return Theme.textBody
-        if (style === caption || style === disabled)
+        if (style === caption)
             return Theme.textCaption
+        if (style === disabled)
+            return Theme.textDisabled
         return Theme.textDescription
     }
     readonly property int styleWeight: {
@@ -53,8 +55,10 @@ Item {
             return Theme.textHeader2Weight
         if (style === body)
             return Theme.textBodyWeight
-        if (style === caption || style === disabled)
+        if (style === caption)
             return Theme.textCaptionWeight
+        if (style === disabled)
+            return Theme.textDisabledWeight
         return Theme.textDescriptionWeight
     }
     readonly property string styleName: {
@@ -68,8 +72,10 @@ Item {
             return Theme.textHeader2StyleName
         if (style === body)
             return Theme.textBodyStyleName
-        if (style === caption || style === disabled)
+        if (style === caption)
             return Theme.textCaptionStyleName
+        if (style === disabled)
+            return Theme.textDisabledStyleName
         return Theme.textDescriptionStyleName
     }
     readonly property int styleLineHeight: {
@@ -83,8 +89,10 @@ Item {
             return Theme.textHeader2LineHeight
         if (style === body)
             return Theme.textBodyLineHeight
-        if (style === caption || style === disabled)
+        if (style === caption)
             return Theme.textCaptionLineHeight
+        if (style === disabled)
+            return Theme.textDisabledLineHeight
         return Theme.textDescriptionLineHeight
     }
     readonly property real styleLetterSpacing: {
@@ -98,8 +106,10 @@ Item {
             return Theme.textHeader2LetterSpacing
         if (style === body)
             return Theme.textBodyLetterSpacing
-        if (style === caption || style === disabled)
+        if (style === caption)
             return Theme.textCaptionLetterSpacing
+        if (style === disabled)
+            return Theme.textDisabledLetterSpacing
         return Theme.textDescriptionLetterSpacing
     }
 

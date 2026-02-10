@@ -1,0 +1,118 @@
+#include <QtTest>
+
+#include <QCoreApplication>
+#include <QKeyEvent>
+#include <QScopedPointer>
+#include <QQmlEngine>
+#include <QtPlugin>
+
+#include "test_utils.h"
+
+Q_IMPORT_PLUGIN(UIFrameworkPlugin)
+
+class CodeEditorTests : public QObject
+{
+    Q_OBJECT
+
+private slots:
+    void code_editor_default_contract_and_utility_api();
+    void code_editor_submit_signal_and_fixed_plain_text_mode();
+};
+
+void CodeEditorTests::code_editor_default_contract_and_utility_api()
+{
+    QQmlEngine engine;
+    engine.addImportPath(TestUtils::qmlImportBase());
+
+    const QByteArray qml = R"(
+import QtQuick
+import UIFramework as UIF
+
+Item {
+    id: root
+    width: 640
+    height: 360
+
+    property bool defaultContractReady: editor.snippetTitle === "Snippet"
+        && editor.showSnippetHeader
+        && editor.wrapMode === TextEdit.NoWrap
+        && editor.textFormat === TextEdit.PlainText
+        && editor.fontPixelSize === UIF.Theme.textBody
+
+    UIF.CodeEditor {
+        id: editor
+        objectName: "codeEditor"
+        width: 460
+        height: 240
+        placeholderText: "Write code"
+    }
+}
+)";
+
+    QScopedPointer<QObject> root(TestUtils::createFromQml(engine, qml));
+    QVERIFY(root);
+    QVERIFY(root->property("defaultContractReady").toBool());
+
+    QObject *editor = root->findChild<QObject *>(QStringLiteral("codeEditor"));
+    QVERIFY(editor);
+    QVERIFY(editor->property("empty").toBool());
+
+    QVERIFY(QMetaObject::invokeMethod(editor, "insertText", Q_ARG(QVariant, QVariant(QStringLiteral("const value = 1;")))));
+    QCOMPARE(editor->property("text").toString(), QStringLiteral("const value = 1;"));
+    QVERIFY(!editor->property("empty").toBool());
+
+    QVERIFY(QMetaObject::invokeMethod(editor, "clear"));
+    QCOMPARE(editor->property("text").toString(), QString());
+    QVERIFY(editor->property("empty").toBool());
+}
+
+void CodeEditorTests::code_editor_submit_signal_and_fixed_plain_text_mode()
+{
+    QQmlEngine engine;
+    engine.addImportPath(TestUtils::qmlImportBase());
+
+    const QByteArray qml = R"(
+import QtQuick
+import UIFramework as UIF
+
+UIF.ApplicationWindow {
+    id: root
+    width: 640
+    height: 420
+    visible: false
+    desktopMinWidth: 0
+    desktopMinHeight: 0
+    mobileMinWidth: 0
+    mobileMinHeight: 0
+
+    property int submitCount: 0
+    property bool fixedModeReady: editor.wrapMode === TextEdit.NoWrap
+        && editor.textFormat === TextEdit.PlainText
+
+    UIF.CodeEditor {
+        id: editor
+        objectName: "codeEditor"
+        anchors.fill: parent
+        text: "let ready = true"
+        onSubmitted: root.submitCount += 1
+    }
+}
+)";
+
+    QScopedPointer<QObject> root(TestUtils::createFromQml(engine, qml));
+    QVERIFY(root);
+    QVERIFY(root->property("fixedModeReady").toBool());
+
+    QObject *editor = root->findChild<QObject *>(QStringLiteral("codeEditor"));
+    QVERIFY(editor);
+    QObject *textEdit = root->findChild<QObject *>(QStringLiteral("codeTextEdit"));
+    QVERIFY(textEdit);
+
+    QVERIFY(QMetaObject::invokeMethod(editor, "forceEditorFocus"));
+    QKeyEvent submitEvent(QEvent::KeyPress, Qt::Key_Return, Qt::ControlModifier, QStringLiteral("\n"));
+    QCoreApplication::sendEvent(textEdit, &submitEvent);
+    QTRY_COMPARE(root->property("submitCount").toInt(), 1);
+}
+
+QTEST_MAIN(CodeEditorTests)
+#include "tst_code_editor.moc"

@@ -101,6 +101,7 @@ Controls.ApplicationWindow {
 
     QtObject {
         Component.onCompleted: {
+            FontPolicy.enforceApplicationFallback()
             RenderQuality.applyWindow(root)
             if (SvgManager.minimumScale < root.effectiveSupersampleScale)
                 SvgManager.minimumScale = root.effectiveSupersampleScale

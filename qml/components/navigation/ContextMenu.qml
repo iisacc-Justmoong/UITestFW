@@ -20,7 +20,7 @@ Controls.Menu {
     focus: true
     padding: Theme.gap4
     closePolicy: Controls.Popup.CloseOnEscape | Controls.Popup.CloseOnPressOutside | Controls.Popup.CloseOnPressOutsideParent
-    parent: Overlay.overlay
+    parent: Controls.Overlay.overlay
 
     readonly property int entryCount: {
         if (!items)

@@ -1,30 +1,58 @@
 import QtQuick
-import QtQuick.Controls
-import QtQuick.Layouts
+import QtQuick.Controls as Controls
 import UIFramework 1.0
 
 Item {
     id: root
 
     property bool open: false
-    property string title: ""
-    property string message: ""
-    property string primaryText: "OK"
-    property string secondaryText: ""
+    property string title: "Alert Dialog"
+    property string message: "It can have 2 or 3 actions depending on your needs."
+    property string primaryText: "Button"
+    property string secondaryText: "Button"
+    property string tertiaryText: ""
     property bool primaryEnabled: true
     property bool secondaryEnabled: true
+    property bool tertiaryEnabled: true
     property bool dismissOnBackground: false
+    property bool useOverlayLayer: true
     property int maxWidth: Theme.dialogMaxWidth
     property int minWidth: Theme.dialogMinWidth
 
+    readonly property int preferredWidth: 328
+    readonly property int sidePadding: Theme.gap24
+    readonly property bool hasSecondaryAction: root.secondaryText.length > 0
+    readonly property bool hasTertiaryAction: root.tertiaryText.length > 0
+    readonly property bool useVerticalActionLayout: root.hasTertiaryAction
+
     signal primaryClicked()
     signal secondaryClicked()
+    signal tertiaryClicked()
     signal dismissed()
 
     visible: open
     enabled: open
     anchors.fill: parent
+    z: 1000
 
+    property Item _fallbackParent: null
+
+    function refreshLayerParent() {
+        const overlayParent = Controls.Overlay.overlay
+        const targetParent = useOverlayLayer && overlayParent ? overlayParent : _fallbackParent
+        if (targetParent && parent !== targetParent)
+            parent = targetParent
+    }
+
+    onOpenChanged: {
+        if (open)
+            refreshLayerParent()
+    }
+
+    onParentChanged: {
+        if (parent && parent !== Controls.Overlay.overlay)
+            _fallbackParent = parent
+    }
 
     Rectangle {
         anchors.fill: parent
@@ -43,88 +71,180 @@ Item {
 
     Rectangle {
         id: alertCard
-        width: Math.min(root.maxWidth, Math.max(root.minWidth, root.width - (Theme.gap24 * 2)))
+        width: Math.min(root.maxWidth,
+                        Math.max(root.minWidth,
+                                 Math.min(root.preferredWidth,
+                                          root.width - (root.sidePadding * 2))))
         radius: Theme.radiusLg
-        color: Theme.surfaceSolid
+        color: "#282828"
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.verticalCenter: parent.verticalCenter
 
-        ColumnLayout {
-            anchors.fill: parent
-            anchors.margins: Theme.gap20
-            spacing: Theme.gap12
+        Column {
+            id: contentColumn
+            width: parent.width
+            spacing: Theme.gap8
+            topPadding: 32
 
-            ColumnLayout {
-                Layout.fillWidth: true
-                spacing: Theme.gap6
+            Item {
+                width: parent.width
+                height: 64
 
-                Label {
-                    style: header2
-                    text: root.title
-                    visible: root.title.length > 0
-                    color: Theme.textPrimary
-                    wrapMode: Text.WordWrap
-                    Layout.fillWidth: true
-                    horizontalAlignment: Text.AlignHCenter
-                }
+                Rectangle {
+                    width: 48
+                    height: 48
+                    radius: 10
+                    anchors.centerIn: parent
+                    color: "#C9D4DB"
+                    border.width: 4
+                    border.color: "#E8F0F5"
 
-                Label {
-                    style: description
-                    text: root.message
-                    visible: root.message.length > 0
-                    color: Theme.textSecondary
-                    wrapMode: Text.WordWrap
-                    Layout.fillWidth: true
-                    horizontalAlignment: Text.AlignHCenter
+                    Rectangle {
+                        anchors.fill: parent
+                        anchors.margins: 2
+                        radius: 8
+                        color: "#D8E0E6"
+                        opacity: 0.42
+                    }
                 }
             }
 
-            Rectangle {
-                Layout.fillWidth: true
-                height: Theme.strokeThin
-                radius: Theme.strokeThin
-                color: Theme.surfaceSolid
-                visible: root.primaryText.length > 0 || root.secondaryText.length > 0
+            Item {
+                width: parent.width
+                implicitHeight: textColumn.implicitHeight
+
+                Column {
+                    id: textColumn
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    width: parent.width - (Theme.gap24 * 2)
+                    spacing: Theme.gap12
+
+                    Label {
+                        style: title2
+                        text: root.title
+                        visible: root.title.length > 0
+                        color: Theme.textPrimary
+                        wrapMode: Text.WordWrap
+                        width: parent.width
+                        horizontalAlignment: Text.AlignHCenter
+                    }
+
+                    Label {
+                        style: body
+                        text: root.message
+                        visible: root.message.length > 0
+                        color: Theme.textSecondary
+                        wrapMode: Text.WordWrap
+                        width: parent.width
+                        horizontalAlignment: Text.AlignHCenter
+                    }
+                }
             }
 
-            RowLayout {
-                Layout.fillWidth: true
-                spacing: Theme.gap8
-                visible: root.primaryText.length > 0 || root.secondaryText.length > 0
-                Layout.alignment: Qt.AlignRight
+            Item {
+                width: parent.width
+                readonly property real actionContentHeight: root.useVerticalActionLayout
+                    ? verticalActions.implicitHeight
+                    : root.hasSecondaryAction
+                        ? horizontalActions.implicitHeight
+                        : singleActionButton.implicitHeight
+                implicitHeight: actionContentHeight + (Theme.gap24 * 2)
 
-                AbstractButton {
-                    id: secondaryButton
-                    visible: root.secondaryText.length > 0
-                    text: root.secondaryText
-                    enabled: root.secondaryEnabled
-                    Layout.preferredWidth: Theme.buttonMinWidth
-                    backgroundColor: "transparent"
-                    backgroundColorHover: Theme.surfaceAlt
-                    backgroundColorPressed: Theme.surfaceAlt
-                    onClicked: root.secondaryClicked()
+                Column {
+                    id: verticalActions
+                    visible: root.useVerticalActionLayout
+                    x: Theme.gap24
+                    y: Theme.gap24
+                    width: parent.width - (Theme.gap24 * 2)
+                    spacing: Theme.gap12
+
+                    LabelButton {
+                        visible: root.primaryText.length > 0
+                        width: parent.width
+                        text: root.primaryText
+                        tone: AbstractButton.Accent
+                        enabled: root.primaryEnabled
+                        onClicked: root.primaryClicked()
+                    }
+
+                    LabelButton {
+                        visible: root.hasSecondaryAction
+                        width: parent.width
+                        text: root.secondaryText
+                        tone: AbstractButton.Default
+                        enabled: root.secondaryEnabled
+                        onClicked: root.secondaryClicked()
+                    }
+
+                    LabelButton {
+                        visible: root.hasTertiaryAction
+                        width: parent.width
+                        text: root.tertiaryText
+                        tone: AbstractButton.Default
+                        enabled: root.tertiaryEnabled
+                        onClicked: root.tertiaryClicked()
+                    }
                 }
 
-                AbstractButton {
-                    id: primaryButton
+                Row {
+                    id: horizontalActions
+                    visible: !root.useVerticalActionLayout && root.hasSecondaryAction
+                    x: Theme.gap24
+                    y: Theme.gap24
+                    width: parent.width - (Theme.gap24 * 2)
+                    spacing: Theme.gap12
+                    readonly property real buttonWidth: (width - spacing) / 2
+
+                    LabelButton {
+                        width: horizontalActions.buttonWidth
+                        text: root.primaryText
+                        tone: AbstractButton.Accent
+                        enabled: root.primaryEnabled
+                        onClicked: root.primaryClicked()
+                    }
+
+                    LabelButton {
+                        width: horizontalActions.buttonWidth
+                        visible: root.hasSecondaryAction
+                        text: root.secondaryText
+                        tone: AbstractButton.Default
+                        enabled: root.secondaryEnabled
+                        onClicked: root.secondaryClicked()
+                    }
+                }
+
+                LabelButton {
+                    id: singleActionButton
+                    visible: !root.useVerticalActionLayout && !root.hasSecondaryAction && root.primaryText.length > 0
+                    x: Theme.gap24
+                    y: Theme.gap24
+                    width: parent.width - (Theme.gap24 * 2)
                     text: root.primaryText
+                    tone: AbstractButton.Accent
                     enabled: root.primaryEnabled
-                    Layout.preferredWidth: Theme.buttonMinWidth
-                    backgroundColor: Theme.accent
-                    backgroundColorHover: Theme.accent
-                    backgroundColorPressed: Theme.accent
-                    textColor: Theme.textPrimary
                     onClicked: root.primaryClicked()
                 }
             }
         }
     }
-    QtObject {
-        Component.onCompleted: Debug.log("Alert", "created")
-    }
 
+    QtObject {
+        Component.onCompleted: {
+            root._fallbackParent = root.parent
+            root.refreshLayerParent()
+            Qt.callLater(root.refreshLayerParent)
+            Debug.log("Alert", "created")
+        }
+    }
 }
 
 // API usage (external):
 // import UIFramework 1.0 as UIF
-// UIF.Alert { open: true; title: "Delete?"; message: "This cannot be undone." }
+// UIF.Alert {
+//     open: true
+//     title: "Alert Dialog"
+//     message: "It can have 2 or 3 actions depending on your needs."
+//     primaryText: "Button"
+//     secondaryText: "Button"
+//     tertiaryText: "Button"
+// }

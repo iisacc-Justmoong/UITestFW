@@ -13,8 +13,9 @@ Item {
 
     default property alias content: contentLayer.data
 
-    implicitWidth: contentLayer.childrenRect.width
-    implicitHeight: contentLayer.childrenRect.height
+    // Keep implicit size stable to avoid self-referential loops with anchor-managed children.
+    implicitWidth: 0
+    implicitHeight: 0
 
     Item {
         id: contentLayer

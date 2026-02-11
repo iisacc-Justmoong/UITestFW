@@ -123,7 +123,7 @@ Item {
                 Layout.fillWidth: true
                 label: control.itemLabel(entry)
                 detail: control.itemDetail(entry)
-                icon: control.itemIcon(entry)
+                iconName: control.itemIcon(entry)
                 showChevron: control.itemShowChevron(entry)
                 selected: control.itemSelected(entry, index)
                 listBackgroundColor: control.rowColor

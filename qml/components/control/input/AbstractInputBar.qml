@@ -34,11 +34,13 @@ FocusScope {
     property color backgroundColorFocused: backgroundColor
     property color backgroundColorDisabled: backgroundColor
 
-    property alias leadingItems: leadingSlot.data
-    property alias trailingItems: trailingSlot.data
+    property alias leadingItems: leadingCustomSlot.data
+    property alias trailingItems: trailingCustomSlot.data
+    property alias leadingInternalItems: leadingInternalSlot.data
+    property alias trailingInternalItems: trailingInternalSlot.data
 
-    readonly property real leadingWidth: leadingHost.visible ? leadingSlot.childrenRect.width : 0
-    readonly property real trailingWidth: trailingHost.visible ? trailingSlot.childrenRect.width : 0
+    readonly property real leadingWidth: leadingHost.visible ? leadingContent.width : 0
+    readonly property real trailingWidth: trailingHost.visible ? trailingContent.width : 0
     readonly property int leftInset: insetHorizontal + leadingWidth + (leadingWidth > 0 ? sideSpacing : 0)
     readonly property int rightInset: insetHorizontal + trailingWidth + (trailingWidth > 0 ? sideSpacing : 0)
     readonly property bool focused: activeFocus || inputField.activeFocus
@@ -65,15 +67,28 @@ FocusScope {
             anchors.left: parent.left
             anchors.leftMargin: control.insetHorizontal
             anchors.verticalCenter: parent.verticalCenter
-            implicitWidth: leadingSlot.childrenRect.width
-            implicitHeight: leadingSlot.childrenRect.height
-            visible: leadingSlot.children.length > 0
+            implicitWidth: leadingContent.width
+            implicitHeight: leadingContent.height
+            visible: leadingContent.width > 0 && leadingContent.height > 0
 
-            Item {
-                id: leadingSlot
+            Row {
+                id: leadingContent
+                spacing: 0
+                anchors.centerIn: parent
                 width: childrenRect.width
                 height: childrenRect.height
-                anchors.centerIn: parent
+
+                Item {
+                    id: leadingInternalSlot
+                    width: childrenRect.width
+                    height: childrenRect.height
+                }
+
+                Item {
+                    id: leadingCustomSlot
+                    width: childrenRect.width
+                    height: childrenRect.height
+                }
             }
         }
 
@@ -82,15 +97,28 @@ FocusScope {
             anchors.right: parent.right
             anchors.rightMargin: control.insetHorizontal
             anchors.verticalCenter: parent.verticalCenter
-            implicitWidth: trailingSlot.childrenRect.width
-            implicitHeight: trailingSlot.childrenRect.height
-            visible: trailingSlot.children.length > 0
+            implicitWidth: trailingContent.width
+            implicitHeight: trailingContent.height
+            visible: trailingContent.width > 0 && trailingContent.height > 0
 
-            Item {
-                id: trailingSlot
+            Row {
+                id: trailingContent
+                spacing: 0
+                anchors.centerIn: parent
                 width: childrenRect.width
                 height: childrenRect.height
-                anchors.centerIn: parent
+
+                Item {
+                    id: trailingCustomSlot
+                    width: childrenRect.width
+                    height: childrenRect.height
+                }
+
+                Item {
+                    id: trailingInternalSlot
+                    width: childrenRect.width
+                    height: childrenRect.height
+                }
             }
         }
     }

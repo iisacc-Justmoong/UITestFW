@@ -4,8 +4,15 @@ import UIFramework 1.0
 AbstractInputBar {
     id: control
 
+    readonly property int defaultMode: 0
+    readonly property int searchMode: 1
+
+    property int mode: defaultMode
     property alias placeholder: control.placeholderText
     property bool clearButtonVisible: true
+    property bool searchIconVisible: mode === searchMode
+    property color searchIconColor: Theme.textOctonary
+    property real searchIconStrokeWidth: 1.5
     property color clearIconBackgroundColor: Theme.textTertiary
     property color clearIconBackgroundColorDisabled: Theme.textOctonary
     property color clearIconForegroundColor: Theme.subSurface
@@ -66,41 +73,76 @@ AbstractInputBar {
         onVisibleChanged: opacity = visible ? 1.0 : 0.0
     }
 
-    trailingItems: Item {
-        id: clearButton
-        width: control.showClearButton ? Theme.iconSm : 0
+    leadingInternalItems: Item {
+        id: searchIconHost
+        width: control.searchIconVisible ? Theme.iconSm : 0
         height: Theme.iconSm
         visible: width > 0
 
         Canvas {
-            id: clearIcon
+            id: searchIcon
             anchors.fill: parent
             antialiasing: true
 
             onPaint: {
                 const ctx = getContext("2d")
                 ctx.clearRect(0, 0, width, height)
-                if (!control.showClearButton)
+                if (!control.searchIconVisible)
                     return
 
-                const backgroundColor = control.enabled
-                    ? control.clearIconBackgroundColor
-                    : control.clearIconBackgroundColorDisabled
-
                 ctx.beginPath()
-                ctx.arc(width * 0.5, height * 0.5, 7, 0, Math.PI * 2, false)
-                ctx.fillStyle = backgroundColor
-                ctx.fill()
-
-                ctx.beginPath()
-                ctx.moveTo(5.0, 5.0)
-                ctx.lineTo(11.0, 11.0)
-                ctx.moveTo(11.0, 5.0)
-                ctx.lineTo(5.0, 11.0)
-                ctx.lineWidth = 1.4
-                ctx.lineCap = "round"
-                ctx.strokeStyle = control.clearIconForegroundColor
+                ctx.arc(width * 0.42, height * 0.42, 4.0, 0, Math.PI * 2, false)
+                ctx.lineWidth = control.searchIconStrokeWidth
+                ctx.strokeStyle = control.searchIconColor
                 ctx.stroke()
+
+                ctx.beginPath()
+                ctx.moveTo(width * 0.63, height * 0.63)
+                ctx.lineTo(width * 0.84, height * 0.84)
+                ctx.lineWidth = control.searchIconStrokeWidth
+                ctx.lineCap = "round"
+                ctx.strokeStyle = control.searchIconColor
+                ctx.stroke()
+            }
+        }
+    }
+
+    trailingInternalItems: Item {
+        id: clearButton
+        width: control.showClearButton ? Theme.iconSm : 0
+        height: Theme.iconSm
+        visible: width > 0
+        readonly property color backgroundColor: control.enabled
+            ? control.clearIconBackgroundColor
+            : control.clearIconBackgroundColorDisabled
+
+        Rectangle {
+            id: clearIconBubble
+            anchors.centerIn: parent
+            width: 14
+            height: 14
+            radius: 7
+            color: clearButton.backgroundColor
+            antialiasing: true
+
+            Rectangle {
+                width: 8
+                height: 1.4
+                radius: 0.7
+                color: control.clearIconForegroundColor
+                anchors.centerIn: parent
+                rotation: 45
+                antialiasing: true
+            }
+
+            Rectangle {
+                width: 8
+                height: 1.4
+                radius: 0.7
+                color: control.clearIconForegroundColor
+                anchors.centerIn: parent
+                rotation: -45
+                antialiasing: true
             }
         }
 
@@ -115,11 +157,10 @@ AbstractInputBar {
         }
     }
 
-    onShowClearButtonChanged: clearIcon.requestPaint()
-    onEnabledChanged: clearIcon.requestPaint()
-    onClearIconBackgroundColorChanged: clearIcon.requestPaint()
-    onClearIconBackgroundColorDisabledChanged: clearIcon.requestPaint()
-    onClearIconForegroundColorChanged: clearIcon.requestPaint()
+    onModeChanged: searchIcon.requestPaint()
+    onSearchIconVisibleChanged: searchIcon.requestPaint()
+    onSearchIconColorChanged: searchIcon.requestPaint()
+    onSearchIconStrokeWidthChanged: searchIcon.requestPaint()
 
     QtObject {
         Component.onCompleted: Debug.log("InputField", "created")
@@ -128,4 +169,4 @@ AbstractInputBar {
 
 // API usage (external):
 // import UIFramework 1.0 as UIF
-// UIF.InputField { placeholderText: "Placeholder" }
+// UIF.InputField { placeholderText: "Search"; mode: searchMode }

@@ -7,7 +7,7 @@ AbstractButton {
 
     property string label: ""
     property string detail: ""
-    property string icon: ""
+    property string iconName: ""
     property bool selected: false
     property bool showChevron: false
 
@@ -19,7 +19,7 @@ AbstractButton {
     property color listBackgroundColor: Theme.surfaceGhost
 
     readonly property string resolvedIconSource: {
-        const raw = icon === undefined || icon === null ? "" : String(icon).trim()
+        const raw = iconName === undefined || iconName === null ? "" : String(iconName).trim()
         if (raw.length === 0)
             return ""
         return Theme.iconPath(raw)
@@ -117,4 +117,4 @@ AbstractButton {
 
 // API usage (external):
 // import UIFramework 1.0 as UIF
-// UIF.ListItem { label: "Label"; detail: "key"; icon: "iconname"; showChevron: true }
+// UIF.ListItem { label: "Label"; detail: "key"; iconName: "iconname"; showChevron: true }

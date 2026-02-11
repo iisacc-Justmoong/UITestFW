@@ -46,7 +46,7 @@ FocusScope {
     property color backgroundColorDisabled: backgroundColor
     property color headerTextColor: Theme.textTertiary
 
-    property string fontFamily: "monospace"
+    property string fontFamily: Qt.platform.os === "osx" ? "Menlo" : "Monospace"
     property int fontPixelSize: Theme.textBody
     property int fontWeight: Theme.textBodyWeight
     property string fontStyleName: Theme.textBodyStyleName

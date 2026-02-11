@@ -11,23 +11,12 @@ UIF.ApplicationWindow {
     height: 980
     title: "UI Framework Visual Catalog"
     subtitle: "컴포넌트 시각 점검용 메인 뷰"
-    navItems: [
-        { label: "Overview", icon: "◉", badge: "1" },
-        { label: "Controls", icon: "▣", badge: "5" },
-        { label: "Navigation", icon: "⇄", badge: "2" },
-        { label: "Layout", icon: "◫", badge: "2" }
-    ]
+    navItems: UIF.AppState.navItems
 
-    property bool alertOpen: false
-    property real progressStart: 0
-    property real progressEnd: 100
-    property real progressCurrent: 46
-    property string currentRoute: "/overview"
-    property int scaffoldNavIndex: 0
-    property int hierarchyActiveButtonId: 1
     readonly property bool compactGallery: width < 1260
 
-    readonly property var runtimeSnapshot: UIF.RuntimeEvents.snapshot()
+    readonly property var runtimeSnapshot: UIF.AppState.runtimeSnapshot
+    readonly property var viewStateSnapshot: UIF.AppState.viewStateSnapshot
     readonly property bool metricsRenderScaleCompliant:
         effectiveSupersampleScale >= 1.0
         && effectiveSupersampleScale <= UIF.RenderQuality.maximumSupersampleScale
@@ -52,8 +41,8 @@ UIF.ApplicationWindow {
         UIF.SvgManager.minimumScale >= 1.0
         && UIF.SvgManager.maximumScale >= UIF.SvgManager.minimumScale
     readonly property bool metricsPageCompliant:
-        UIF.PageMonitor.count >= 0
-        && (UIF.PageMonitor.count === 0 || UIF.PageMonitor.current.length > 0)
+        UIF.AppState.pageHistory.length >= 0
+        && (viewStateSnapshot.loadedViews === undefined || viewStateSnapshot.loadedViews.length >= 0)
     readonly property int metricsTotalChecks: 6
     readonly property int metricsPassedChecks:
         (metricsRenderScaleCompliant ? 1 : 0)
@@ -65,65 +54,70 @@ UIF.ApplicationWindow {
     readonly property bool metricsPass: metricsPassedChecks === metricsTotalChecks
     readonly property string metricsSummary: metricsPassedChecks + "/" + metricsTotalChecks
 
-    property var scaffoldNavModel: [
-        { label: "Overview", icon: "◉", badge: "4" },
-        { label: "Runs", icon: "▣", badge: "9" },
-        { label: "Devices", icon: "⌘", badge: "2" },
-        { label: "Settings", icon: "⚙", badge: "1" }
-    ]
-
-    property var demoListItems: [
-        { label: "Overview", detail: "Cmd+1", selected: true, showChevron: true },
-        { label: "Reports", detail: "Cmd+2", showChevron: true },
-        { label: "Settings", detail: "Cmd+,", showChevron: false }
-    ]
-
-    property var demoContextMenuItems: [
-        { id: "new", label: "New Run", key: "Cmd+N", showChevron: false },
-        { id: "open", label: "Open Recent", key: "Cmd+O", showChevron: true },
-        { type: "divider" },
-        { id: "archive", label: "Archive", key: "Cmd+E", showChevron: false }
-    ]
-
-    function clampProgress(value) {
-        const minValue = Math.min(progressStart, progressEnd)
-        const maxValue = Math.max(progressStart, progressEnd)
-        return Math.max(minValue, Math.min(maxValue, value))
-    }
-
     function nudgeProgress(delta) {
-        progressCurrent = clampProgress(progressCurrent + delta)
+        UIF.AppState.nudgeProgress(delta)
     }
-
-    onProgressStartChanged: progressCurrent = clampProgress(progressCurrent)
-    onProgressEndChanged: progressCurrent = clampProgress(progressCurrent)
 
     Component.onCompleted: {
+        UIF.AppState.bootstrap()
         UIF.FontPolicy.enforceApplicationFallback()
         UIF.RenderMonitor.attachWindow(root)
         UIF.PageMonitor.record("/visual-catalog")
+        UIF.AppState.syncPageHistory(UIF.PageMonitor.history)
+        UIF.AppState.syncRuntimeSnapshot(UIF.RuntimeEvents.snapshot())
+        UIF.AppState.syncViewStateSnapshot(UIF.ViewStateTracker.snapshot())
         UIF.Debug.enabled = true
         UIF.Debug.log("Main", "visual-catalog-opened")
+    }
+
+    Connections {
+        target: UIF.RuntimeEvents
+        ignoreUnknownSignals: true
+        function onOsStatsChanged() {
+            UIF.AppState.syncRuntimeSnapshot(UIF.RuntimeEvents.snapshot())
+        }
+        function onUiChanged() {
+            UIF.AppState.syncRuntimeSnapshot(UIF.RuntimeEvents.snapshot())
+        }
+        function onRunningChanged() {
+            UIF.AppState.syncRuntimeSnapshot(UIF.RuntimeEvents.snapshot())
+        }
+    }
+
+    Connections {
+        target: UIF.ViewStateTracker
+        ignoreUnknownSignals: true
+        function onStackChanged() {
+            UIF.AppState.syncViewStateSnapshot(UIF.ViewStateTracker.snapshot())
+        }
+    }
+
+    Connections {
+        target: UIF.PageMonitor
+        ignoreUnknownSignals: true
+        function onHistoryChanged() {
+            UIF.AppState.syncPageHistory(UIF.PageMonitor.history)
+        }
     }
 
     UIF.Alert {
         id: sampleAlert
         anchors.fill: parent
-        open: root.alertOpen
+        open: UIF.AppState.alertOpen
         title: "Alert Dialog"
         message: "It can have 2 or 3 actions depending on your needs."
         primaryText: "Button"
         secondaryText: "Button"
         tertiaryText: "Button"
-        onPrimaryClicked: root.alertOpen = false
-        onSecondaryClicked: root.alertOpen = false
-        onTertiaryClicked: root.alertOpen = false
-        onDismissed: root.alertOpen = false
+        onPrimaryClicked: UIF.AppState.alertOpen = false
+        onSecondaryClicked: UIF.AppState.alertOpen = false
+        onTertiaryClicked: UIF.AppState.alertOpen = false
+        onDismissed: UIF.AppState.alertOpen = false
     }
 
     UIF.ContextMenu {
         id: demoContextMenu
-        items: root.demoContextMenuItems
+        items: UIF.AppState.demoContextMenuItems
     }
 
     Component {
@@ -230,7 +224,7 @@ UIF.ApplicationWindow {
                             UIF.LabelButton {
                                 text: "Open Alert"
                                 tone: UIF.AbstractButton.Accent
-                                onClicked: root.alertOpen = true
+                                onClicked: UIF.AppState.alertOpen = true
                             }
 
                             UIF.LabelButton {
@@ -269,14 +263,14 @@ UIF.ApplicationWindow {
                             Slider {
                                 id: progressSlider
                                 Layout.fillWidth: true
-                                from: Math.min(root.progressStart, root.progressEnd)
-                                to: Math.max(root.progressStart, root.progressEnd)
-                                value: root.progressCurrent
+                                from: Math.min(UIF.AppState.progressStart, UIF.AppState.progressEnd)
+                                to: Math.max(UIF.AppState.progressStart, UIF.AppState.progressEnd)
+                                value: UIF.AppState.progressCurrent
                                 stepSize: 1
-                                onMoved: root.progressCurrent = value
+                                onMoved: UIF.AppState.progressCurrent = value
                                 onValueChanged: {
-                                    if (Math.abs(root.progressCurrent - value) > 0.000001)
-                                        root.progressCurrent = value
+                                    if (Math.abs(UIF.AppState.progressCurrent - value) > 0.000001)
+                                        UIF.AppState.progressCurrent = value
                                 }
                             }
 
@@ -296,25 +290,25 @@ UIF.ApplicationWindow {
                         UIF.Label {
                             style: caption
                             color: UIF.Theme.textTertiary
-                            text: "start=" + root.progressStart.toFixed(0)
-                                + " end=" + root.progressEnd.toFixed(0)
-                                + " current=" + root.progressCurrent.toFixed(0)
+                            text: "start=" + UIF.AppState.progressStart.toFixed(0)
+                                + " end=" + UIF.AppState.progressEnd.toFixed(0)
+                                + " current=" + UIF.AppState.progressCurrent.toFixed(0)
                         }
 
                         UIF.ProgressBar {
                             width: parent.width
                             size: large
-                            startValue: root.progressStart
-                            endValue: root.progressEnd
-                            currentValue: root.progressCurrent
+                            startValue: UIF.AppState.progressStart
+                            endValue: UIF.AppState.progressEnd
+                            currentValue: UIF.AppState.progressCurrent
                         }
 
                         UIF.ProgressBar {
                             width: parent.width
                             size: regular
-                            startValue: root.progressStart
-                            endValue: root.progressEnd
-                            currentValue: root.progressCurrent
+                            startValue: UIF.AppState.progressStart
+                            endValue: UIF.AppState.progressEnd
+                            currentValue: UIF.AppState.progressCurrent
                         }
                     }
                 }
@@ -593,10 +587,10 @@ UIF.ApplicationWindow {
                                     { path: "/settings", component: routeSettings }
                                 ]
                                 onNavigated: function(path, params) {
-                                    root.currentRoute = path
+                                    UIF.PageMonitor.record(path)
                                 }
                                 onNavigationFailed: function(path) {
-                                    root.currentRoute = "not-found: " + path
+                                    UIF.AppState.currentRoute = "not-found: " + path
                                 }
                             }
                         }
@@ -604,12 +598,12 @@ UIF.ApplicationWindow {
                         UIF.Label {
                             style: caption
                             color: UIF.Theme.textTertiary
-                            text: "currentPath = " + root.currentRoute
+                            text: "currentPath = " + UIF.AppState.currentRoute
                         }
 
                         UIF.List {
                             width: parent.width
-                            items: root.demoListItems
+                            items: UIF.AppState.demoListItems
                             toolbarIcon1: "view-more-symbolic-default"
                             toolbarIcon2: "view-more-symbolic-default"
                             toolbarIcon3: "view-more-symbolic-default"
@@ -736,7 +730,7 @@ UIF.ApplicationWindow {
                             minimumPanelWidth: width
                             minimumPanelHeight: parent.height
                             onToolbarActivated: function(button, buttonId, index) {
-                                root.hierarchyActiveButtonId = buttonId >= 0 ? buttonId : (index + 1)
+                                UIF.AppState.hierarchyActiveButtonId = buttonId >= 0 ? buttonId : (index + 1)
                             }
                             toolbarButtons: [
                                 UIF.ToolbarButton { buttonId: 1; iconName: "view-more-symbolic-default" },
@@ -782,7 +776,7 @@ UIF.ApplicationWindow {
                                 style: description
                                 color: UIF.Theme.textSecondary
                                 wrapMode: Text.WordWrap
-                                text: "activeToolbarButtonId = " + root.hierarchyActiveButtonId
+                                text: "activeToolbarButtonId = " + UIF.AppState.hierarchyActiveButtonId
                             }
 
                             UIF.Label {
@@ -813,10 +807,10 @@ UIF.ApplicationWindow {
                             anchors.fill: parent
                             headerTitle: "Scaffold"
                             headerSubtitle: "Nested Preview"
-                            navModel: root.scaffoldNavModel
-                            navIndex: root.scaffoldNavIndex
+                            navModel: UIF.AppState.scaffoldNavModel
+                            navIndex: UIF.AppState.scaffoldNavIndex
                             onNavActivated: function(index, item) {
-                                root.scaffoldNavIndex = index
+                                UIF.AppState.selectScaffoldNavIndex(index)
                             }
 
                             ColumnLayout {
@@ -824,7 +818,7 @@ UIF.ApplicationWindow {
                                 spacing: UIF.Theme.gap10
 
                                 UIF.Label {
-                                    text: "Selected nav index: " + root.scaffoldNavIndex
+                                    text: "Selected nav index: " + UIF.AppState.scaffoldNavIndex
                                     style: body
                                     color: UIF.Theme.textPrimary
                                 }
@@ -855,7 +849,7 @@ UIF.ApplicationWindow {
                                     Layout.fillWidth: true
                                     startValue: 0
                                     endValue: 1
-                                    currentValue: root.scaffoldNavIndex / Math.max(1, root.scaffoldNavModel.length - 1)
+                                    currentValue: UIF.AppState.scaffoldNavIndex / Math.max(1, UIF.AppState.scaffoldNavModel.length - 1)
                                     size: regular
                                 }
                             }

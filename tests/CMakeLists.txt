@@ -11,7 +11,7 @@ function(uifw_add_test test_name test_source)
     )
     add_test(NAME ${test_name} COMMAND ${test_name})
     set_tests_properties(${test_name} PROPERTIES
-        ENVIRONMENT "QT_QPA_PLATFORM=offscreen"
+        ENVIRONMENT "QT_QPA_PLATFORM=offscreen;QT_QUICK_CONTROLS_STYLE=Basic"
     )
 endfunction()
 

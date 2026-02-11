@@ -151,7 +151,11 @@ Item {
 
     onStyleChanged: {
         if (!Theme.isThemeTextStyleCompliant(stylePixelSize, styleWeight, styleName))
-            Debug.warn("Label", "style-noncompliant", stylePixelSize, styleWeight, styleName)
+            Debug.warn("Label", "style-noncompliant", {
+                "pixelSize": stylePixelSize,
+                "weight": styleWeight,
+                "styleName": styleName
+            })
     }
 
     QtObject {

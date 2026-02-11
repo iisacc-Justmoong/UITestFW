@@ -27,20 +27,23 @@ void FontPolicyTests::font_policy_token_mapping_is_strict()
         int pixelSize;
         int weight;
         const char *style;
+        int fallbackWeight;
+        const char *fallbackStyle;
     };
     const QList<Token> expected = {
-        {26, QFont::Bold, "Bold"},
-        {22, QFont::Bold, "Bold"},
-        {17, QFont::DemiBold, "SemiBold"},
-        {15, QFont::DemiBold, "SemiBold"},
-        {13, QFont::Medium, "Medium"},
-        {12, QFont::DemiBold, "SemiBold"},
-        {11, QFont::Normal, "Regular"}
+        {26, QFont::Bold, "Bold", QFont::Bold, "Bold"},
+        {22, QFont::Bold, "Bold", QFont::Bold, "Bold"},
+        {17, QFont::DemiBold, "SemiBold", QFont::DemiBold, "SemiBold"},
+        {15, QFont::DemiBold, "SemiBold", QFont::DemiBold, "SemiBold"},
+        {12, QFont::Medium, "Medium", QFont::Medium, "Medium"},
+        {12, QFont::DemiBold, "SemiBold", QFont::DemiBold, "SemiBold"},
+        {11, QFont::Normal, "Regular", QFont::Normal, "Regular"}
     };
 
     for (const Token &token : expected) {
-        QCOMPARE(policy.weightForTextSize(token.pixelSize, QFont::Normal), token.weight);
-        QCOMPARE(policy.styleNameForTextSize(token.pixelSize, QStringLiteral("Regular")), QString::fromLatin1(token.style));
+        QCOMPARE(policy.weightForTextSize(token.pixelSize, token.fallbackWeight), token.weight);
+        QCOMPARE(policy.styleNameForTextSize(token.pixelSize, QString::fromLatin1(token.fallbackStyle)),
+                 QString::fromLatin1(token.style));
         QVERIFY(policy.isThemeTextStyleCompliant(token.pixelSize, token.weight, QString::fromLatin1(token.style)));
     }
 

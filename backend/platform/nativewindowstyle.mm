@@ -1,5 +1,6 @@
 #include "backend/platform/nativewindowstyle.h"
 
+#include <QGuiApplication>
 #include <QWindow>
 
 #import <AppKit/AppKit.h>
@@ -30,8 +31,17 @@ bool NativeWindowStyle::applyTitleBarColor(QObject *windowObject, const QColor &
     if (!window)
         return false;
 
+    if (!qGuiApp)
+        return false;
+
+    const QString platformName = QGuiApplication::platformName();
+    if (platformName.compare(QStringLiteral("cocoa"), Qt::CaseInsensitive) != 0)
+        return false;
+
     if (!window->handle())
         window->create();
+    if (!window->handle())
+        return false;
 
     NSView *view = reinterpret_cast<NSView *>(window->winId());
     if (!view)

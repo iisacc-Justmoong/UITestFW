@@ -27,6 +27,44 @@ UIF.ApplicationWindow {
     property int hierarchyActiveButtonId: 1
     readonly property bool compactGallery: width < 1260
 
+    readonly property var runtimeSnapshot: UIF.RuntimeEvents.snapshot()
+    readonly property bool metricsRenderScaleCompliant:
+        effectiveSupersampleScale >= 1.0
+        && effectiveSupersampleScale <= UIF.RenderQuality.maximumSupersampleScale
+    readonly property bool metricsFontFallbackCompliant:
+        UIF.Theme.fontBody.length > 0
+        && UIF.FontPolicy.resolveFamily(UIF.FontPolicy.preferredFamily).length > 0
+    readonly property bool metricsThemeTextCompliant:
+        UIF.Theme.isThemeTextStyleCompliant(UIF.Theme.textTitle, UIF.Theme.textTitleWeight, UIF.Theme.textTitleStyleName)
+        && UIF.Theme.isThemeTextStyleCompliant(UIF.Theme.textTitle2, UIF.Theme.textTitle2Weight, UIF.Theme.textTitle2StyleName)
+        && UIF.Theme.isThemeTextStyleCompliant(UIF.Theme.textHeader, UIF.Theme.textHeaderWeight, UIF.Theme.textHeaderStyleName)
+        && UIF.Theme.isThemeTextStyleCompliant(UIF.Theme.textHeader2, UIF.Theme.textHeader2Weight, UIF.Theme.textHeader2StyleName)
+        && UIF.Theme.isThemeTextStyleCompliant(UIF.Theme.textBody, UIF.Theme.textBodyWeight, UIF.Theme.textBodyStyleName)
+        && UIF.Theme.isThemeTextStyleCompliant(UIF.Theme.textDescription, UIF.Theme.textDescriptionWeight, UIF.Theme.textDescriptionStyleName)
+        && UIF.Theme.isThemeTextStyleCompliant(UIF.Theme.textCaption, UIF.Theme.textCaptionWeight, UIF.Theme.textCaptionStyleName)
+        && UIF.Theme.isThemeTextStyleCompliant(UIF.Theme.textDisabled, UIF.Theme.textDisabledWeight, UIF.Theme.textDisabledStyleName)
+    readonly property bool metricsRuntimeCompliant:
+        runtimeSnapshot
+        && runtimeSnapshot.pid !== undefined
+        && runtimeSnapshot.uptimeMs !== undefined
+        && runtimeSnapshot.rssBytes !== undefined
+    readonly property bool metricsSvgCompliant:
+        UIF.SvgManager.minimumScale >= 1.0
+        && UIF.SvgManager.maximumScale >= UIF.SvgManager.minimumScale
+    readonly property bool metricsPageCompliant:
+        UIF.PageMonitor.count >= 0
+        && (UIF.PageMonitor.count === 0 || UIF.PageMonitor.current.length > 0)
+    readonly property int metricsTotalChecks: 6
+    readonly property int metricsPassedChecks:
+        (metricsRenderScaleCompliant ? 1 : 0)
+        + (metricsFontFallbackCompliant ? 1 : 0)
+        + (metricsThemeTextCompliant ? 1 : 0)
+        + (metricsRuntimeCompliant ? 1 : 0)
+        + (metricsSvgCompliant ? 1 : 0)
+        + (metricsPageCompliant ? 1 : 0)
+    readonly property bool metricsPass: metricsPassedChecks === metricsTotalChecks
+    readonly property string metricsSummary: metricsPassedChecks + "/" + metricsTotalChecks
+
     property var scaffoldNavModel: [
         { label: "Overview", icon: "◉", badge: "4" },
         { label: "Runs", icon: "▣", badge: "9" },

@@ -20,7 +20,7 @@ constexpr std::array<TextStyleToken, 7> kThemeTextTokens = {{
     {22, QFont::Bold, "Bold"},
     {17, QFont::DemiBold, "SemiBold"},
     {15, QFont::DemiBold, "SemiBold"},
-    {13, QFont::Medium, "Medium"},
+    {12, QFont::Medium, "Medium"},
     {12, QFont::DemiBold, "SemiBold"},
     {11, QFont::Normal, "Regular"}
 }};
@@ -146,12 +146,19 @@ QString FontPolicy::styleNameForTextSize(int pixelSize, const QString &fallbackS
 
 bool FontPolicy::isThemeTextStyleCompliant(int pixelSize, int weight, const QString &styleName) const
 {
-    int expectedWeight = QFont::Normal;
-    QString expectedStyleName;
-    if (!tokenForPixelSize(pixelSize, &expectedWeight, &expectedStyleName))
-        return false;
-    return weight == expectedWeight
-           && QString::compare(styleName.trimmed(), expectedStyleName, Qt::CaseInsensitive) == 0;
+    const QString normalizedStyleName = styleName.trimmed();
+    for (const TextStyleToken &token : kThemeTextTokens) {
+        if (token.pixelSize != pixelSize)
+            continue;
+        if (token.weight != weight)
+            continue;
+        if (QString::compare(normalizedStyleName,
+                             QString::fromLatin1(token.styleName),
+                             Qt::CaseInsensitive) == 0) {
+            return true;
+        }
+    }
+    return false;
 }
 
 void FontPolicy::installPretendardFallbacks()
@@ -192,16 +199,50 @@ bool FontPolicy::enforcePretendardFallback()
 
 bool FontPolicy::tokenForPixelSize(int pixelSize, int *weight, QString *styleName)
 {
+    const int requestedWeight = weight ? *weight : 0;
+    const QString requestedStyleName = styleName ? styleName->trimmed() : QString();
+
+    const TextStyleToken *firstMatch = nullptr;
+    const TextStyleToken *preferredByWeight = nullptr;
+    const TextStyleToken *preferredByStyle = nullptr;
+    const TextStyleToken *preferredByBoth = nullptr;
+
     for (const TextStyleToken &token : kThemeTextTokens) {
         if (token.pixelSize != pixelSize)
             continue;
-        if (weight)
-            *weight = token.weight;
-        if (styleName)
-            *styleName = QString::fromLatin1(token.styleName);
-        return true;
+
+        if (!firstMatch)
+            firstMatch = &token;
+
+        const bool weightMatch = weight && requestedWeight == token.weight;
+        const bool styleMatch = styleName
+            && !requestedStyleName.isEmpty()
+            && QString::compare(requestedStyleName,
+                                QString::fromLatin1(token.styleName),
+                                Qt::CaseInsensitive) == 0;
+
+        if (weightMatch && styleMatch) {
+            preferredByBoth = &token;
+            break;
+        }
+        if (!preferredByWeight && weightMatch)
+            preferredByWeight = &token;
+        if (!preferredByStyle && styleMatch)
+            preferredByStyle = &token;
     }
-    return false;
+
+    if (!firstMatch)
+        return false;
+
+    const TextStyleToken *resolved = preferredByBoth
+        ? preferredByBoth
+        : (preferredByWeight ? preferredByWeight : (preferredByStyle ? preferredByStyle : firstMatch));
+
+    if (weight)
+        *weight = resolved->weight;
+    if (styleName)
+        *styleName = QString::fromLatin1(resolved->styleName);
+    return true;
 }
 
 QString FontPolicy::styleNameForWeight(int weight)

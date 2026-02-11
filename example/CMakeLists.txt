@@ -1,0 +1,3 @@
+add_subdirectory(EventListener)
+add_subdirectory(mvvm)
+add_subdirectory(TypingPractice)

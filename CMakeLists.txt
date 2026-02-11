@@ -156,6 +156,7 @@ target_link_libraries(UIFramework
 )
 
 option(UIFRAMEWORK_BUILD_DEMO "Build the UIFramework demo application" ON)
+option(UIFRAMEWORK_BUILD_EXAMPLES "Build runnable example applications" ON)
 option(UIFRAMEWORK_BUILD_TESTS "Build UIFramework tests" ON)
 
 if(UIFRAMEWORK_BUILD_DEMO)
@@ -196,6 +197,10 @@ if(UIFRAMEWORK_BUILD_DEMO)
     endif()
 
     qt_finalize_executable(UIFrameworkDemo)
+endif()
+
+if(UIFRAMEWORK_BUILD_EXAMPLES)
+    add_subdirectory(example)
 endif()
 
 if(UIFRAMEWORK_BUILD_TESTS)

@@ -1,9 +1,20 @@
 # EventListener Examples
 
-This folder shows **multiple ways** to use `EventListener` in QML. These examples are not built; they
-are intended as reference snippets.
+This folder shows **multiple ways** to use `EventListener` in QML. The project is now buildable and runnable as a standalone example app.
 
 > Note: component name is `EventListener` (spelled as in code).
+
+## Run
+
+From repository root:
+
+```bash
+cmake -S . -B build-codex -DUIFRAMEWORK_BUILD_EXAMPLES=ON
+cmake --build build-codex --target UIFrameworkExampleEventListener
+./build-codex/example/EventListener/UIFrameworkExampleEventListener
+```
+
+On macOS Finder, you can also click `example/run-eventlistener.command`.
 
 ---
 

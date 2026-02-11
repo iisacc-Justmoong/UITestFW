@@ -12,7 +12,8 @@ void setupExampleViewModel(QQmlEngine *engine)
     if (!engine)
         return;
 
-    auto *registry = qmlSingletonInstance<ViewModelRegistry>(engine, "UIFramework", 1, 0, "ViewModels");
+    auto *registry = engine->singletonInstance<ViewModelRegistry *>(QStringLiteral("UIFramework"),
+                                                                     QStringLiteral("ViewModels"));
     if (!registry)
         return;
 

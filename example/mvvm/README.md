@@ -1,13 +1,25 @@
 # MVVM Example (Model → ViewModel → QML)
 
-This example is **not built** by default. It exists only to demonstrate the MVVM flow used in this repo:
+This example is buildable and runnable, and demonstrates the MVVM flow used in this repo:
 
 - **Model (C++)** holds state and emits signals.
 - **ViewModel (C++)** exposes model state to QML and provides commands.
 - **View (QML)** binds to ViewModel and triggers commands.
 - **ViewModelRegistry (C++)** acts as the bridge that hands ViewModels to QML by key.
 
-> This folder is a reference implementation. Do not add it to build targets.
+> This folder is both a reference implementation and a runnable sample target.
+
+## Run
+
+From repository root:
+
+```bash
+cmake -S . -B build-codex -DUIFRAMEWORK_BUILD_EXAMPLES=ON
+cmake --build build-codex --target UIFrameworkExampleMVVM
+./build-codex/example/mvvm/UIFrameworkExampleMVVM
+```
+
+On macOS Finder, you can also click `example/run-mvvm.command`.
 
 ---
 
@@ -100,7 +112,7 @@ ApplicationWindow {
 
 ## Notes / Constraints
 
-- This is **not** a build target.
+- This is available as a build target.
 - The file paths use plain QObject classes for simplicity.
 - In real code, ViewModels can expose richer state and commands, but the registration pattern is the same.
 
@@ -119,14 +131,14 @@ ApplicationWindow {
 
 # MVVM 예제 (Model → ViewModel → QML)
 
-이 예제는 **기본적으로 빌드되지 않습니다**. 본 저장소에서 사용하는 MVVM 흐름을 설명하기 위한 참고용입니다:
+이 예제는 빌드 및 실행이 가능하며, 본 저장소에서 사용하는 MVVM 흐름을 설명한다:
 
 - **Model (C++)**: 상태를 보관하고 시그널을 발생
 - **ViewModel (C++)**: Model 상태를 QML에 노출하고 커맨드를 제공
 - **View (QML)**: ViewModel에 바인딩하고 커맨드를 호출
 - **ViewModelRegistry (C++)**: ViewModel을 QML로 전달하는 브리지(키 기반 조회)
 
-> 이 폴더는 참고용이며, 빌드 타겟에 포함하지 않습니다.
+> 이 폴더는 참고용이면서 동시에 실행 가능한 샘플 타겟이다.
 
 ---
 
@@ -206,7 +218,7 @@ ApplicationWindow {
 
 ## 참고 / 제약 사항
 
-- 이 예제는 **빌드 대상이 아닙니다**.
+- 이 예제는 빌드 대상으로 포함되어 있다.
 - 단순한 QObject 기반으로 작성되어 있습니다.
 - 실제 프로젝트에서는 더 많은 상태/명령을 다루지만 등록 패턴은 동일합니다.
 

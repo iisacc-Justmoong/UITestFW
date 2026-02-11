@@ -1,5 +1,6 @@
 #include <QCoreApplication>
 #include <QGuiApplication>
+#include <QQuickStyle>
 #include <QQmlApplicationEngine>
 #include <QtPlugin>
 
@@ -7,6 +8,7 @@ Q_IMPORT_PLUGIN(UIFrameworkPlugin)
 
 int main(int argc, char *argv[])
 {
+    QQuickStyle::setStyle(QStringLiteral("Basic"));
     QGuiApplication app(argc, argv);
 
     QQmlApplicationEngine engine;

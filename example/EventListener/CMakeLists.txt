@@ -1,14 +1,18 @@
 cmake_minimum_required(VERSION 3.21)
-project(UIFrameworkExampleEventListener LANGUAGES CXX)
 
-set(CMAKE_CXX_STANDARD 20)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
+if(CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
+    project(UIFrameworkExampleEventListener LANGUAGES CXX)
 
-find_package(Qt6 6.5 REQUIRED COMPONENTS Quick QuickControls2)
+    set(CMAKE_CXX_STANDARD 20)
+    set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-qt_standard_project_setup()
+    find_package(Qt6 6.5 REQUIRED COMPONENTS Quick QuickControls2 Svg Network)
+    qt_standard_project_setup()
+endif()
 
-add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/../../ backend_build)
+if(NOT TARGET UIFramework)
+    add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/../.. backend_build)
+endif()
 
 qt_add_executable(UIFrameworkExampleEventListener
     main.cpp
@@ -33,6 +37,8 @@ target_link_libraries(UIFrameworkExampleEventListener
         Qt6::Quick
         Qt6::QuickControls2
         UIFramework
+        UIFrameworkplugin
+        UIFrameworkplugin_init
 )
 
 add_custom_target(run_UIFrameworkExampleEventListener

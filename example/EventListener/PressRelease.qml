@@ -1,23 +1,34 @@
 import QtQuick
 import UIFramework 1.0 as UIF
 
-Rectangle {
-    width: 120
-    height: 40
-    color: "#1f1f1f"
+Item {
+    id: root
 
-    UIF.Label {
-        anchors.centerIn: parent
+    signal eventRaised(string triggerName, string detail)
+
+    implicitWidth: holdButton.implicitWidth
+    implicitHeight: holdButton.implicitHeight
+    property bool pressedNow: false
+
+    UIF.LabelButton {
+        id: holdButton
         text: "Hold"
+        tone: root.pressedNow ? UIF.AbstractButton.Accent : UIF.AbstractButton.Default
     }
 
     UIF.EventListener {
         trigger: "pressed"
-        action: () => console.log("pressed")
+        action: () => {
+            root.pressedNow = true
+            root.eventRaised("pressed", "button pressed")
+        }
     }
 
     UIF.EventListener {
         trigger: "released"
-        action: () => console.log("released")
+        action: () => {
+            root.pressedNow = false
+            root.eventRaised("released", "button released")
+        }
     }
 }

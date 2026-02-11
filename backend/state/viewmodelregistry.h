@@ -4,6 +4,8 @@
 #include <QPointer>
 #include <QStringList>
 #include <QHash>
+#include <QVariant>
+#include <QVariantMap>
 #include <QtQml/qqml.h>
 
 class ViewModelRegistry : public QObject
@@ -13,6 +15,10 @@ class ViewModelRegistry : public QObject
     QML_SINGLETON
 
     Q_PROPERTY(QStringList keys READ keys NOTIFY keysChanged)
+    Q_PROPERTY(QStringList views READ views NOTIFY viewsChanged)
+    Q_PROPERTY(QVariantMap bindings READ bindings NOTIFY viewsChanged)
+    Q_PROPERTY(QVariantMap owners READ owners NOTIFY ownershipChanged)
+    Q_PROPERTY(QString lastError READ lastError NOTIFY lastErrorChanged)
 
 public:
     explicit ViewModelRegistry(QObject *parent = nullptr);
@@ -22,15 +28,47 @@ public:
     Q_INVOKABLE void remove(const QString &key);
     Q_INVOKABLE void clear();
 
+    Q_INVOKABLE bool bindView(const QString &viewId, const QString &key, bool writable = false);
+    Q_INVOKABLE void unbindView(const QString &viewId);
+    Q_INVOKABLE QObject *getForView(const QString &viewId) const;
+    Q_INVOKABLE QString keyForView(const QString &viewId) const;
+    Q_INVOKABLE bool claimOwnership(const QString &viewId, const QString &key);
+    Q_INVOKABLE bool releaseOwnership(const QString &viewId, const QString &key = QString());
+    Q_INVOKABLE bool canWrite(const QString &viewId, const QString &key = QString()) const;
+    Q_INVOKABLE QString ownerOf(const QString &key) const;
+    Q_INVOKABLE bool updateProperty(const QString &viewId, const QString &property, const QVariant &value);
+    Q_INVOKABLE bool updatePropertyByKey(const QString &viewId,
+                                         const QString &key,
+                                         const QString &property,
+                                         const QVariant &value);
+    Q_INVOKABLE QVariant readProperty(const QString &viewId, const QString &property) const;
+
     QStringList keys() const;
+    QStringList views() const;
+    QVariantMap bindings() const;
+    QVariantMap owners() const;
+    QString lastError() const;
 
 signals:
     void keysChanged();
+    void viewsChanged();
+    void ownershipChanged();
+    void lastErrorChanged();
 
 private:
+    static QString normalizeToken(const QString &value);
+
+    void setLastError(const QString &message);
+    void pruneBindingsAndOwners(const QStringList &validKeys);
+    bool keyExists(const QString &key) const;
+    QString resolveKeyForWrite(const QString &viewId, const QString &key) const;
+
     void prune();
     bool hasReference(QObject *object, const QString &exceptKey = QString()) const;
     void maybeDisposeOwned(QObject *object, const QString &exceptKey = QString());
 
     QHash<QString, QPointer<QObject>> m_entries;
+    QHash<QString, QString> m_viewBindings;
+    QHash<QString, QString> m_owners;
+    QString m_lastError;
 };

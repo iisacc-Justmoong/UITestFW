@@ -542,25 +542,21 @@ UIF.ApplicationWindow {
                             UIF.NavigationLink {
                                 text: "Go Overview"
                                 to: "/overview"
-                                router: demoRouter
                             }
 
                             UIF.NavigationLink {
                                 text: "Go Reports"
                                 to: "/reports"
-                                router: demoRouter
                             }
 
                             UIF.Link {
                                 text: "Go Runs"
                                 href: "/runs"
-                                router: demoRouter
                                 underline: true
                             }
 
                             UIF.LinkWrapper {
                                 href: "/settings"
-                                router: demoRouter
 
                                 Rectangle {
                                     width: 148

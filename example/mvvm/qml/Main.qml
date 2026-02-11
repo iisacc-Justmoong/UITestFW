@@ -10,7 +10,13 @@ UIF.ApplicationWindow {
     subtitle: "Model -> ViewModel -> LVRS QML"
     navigationEnabled: false
 
-    property var vm: UIF.ViewModels.get("Example")
+    property string viewId: "ExampleView"
+    property var vm: UIF.ViewModels.getForView(root.viewId)
+    property bool writeEnabled: UIF.ViewModels.canWrite(root.viewId)
+
+    Component.onCompleted: {
+        UIF.ViewModels.bindView(root.viewId, "Example", true)
+    }
 
     Item {
         anchors.fill: parent
@@ -37,10 +43,20 @@ UIF.ApplicationWindow {
 
                 UIF.LabelButton {
                     width: parent.width
-                    text: "Toggle Status"
-                    enabled: root.vm !== null
+                    text: "Toggle Status (ownership write)"
+                    enabled: root.vm !== null && root.writeEnabled
                     tone: enabled ? UIF.AbstractButton.Accent : UIF.AbstractButton.Disabled
-                    onClicked: root.vm.simulateWork()
+                    onClicked: {
+                        const nextStatus = root.vm.status === "Idle" ? "Working" : "Idle"
+                        UIF.ViewModels.updateProperty(root.viewId, "status", nextStatus)
+                    }
+                }
+
+                UIF.Label {
+                    width: parent.width
+                    style: caption
+                    color: UIF.Theme.textTertiary
+                    text: "owner=" + UIF.ViewModels.ownerOf("Example")
                 }
             }
         }

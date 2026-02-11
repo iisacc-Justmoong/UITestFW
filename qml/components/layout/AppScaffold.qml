@@ -45,6 +45,22 @@ Item {
         return ({})
     }
 
+    function resolveRouter() {
+        if (pageRouter)
+            return pageRouter
+        if (typeof Navigator !== "undefined" && Navigator && Navigator.router)
+            return Navigator.router
+        return null
+    }
+
+    function navigateTo(path, params) {
+        var targetRouter = resolveRouter()
+        if (!targetRouter || !path)
+            return false
+        targetRouter.go(path, params !== undefined ? params : ({}))
+        return true
+    }
+
     onWideChanged: {
         if (wide && navDrawer.opened)
             navDrawer.close()
@@ -112,8 +128,7 @@ Item {
                 root.navIndex = index
                 root.navActivated(index, item)
                 var path = root.routeForItem(item)
-                if (root.pageRouter && path)
-                    root.pageRouter.go(path, root.paramsForItem(item))
+                root.navigateTo(path, root.paramsForItem(item))
             }
         }
     }
@@ -180,8 +195,7 @@ Item {
                 root.navIndex = index
                 root.navActivated(index, item)
                 var path = root.routeForItem(item)
-                if (root.pageRouter && path)
-                    root.pageRouter.go(path, root.paramsForItem(item))
+                root.navigateTo(path, root.paramsForItem(item))
                 navDrawer.close()
             }
         }

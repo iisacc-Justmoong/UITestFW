@@ -15,6 +15,14 @@ Item {
     implicitWidth: contentSlot.childrenRect.width
     implicitHeight: contentSlot.childrenRect.height
 
+    function resolveRouter() {
+        if (router)
+            return router
+        if (typeof Navigator !== "undefined" && Navigator && Navigator.router)
+            return Navigator.router
+        return null
+    }
+
     Item {
         id: contentSlot
         anchors.fill: parent
@@ -26,21 +34,22 @@ Item {
         cursorShape: Qt.PointingHandCursor
         propagateComposedEvents: true
         onClicked: function(mouse) {
-            if (!root.router)
+            var targetRouter = root.resolveRouter()
+            if (!targetRouter)
                 return
             if (root.targetComponent) {
                 if (root.replace)
-                    root.router.replaceWith(root.targetComponent, root.params)
+                    targetRouter.replaceWith(root.targetComponent, root.params)
                 else
-                    root.router.goTo(root.targetComponent, root.params)
+                    targetRouter.goTo(root.targetComponent, root.params)
                 return
             }
             if (!root.href)
                 return
             if (root.replace)
-                root.router.replace(root.href, root.params)
+                targetRouter.replace(root.href, root.params)
             else
-                root.router.go(root.href, root.params)
+                targetRouter.go(root.href, root.params)
         }
     }
     QtObject {
@@ -51,4 +60,4 @@ Item {
 
 // API usage (external):
 // import LVRS 1.0 as UIF
-// UIF.LinkWrapper { router: pageRouter; href: "/b"; Rectangle { width: 120; height: 40 } }
+// UIF.LinkWrapper { href: "/b"; Rectangle { width: 120; height: 40 } }

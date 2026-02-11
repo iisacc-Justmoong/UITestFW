@@ -1,5 +1,7 @@
 # LVRS Docs
 
+## Layered Visual Render System
+
 This documentation is organized **per directory and per component**.
 Use the links below to navigate.
 

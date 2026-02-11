@@ -7,7 +7,6 @@ Wrap any component to make it navigable.
 ## Usage
 ```qml
 UIF.LinkWrapper {
-    router: router
     href: "/b"
     Rectangle { width: 120; height: 40 }
 }

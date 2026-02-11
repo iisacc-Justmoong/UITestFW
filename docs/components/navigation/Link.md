@@ -10,7 +10,9 @@ Anchor-like control for navigation.
 - `targetComponent`
 - `replace`
 
+`router` is optional when `Navigator` has a registered `PageRouter`.
+
 ## Usage
 ```qml
-UIF.Link { router: router; href: "/reports"; Text { text: "Reports" } }
+UIF.Link { href: "/reports"; Text { text: "Reports" } }
 ```

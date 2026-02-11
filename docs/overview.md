@@ -18,4 +18,4 @@ import LVRS 1.0 as UIF
 ## Philosophy
 - Reusable primitives with consistent styling via `Theme`
 - Navigation that blends Svelte-like path syntax with SwiftUI navigation stacks
-- MVVM-ready: ViewModels registered in C++ and consumed by QML
+- MVVM-ready: ViewModels registered in C++, bound per view, and write-owned through permission checks

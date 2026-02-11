@@ -47,7 +47,7 @@ It emits `statusChanged()` when the value updates.
 ### `backend/ExampleViewModel.h` / `backend/ExampleViewModel.cpp`
 Wraps the model and exposes:
 - `status` (READ-only from the model)
-- `simulateWork()` (command that toggles the model state)
+- `simulateWork()` (optional command example; view-level writes can also be used)
 
 It forwards `statusChanged()` to QML.
 
@@ -61,9 +61,10 @@ Registers the ViewModel into `ViewModels`:
 ### `qml/Main.qml`
 Binds UI to the registered ViewModel:
 
-- Fetches it by key: `UIF.ViewModels.get("Example")`
+- Binds a view key with ownership: `UIF.ViewModels.bindView("ExampleView", "Example", true)`
+- Fetches by view key: `UIF.ViewModels.getForView("ExampleView")`
 - Reads `vm.status`
-- Calls `vm.simulateWork()`
+- Updates model through permission check: `UIF.ViewModels.updateProperty("ExampleView", "status", "Working")`
 
 ---
 
@@ -99,11 +100,17 @@ engine.load(QUrl("qrc:/qt/qml/Example/Main.qml"));
 import LVRS 1.0 as UIF
 
 ApplicationWindow {
-    property var vm: UIF.ViewModels.get("Example")
+    property string viewId: "ExampleView"
+    Component.onCompleted: UIF.ViewModels.bindView(viewId, "Example", true)
+    property var vm: UIF.ViewModels.getForView(viewId)
 
     Column {
         Text { text: vm ? ("Status: " + vm.status) : "No VM" }
-        Button { text: "Toggle"; onClicked: vm.simulateWork() }
+        Button {
+            text: "Toggle"
+            onClicked: UIF.ViewModels.updateProperty(viewId, "status",
+                                                     vm.status === "Idle" ? "Working" : "Idle")
+        }
     }
 }
 ```
@@ -123,7 +130,8 @@ ApplicationWindow {
 - [ ] Create a model with Q_PROPERTY + signals
 - [ ] Wrap it in a ViewModel
 - [ ] Register it via `ViewModels.set("Key", vm)`
-- [ ] Fetch in QML via `ViewModels.get("Key")`
+- [ ] Bind view ownership via `ViewModels.bindView("ViewId", "Key", true|false)`
+- [ ] Fetch in QML via `ViewModels.getForView("ViewId")`
 
 
 
@@ -153,7 +161,7 @@ ApplicationWindow {
 ### `backend/ExampleViewModel.h` / `backend/ExampleViewModel.cpp`
 Model을 감싸 QML에 다음을 제공합니다:
 - `status` (Model의 값 읽기 전용)
-- `simulateWork()` (상태 토글 커맨드)
+- `simulateWork()` (선택형 명령 예시, 뷰 권한 기반 쓰기와 병행 가능)
 
 `statusChanged()` 시그널을 QML로 전달합니다.
 
@@ -167,9 +175,10 @@ ViewModel을 `ViewModels`에 등록합니다:
 ### `qml/Main.qml`
 등록된 ViewModel을 받아 UI에서 사용:
 
-- `UIF.ViewModels.get("Example")`으로 조회
+- `UIF.ViewModels.bindView("ExampleView", "Example", true)`로 뷰 바인딩/소유권 획득
+- `UIF.ViewModels.getForView("ExampleView")`으로 조회
 - `vm.status` 바인딩
-- `vm.simulateWork()` 호출
+- `UIF.ViewModels.updateProperty("ExampleView", "status", ...)` 호출
 
 ---
 
@@ -205,11 +214,17 @@ engine.load(QUrl("qrc:/qt/qml/Example/Main.qml"));
 import LVRS 1.0 as UIF
 
 ApplicationWindow {
-    property var vm: UIF.ViewModels.get("Example")
+    property string viewId: "ExampleView"
+    Component.onCompleted: UIF.ViewModels.bindView(viewId, "Example", true)
+    property var vm: UIF.ViewModels.getForView(viewId)
 
     Column {
         Text { text: vm ? ("Status: " + vm.status) : "No VM" }
-        Button { text: "Toggle"; onClicked: vm.simulateWork() }
+        Button {
+            text: "Toggle"
+            onClicked: UIF.ViewModels.updateProperty(viewId, "status",
+                                                     vm.status === "Idle" ? "Working" : "Idle")
+        }
     }
 }
 ```
@@ -229,4 +244,5 @@ ApplicationWindow {
 - [ ] Q_PROPERTY + 시그널을 가진 Model 생성
 - [ ] ViewModel로 래핑
 - [ ] `ViewModels.set("Key", vm)` 등록
-- [ ] QML에서 `ViewModels.get("Key")`로 조회
+- [ ] `ViewModels.bindView("ViewId", "Key", true|false)`로 뷰 바인딩
+- [ ] QML에서 `ViewModels.getForView("ViewId")`로 조회

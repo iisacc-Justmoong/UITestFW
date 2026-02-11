@@ -16,6 +16,8 @@ private slots:
     void route_params_are_passed_to_target_component();
     void component_navigation_keeps_path_stack_in_sync();
     void page_router_updates_view_state_tracker_from_stack();
+    void global_navigator_allows_one_line_navigation();
+    void route_mvvm_binding_and_write_ownership_are_applied();
 };
 
 void PageRouterTests::route_params_are_passed_to_target_component()
@@ -256,6 +258,175 @@ Item {
     QTRY_COMPARE(root->property("rootState").toString(), QStringLiteral("Active"));
     QTRY_COMPARE(root->property("runState").toString(), QString());
     QTRY_COMPARE(root->property("loadedCount").toInt(), 1);
+}
+
+void PageRouterTests::global_navigator_allows_one_line_navigation()
+{
+    QQmlEngine engine;
+    engine.addImportPath(TestUtils::qmlImportBase());
+
+    const QByteArray qml = R"(
+import QtQuick
+import LVRS as UIF
+
+Item {
+    id: root
+    width: 320
+    height: 240
+
+    property string currentPath: router.currentPath
+    property int depth: router.depth
+
+    Component { id: homePage; Item { } }
+    Component { id: reportsPage; Item { } }
+    Component { id: settingsPage; Item { } }
+
+    UIF.PageRouter {
+        id: router
+        anchors.fill: parent
+        initialPath: "/"
+        routes: [
+            { path: "/", component: homePage },
+            { path: "/reports", component: reportsPage },
+            { path: "/settings", component: settingsPage }
+        ]
+    }
+
+    UIF.Link {
+        id: globalLink
+        visible: false
+        href: "/settings"
+    }
+
+    function goReportsInOneLine() {
+        UIF.Navigator.go("/reports")
+    }
+
+    function goSettingsByLink() {
+        globalLink.clicked()
+    }
+
+    function goBackInOneLine() {
+        UIF.Navigator.back()
+    }
+}
+)";
+
+    QScopedPointer<QObject> root(TestUtils::createFromQml(engine, qml));
+    QVERIFY(root);
+    QTRY_COMPARE(root->property("currentPath").toString(), QStringLiteral("/"));
+    QCOMPARE(root->property("depth").toInt(), 1);
+
+    QVERIFY(QMetaObject::invokeMethod(root.data(), "goReportsInOneLine"));
+    QTRY_COMPARE(root->property("currentPath").toString(), QStringLiteral("/reports"));
+    QCOMPARE(root->property("depth").toInt(), 2);
+
+    QVERIFY(QMetaObject::invokeMethod(root.data(), "goSettingsByLink"));
+    QTRY_COMPARE(root->property("currentPath").toString(), QStringLiteral("/settings"));
+    QCOMPARE(root->property("depth").toInt(), 3);
+
+    QVERIFY(QMetaObject::invokeMethod(root.data(), "goBackInOneLine"));
+    QTRY_COMPARE(root->property("currentPath").toString(), QStringLiteral("/reports"));
+    QCOMPARE(root->property("depth").toInt(), 2);
+}
+
+void PageRouterTests::route_mvvm_binding_and_write_ownership_are_applied()
+{
+    QQmlEngine engine;
+    engine.addImportPath(TestUtils::qmlImportBase());
+
+    const QByteArray qml = R"(
+import QtQuick
+import LVRS as UIF
+
+Item {
+    id: root
+    width: 320
+    height: 240
+
+    property string ownerOverview: {
+        UIF.ViewModels.owners
+        return UIF.ViewModels.ownerOf("OverviewVM")
+    }
+    property string ownerReports: {
+        UIF.ViewModels.owners
+        return UIF.ViewModels.ownerOf("ReportsVM")
+    }
+    property bool canWriteOverview: {
+        UIF.ViewModels.bindings
+        UIF.ViewModels.owners
+        return UIF.ViewModels.canWrite("/overview")
+    }
+    property bool canWriteReports: {
+        UIF.ViewModels.bindings
+        UIF.ViewModels.owners
+        return UIF.ViewModels.canWrite("/reports")
+    }
+    property string overviewStatus: overviewVm.status
+
+    QtObject {
+        id: overviewVm
+        property string status: "Idle"
+    }
+
+    QtObject {
+        id: reportsVm
+        property string status: "Ready"
+    }
+
+    Component {
+        id: overviewPage
+        Item { }
+    }
+
+    Component {
+        id: reportsPage
+        Item { }
+    }
+
+    UIF.PageRouter {
+        id: router
+        anchors.fill: parent
+        initialPath: "/overview"
+        routes: [
+            { path: "/overview", component: overviewPage, viewModelKey: "OverviewVM", writable: true },
+            { path: "/reports", component: reportsPage, viewModelKey: "ReportsVM" }
+        ]
+    }
+
+    function prepare() {
+        UIF.ViewModels.clear()
+        UIF.ViewModels.set("OverviewVM", overviewVm)
+        UIF.ViewModels.set("ReportsVM", reportsVm)
+        router.setRoot("/overview")
+    }
+
+    function goReports() {
+        router.go("/reports")
+    }
+
+    function writeOverviewStatus(nextStatus) {
+        UIF.ViewModels.updateProperty("/overview", "status", nextStatus)
+    }
+}
+)";
+
+    QScopedPointer<QObject> root(TestUtils::createFromQml(engine, qml));
+    QVERIFY(root);
+    QVERIFY(QMetaObject::invokeMethod(root.data(), "prepare"));
+
+    QTRY_COMPARE(root->property("ownerOverview").toString(), QStringLiteral("/overview"));
+    QCOMPARE(root->property("ownerReports").toString(), QString());
+    QCOMPARE(root->property("canWriteOverview").toBool(), true);
+    QCOMPARE(root->property("canWriteReports").toBool(), false);
+
+    QVERIFY(QMetaObject::invokeMethod(root.data(),
+                                      "writeOverviewStatus",
+                                      Q_ARG(QVariant, QVariant(QStringLiteral("Working")))));
+    QTRY_COMPARE(root->property("overviewStatus").toString(), QStringLiteral("Working"));
+
+    QVERIFY(QMetaObject::invokeMethod(root.data(), "goReports"));
+    QTRY_COMPARE(root->property("canWriteReports").toBool(), false);
 }
 
 QTEST_MAIN(PageRouterTests)

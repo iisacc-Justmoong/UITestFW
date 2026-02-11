@@ -16,6 +16,7 @@ Item {
 
     property Component notFoundComponent: null
     property url notFoundSource: ""
+    property bool registerAsGlobalNavigator: true
 
     readonly property bool canGoBack: stackView.depth > 1
     readonly property int depth: stackView.depth
@@ -147,6 +148,55 @@ Item {
         return null
     }
 
+    function routeViewModelKey(route, params) {
+        if (!route || typeof route !== "object")
+            return ""
+        if (route.viewModelKey !== undefined && route.viewModelKey !== null && String(route.viewModelKey).trim().length > 0)
+            return String(route.viewModelKey).trim()
+        if (route.modelKey !== undefined && route.modelKey !== null && String(route.modelKey).trim().length > 0)
+            return String(route.modelKey).trim()
+        if (params && params.viewModelKey !== undefined && params.viewModelKey !== null && String(params.viewModelKey).trim().length > 0)
+            return String(params.viewModelKey).trim()
+        if (params && params.modelKey !== undefined && params.modelKey !== null && String(params.modelKey).trim().length > 0)
+            return String(params.modelKey).trim()
+        return ""
+    }
+
+    function routeViewId(pathValue, route, params, fallbackIndex) {
+        if (route && route.viewId !== undefined && route.viewId !== null && String(route.viewId).trim().length > 0)
+            return String(route.viewId).trim()
+        if (params && params.viewId !== undefined && params.viewId !== null && String(params.viewId).trim().length > 0)
+            return String(params.viewId).trim()
+        if (pathValue !== undefined && pathValue !== null && String(pathValue).trim().length > 0)
+            return String(pathValue).trim()
+        return "_component_" + fallbackIndex
+    }
+
+    function routeWritable(route, params) {
+        if (route && route.writable !== undefined)
+            return !!route.writable
+        if (route && route.modelWritable !== undefined)
+            return !!route.modelWritable
+        if (params && params.writable !== undefined)
+            return !!params.writable
+        if (params && params.modelWritable !== undefined)
+            return !!params.modelWritable
+        return false
+    }
+
+    function bindRouteViewModel(pathValue, route, params, fallbackIndex) {
+        if (typeof ViewModels === "undefined" || !ViewModels || !ViewModels.bindView)
+            return
+
+        var key = routeViewModelKey(route, params)
+        if (!key)
+            return
+
+        var viewId = routeViewId(pathValue, route, params, fallbackIndex)
+        var writable = routeWritable(route, params)
+        ViewModels.bindView(viewId, key, writable)
+    }
+
     function navigate(path, params, mode) {
         var resolved = resolveRoute(path)
         var targetParams = ({})
@@ -194,6 +244,10 @@ Item {
         }
         updatePathStack(normalized, targetParams, mode)
         setCurrent(normalized, targetParams)
+        bindRouteViewModel(normalized,
+                           route,
+                           targetParams,
+                           root.path && root.path.length !== undefined ? Math.max(0, root.path.length - 1) : 0)
         navigated(normalized, targetParams)
     }
 
@@ -211,14 +265,25 @@ Item {
         }
         updateComponentPathStack(component, targetParams, mode)
         setCurrent("", targetParams)
+        bindRouteViewModel("",
+                           null,
+                           targetParams,
+                           root.path && root.path.length !== undefined ? Math.max(0, root.path.length - 1) : 0)
         componentNavigated(component)
     }
 
     Component.onCompleted: {
+        if (registerAsGlobalNavigator)
+            Navigator.registerRouter(root)
         if (initialPath)
             setRoot(initialPath)
         else
             syncViewStateTracker()
+    }
+
+    Component.onDestruction: {
+        if (registerAsGlobalNavigator)
+            Navigator.unregisterRouter(root)
     }
 
     StackView {
@@ -273,6 +338,7 @@ Item {
             }
             var mergedParams = entryParams !== undefined ? entryParams : resolved.params
             stackView.push(target, mergedParams || {})
+            bindRouteViewModel(normalized, resolved.route, mergedParams || {}, i)
         }
         _syncingPath = false
         applyCurrentFromPathEntry(path[path.length - 1])
@@ -448,4 +514,6 @@ Item {
 
 // API usage (external):
 // import LVRS 1.0 as UIF
-// UIF.PageRouter { routes: [{ path: "/", component: homePage }] }
+// UIF.PageRouter {
+//     routes: [{ path: "/", component: homePage, viewModelKey: "OverviewVM", writable: true }]
+// }

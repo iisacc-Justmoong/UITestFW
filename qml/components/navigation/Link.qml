@@ -20,22 +20,31 @@ AbstractButton {
     hoverEnabled: true
     background: Item { }
 
+    function resolveRouter() {
+        if (router)
+            return router
+        if (typeof Navigator !== "undefined" && Navigator && Navigator.router)
+            return Navigator.router
+        return null
+    }
+
     onClicked: {
-        if (!router)
+        var targetRouter = resolveRouter()
+        if (!targetRouter)
             return
         if (targetComponent) {
             if (replace)
-                router.replaceWith(targetComponent, params)
+                targetRouter.replaceWith(targetComponent, params)
             else
-                router.goTo(targetComponent, params)
+                targetRouter.goTo(targetComponent, params)
             return
         }
         if (!href)
             return
         if (replace)
-            router.replace(href, params)
+            targetRouter.replace(href, params)
         else
-            router.go(href, params)
+            targetRouter.go(href, params)
     }
 
     contentItem: Item {
@@ -69,4 +78,4 @@ AbstractButton {
 
 // API usage (external):
 // import LVRS 1.0 as UIF
-// UIF.Link { href: "/reports"; router: pageRouter; UIF.Label { text: "Reports"; style: description } }
+// UIF.Link { href: "/reports"; UIF.Label { text: "Reports"; style: description } }

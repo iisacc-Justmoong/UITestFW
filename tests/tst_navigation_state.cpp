@@ -12,6 +12,37 @@
 
 Q_IMPORT_PLUGIN(LVRSPlugin)
 
+class MutableStatusModel : public QObject
+{
+    Q_OBJECT
+    Q_PROPERTY(QString status READ status WRITE setStatus NOTIFY statusChanged)
+
+public:
+    explicit MutableStatusModel(QObject *parent = nullptr)
+        : QObject(parent)
+    {
+    }
+
+    QString status() const
+    {
+        return m_status;
+    }
+
+    void setStatus(const QString &value)
+    {
+        if (m_status == value)
+            return;
+        m_status = value;
+        emit statusChanged();
+    }
+
+signals:
+    void statusChanged();
+
+private:
+    QString m_status = QStringLiteral("Idle");
+};
+
 class NavigationStateTests : public QObject
 {
     Q_OBJECT
@@ -21,6 +52,7 @@ private slots:
     void page_monitor_signal_contract_and_normalization();
     void view_state_tracker_syncs_stack_and_status();
     void view_state_tracker_disable_override_changes_active_target();
+    void viewmodels_registry_binding_ownership_and_write_permissions();
     void viewmodels_registry_tracks_keys_and_ownership();
     void viewmodels_registry_signal_and_prune_contract();
 };
@@ -160,6 +192,71 @@ void NavigationStateTests::view_state_tracker_disable_override_changes_active_ta
     QCOMPARE(tracker.loadedCount(), 0);
     QCOMPARE(tracker.currentActiveView(), QString());
     QVERIFY(stackSpy.count() >= 3);
+}
+
+void NavigationStateTests::viewmodels_registry_binding_ownership_and_write_permissions()
+{
+    ViewModelRegistry registry;
+    auto *model = new MutableStatusModel;
+    registry.set(QStringLiteral("Example"), model);
+
+    QSignalSpy viewsSpy(&registry, &ViewModelRegistry::viewsChanged);
+    QSignalSpy ownershipSpy(&registry, &ViewModelRegistry::ownershipChanged);
+    QSignalSpy errorSpy(&registry, &ViewModelRegistry::lastErrorChanged);
+    QVERIFY(viewsSpy.isValid());
+    QVERIFY(ownershipSpy.isValid());
+    QVERIFY(errorSpy.isValid());
+
+    QVERIFY(registry.bindView(QStringLiteral("OverviewView"), QStringLiteral("Example"), true));
+    QCOMPARE(registry.keyForView(QStringLiteral("OverviewView")), QStringLiteral("Example"));
+    QVERIFY(registry.getForView(QStringLiteral("OverviewView")) == model);
+    QCOMPARE(registry.ownerOf(QStringLiteral("Example")), QStringLiteral("OverviewView"));
+    QVERIFY(registry.canWrite(QStringLiteral("OverviewView")));
+
+    QVERIFY(registry.bindView(QStringLiteral("ReportsView"), QStringLiteral("Example"), false));
+    QCOMPARE(registry.keyForView(QStringLiteral("ReportsView")), QStringLiteral("Example"));
+    QVERIFY(!registry.canWrite(QStringLiteral("ReportsView")));
+
+    QVERIFY(!registry.updateProperty(QStringLiteral("ReportsView"),
+                                     QStringLiteral("status"),
+                                     QStringLiteral("Working")));
+    QCOMPARE(registry.lastError(), QStringLiteral("View has no write permission for the model"));
+    QCOMPARE(model->status(), QStringLiteral("Idle"));
+
+    QVERIFY(registry.updateProperty(QStringLiteral("OverviewView"),
+                                    QStringLiteral("status"),
+                                    QStringLiteral("Working")));
+    QCOMPARE(model->status(), QStringLiteral("Working"));
+    QCOMPARE(registry.readProperty(QStringLiteral("OverviewView"), QStringLiteral("status")).toString(),
+             QStringLiteral("Working"));
+
+    QVERIFY(!registry.bindView(QStringLiteral("ReportsView"), QStringLiteral("Example"), true));
+    QCOMPARE(registry.lastError(), QStringLiteral("ViewModel is already owned by another view"));
+
+    QVERIFY(registry.releaseOwnership(QStringLiteral("OverviewView"), QStringLiteral("Example")));
+    QCOMPARE(registry.ownerOf(QStringLiteral("Example")), QString());
+    QVERIFY(registry.claimOwnership(QStringLiteral("ReportsView"), QStringLiteral("Example")));
+    QCOMPARE(registry.ownerOf(QStringLiteral("Example")), QStringLiteral("ReportsView"));
+    QVERIFY(registry.canWrite(QStringLiteral("ReportsView"), QStringLiteral("Example")));
+
+    QVERIFY(registry.updateProperty(QStringLiteral("ReportsView"),
+                                    QStringLiteral("status"),
+                                    QStringLiteral("Ready")));
+    QCOMPARE(model->status(), QStringLiteral("Ready"));
+
+    registry.unbindView(QStringLiteral("ReportsView"));
+    QCOMPARE(registry.keyForView(QStringLiteral("ReportsView")), QString());
+    QCOMPARE(registry.ownerOf(QStringLiteral("Example")), QString());
+    QVERIFY(!registry.canWrite(QStringLiteral("ReportsView")));
+
+    QCOMPARE(registry.bindings().value(QStringLiteral("OverviewView")).toString(),
+             QStringLiteral("Example"));
+    QVERIFY(viewsSpy.count() >= 3);
+    QVERIFY(ownershipSpy.count() >= 3);
+    QVERIFY(errorSpy.count() >= 1);
+
+    registry.remove(QStringLiteral("Example"));
+    QCOMPARE(registry.keyForView(QStringLiteral("OverviewView")), QString());
 }
 
 void NavigationStateTests::viewmodels_registry_tracks_keys_and_ownership()

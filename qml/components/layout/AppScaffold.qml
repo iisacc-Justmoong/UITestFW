@@ -6,7 +6,7 @@ import UIFramework 1.0
 Item {
     id: root
 
-    property string headerTitle: "UITestFW"
+    property string headerTitle: "UIFramework"
     property string headerSubtitle: ""
     property var navModel: ["Overview", "Suites", "Runs", "Devices", "Reports", "Settings"]
     property int navIndex: 0
@@ -365,4 +365,4 @@ Item {
 
 // API usage (external):
 // import UIFramework 1.0 as UIF
-// UIF.AppScaffold { headerTitle: "UITestFW"; navModel: ["Overview"] }
+// UIF.AppScaffold { headerTitle: "UIFramework"; navModel: ["Overview"] }

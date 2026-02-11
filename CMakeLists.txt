@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.21)
-project(UITestFW LANGUAGES CXX)
+project(UIFramework LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -155,46 +155,47 @@ target_link_libraries(UIFramework
         Qt6::Network
 )
 
-option(UIFRAMEWORK_BUILD_DEMO "Build the UITestFW demo application" ON)
+option(UIFRAMEWORK_BUILD_DEMO "Build the UIFramework demo application" ON)
 option(UIFRAMEWORK_BUILD_TESTS "Build UIFramework tests" ON)
 
 if(UIFRAMEWORK_BUILD_DEMO)
-    qt_add_executable(UITestFW
+    qt_add_executable(UIFrameworkDemo
         MANUAL_FINALIZATION
         main.cpp
     )
 
-    qt_add_qml_module(UITestFW
-        URI UITestFW
+    qt_add_qml_module(UIFrameworkDemo
+        URI UIFrameworkDemo
         VERSION 1.0
         RESOURCE_PREFIX "/qt/qml"
-        OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/UITestFW"
+        OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/UIFrameworkDemo"
         QML_FILES
-            ${UITESTFW_QML_FILES}
+            ${UIFRAMEWORK_DEMO_QML_FILES}
     )
 
-    target_link_libraries(UITestFW
+    target_link_libraries(UIFrameworkDemo
         PRIVATE
             Qt6::Quick
             Qt6::QuickControls2
             UIFramework
     )
 
-    set_target_properties(UITestFW PROPERTIES
+    set_target_properties(UIFrameworkDemo PROPERTIES
         MACOSX_BUNDLE TRUE
         WIN32_EXECUTABLE TRUE
+        OUTPUT_NAME "UIFramework"
     )
 
     if(IOS)
-        set(UIFRAMEWORK_IOS_BUNDLE_ID "" CACHE STRING "Override iOS bundle identifier for UITestFW demo")
+        set(UIFRAMEWORK_IOS_BUNDLE_ID "" CACHE STRING "Override iOS bundle identifier for UIFramework demo")
         if(UIFRAMEWORK_IOS_BUNDLE_ID)
-            set_target_properties(UITestFW PROPERTIES
+            set_target_properties(UIFrameworkDemo PROPERTIES
                 XCODE_ATTRIBUTE_PRODUCT_BUNDLE_IDENTIFIER "${UIFRAMEWORK_IOS_BUNDLE_ID}"
             )
         endif()
     endif()
 
-    qt_finalize_executable(UITestFW)
+    qt_finalize_executable(UIFrameworkDemo)
 endif()
 
 if(UIFRAMEWORK_BUILD_TESTS)

@@ -17,7 +17,7 @@ Compatibility wrapper over `ApplicationWindow`. New code should use `UIF.Applica
 ## Usage
 ```qml
 UIF.ApplicationWindow {
-    title: "UITestFW"
+    title: "UIFramework"
     navItems: ["Overview", "Runs"]
     onNavActivated: (idx, item) => console.log(idx, item)
 }

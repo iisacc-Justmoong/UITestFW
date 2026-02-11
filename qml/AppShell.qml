@@ -12,4 +12,4 @@ ApplicationWindow {
 
 // API usage (external):
 // import UIFramework as UIF
-// UIF.AppShell { title: "UITestFW"; navItems: ["Overview"] }
+// UIF.AppShell { title: "UIFramework"; navItems: ["Overview"] }

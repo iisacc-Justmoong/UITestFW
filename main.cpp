@@ -36,7 +36,7 @@ int main(int argc, char *argv[])
 {
     RenderQuality::configureGlobalDefaults();
     QGuiApplication app(argc, argv);
-    app.setApplicationName(QStringLiteral("UITestFW"));
+    app.setApplicationName(QStringLiteral("UIFramework"));
     loadBundledFonts();
     FontPolicy::installPretendardFallbacks();
     if (!FontPolicy::enforcePretendardFallback())
@@ -50,7 +50,7 @@ int main(int argc, char *argv[])
         []() { QCoreApplication::exit(-1); },
         Qt::QueuedConnection);
 
-    engine.loadFromModule(QStringLiteral("UITestFW"), QStringLiteral("Main"));
+    engine.loadFromModule(QStringLiteral("UIFrameworkDemo"), QStringLiteral("Main"));
 
     return app.exec();
 }

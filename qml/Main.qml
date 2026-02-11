@@ -1154,5 +1154,5 @@ UIF.ApplicationWindow {
 }
 
 // API usage (external):
-// import UITestFW 1.0
+// import UIFrameworkDemo 1.0
 // Main { visible: true }

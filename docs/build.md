@@ -8,7 +8,7 @@ cmake --build build
 
 Run demo app:
 ```
-./build/UITestFW
+./build/UIFramework
 ```
 
 Notes:

@@ -29,6 +29,8 @@ Controls.ApplicationWindow {
     // Keep view composition identical across platforms; only apply when explicitly enabled.
     property bool usePlatformSafeMargin: false
     property int safeMargin: usePlatformSafeMargin && isMobilePlatform ? 12 : 0
+    property color windowColor: Theme.window
+    property bool forceNativeDarkTitleBar: Theme.dark
 
     property string subtitle: ""
     property var navItems: ["Overview", "Suites", "Runs", "Devices", "Reports", "Settings"]
@@ -51,6 +53,7 @@ Controls.ApplicationWindow {
 
     minimumWidth: isMobilePlatform ? mobileMinWidth : desktopMinWidth
     minimumHeight: isMobilePlatform ? mobileMinHeight : desktopMinHeight
+    color: root.windowColor
 
     function matchesMedia(rule) {
         if (!rule)
@@ -68,6 +71,19 @@ Controls.ApplicationWindow {
             return widthClass === medium || heightClass === medium
         return false
     }
+
+    function applyNativeWindowStyle() {
+        if (!NativeWindowStyle.titleBarColorSupported)
+            return false
+        return NativeWindowStyle.applyTitleBarColor(root, root.windowColor, root.forceNativeDarkTitleBar)
+    }
+
+    onVisibleChanged: {
+        if (visible)
+            applyNativeWindowStyle()
+    }
+    onWindowColorChanged: applyNativeWindowStyle()
+    onForceNativeDarkTitleBarChanged: applyNativeWindowStyle()
 
     readonly property real effectiveSupersampleScale: RenderQuality.enabled
         ? Math.max(RenderQuality.minimumSupersampleScale,
@@ -108,6 +124,8 @@ Controls.ApplicationWindow {
             RuntimeEvents.attachWindow(root)
             Debug.log("ApplicationWindow", "created")
             Debug.log("ApplicationWindow", "supersample-scale", root.effectiveSupersampleScale)
+            root.applyNativeWindowStyle()
+            Qt.callLater(root.applyNativeWindowStyle)
         }
     }
 

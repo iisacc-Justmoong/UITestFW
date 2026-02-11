@@ -25,3 +25,17 @@ set(UIFRAMEWORK_BACKEND_HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/graphics/svgmanager.h
     ${CMAKE_CURRENT_LIST_DIR}/text/textmarkup.h
 )
+
+if(APPLE)
+    list(APPEND UIFRAMEWORK_BACKEND_SOURCES
+        ${CMAKE_CURRENT_LIST_DIR}/platform/nativewindowstyle.mm
+    )
+else()
+    list(APPEND UIFRAMEWORK_BACKEND_SOURCES
+        ${CMAKE_CURRENT_LIST_DIR}/platform/nativewindowstyle.cpp
+    )
+endif()
+
+list(APPEND UIFRAMEWORK_BACKEND_HEADERS
+    ${CMAKE_CURRENT_LIST_DIR}/platform/nativewindowstyle.h
+)

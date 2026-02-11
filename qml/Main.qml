@@ -9,6 +9,7 @@ UIF.ApplicationWindow {
     visible: true
     width: 1480
     height: 980
+    title: ""
 
     property bool alertOpen: false
     property int eventClickCount: 0
@@ -92,10 +93,10 @@ UIF.ApplicationWindow {
     Component.onCompleted: {
         UIF.FontPolicy.enforceApplicationFallback()
         UIF.Debug.enabled = true
-        UIF.Debug.log("Main", "gallery-opened")
+        UIF.Debug.log("Main", "test-app-opened")
         UIF.Debug.log("Main", "font-family", UIF.FontPolicy.effectiveFamily)
         UIF.RenderMonitor.attachWindow(root)
-        UIF.PageMonitor.record("/gallery")
+        UIF.PageMonitor.record("/test-app")
         root.runtimeSnapshot = UIF.RuntimeEvents.snapshot()
     }
 
@@ -343,7 +344,7 @@ UIF.ApplicationWindow {
                         }
 
                         UIF.Label {
-                            text: "Layout: AppHeader, AppScaffold, VStack, HStack, ZStack, Spacer active in gallery"
+                            text: "Layout: AppHeader, AppScaffold, VStack, HStack, ZStack, Spacer active in test app"
                             color: UIF.Theme.textSecondary
                             style: description
                         }

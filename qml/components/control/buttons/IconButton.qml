@@ -49,10 +49,10 @@ AbstractButton {
                     control.iconSize)
     }
 
-    horizontalPadding: Theme.gap7
-    verticalPadding: Theme.gap7
+    horizontalPadding: Theme.gap2
+    verticalPadding: Theme.gap2
     spacing: Theme.gapNone
-    cornerRadius: Theme.radiusMd
+    cornerRadius: Theme.radiusSm
     implicitHeight: contentItem.implicitHeight + topPadding + bottomPadding
     implicitWidth: contentItem.implicitWidth + leftPadding + rightPadding
 

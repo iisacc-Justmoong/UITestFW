@@ -34,3 +34,10 @@ target_link_libraries(UIFrameworkExampleEventListener
         Qt6::QuickControls2
         UIFramework
 )
+
+add_custom_target(run_UIFrameworkExampleEventListener
+    COMMAND $<TARGET_FILE:UIFrameworkExampleEventListener>
+    DEPENDS UIFrameworkExampleEventListener
+    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+    USES_TERMINAL
+)

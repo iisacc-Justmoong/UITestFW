@@ -174,10 +174,10 @@ QtObject {
     readonly property string textHeader2StyleName: "SemiBold"
     readonly property int textHeader2LineHeight: 15
     readonly property real textHeader2LetterSpacing: 0
-    readonly property int textBody: 13
+    readonly property int textBody: 12
     readonly property int textBodyWeight: Font.Medium
     readonly property string textBodyStyleName: "Medium"
-    readonly property int textBodyLineHeight: 13
+    readonly property int textBodyLineHeight: 12
     readonly property real textBodyLetterSpacing: 0
     readonly property int textDescription: 12
     readonly property int textDescriptionWeight: Font.DemiBold

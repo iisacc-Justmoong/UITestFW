@@ -13,9 +13,12 @@ Rectangle {
     property alias toolbarButtons: toolbar.buttons
     property alias activeToolbarButton: toolbar.activeButton
     property alias activeToolbarButtonId: toolbar.activeButtonId
+    property alias activeListItem: hierarchyList.activeItem
+    property alias activeListItemId: hierarchyList.activeItemId
     default property alias listItems: hierarchyList.items
 
     signal toolbarActivated(var button, int buttonId, int index)
+    signal listItemActivated(var item, int itemId, int index)
 
     implicitWidth: minimumPanelWidth
     implicitHeight: minimumPanelHeight
@@ -45,6 +48,7 @@ Rectangle {
         HierarchyList {
             id: hierarchyList
             width: listViewport.width
+            onActiveChanged: control.listItemActivated(item, itemId, index)
         }
 
         ScrollBar.vertical: ScrollBar {

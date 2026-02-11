@@ -4,12 +4,13 @@ import UIFramework 1.0
 AbstractButton {
     id: control
 
-    tone: AbstractButton.Accent
+    tone: AbstractButton.Default
     horizontalPadding: Theme.gap8
     verticalPadding: control.tone === AbstractButton.Accent ? Theme.gap2 : Theme.gap4
     spacing: Theme.gapNone
     cornerRadius: Theme.radiusSm
-    implicitHeight: contentItem.implicitHeight + topPadding + bottomPadding
+    implicitHeight: Theme.controlHeightMd
+    height: Theme.controlHeightMd
     implicitWidth: contentItem.implicitWidth + leftPadding + rightPadding
 
     textColor: control.tone === AbstractButton.Borderless ? Theme.accent : Theme.textPrimary
@@ -34,12 +35,12 @@ AbstractButton {
         verticalAlignment: Text.AlignVCenter
         elide: Text.ElideRight
     }
-    QtObject {
-        Component.onCompleted: Debug.log("LabelButton", "created")
-    }
 
+    QtObject {
+        Component.onCompleted: Debug.log("AlertButton", "created")
+    }
 }
 
 // API usage (external):
 // import UIFramework 1.0 as UIF
-// UIF.LabelButton { text: "Button"; tone: UIF.AbstractButton.Accent }
+// UIF.AlertButton { text: "Button"; tone: UIF.AbstractButton.Accent }

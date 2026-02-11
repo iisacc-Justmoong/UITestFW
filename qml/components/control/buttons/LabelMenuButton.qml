@@ -6,18 +6,29 @@ AbstractButton {
     id: control
 
     tone: AbstractButton.Accent
-    readonly property color indicatorColor: !control.effectiveEnabled
-        ? Theme.textOctonary
+    readonly property string indicatorNameDefault: "pan-down-symbolic-default"
+    readonly property string indicatorNameBorderless: "pan-down-symbolic-borderless"
+    readonly property string indicatorNameAccent: "pan-down-symbolic-accent"
+    readonly property string indicatorNameDisabled: "pan-down-symbolic-disabled"
+    readonly property string resolvedIndicatorName: !control.effectiveEnabled
+        ? control.indicatorNameDisabled
         : control.tone === AbstractButton.Borderless
-            ? Theme.accent
+            ? control.indicatorNameBorderless
             : control.tone === AbstractButton.Accent || control.tone === AbstractButton.Destructive
-                ? Theme.textPrimary
-                : Theme.textPrimary
+                ? control.indicatorNameAccent
+                : control.indicatorNameDefault
+    readonly property int iconRevision: SvgManager.revision
+    readonly property string renderedIndicatorSource: {
+        control.iconRevision
+        return SvgManager.icon(
+                    Theme.iconPath(control.resolvedIndicatorName),
+                    Theme.iconSm)
+    }
 
-    horizontalPadding: Theme.gap7
-    verticalPadding: Theme.gap7
-    spacing: Theme.gap4
-    cornerRadius: Theme.radiusMd
+    horizontalPadding: Theme.gap8
+    verticalPadding: Theme.gap2
+    spacing: Theme.gap2
+    cornerRadius: Theme.radiusSm
     implicitHeight: contentItem.implicitHeight + topPadding + bottomPadding
     implicitWidth: contentItem.implicitWidth + leftPadding + rightPadding
 
@@ -36,7 +47,7 @@ AbstractButton {
     backgroundColorDisabled: Theme.subSurface
 
     contentItem: RowLayout {
-        spacing: Theme.gap4
+        spacing: Theme.gap2
         Layout.alignment: Qt.AlignVCenter | Qt.AlignHCenter
 
         Label {
@@ -47,36 +58,23 @@ AbstractButton {
             Layout.alignment: Qt.AlignVCenter
         }
 
-        Canvas {
-            id: indicatorCanvas
-            width: 16
-            height: 16
-            Layout.preferredWidth: 16
-            Layout.preferredHeight: 16
-            Layout.minimumWidth: 16
-            Layout.minimumHeight: 16
-            Layout.maximumWidth: 16
-            Layout.maximumHeight: 16
+        Image {
+            source: control.renderedIndicatorSource
+            sourceSize.width: Theme.iconSm
+            sourceSize.height: Theme.iconSm
+            width: Theme.iconSm
+            height: Theme.iconSm
+            fillMode: Image.PreserveAspectFit
+            smooth: true
+            Layout.preferredWidth: Theme.iconSm
+            Layout.preferredHeight: Theme.iconSm
+            Layout.minimumWidth: Theme.iconSm
+            Layout.minimumHeight: Theme.iconSm
+            Layout.maximumWidth: Theme.iconSm
+            Layout.maximumHeight: Theme.iconSm
             Layout.alignment: Qt.AlignVCenter
-            antialiasing: true
-
-            onPaint: {
-                const ctx = getContext("2d")
-                ctx.clearRect(0, 0, width, height)
-                ctx.beginPath()
-                ctx.moveTo(4.5, 6.25)
-                ctx.lineTo(8.0, 9.75)
-                ctx.lineTo(11.5, 6.25)
-                ctx.lineWidth = 1.6
-                ctx.lineCap = "round"
-                ctx.lineJoin = "round"
-                ctx.strokeStyle = control.indicatorColor
-                ctx.stroke()
-            }
         }
     }
-
-    onIndicatorColorChanged: indicatorCanvas.requestPaint()
 
     QtObject {
         Component.onCompleted: Debug.log("LabelMenuButton", "created")

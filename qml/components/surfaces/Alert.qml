@@ -158,7 +158,7 @@ Item {
                     width: parent.width - (Theme.gap24 * 2)
                     spacing: Theme.gap12
 
-                    LabelButton {
+                    AlertButton {
                         visible: root.primaryText.length > 0
                         width: parent.width
                         text: root.primaryText
@@ -167,7 +167,7 @@ Item {
                         onClicked: root.primaryClicked()
                     }
 
-                    LabelButton {
+                    AlertButton {
                         visible: root.hasSecondaryAction
                         width: parent.width
                         text: root.secondaryText
@@ -176,7 +176,7 @@ Item {
                         onClicked: root.secondaryClicked()
                     }
 
-                    LabelButton {
+                    AlertButton {
                         visible: root.hasTertiaryAction
                         width: parent.width
                         text: root.tertiaryText
@@ -195,7 +195,7 @@ Item {
                     spacing: Theme.gap12
                     readonly property real buttonWidth: (width - spacing) / 2
 
-                    LabelButton {
+                    AlertButton {
                         width: horizontalActions.buttonWidth
                         text: root.primaryText
                         tone: AbstractButton.Accent
@@ -203,7 +203,7 @@ Item {
                         onClicked: root.primaryClicked()
                     }
 
-                    LabelButton {
+                    AlertButton {
                         width: horizontalActions.buttonWidth
                         visible: root.hasSecondaryAction
                         text: root.secondaryText
@@ -213,7 +213,7 @@ Item {
                     }
                 }
 
-                LabelButton {
+                AlertButton {
                     id: singleActionButton
                     visible: !root.useVerticalActionLayout && !root.hasSecondaryAction && root.primaryText.length > 0
                     x: Theme.gap24

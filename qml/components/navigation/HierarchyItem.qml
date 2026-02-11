@@ -5,6 +5,10 @@ import UIFramework 1.0
 AbstractButton {
     id: control
 
+    readonly property bool __isHierarchyItem: true
+    property int itemId: -1
+    property var hierarchyList: null
+
     text: "Label"
     property alias label: control.text
     property string iconName: ""
@@ -28,9 +32,11 @@ AbstractButton {
     property color textColorNormal: Theme.bodyColor
     property color textColorDisabled: Theme.disabledColor
     property color chevronColor: Theme.descriptionColor
-    property color rowBackgroundColor: selected ? Theme.accentOverlay : "transparent"
-    property color rowBackgroundColorHover: selected ? Theme.accentOverlay : Theme.surfaceGhost
-    property color rowBackgroundColorPressed: selected ? Theme.accentOverlay : Theme.surfaceAlt
+    readonly property bool resolvedSelected: hierarchyList ? hierarchyList.activeItem === control : selected
+    property color rowBackgroundColor: resolvedSelected ? Theme.accentOverlay : "transparent"
+    property color rowBackgroundColorHover: resolvedSelected ? Theme.accentOverlay : Theme.surfaceGhost
+    property color rowBackgroundColorPressed: resolvedSelected ? Theme.accentOverlay : Theme.surfaceAlt
+    readonly property bool rowVisible: hierarchyList ? hierarchyList.isItemVisible(control) : true
 
     readonly property int computedLeftPadding: baseLeftPadding + Math.max(0, indentLevel) * indentStep
     readonly property string resolvedIconName: {
@@ -52,11 +58,22 @@ AbstractButton {
     implicitHeight: rowHeight
     implicitWidth: Math.max(itemWidth, contentItem.implicitWidth + leftPadding + rightPadding)
     width: parent ? parent.width : implicitWidth
+    visible: rowVisible
 
     backgroundColor: rowBackgroundColor
     backgroundColorHover: rowBackgroundColorHover
     backgroundColorPressed: rowBackgroundColorPressed
     backgroundColorDisabled: rowBackgroundColor
+
+    onClicked: {
+        if (hierarchyList && hierarchyList.requestActivate)
+            hierarchyList.requestActivate(control)
+    }
+
+    onHierarchyListChanged: {
+        if (hierarchyList && hierarchyList.registerItem)
+            hierarchyList.registerItem(control)
+    }
 
     contentItem: RowLayout {
         spacing: Theme.gap14
@@ -139,22 +156,33 @@ AbstractButton {
                     if (!control.showChevron)
                         return
 
-                    const cx = width * 0.5
-                    const cy = height * 0.5
-                    ctx.save()
-                    if (control.expanded)
-                        ctx.rotate(Math.PI / 2, cx, cy)
-
                     ctx.beginPath()
-                    ctx.moveTo(width * 0.38, height * 0.28)
-                    ctx.lineTo(width * 0.58, height * 0.5)
-                    ctx.lineTo(width * 0.38, height * 0.72)
+                    if (control.expanded) {
+                        ctx.moveTo(width * 0.28, height * 0.38)
+                        ctx.lineTo(width * 0.5, height * 0.6)
+                        ctx.lineTo(width * 0.72, height * 0.38)
+                    } else {
+                        ctx.moveTo(width * 0.38, height * 0.28)
+                        ctx.lineTo(width * 0.58, height * 0.5)
+                        ctx.lineTo(width * 0.38, height * 0.72)
+                    }
                     ctx.lineWidth = 1.5
                     ctx.lineCap = "round"
                     ctx.lineJoin = "round"
                     ctx.strokeStyle = control.enabled ? control.chevronColor : control.textColorDisabled
                     ctx.stroke()
-                    ctx.restore()
+                }
+            }
+
+            MouseArea {
+                anchors.fill: parent
+                enabled: control.showChevron && control.enabled
+                acceptedButtons: Qt.LeftButton
+                onClicked: function(mouse) {
+                    mouse.accepted = true
+                    control.expanded = !control.expanded
+                    if (control.hierarchyList && control.hierarchyList.requestActivate)
+                        control.hierarchyList.requestActivate(control)
                 }
             }
         }
@@ -166,7 +194,11 @@ AbstractButton {
     onEnabledChanged: chevronCanvas.requestPaint()
 
     QtObject {
-        Component.onCompleted: Debug.log("HierarchyItem", "created")
+        Component.onCompleted: {
+            if (control.hierarchyList && control.hierarchyList.registerItem)
+                control.hierarchyList.registerItem(control)
+            Debug.log("HierarchyItem", "created")
+        }
     }
 }
 

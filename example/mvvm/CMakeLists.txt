@@ -28,3 +28,10 @@ target_link_libraries(UIFrameworkExampleMVVM
         Qt6::QuickControls2
         UIFramework
 )
+
+add_custom_target(run_UIFrameworkExampleMVVM
+    COMMAND $<TARGET_FILE:UIFrameworkExampleMVVM>
+    DEPENDS UIFrameworkExampleMVVM
+    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+    USES_TERMINAL
+)

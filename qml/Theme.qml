@@ -75,6 +75,8 @@ QtObject {
     readonly property color success: "#32d74b"
     readonly property color warning: "#ffd60a"
     readonly property color danger: "#ff453a"
+    readonly property color surface: "#38383c"
+    readonly property color darkGrey10: "#b4b8bf"
     readonly property color accentTint: "#1F0A84FF"
     readonly property color dangerTint: "#1FFF453A"
     readonly property color accentOverlay: "#400A84FF"
@@ -82,6 +84,13 @@ QtObject {
     readonly property color overlayBackdrop: "#59000000"
     readonly property color shadowStrong: "#40000000"
     readonly property color strokeSoft: "#D0D7E2"
+
+    //ContextMenu
+
+    readonly property color contextMenuSurface: surface
+    readonly property color contextMenuDivider: surface
+    readonly property color contextMenuItemSelectedBackground: accent
+    readonly property color contextMenuItemInactiveBackground: surface
 
     //Radius
 

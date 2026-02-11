@@ -2,6 +2,7 @@
 
 #include <QChildEvent>
 #include <QCoreApplication>
+#include <QContextMenuEvent>
 #include <QDateTime>
 #include <QEvent>
 #include <QFile>
@@ -444,6 +445,24 @@ bool RuntimeEvents::eventFilter(QObject *watched, QEvent *event)
                              static_cast<int>(mouseEvent->modifiers()));
         emit mouseChanged();
         emit mouseReleased(m_lastMouseX, m_lastMouseY, m_lastMouseButtons, m_lastMouseModifiers);
+        markActivity();
+        break;
+    }
+    case QEvent::ContextMenu: {
+        auto *contextEvent = static_cast<QContextMenuEvent *>(event);
+        const int modifiers = static_cast<int>(contextEvent->modifiers());
+        const int buttons = contextEvent->reason() == QContextMenuEvent::Mouse
+            ? static_cast<int>(Qt::RightButton)
+            : 0;
+        updateMouseFromEvent(static_cast<qreal>(contextEvent->globalPos().x()),
+                             static_cast<qreal>(contextEvent->globalPos().y()),
+                             buttons,
+                             modifiers);
+        emit mouseChanged();
+        emit contextRequested(m_lastMouseX,
+                              m_lastMouseY,
+                              m_lastMouseModifiers,
+                              static_cast<int>(contextEvent->reason()));
         markActivity();
         break;
     }

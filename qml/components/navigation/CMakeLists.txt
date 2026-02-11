@@ -3,4 +3,7 @@ set(UIFRAMEWORK_NAVIGATION_QML_FILES
     qml/components/navigation/Link.qml
     qml/components/navigation/LinkWrapper.qml
     qml/components/navigation/NavigationLink.qml
+    qml/components/navigation/ContextMenu.qml
+    qml/components/navigation/MenuItem.qml
+    qml/components/navigation/MenuDivider.qml
 )

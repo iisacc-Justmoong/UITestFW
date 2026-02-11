@@ -1,6 +1,7 @@
 #include <QtTest>
 
 #include <QCoreApplication>
+#include <QContextMenuEvent>
 #include <QEvent>
 #include <QKeyEvent>
 #include <QMouseEvent>
@@ -25,6 +26,7 @@ class RuntimeServicesTests : public QObject
 private slots:
     void runtime_events_measurement_boundaries();
     void runtime_events_idle_and_reset_signal_contract();
+    void runtime_events_context_menu_signal_contract();
     void runtime_events_single_input_event_is_counted_once();
     void render_monitor_counts_frames_when_swapped();
     void render_monitor_active_signal_and_destroy_path();
@@ -167,6 +169,34 @@ void RuntimeServicesTests::runtime_events_idle_and_reset_signal_contract()
     QVERIFY(!events.anyKeyPressed());
     QVERIFY(!events.mouseButtonPressed());
     QCOMPARE(runningSpy.count(), 1);
+}
+
+void RuntimeServicesTests::runtime_events_context_menu_signal_contract()
+{
+    RuntimeEvents events;
+    QQuickWindow window;
+    events.attachWindow(&window);
+    QTRY_VERIFY(events.running());
+
+    QSignalSpy contextSpy(&events, &RuntimeEvents::contextRequested);
+    QVERIFY(contextSpy.isValid());
+
+    const QPoint local(22, 16);
+    const QPoint global(320, 240);
+    QContextMenuEvent contextEvent(QContextMenuEvent::Mouse,
+                                   local,
+                                   global,
+                                   Qt::NoModifier);
+    QCoreApplication::sendEvent(&window, &contextEvent);
+
+    QTRY_VERIFY(contextSpy.count() >= 1);
+    const QList<QVariant> args = contextSpy.takeLast();
+    QVERIFY(args.size() >= 4);
+    QCOMPARE(args.at(2).toInt(), static_cast<int>(Qt::NoModifier));
+    QCOMPARE(args.at(3).toInt(), static_cast<int>(QContextMenuEvent::Mouse));
+    QCOMPARE(events.lastMouseButtons(), static_cast<int>(Qt::RightButton));
+    QCOMPARE(events.lastMouseX(), static_cast<qreal>(global.x()));
+    QCOMPARE(events.lastMouseY(), static_cast<qreal>(global.y()));
 }
 
 void RuntimeServicesTests::runtime_events_single_input_event_is_counted_once()

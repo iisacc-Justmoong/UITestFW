@@ -118,6 +118,7 @@ signals:
     void mouseMoved(qreal x, qreal y, int buttons, int modifiers);
     void mousePressed(qreal x, qreal y, int buttons, int modifiers);
     void mouseReleased(qreal x, qreal y, int buttons, int modifiers);
+    void contextRequested(qreal x, qreal y, int modifiers, int reason);
     void uiChanged();
     void uiEvent(const QString &eventType, const QString &objectName, const QString &className, bool visible);
     void idleChanged();

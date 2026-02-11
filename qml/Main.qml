@@ -6,11 +6,9 @@ import UIFramework as UIF
 
 UIF.ApplicationWindow {
     id: root
-
     visible: true
     width: 1480
     height: 980
-    title: "UIFramework Visual Gallery"
 
     property bool alertOpen: false
     property int eventClickCount: 0
@@ -59,6 +57,27 @@ UIF.ApplicationWindow {
     property bool metricsPass: metricsPassedChecks === metricsTotalChecks
     property string metricsSummary: metricsPassedChecks + "/" + metricsTotalChecks
     property var runtimeSnapshot: ({})
+    property string demoContextMenuLastAction: "none"
+    property var demoContextMenuItems: [
+        { id: "open", label: "Label", key: "key", showChevron: true },
+        { id: "rename", label: "Label", key: "key", enabled: false, showChevron: true },
+        { id: "pin", label: "Label", key: "key", selected: true, showChevron: true },
+        { type: "divider" },
+        { id: "delete", label: "Label", key: "key", showChevron: false }
+    ]
+
+    function openDemoContextMenuAtGlobal(globalX, globalY) {
+        if (!demoContextMenu.parent) {
+            demoContextMenu.openAt(globalX, globalY)
+            return
+        }
+        const localPoint = demoContextMenu.parent.mapFromGlobal(globalX, globalY)
+        demoContextMenu.openAt(localPoint.x, localPoint.y)
+    }
+
+    function openDemoContextMenuAtLocal(localX, localY) {
+        demoContextMenu.openAt(localX, localY)
+    }
 
     function textModeName(mode) {
         if (mode === textEditorPreview.plainTextMode)
@@ -104,6 +123,26 @@ UIF.ApplicationWindow {
         }
         onDismissed: {
             root.alertOpen = false
+        }
+    }
+
+    UIF.ContextMenu {
+        id: demoContextMenu
+        items: root.demoContextMenuItems
+        onItemTriggered: function(index, item) {
+            const actionId = item && item.id !== undefined ? item.id : ("item-" + index)
+            root.demoContextMenuLastAction = actionId
+        }
+    }
+
+    TapHandler {
+        id: defaultContextMenuHandler
+        acceptedButtons: Qt.RightButton
+        onTapped: function(eventPoint) {
+            const localX = eventPoint.position.x
+            const localY = eventPoint.position.y
+            root.eventLastTrigger = "context-menu @" + Math.round(localX) + "," + Math.round(localY)
+            root.openDemoContextMenuAtLocal(localX, localY)
         }
     }
 
@@ -311,7 +350,7 @@ UIF.ApplicationWindow {
 
                         UIF.Label {
                             text: "Navigation: PageRouter(path=" + demoRouter.path.join("/")
-                                + "), Link, LinkWrapper, NavigationLink active"
+                                + "), Link, LinkWrapper, NavigationLink, ContextMenu active"
                             color: UIF.Theme.textSecondary
                             style: description
                         }
@@ -776,7 +815,7 @@ UIF.ApplicationWindow {
 
                 UIF.AppCard {
                     title: "Navigation"
-                    subtitle: "PageRouter, Link, NavigationLink, LinkWrapper"
+                    subtitle: "PageRouter, Link, NavigationLink, LinkWrapper, ContextMenu"
                     Layout.fillWidth: true
                     Layout.columnSpan: gallery.columns
 
@@ -833,6 +872,20 @@ UIF.ApplicationWindow {
                                         style: description
                                     }
                                 }
+                            }
+                        }
+
+                        Rectangle {
+                            Layout.fillWidth: true
+                            Layout.preferredHeight: 92
+                            radius: UIF.Theme.radiusMd
+                            color: UIF.Theme.surfaceSolid
+
+                            UIF.Label {
+                                anchors.centerIn: parent
+                                text: "Default context menu active (last=" + root.demoContextMenuLastAction + ")"
+                                color: UIF.Theme.textPrimary
+                                style: description
                             }
                         }
                     }

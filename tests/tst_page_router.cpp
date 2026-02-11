@@ -15,6 +15,7 @@ class PageRouterTests : public QObject
 private slots:
     void route_params_are_passed_to_target_component();
     void component_navigation_keeps_path_stack_in_sync();
+    void page_router_updates_view_state_tracker_from_stack();
 };
 
 void PageRouterTests::route_params_are_passed_to_target_component()
@@ -174,6 +175,87 @@ Item {
     QTRY_COMPARE(root->property("depth").toInt(), 0);
     QCOMPARE(root->property("pathLength").toInt(), 0);
     QCOMPARE(root->property("currentPath").toString(), QString());
+}
+
+void PageRouterTests::page_router_updates_view_state_tracker_from_stack()
+{
+    QQmlEngine engine;
+    engine.addImportPath(TestUtils::qmlImportBase());
+
+    const QByteArray qml = R"(
+import QtQuick
+import LVRS as UIF
+
+Item {
+    id: root
+    width: 320
+    height: 240
+
+    property string activeView: UIF.ViewStateTracker.currentActiveView
+    property string rootState: {
+        UIF.ViewStateTracker.stack
+        return UIF.ViewStateTracker.stateOf("/")
+    }
+    property string runState: {
+        UIF.ViewStateTracker.stack
+        return UIF.ViewStateTracker.stateOf("/runs/42")
+    }
+    property int loadedCount: UIF.ViewStateTracker.loadedCount
+
+    Component {
+        id: homePage
+        Item { }
+    }
+
+    Component {
+        id: runPage
+        Item { property string runId: "" }
+    }
+
+    UIF.PageRouter {
+        id: router
+        anchors.fill: parent
+        initialPath: "/"
+        routes: [
+            { path: "/", component: homePage },
+            { path: "/runs/[runId]", component: runPage }
+        ]
+    }
+
+    function resetTracker() {
+        UIF.ViewStateTracker.clear()
+        router.setRoot("/")
+    }
+
+    function openRun() {
+        router.go("/runs/42")
+    }
+
+    function goBack() {
+        router.back()
+    }
+}
+)";
+
+    QScopedPointer<QObject> root(TestUtils::createFromQml(engine, qml));
+    QVERIFY(root);
+    QVERIFY(QMetaObject::invokeMethod(root.data(), "resetTracker"));
+
+    QTRY_COMPARE(root->property("activeView").toString(), QStringLiteral("/"));
+    QTRY_COMPARE(root->property("rootState").toString(), QStringLiteral("Active"));
+    QTRY_COMPARE(root->property("loadedCount").toInt(), 1);
+
+    QVERIFY(QMetaObject::invokeMethod(root.data(), "openRun"));
+    QTRY_COMPARE(root->property("activeView").toString(), QStringLiteral("/runs/42"));
+    QTRY_COMPARE(root->property("rootState").toString(), QStringLiteral("Inactive"));
+    QTRY_COMPARE(root->property("runState").toString(), QStringLiteral("Active"));
+    QTRY_COMPARE(root->property("loadedCount").toInt(), 2);
+
+    QVERIFY(QMetaObject::invokeMethod(root.data(), "goBack"));
+    QTRY_COMPARE(root->property("activeView").toString(), QStringLiteral("/"));
+    QTRY_COMPARE(root->property("rootState").toString(), QStringLiteral("Active"));
+    QTRY_COMPARE(root->property("runState").toString(), QString());
+    QTRY_COMPARE(root->property("loadedCount").toInt(), 1);
 }
 
 QTEST_MAIN(PageRouterTests)

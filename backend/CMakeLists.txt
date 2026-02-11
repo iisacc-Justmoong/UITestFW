@@ -6,6 +6,7 @@ set(LVRS_BACKEND_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/platform/platforminfo.cpp
     ${CMAKE_CURRENT_LIST_DIR}/runtime/renderingmonitor.cpp
     ${CMAKE_CURRENT_LIST_DIR}/navigation/pagemonitor.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/navigation/viewstatetracker.cpp
     ${CMAKE_CURRENT_LIST_DIR}/state/viewmodelregistry.cpp
     ${CMAKE_CURRENT_LIST_DIR}/runtime/debuglogger.cpp
     ${CMAKE_CURRENT_LIST_DIR}/graphics/svgmanager.cpp
@@ -20,6 +21,7 @@ set(LVRS_BACKEND_HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/platform/platforminfo.h
     ${CMAKE_CURRENT_LIST_DIR}/runtime/renderingmonitor.h
     ${CMAKE_CURRENT_LIST_DIR}/navigation/pagemonitor.h
+    ${CMAKE_CURRENT_LIST_DIR}/navigation/viewstatetracker.h
     ${CMAKE_CURRENT_LIST_DIR}/state/viewmodelregistry.h
     ${CMAKE_CURRENT_LIST_DIR}/runtime/debuglogger.h
     ${CMAKE_CURRENT_LIST_DIR}/graphics/svgmanager.h

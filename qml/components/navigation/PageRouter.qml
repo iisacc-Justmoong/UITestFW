@@ -217,6 +217,8 @@ Item {
     Component.onCompleted: {
         if (initialPath)
             setRoot(initialPath)
+        else
+            syncViewStateTracker()
     }
 
     StackView {
@@ -242,6 +244,7 @@ Item {
         if (path.length === 0) {
             _syncingPath = false
             setCurrent("", {})
+            syncViewStateTracker()
             return
         }
         for (var i = 0; i < path.length; i++) {
@@ -273,12 +276,14 @@ Item {
         }
         _syncingPath = false
         applyCurrentFromPathEntry(path[path.length - 1])
+        syncViewStateTracker()
     }
 
     function setPathInternal(nextPath) {
         _syncingPath = true
         path = nextPath
         _syncingPath = false
+        syncViewStateTracker()
     }
 
     function applyCurrentFromPathEntry(entry) {
@@ -353,6 +358,68 @@ Item {
             params: params !== undefined ? params : ({}),
             component: component
         }
+    }
+
+    function createViewTrackingEntry(entry, index) {
+        if (typeof entry === "string") {
+            var normalized = normalizePath(entry)
+            return {
+                viewId: normalized,
+                path: normalized,
+                enabled: true
+            }
+        }
+
+        if (typeof entry !== "object" || entry === null)
+            return null
+
+        var pathValue = ""
+        if (entry.path !== undefined && entry.path !== null && entry.path !== "")
+            pathValue = normalizePath(entry.path)
+
+        var viewId = ""
+        if (entry.viewId !== undefined && entry.viewId !== null) {
+            var candidate = String(entry.viewId).trim()
+            if (candidate.length > 0)
+                viewId = candidate
+        }
+        if (viewId === "" && pathValue !== "")
+            viewId = pathValue
+        if (viewId === "")
+            viewId = "_component_" + index
+
+        var enabled = true
+        if (entry.enabled !== undefined)
+            enabled = !!entry.enabled
+        if (entry.disabled !== undefined && !!entry.disabled)
+            enabled = false
+        if (entry.params !== undefined && entry.params !== null && entry.params.disabled !== undefined && !!entry.params.disabled)
+            enabled = false
+
+        return {
+            viewId: viewId,
+            path: pathValue,
+            enabled: enabled
+        }
+    }
+
+    function buildViewTrackingEntries() {
+        var entries = []
+        if (!path || path.length === undefined)
+            return entries
+
+        for (var i = 0; i < path.length; i++) {
+            var entry = createViewTrackingEntry(path[i], i)
+            if (entry)
+                entries.push(entry)
+        }
+        return entries
+    }
+
+    function syncViewStateTracker() {
+        if (typeof ViewStateTracker === "undefined" || !ViewStateTracker || !ViewStateTracker.syncStack)
+            return
+        ViewStateTracker.syncStack(buildViewTrackingEntries())
     }
 
     function updateComponentPathStack(component, params, mode) {

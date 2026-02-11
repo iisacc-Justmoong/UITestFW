@@ -3,6 +3,11 @@ set(UIFRAMEWORK_NAVIGATION_QML_FILES
     qml/components/navigation/Link.qml
     qml/components/navigation/LinkWrapper.qml
     qml/components/navigation/NavigationLink.qml
+    qml/components/navigation/ToolbarButton.qml
+    qml/components/navigation/HierarchyToolbar.qml
+    qml/components/navigation/HierarchyItem.qml
+    qml/components/navigation/HierarchyList.qml
+    qml/components/navigation/Hierarchy.qml
     qml/components/navigation/List.qml
     qml/components/navigation/ListItem.qml
     qml/components/navigation/ListToolbar.qml

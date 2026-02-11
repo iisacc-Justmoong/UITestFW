@@ -24,6 +24,7 @@ UIF.ApplicationWindow {
     property real progressCurrent: 46
     property string currentRoute: "/overview"
     property int scaffoldNavIndex: 0
+    property int hierarchyActiveButtonId: 1
     readonly property bool compactGallery: width < 1260
 
     property var scaffoldNavModel: [
@@ -675,6 +676,87 @@ UIF.ApplicationWindow {
                                 UIF.Label { text: "VStack item A"; style: description }
                                 UIF.Label { text: "VStack item B"; style: description }
                                 UIF.Label { text: "VStack item C"; style: description }
+                            }
+                        }
+                    }
+                }
+
+                UIF.AppCard {
+                    title: "Hierarchy / Outliner"
+                    subtitle: "ToolbarButton x N + HierarchyItem x N"
+                    Layout.fillWidth: true
+
+                    Rectangle {
+                        width: parent.width
+                        height: 360
+                        radius: UIF.Theme.radiusMd
+                        color: UIF.Theme.surfaceGhost
+                        clip: true
+
+                        UIF.Hierarchy {
+                            id: hierarchyPreview
+                            anchors.left: parent.left
+                            anchors.top: parent.top
+                            anchors.bottom: parent.bottom
+                            width: Math.min(240, parent.width * 0.55)
+                            minimumPanelWidth: width
+                            minimumPanelHeight: parent.height
+                            onToolbarActivated: function(button, buttonId, index) {
+                                root.hierarchyActiveButtonId = buttonId >= 0 ? buttonId : (index + 1)
+                            }
+                            toolbarButtons: [
+                                UIF.ToolbarButton { buttonId: 1; iconName: "view-more-symbolic-default" },
+                                UIF.ToolbarButton { buttonId: 2; iconName: "view-more-symbolic-default" },
+                                UIF.ToolbarButton { buttonId: 3; iconName: "view-more-symbolic-default" },
+                                UIF.ToolbarButton { buttonId: 4; iconName: "view-more-symbolic-default" },
+                                UIF.ToolbarButton { buttonId: 5; iconName: "view-more-symbolic-default" }
+                            ]
+
+                            UIF.HierarchyItem { label: "World"; iconGlyph: "□"; showChevron: true; expanded: true; selected: true }
+                            UIF.HierarchyItem { label: "Environment"; iconGlyph: "□"; indentLevel: 1; showChevron: true }
+                            UIF.HierarchyItem { label: "Directional Light"; iconGlyph: "□"; indentLevel: 2; showChevron: false }
+                            UIF.HierarchyItem { label: "Sky Light"; iconGlyph: "□"; indentLevel: 2; showChevron: false }
+                            UIF.HierarchyItem { label: "Characters"; iconGlyph: "□"; indentLevel: 1; showChevron: true }
+                            UIF.HierarchyItem { label: "Player"; iconGlyph: "□"; indentLevel: 2; showChevron: true }
+                            UIF.HierarchyItem { label: "Camera Boom"; iconGlyph: "□"; indentLevel: 3; showChevron: false }
+                            UIF.HierarchyItem { label: "Camera"; iconGlyph: "□"; indentLevel: 3; showChevron: false }
+                            UIF.HierarchyItem { label: "Enemies"; iconGlyph: "□"; indentLevel: 2; showChevron: true }
+                            UIF.HierarchyItem { label: "Enemy_01"; iconGlyph: "□"; indentLevel: 3; showChevron: false }
+                            UIF.HierarchyItem { label: "Enemy_02"; iconGlyph: "□"; indentLevel: 3; showChevron: false }
+                            UIF.HierarchyItem { label: "Props"; iconGlyph: "□"; indentLevel: 1; showChevron: true }
+                            UIF.HierarchyItem { label: "Barrel_A"; iconGlyph: "□"; indentLevel: 2; showChevron: false }
+                            UIF.HierarchyItem { label: "Crate_B"; iconGlyph: "□"; indentLevel: 2; showChevron: false }
+                        }
+
+                        Column {
+                            anchors.left: hierarchyPreview.right
+                            anchors.right: parent.right
+                            anchors.top: parent.top
+                            anchors.margins: UIF.Theme.gap12
+                            spacing: UIF.Theme.gap8
+
+                            UIF.Label {
+                                width: parent.width
+                                style: body
+                                color: UIF.Theme.textPrimary
+                                wrapMode: Text.WordWrap
+                                text: "툴바는 상단 고정이며 버튼은 단일 선택으로 동작한다."
+                            }
+
+                            UIF.Label {
+                                width: parent.width
+                                style: description
+                                color: UIF.Theme.textSecondary
+                                wrapMode: Text.WordWrap
+                                text: "activeToolbarButtonId = " + root.hierarchyActiveButtonId
+                            }
+
+                            UIF.Label {
+                                width: parent.width
+                                style: description
+                                color: UIF.Theme.textSecondary
+                                wrapMode: Text.WordWrap
+                                text: "아이템과 아이콘/텍스트는 각각의 컴포넌트 인자로 주입 가능하다."
                             }
                         }
                     }

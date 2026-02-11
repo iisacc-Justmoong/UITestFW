@@ -1,0 +1,175 @@
+import QtQuick
+import QtQuick.Layouts
+import UIFramework 1.0
+
+AbstractButton {
+    id: control
+
+    text: "Label"
+    property alias label: control.text
+    property string iconName: ""
+    property url iconSource: ""
+    property string iconGlyph: ""
+    property bool showChevron: true
+    property bool expanded: false
+    property bool selected: false
+
+    property int indentLevel: 0
+    property int indentStep: 13
+    property int rowHeight: 28
+    property int itemWidth: 200
+    property int iconSize: 16
+    property int chevronSize: 16
+    property int baseLeftPadding: Theme.gap8
+    property int rowRightPadding: Theme.gap8
+    property int leadingSpacing: Theme.gap2
+
+    property color iconPlaceholderColor: Theme.darkGrey10
+    property color textColorNormal: Theme.bodyColor
+    property color textColorDisabled: Theme.disabledColor
+    property color chevronColor: Theme.descriptionColor
+    property color rowBackgroundColor: selected ? Theme.accentOverlay : "transparent"
+    property color rowBackgroundColorHover: selected ? Theme.accentOverlay : Theme.surfaceGhost
+    property color rowBackgroundColorPressed: selected ? Theme.accentOverlay : Theme.surfaceAlt
+
+    readonly property int computedLeftPadding: baseLeftPadding + Math.max(0, indentLevel) * indentStep
+    readonly property string resolvedIconName: {
+        const rawName = iconName === undefined || iconName === null ? "" : String(iconName)
+        return rawName.trim()
+    }
+    readonly property url resolvedIconSource: iconSource.toString().length > 0
+        ? iconSource
+        : resolvedIconName.length > 0
+            ? Theme.iconPath(resolvedIconName)
+            : ""
+
+    tone: AbstractButton.Borderless
+    leftPadding: computedLeftPadding
+    rightPadding: rowRightPadding
+    topPadding: 0
+    bottomPadding: 0
+    spacing: Theme.gapNone
+    implicitHeight: rowHeight
+    implicitWidth: Math.max(itemWidth, contentItem.implicitWidth + leftPadding + rightPadding)
+    width: parent ? parent.width : implicitWidth
+
+    backgroundColor: rowBackgroundColor
+    backgroundColorHover: rowBackgroundColorHover
+    backgroundColorPressed: rowBackgroundColorPressed
+    backgroundColorDisabled: rowBackgroundColor
+
+    contentItem: RowLayout {
+        spacing: Theme.gap14
+
+        RowLayout {
+            Layout.fillWidth: true
+            spacing: control.leadingSpacing
+
+            Item {
+                Layout.preferredWidth: control.iconSize
+                Layout.preferredHeight: control.iconSize
+                Layout.alignment: Qt.AlignVCenter
+
+                Image {
+                    id: iconImage
+                    anchors.centerIn: parent
+                    visible: control.iconGlyph.length === 0 && control.resolvedIconSource.toString().length > 0
+                    source: control.resolvedIconSource
+                    sourceSize.width: control.iconSize
+                    sourceSize.height: control.iconSize
+                    width: control.iconSize
+                    height: control.iconSize
+                    fillMode: Image.PreserveAspectFit
+                    smooth: true
+                }
+
+                Label {
+                    anchors.centerIn: parent
+                    visible: control.iconGlyph.length > 0
+                    text: control.iconGlyph
+                    style: body
+                    color: control.enabled ? control.textColorNormal : control.textColorDisabled
+                    font.pixelSize: control.iconSize
+                    font.weight: Font.Normal
+                    font.styleName: "Regular"
+                    lineHeight: control.iconSize
+                    lineHeightMode: Text.FixedHeight
+                }
+
+                Rectangle {
+                    anchors.centerIn: parent
+                    visible: !iconImage.visible && control.iconGlyph.length === 0
+                    width: 12
+                    height: 12
+                    radius: 2
+                    color: control.iconPlaceholderColor
+                    antialiasing: true
+                }
+            }
+
+            Label {
+                id: labelNode
+                Layout.fillWidth: true
+                style: body
+                text: control.text
+                color: control.enabled ? control.textColorNormal : control.textColorDisabled
+                font.weight: Font.Normal
+                font.styleName: "Regular"
+                lineHeight: 16
+                lineHeightMode: Text.FixedHeight
+                elide: Text.ElideRight
+                verticalAlignment: Text.AlignVCenter
+            }
+        }
+
+        Item {
+            Layout.preferredWidth: control.chevronSize
+            Layout.preferredHeight: control.chevronSize
+            Layout.alignment: Qt.AlignVCenter
+            visible: control.showChevron
+
+            Canvas {
+                id: chevronCanvas
+                anchors.fill: parent
+                antialiasing: true
+
+                onPaint: {
+                    const ctx = getContext("2d")
+                    ctx.clearRect(0, 0, width, height)
+                    if (!control.showChevron)
+                        return
+
+                    const cx = width * 0.5
+                    const cy = height * 0.5
+                    ctx.save()
+                    if (control.expanded)
+                        ctx.rotate(Math.PI / 2, cx, cy)
+
+                    ctx.beginPath()
+                    ctx.moveTo(width * 0.38, height * 0.28)
+                    ctx.lineTo(width * 0.58, height * 0.5)
+                    ctx.lineTo(width * 0.38, height * 0.72)
+                    ctx.lineWidth = 1.5
+                    ctx.lineCap = "round"
+                    ctx.lineJoin = "round"
+                    ctx.strokeStyle = control.enabled ? control.chevronColor : control.textColorDisabled
+                    ctx.stroke()
+                    ctx.restore()
+                }
+            }
+        }
+    }
+
+    onShowChevronChanged: chevronCanvas.requestPaint()
+    onExpandedChanged: chevronCanvas.requestPaint()
+    onChevronColorChanged: chevronCanvas.requestPaint()
+    onEnabledChanged: chevronCanvas.requestPaint()
+
+    QtObject {
+        Component.onCompleted: Debug.log("HierarchyItem", "created")
+    }
+}
+
+// API usage (external):
+// import UIFramework 1.0 as UIF
+// UIF.HierarchyItem { label: "Main Camera"; iconGlyph: "■"; indentLevel: 1; showChevron: true }

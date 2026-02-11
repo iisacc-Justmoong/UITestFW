@@ -1,17 +1,17 @@
 # LVRS
 
-LVRS는 Qt 6 기반의 QML UI 프레임워크이자 앱 셸 라이브러리이다. 레이아웃, 내비게이션, 공통 컨트롤, 런타임 싱글턴, MVVM 뷰모델 레지스트리를 함께 제공하며, 목표는 신규 앱의 시작 비용을 줄이고 일관된 화면 구조를 빠르게 구성하는 데 있다.
+LVRS is a Qt 6 QML UI framework and app-shell library. It provides reusable controls, layout primitives, routing, runtime singletons, and an MVVM registry with view-level ownership and write permissions.
 
-## 1) 요구 환경
+## 1) Requirements
 
-- CMake 3.21 이상
-- C++20 컴파일러
-- Qt 6.5 이상
-- Qt 모듈: `Quick`, `QuickControls2`, `Qml`, `Svg`, `Network`, `Test`
+- CMake 3.21+
+- C++20 compiler
+- Qt 6.5+
+- Qt modules: `Quick`, `QuickControls2`, `Qml`, `Svg`, `Network`, `Test`
 
-## 2) 저장소 빌드 및 실행
+## 2) Build and Run from Source
 
-LVRS 데모 앱, 예제, 테스트를 포함한 전체 빌드 절차는 다음과 같다.
+Build demo, examples, and tests:
 
 ```bash
 cmake -S . -B build \
@@ -22,36 +22,34 @@ cmake -S . -B build \
 cmake --build build -j
 ```
 
-데모 실행은 빌드 산출물에 따라 아래 중 하나를 사용한다.
+Run the demo app:
 
 ```bash
 ./build/LVRS
-# 또는 macOS 번들 환경에서는
+# On macOS bundles:
 open ./build/LVRS.app
 ```
 
-테스트 실행:
+Run tests:
 
 ```bash
 ctest --test-dir build --output-on-failure
 ```
 
-## 3) 설치
+## 3) Install
 
-### 3-1. 통합 설치 스크립트 사용
-
-프로젝트 루트에서 아래를 실행하면 사용자 영역에 설치된다.
+### 3-1. Install Script (recommended)
 
 ```bash
 ./install.sh
 ```
 
-설치 결과:
+Default install outputs:
 
-- CMake 패키지 프리픽스: `~/.local/LVRS`
-- 소스 스냅샷: `~/.local/LVRS/src/LVRS`
+- CMake package prefix: `~/.local/LVRS`
+- Source snapshot: `~/.local/LVRS/src/LVRS`
 
-### 3-2. 수동 설치
+### 3-2. Manual Install
 
 ```bash
 cmake -S . -B build-install \
@@ -65,9 +63,9 @@ cmake --build build-install -j
 cmake --install build-install
 ```
 
-## 4) 신규 앱 프로젝트 시작 예제
+## 4) Start a New App Project
 
-아래 예제는 LVRS를 프로젝트에 직접 포함(`add_subdirectory`)하는 시작점이다. 정적 QML 플러그인 타깃까지 안전하게 링크하기 위해 이 경로를 권장한다.
+The most reliable integration path is to include LVRS as a subdirectory, so static plugin targets are linked automatically.
 
 ### 4-1. `CMakeLists.txt`
 
@@ -81,7 +79,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 find_package(Qt6 6.5 REQUIRED COMPONENTS Quick QuickControls2 Svg Network)
 qt_standard_project_setup()
 
-# LVRS 소스를 외부 디렉터리에 두었을 때의 예시
+# Example: LVRS vendored under external/LVRS
 add_subdirectory(external/LVRS lvrs_build)
 
 qt_add_executable(MyLvrsApp
@@ -136,9 +134,9 @@ int main(int argc, char *argv[])
 
 ```qml
 import QtQuick
-import LVRS 1.0 as UIF
+import LVRS 1.0 as LV
 
-UIF.ApplicationWindow {
+LV.ApplicationWindow {
     id: root
     visible: true
     width: 1200
@@ -148,15 +146,15 @@ UIF.ApplicationWindow {
 
     Component {
         id: homePage
-        Rectangle { color: UIF.Theme.surfaceAlt }
+        Rectangle { color: LV.Theme.surfaceAlt }
     }
 
     Component {
         id: reportsPage
-        Rectangle { color: UIF.Theme.surfaceGhost }
+        Rectangle { color: LV.Theme.surfaceGhost }
     }
 
-    UIF.PageRouter {
+    LV.PageRouter {
         id: router
         anchors.fill: parent
         initialPath: "/"
@@ -167,39 +165,39 @@ UIF.ApplicationWindow {
     }
 
     Component.onCompleted: {
-        // 라우터를 직접 전달하지 않아도 전역 Navigator가 페이지 이동을 위임한다.
-        UIF.Navigator.go("/reports")
+        // Global one-line navigation delegation
+        LV.Navigator.go("/reports")
     }
 }
 ```
 
-## 5) MVVM 시작 API
+## 5) MVVM Starter API
 
-LVRS의 `ViewModels` 싱글턴은 뷰-뷰모델 바인딩, 소유권, 쓰기 권한을 함께 제공한다.
+`ViewModels` manages view-to-viewmodel bindings, ownership, and write authorization.
 
-- `UIF.ViewModels.bindView(viewId, key, writable)`
-- `UIF.ViewModels.getForView(viewId)`
-- `UIF.ViewModels.canWrite(viewId, key?)`
-- `UIF.ViewModels.updateProperty(viewId, property, value)`
-- `UIF.ViewModels.ownerOf(key)`
+- `LV.ViewModels.bindView(viewId, key, writable)`
+- `LV.ViewModels.getForView(viewId)`
+- `LV.ViewModels.canWrite(viewId, key?)`
+- `LV.ViewModels.updateProperty(viewId, property, value)`
+- `LV.ViewModels.ownerOf(key)`
 
-QML 예시:
+QML example:
 
 ```qml
 property string viewId: "/overview"
-property var vm: UIF.ViewModels.getForView(viewId)
+property var vm: LV.ViewModels.getForView(viewId)
 
-Component.onCompleted: UIF.ViewModels.bindView(viewId, "OverviewVM", true)
+Component.onCompleted: LV.ViewModels.bindView(viewId, "OverviewVM", true)
 
 function renameStatus() {
-    UIF.ViewModels.updateProperty(viewId, "status", "Working")
+    LV.ViewModels.updateProperty(viewId, "status", "Working")
 }
 ```
 
-## 6) 주요 경로
+## 6) Repository Layout
 
-- 백엔드: `backend/`
-- QML 모듈: `qml/`
-- 예제: `example/`
-- 테스트: `tests/`
-- 상세 문서 인덱스: `docs/README.md`
+- Backend runtime and singletons: `backend/`
+- QML module: `qml/`
+- Runnable examples: `example/`
+- Test suite: `tests/`
+- Detailed docs index: `docs/README.md`

@@ -61,10 +61,10 @@ Registers the ViewModel into `ViewModels`:
 ### `qml/Main.qml`
 Binds UI to the registered ViewModel:
 
-- Binds a view key with ownership: `UIF.ViewModels.bindView("ExampleView", "Example", true)`
-- Fetches by view key: `UIF.ViewModels.getForView("ExampleView")`
+- Binds a view key with ownership: `LV.ViewModels.bindView("ExampleView", "Example", true)`
+- Fetches by view key: `LV.ViewModels.getForView("ExampleView")`
 - Reads `vm.status`
-- Updates model through permission check: `UIF.ViewModels.updateProperty("ExampleView", "status", "Working")`
+- Updates model through permission check: `LV.ViewModels.updateProperty("ExampleView", "status", "Working")`
 
 ---
 
@@ -97,18 +97,18 @@ engine.load(QUrl("qrc:/qt/qml/Example/Main.qml"));
 ## QML Usage Pattern
 
 ```qml
-import LVRS 1.0 as UIF
+import LVRS 1.0 as LV
 
 ApplicationWindow {
     property string viewId: "ExampleView"
-    Component.onCompleted: UIF.ViewModels.bindView(viewId, "Example", true)
-    property var vm: UIF.ViewModels.getForView(viewId)
+    Component.onCompleted: LV.ViewModels.bindView(viewId, "Example", true)
+    property var vm: LV.ViewModels.getForView(viewId)
 
     Column {
         Text { text: vm ? ("Status: " + vm.status) : "No VM" }
         Button {
             text: "Toggle"
-            onClicked: UIF.ViewModels.updateProperty(viewId, "status",
+            onClicked: LV.ViewModels.updateProperty(viewId, "status",
                                                      vm.status === "Idle" ? "Working" : "Idle")
         }
     }
@@ -175,10 +175,10 @@ ViewModel을 `ViewModels`에 등록합니다:
 ### `qml/Main.qml`
 등록된 ViewModel을 받아 UI에서 사용:
 
-- `UIF.ViewModels.bindView("ExampleView", "Example", true)`로 뷰 바인딩/소유권 획득
-- `UIF.ViewModels.getForView("ExampleView")`으로 조회
+- `LV.ViewModels.bindView("ExampleView", "Example", true)`로 뷰 바인딩/소유권 획득
+- `LV.ViewModels.getForView("ExampleView")`으로 조회
 - `vm.status` 바인딩
-- `UIF.ViewModels.updateProperty("ExampleView", "status", ...)` 호출
+- `LV.ViewModels.updateProperty("ExampleView", "status", ...)` 호출
 
 ---
 
@@ -211,18 +211,18 @@ engine.load(QUrl("qrc:/qt/qml/Example/Main.qml"));
 ## QML 사용 패턴
 
 ```qml
-import LVRS 1.0 as UIF
+import LVRS 1.0 as LV
 
 ApplicationWindow {
     property string viewId: "ExampleView"
-    Component.onCompleted: UIF.ViewModels.bindView(viewId, "Example", true)
-    property var vm: UIF.ViewModels.getForView(viewId)
+    Component.onCompleted: LV.ViewModels.bindView(viewId, "Example", true)
+    property var vm: LV.ViewModels.getForView(viewId)
 
     Column {
         Text { text: vm ? ("Status: " + vm.status) : "No VM" }
         Button {
             text: "Toggle"
-            onClicked: UIF.ViewModels.updateProperty(viewId, "status",
+            onClicked: LV.ViewModels.updateProperty(viewId, "status",
                                                      vm.status === "Idle" ? "Working" : "Idle")
         }
     }

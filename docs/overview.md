@@ -5,7 +5,7 @@ for common app needs. It is organized by directory and by component.
 
 ## QML Import
 ```qml
-import LVRS 1.0 as UIF
+import LVRS 1.0 as LV
 ```
 
 ## Main Packages

@@ -2,7 +2,7 @@
 
 Location: `qml/components/control/input/TextEditor.qml`
 
-멀티라인 입력 컴포넌트이다. 입력 모드와 무관하게 동일한 문자열 파서/렌더러(`TextMarkup`)를 거쳐 일관된 결과를 제공한다.
+Multi-line input component. It keeps output behavior consistent by processing content through the same parser/renderer (`TextMarkup`) across input modes.
 
 ## Core API
 - `text`, `placeholderText`, `readOnly`
@@ -12,11 +12,11 @@ Location: `qml/components/control/input/TextEditor.qml`
 - `selectionStart`, `selectionEnd`, `cursorPosition`
 - `normalizedInput`, `renderedOutput`, `renderedPlainText`
 
-`enforceModeDefaults: true`일 때 입력 `textFormat`은 모드와 무관하게 `PlainText`로 고정되며, 스타일 렌더링은 `renderedOutput`을 통해 일관되게 제공된다.
+When `enforceModeDefaults: true`, input `textFormat` is fixed to `PlainText` regardless of mode, while styled rendering remains available through `renderedOutput`.
 
 ## Signals
 - `textEdited(text)`
-- `submitted(text)` (`Ctrl+Enter` 또는 `Cmd+Enter`)
+- `submitted(text)` (`Ctrl+Enter` or `Cmd+Enter`)
 
 ## Utility Methods
 - `forceEditorFocus()`
@@ -27,9 +27,61 @@ Location: `qml/components/control/input/TextEditor.qml`
 
 ## Usage
 ```qml
-UIF.TextEditor {
+LV.TextEditor {
     mode: markdownMode
     text: "Hello **bold**"
     onSubmitted: save(text)
+}
+```
+
+## Practical Examples
+
+### Example 1: Markdown note editor
+```qml
+import QtQuick
+import LVRS 1.0 as LV
+
+LV.TextEditor {
+    mode: markdownMode
+    placeholderText: "Write release notes..."
+    text: "## v1.2.0\n- Added route state tracking"
+    onSubmitted: console.log("Saved note:", text)
+}
+```
+
+### Example 2: Plain text input without preview
+```qml
+import QtQuick
+import LVRS 1.0 as LV
+
+LV.TextEditor {
+    mode: plainTextMode
+    showRenderedOutput: false
+    enforceModeDefaults: true
+    placeholderText: "Paste raw logs"
+}
+```
+
+### Example 3: Editor command buttons
+```qml
+import QtQuick
+import LVRS 1.0 as LV
+
+Column {
+    spacing: 8
+
+    LV.TextEditor {
+        id: editor
+        mode: richTextMode
+        text: "Initial content"
+    }
+
+    Row {
+        spacing: 8
+        LV.LabelButton { text: "Insert Date"; onClicked: editor.insertText("\nDate: 2026-02-11") }
+        LV.LabelButton { text: "Undo"; onClicked: editor.undo() }
+        LV.LabelButton { text: "Redo"; onClicked: editor.redo() }
+        LV.LabelButton { text: "Clear"; onClicked: editor.clear() }
+    }
 }
 ```

@@ -9,7 +9,7 @@
 
 Usage:
 ```qml
-import LVRS 1.0 as UIF
+import LVRS 1.0 as LV
 
-Rectangle { color: UIF.Theme.window }
+Rectangle { color: LV.Theme.window }
 ```

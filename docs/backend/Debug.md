@@ -14,6 +14,6 @@ Debug logger singleton for QML and C++.
 
 ## Usage
 ```qml
-UIF.Debug.enabled = true
-UIF.Debug.log("AppCard", "created", { id: "card-1" })
+LV.Debug.enabled = true
+LV.Debug.log("AppCard", "created", { id: "card-1" })
 ```

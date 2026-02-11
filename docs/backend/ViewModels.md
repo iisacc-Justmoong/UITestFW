@@ -19,7 +19,7 @@ Registry and MVVM ownership hub for ViewModel instances.
 
 ## Usage
 ```qml
-Component.onCompleted: UIF.ViewModels.bindView("OverviewView", "Main", true)
-property var vm: UIF.ViewModels.getForView("OverviewView")
-UIF.ViewModels.updateProperty("OverviewView", "status", "Working")
+Component.onCompleted: LV.ViewModels.bindView("OverviewView", "Main", true)
+property var vm: LV.ViewModels.getForView("OverviewView")
+LV.ViewModels.updateProperty("OverviewView", "status", "Working")
 ```

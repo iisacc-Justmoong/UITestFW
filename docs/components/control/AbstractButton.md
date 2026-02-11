@@ -23,5 +23,43 @@ Base button for all custom controls. Provides theme-driven colors and padding.
 
 ## Usage
 ```qml
-UIF.AbstractButton { text: "Action"; tone: UIF.AbstractButton.Accent }
+LV.AbstractButton { text: "Action"; tone: LV.AbstractButton.Accent }
+```
+
+## Practical Examples
+
+### Example 1: Primary action button
+```qml
+import QtQuick
+import LVRS 1.0 as LV
+
+LV.AbstractButton {
+    text: "Create Run"
+    tone: LV.AbstractButton.Accent
+    onClicked: console.log("Run created")
+}
+```
+
+### Example 2: Destructive action with explicit state
+```qml
+import QtQuick
+import LVRS 1.0 as LV
+
+LV.AbstractButton {
+    text: "Delete Project"
+    tone: LV.AbstractButton.Destructive
+    enabled: canDelete
+}
+```
+
+### Example 3: Disabled style for read-only screens
+```qml
+import QtQuick
+import LVRS 1.0 as LV
+
+LV.AbstractButton {
+    text: "Sync"
+    tone: LV.AbstractButton.Disabled
+    enabled: false
+}
 ```

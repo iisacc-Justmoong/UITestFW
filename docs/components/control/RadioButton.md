@@ -2,7 +2,7 @@
 
 Location: `qml/components/control/check/RadioButton.qml`
 
-Figma `Radio` 노드(18x18) 기준의 라디오 인디케이터이다. `checked/enabled`와 `state/available`를 함께 지원한다.
+Radio indicator component aligned with the Figma `Radio` node (18x18). Supports both `checked/enabled` and compatibility aliases `state/available`.
 
 ## Properties
 - `checked` / `state`
@@ -11,9 +11,61 @@ Figma `Radio` 노드(18x18) 기준의 라디오 인디케이터이다. `checked/
 
 ## Usage
 ```qml
-UIF.RadioButton { text: "Choice A"; checked: true }
+LV.RadioButton { text: "Choice A"; checked: true }
 ```
 
 ```qml
-UIF.RadioButton { state: true; available: false }
+LV.RadioButton { state: true; available: false }
+```
+
+## Practical Examples
+
+### Example 1: Simple mode selection
+```qml
+import QtQuick
+import QtQuick.Controls
+import LVRS 1.0 as LV
+
+ButtonGroup { id: modeGroup }
+
+Column {
+    LV.RadioButton { text: "Daily"; checked: true; ButtonGroup.group: modeGroup }
+    LV.RadioButton { text: "Weekly"; ButtonGroup.group: modeGroup }
+    LV.RadioButton { text: "Monthly"; ButtonGroup.group: modeGroup }
+}
+```
+
+### Example 2: Compatibility API (`state`, `available`)
+```qml
+import QtQuick
+import LVRS 1.0 as LV
+
+LV.RadioButton {
+    text: "Legacy Option"
+    state: true
+    available: false
+}
+```
+
+### Example 3: Data-bound selection card
+```qml
+import QtQuick
+import LVRS 1.0 as LV
+
+Item {
+    property string environment: "staging"
+
+    Column {
+        LV.RadioButton {
+            text: "Staging"
+            checked: environment === "staging"
+            onClicked: environment = "staging"
+        }
+        LV.RadioButton {
+            text: "Production"
+            checked: environment === "production"
+            onClicked: environment = "production"
+        }
+    }
+}
 ```

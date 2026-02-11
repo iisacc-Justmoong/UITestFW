@@ -12,5 +12,5 @@ File helpers exposed to QML.
 
 ## Usage
 ```qml
-UIF.Backend.saveTextFile("/tmp/out.txt", "hello")
+LV.Backend.saveTextFile("/tmp/out.txt", "hello")
 ```

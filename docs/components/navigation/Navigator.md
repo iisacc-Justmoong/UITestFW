@@ -20,5 +20,46 @@ Global navigation delegate for `PageRouter`.
 
 ## Usage
 ```qml
-UIF.Navigator.go("/reports")
+LV.Navigator.go("/reports")
+```
+
+## Practical Examples
+
+### Example 1: One-line global navigation
+```qml
+import QtQuick
+import LVRS 1.0 as LV
+
+LV.LabelButton {
+    text: "Open Reports"
+    tone: LV.AbstractButton.Accent
+    onClicked: LV.Navigator.go("/reports")
+}
+```
+
+### Example 2: Back stack controls
+```qml
+import QtQuick
+import LVRS 1.0 as LV
+
+Row {
+    spacing: 8
+    LV.LabelButton { text: "Back"; onClicked: LV.Navigator.back() }
+    LV.LabelButton { text: "Root"; onClicked: LV.Navigator.popToRoot() }
+}
+```
+
+### Example 3: Navigate to a component object
+```qml
+import QtQuick
+import LVRS 1.0 as LV
+
+Item {
+    Component { id: localPage; Rectangle { color: LV.Theme.surfaceAlt } }
+
+    LV.LabelButton {
+        text: "Open Local Page"
+        onClicked: LV.Navigator.goTo(localPage, { from: "quick-action" })
+    }
+}
 ```

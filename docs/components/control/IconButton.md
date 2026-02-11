@@ -13,12 +13,51 @@ Icon-first button variant aligned with the Figma Button component.
 
 ## Usage
 ```qml
-UIF.IconButton { tone: UIF.AbstractButton.Accent }
+LV.IconButton { tone: LV.AbstractButton.Accent }
 ```
 
 ```qml
-UIF.IconButton {
-    tone: UIF.AbstractButton.Default
+LV.IconButton {
+    tone: LV.AbstractButton.Default
     iconName: "pan-down-symbolic-default"
+}
+```
+
+## Practical Examples
+
+### Example 1: Accent icon action
+```qml
+import QtQuick
+import LVRS 1.0 as LV
+
+LV.IconButton {
+    tone: LV.AbstractButton.Accent
+    iconName: "view-more-symbolic-default"
+    onClicked: console.log("Open actions")
+}
+```
+
+### Example 2: Borderless row action
+```qml
+import QtQuick
+import LVRS 1.0 as LV
+
+LV.IconButton {
+    tone: LV.AbstractButton.Borderless
+    iconName: "pan-down-symbolic-borderless"
+    onClicked: console.log("Expand row")
+}
+```
+
+### Example 3: Glyph fallback when icon set is unavailable
+```qml
+import QtQuick
+import LVRS 1.0 as LV
+
+LV.IconButton {
+    tone: LV.AbstractButton.Default
+    iconName: ""
+    iconGlyph: "+"
+    onClicked: console.log("Create item")
 }
 ```

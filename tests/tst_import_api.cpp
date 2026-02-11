@@ -13,6 +13,7 @@ class ImportApiTests : public QObject
 
 private slots:
     void versionless_import_application_window_loads();
+    void versionless_import_window_loads();
     void appshell_compat_loads();
     void icon_name_mapping_loads();
 };
@@ -105,6 +106,44 @@ UIF.ApplicationWindow {
     QVERIFY(root->property("labelStyleApiReady").toBool());
     QVERIFY(root->property("figmaTextDesignReady").toBool());
     QCOMPARE(root->property("subtitle").toString(), QStringLiteral("Merged"));
+}
+
+void ImportApiTests::versionless_import_window_loads()
+{
+    QQmlEngine engine;
+    const QString importBase = QDir::cleanPath(QCoreApplication::applicationDirPath() + "/..");
+    engine.addImportPath(importBase);
+    const QByteArray qml = R"(
+import QtQuick
+import LVRS as LV
+
+LV.Window {
+    width: 520
+    height: 360
+    visible: false
+    title: "Settings"
+    usePlatformSafeMargin: true
+
+    property bool windowApiReady: platform.length > 0
+        && (widthClass >= compact && widthClass <= expanded)
+        && (heightClass >= compact && heightClass <= expanded)
+        && typeof matchesMedia === "function"
+    property bool contentApiReady: contentLabel.text === "Window Content"
+
+    LV.Label {
+        id: contentLabel
+        text: "Window Content"
+        style: body
+    }
+}
+)";
+
+    QScopedPointer<QObject> root(createFromQml(engine, qml));
+    QVERIFY(root);
+    QCOMPARE(root->property("title").toString(), QStringLiteral("Settings"));
+    QVERIFY(root->property("solidChrome").toBool());
+    QVERIFY(root->property("windowApiReady").toBool());
+    QVERIFY(root->property("contentApiReady").toBool());
 }
 
 void ImportApiTests::appshell_compat_loads()

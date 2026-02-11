@@ -10,7 +10,20 @@ bool NativeWindowStyle::titleBarColorSupported() const
     return false;
 }
 
+bool NativeWindowStyle::solidChromeSupported() const
+{
+    return false;
+}
+
 bool NativeWindowStyle::applyTitleBarColor(QObject *window, const QColor &color, bool darkAppearance)
+{
+    Q_UNUSED(window);
+    Q_UNUSED(color);
+    Q_UNUSED(darkAppearance);
+    return false;
+}
+
+bool NativeWindowStyle::applySolidChrome(QObject *window, const QColor &color, bool darkAppearance)
 {
     Q_UNUSED(window);
     Q_UNUSED(color);

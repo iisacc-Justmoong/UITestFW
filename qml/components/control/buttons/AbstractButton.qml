@@ -1,6 +1,6 @@
 import QtQuick
 import QtQuick.Controls as Controls
-import UIFramework 1.0
+import LVRS 1.0
 
 Controls.AbstractButton {
     id: control
@@ -114,5 +114,5 @@ Controls.AbstractButton {
 }
 
 // API usage (external):
-// import UIFramework 1.0 as UIF
+// import LVRS 1.0 as UIF
 // UIF.AbstractButton { text: "Action"; tone: UIF.AbstractButton.Accent }

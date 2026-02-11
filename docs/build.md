@@ -8,7 +8,7 @@ cmake --build build
 
 Run demo app:
 ```
-./build/UIFramework
+./build/LVRS
 ```
 
 Notes:

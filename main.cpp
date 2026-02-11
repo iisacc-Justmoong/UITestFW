@@ -8,21 +8,21 @@
 #include <QQmlApplicationEngine>
 #include <QtPlugin>
 
-Q_IMPORT_PLUGIN(UIFrameworkPlugin)
+Q_IMPORT_PLUGIN(LVRSPlugin)
 
 namespace {
 void loadBundledFonts()
 {
     static const char *kFontResources[] = {
-        ":/qt/qml/UIFramework/resources/font/Pretendard-Regular.ttf",
-        ":/qt/qml/UIFramework/resources/font/Pretendard-Medium.ttf",
-        ":/qt/qml/UIFramework/resources/font/Pretendard-SemiBold.ttf",
-        ":/qt/qml/UIFramework/resources/font/Pretendard-Bold.ttf",
-        ":/qt/qml/UIFramework/resources/font/Pretendard-Light.ttf",
-        ":/qt/qml/UIFramework/resources/font/Pretendard-ExtraLight.ttf",
-        ":/qt/qml/UIFramework/resources/font/Pretendard-Thin.ttf",
-        ":/qt/qml/UIFramework/resources/font/Pretendard-ExtraBold.ttf",
-        ":/qt/qml/UIFramework/resources/font/Pretendard-Black.ttf"
+        ":/qt/qml/LVRS/resources/font/Pretendard-Regular.ttf",
+        ":/qt/qml/LVRS/resources/font/Pretendard-Medium.ttf",
+        ":/qt/qml/LVRS/resources/font/Pretendard-SemiBold.ttf",
+        ":/qt/qml/LVRS/resources/font/Pretendard-Bold.ttf",
+        ":/qt/qml/LVRS/resources/font/Pretendard-Light.ttf",
+        ":/qt/qml/LVRS/resources/font/Pretendard-ExtraLight.ttf",
+        ":/qt/qml/LVRS/resources/font/Pretendard-Thin.ttf",
+        ":/qt/qml/LVRS/resources/font/Pretendard-ExtraBold.ttf",
+        ":/qt/qml/LVRS/resources/font/Pretendard-Black.ttf"
     };
 
     for (const char *fontResource : kFontResources) {
@@ -36,7 +36,7 @@ int main(int argc, char *argv[])
 {
     RenderQuality::configureGlobalDefaults();
     QGuiApplication app(argc, argv);
-    app.setApplicationName(QStringLiteral("UIFramework"));
+    app.setApplicationName(QStringLiteral("LVRS"));
     loadBundledFonts();
     FontPolicy::installPretendardFallbacks();
     if (!FontPolicy::enforcePretendardFallback())
@@ -50,7 +50,7 @@ int main(int argc, char *argv[])
         []() { QCoreApplication::exit(-1); },
         Qt::QueuedConnection);
 
-    engine.loadFromModule(QStringLiteral("UIFrameworkDemo"), QStringLiteral("Main"));
+    engine.loadFromModule(QStringLiteral("LVRSDemo"), QStringLiteral("Main"));
 
     return app.exec();
 }

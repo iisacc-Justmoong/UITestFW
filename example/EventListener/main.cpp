@@ -4,7 +4,7 @@
 #include <QQmlApplicationEngine>
 #include <QtPlugin>
 
-Q_IMPORT_PLUGIN(UIFrameworkPlugin)
+Q_IMPORT_PLUGIN(LVRSPlugin)
 
 int main(int argc, char *argv[])
 {

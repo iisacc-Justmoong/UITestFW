@@ -7,7 +7,7 @@
 #include "backend/platform/platforminfo.h"
 #include "test_utils.h"
 
-Q_IMPORT_PLUGIN(UIFrameworkPlugin)
+Q_IMPORT_PLUGIN(LVRSPlugin)
 
 class PlatformIntegrationTests : public QObject
 {
@@ -48,7 +48,7 @@ void PlatformIntegrationTests::application_window_and_main_metrics_are_exposed()
 
         const QByteArray qml = R"(
 import QtQuick
-import UIFramework as UIF
+import LVRS as UIF
 
 UIF.ApplicationWindow {
     id: root

@@ -1,6 +1,6 @@
 import QtQuick
 import QtQuick.Layouts
-import UIFramework 1.0
+import LVRS 1.0
 
 Item {
     id: control
@@ -139,5 +139,5 @@ Item {
 }
 
 // API usage (external):
-// import UIFramework 1.0 as UIF
+// import LVRS 1.0 as UIF
 // UIF.List { toolbarIcon1: "iconname"; toolbarIcon2: "iconname"; toolbarIcon3: "iconname"; items: [{label: "Item"}] }

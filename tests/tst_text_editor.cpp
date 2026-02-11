@@ -8,7 +8,7 @@
 
 #include "test_utils.h"
 
-Q_IMPORT_PLUGIN(UIFrameworkPlugin)
+Q_IMPORT_PLUGIN(LVRSPlugin)
 
 class TextEditorTests : public QObject
 {
@@ -26,7 +26,7 @@ void TextEditorTests::text_editor_default_contract_and_utility_api()
 
     const QByteArray qml = R"(
 import QtQuick
-import UIFramework as UIF
+import LVRS as UIF
 
 Item {
     id: root
@@ -82,7 +82,7 @@ void TextEditorTests::text_editor_mode_independent_render_contract_and_submit_si
 
     const QByteArray qml = R"(
 import QtQuick
-import UIFramework as UIF
+import LVRS as UIF
 
 UIF.ApplicationWindow {
     id: root

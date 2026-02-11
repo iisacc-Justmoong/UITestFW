@@ -1,6 +1,6 @@
 import QtQuick
 import QtQuick.Controls as Controls
-import UIFramework 1.0
+import LVRS 1.0
 
 Controls.Switch {
     id: control
@@ -107,5 +107,5 @@ Controls.Switch {
 }
 
 // API usage (external):
-// import UIFramework 1.0 as UIF
+// import LVRS 1.0 as UIF
 // UIF.ToggleSwitch { checked: true }

@@ -1,5 +1,5 @@
 import QtQuick
-import UIFramework 1.0 as UIF
+import LVRS 1.0 as UIF
 
 UIF.ApplicationWindow {
     id: root
@@ -7,7 +7,7 @@ UIF.ApplicationWindow {
     width: 620
     height: 420
     title: "Example: ViewModel Registry"
-    subtitle: "Model -> ViewModel -> UIFramework QML"
+    subtitle: "Model -> ViewModel -> LVRS QML"
     navigationEnabled: false
 
     property var vm: UIF.ViewModels.get("Example")

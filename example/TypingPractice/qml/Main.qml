@@ -1,5 +1,5 @@
 import QtQuick
-import UIFramework 1.0 as UIF
+import LVRS 1.0 as UIF
 
 UIF.ApplicationWindow {
     id: root
@@ -8,7 +8,7 @@ UIF.ApplicationWindow {
     width: 920
     height: 760
     title: "Typing Practice"
-    subtitle: "UIFramework Example"
+    subtitle: "LVRS Example"
     navigationEnabled: false
 
     readonly property var practiceTexts: [

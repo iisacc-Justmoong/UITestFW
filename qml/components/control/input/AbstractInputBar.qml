@@ -1,5 +1,5 @@
 import QtQuick
-import UIFramework 1.0
+import LVRS 1.0
 
 FocusScope {
     id: control
@@ -181,5 +181,5 @@ FocusScope {
 }
 
 // API usage (external):
-// import UIFramework 1.0 as UIF
+// import LVRS 1.0 as UIF
 // UIF.AbstractInputBar { placeholderText: "Search"; leadingItems: UIF.Label { text: "⌕"; style: body } }

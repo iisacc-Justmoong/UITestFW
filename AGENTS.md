@@ -17,7 +17,7 @@
   Generates build files in `./build`.
 - Build: `cmake --build build`  
   Compiles the C++ target and QML module.
-- Run: `./build/UIFramework`  
+- Run: `./build/LVRS`  
   Launches the Qt Quick UI.
 
 _No automated tests are set up yet._

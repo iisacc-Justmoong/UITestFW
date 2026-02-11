@@ -1,11 +1,11 @@
 # Overview
 
-UIFramework is a Qt 6.5+ QML module that provides a structured UI library and C++ singletons
+LVRS is a Qt 6.5+ QML module that provides a structured UI library and C++ singletons
 for common app needs. It is organized by directory and by component.
 
 ## QML Import
 ```qml
-import UIFramework 1.0 as UIF
+import LVRS 1.0 as UIF
 ```
 
 ## Main Packages

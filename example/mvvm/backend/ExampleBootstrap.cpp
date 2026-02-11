@@ -12,7 +12,7 @@ void setupExampleViewModel(QQmlEngine *engine)
     if (!engine)
         return;
 
-    auto *registry = engine->singletonInstance<ViewModelRegistry *>(QStringLiteral("UIFramework"),
+    auto *registry = engine->singletonInstance<ViewModelRegistry *>(QStringLiteral("LVRS"),
                                                                      QStringLiteral("ViewModels"));
     if (!registry)
         return;

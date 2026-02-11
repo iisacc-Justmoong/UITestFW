@@ -9,9 +9,9 @@ This folder shows **multiple ways** to use `EventListener` in QML. The project i
 From repository root:
 
 ```bash
-cmake -S . -B build-codex -DUIFRAMEWORK_BUILD_EXAMPLES=ON
-cmake --build build-codex --target UIFrameworkExampleEventListener
-./build-codex/example/EventListener/UIFrameworkExampleEventListener
+cmake -S . -B build-codex -DLVRS_BUILD_EXAMPLES=ON
+cmake --build build-codex --target LVRSExampleEventListener
+./build-codex/example/EventListener/LVRSExampleEventListener
 ```
 
 On macOS Finder, you can also click `example/run-eventlistener.command`.

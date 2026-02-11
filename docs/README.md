@@ -1,4 +1,4 @@
-# UIFramework Docs
+# LVRS Docs
 
 This documentation is organized **per directory and per component**.
 Use the links below to navigate.

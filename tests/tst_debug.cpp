@@ -5,7 +5,7 @@
 #include <QDir>
 #include <QtPlugin>
 
-Q_IMPORT_PLUGIN(UIFrameworkPlugin)
+Q_IMPORT_PLUGIN(LVRSPlugin)
 
 class DebugTests : public QObject
 {
@@ -22,7 +22,7 @@ void DebugTests::debug_enabled_toggle()
     engine.addImportPath(importBase);
     const QByteArray qml = R"(
 import QtQuick
-import UIFramework 1.0 as UIF
+import LVRS 1.0 as UIF
 
 Item {
     Component.onCompleted: {

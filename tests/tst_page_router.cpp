@@ -6,7 +6,7 @@
 
 #include "test_utils.h"
 
-Q_IMPORT_PLUGIN(UIFrameworkPlugin)
+Q_IMPORT_PLUGIN(LVRSPlugin)
 
 class PageRouterTests : public QObject
 {
@@ -24,7 +24,7 @@ void PageRouterTests::route_params_are_passed_to_target_component()
 
     const QByteArray qml = R"(
 import QtQuick
-import UIFramework as UIF
+import LVRS as UIF
 
 Item {
     id: root
@@ -96,7 +96,7 @@ void PageRouterTests::component_navigation_keeps_path_stack_in_sync()
 
     const QByteArray qml = R"(
 import QtQuick
-import UIFramework as UIF
+import LVRS as UIF
 
 Item {
     id: root

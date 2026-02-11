@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.21)
-project(UIFramework LANGUAGES CXX)
+project(LVRS LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -9,10 +9,10 @@ include(CMakePackageConfigHelpers)
 
 qt_standard_project_setup()
 
-option(UIFRAMEWORK_FORCE_X86_QT_TOOLS "Force Qt host tools to run under x86_64 (Rosetta)" OFF)
-option(UIFRAMEWORK_ENABLE_DUMMY_AGL "Provide a dummy AGL framework when the system one is missing" ON)
+option(LVRS_FORCE_X86_QT_TOOLS "Force Qt host tools to run under x86_64 (Rosetta)" OFF)
+option(LVRS_ENABLE_DUMMY_AGL "Provide a dummy AGL framework when the system one is missing" ON)
 
-if(APPLE AND UIFRAMEWORK_ENABLE_DUMMY_AGL)
+if(APPLE AND LVRS_ENABLE_DUMMY_AGL)
     if(NOT EXISTS "/System/Library/Frameworks/AGL.framework/AGL")
         set(_uifw_framework_root "${CMAKE_CURRENT_BINARY_DIR}/frameworks")
         set(_uifw_agl_framework "${_uifw_framework_root}/AGL.framework")
@@ -81,7 +81,7 @@ if(APPLE AND UIFRAMEWORK_ENABLE_DUMMY_AGL)
     endif()
 endif()
 
-if(APPLE AND UIFRAMEWORK_FORCE_X86_QT_TOOLS)
+if(APPLE AND LVRS_FORCE_X86_QT_TOOLS)
     function(_uifw_wrap_qt_tool target)
         get_target_property(_tool_path ${target} IMPORTED_LOCATION)
         if(NOT _tool_path)
@@ -111,13 +111,13 @@ if(APPLE AND UIFRAMEWORK_FORCE_X86_QT_TOOLS)
     endif()
 endif()
 
-qt_add_library(UIFramework STATIC)
-add_library(UIFramework::UIFramework ALIAS UIFramework)
+qt_add_library(LVRS STATIC)
+add_library(LVRS::LVRS ALIAS LVRS)
 
 include(${CMAKE_CURRENT_LIST_DIR}/backend/CMakeLists.txt)
 include(${CMAKE_CURRENT_LIST_DIR}/qml/CMakeLists.txt)
 
-target_include_directories(UIFramework
+target_include_directories(LVRS
     PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/backend>
@@ -129,24 +129,24 @@ target_include_directories(UIFramework
         $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/backend/state>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/backend/graphics>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/backend/text>
-        $<INSTALL_INTERFACE:include/UIFramework>
+        $<INSTALL_INTERFACE:include/LVRS>
 )
 
-qt_add_qml_module(UIFramework
-    URI UIFramework
+qt_add_qml_module(LVRS
+    URI LVRS
     VERSION 1.0
     RESOURCE_PREFIX "/qt/qml"
-    OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/UIFramework"
+    OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/LVRS"
     SOURCES
-        ${UIFRAMEWORK_BACKEND_SOURCES}
-        ${UIFRAMEWORK_BACKEND_HEADERS}
+        ${LVRS_BACKEND_SOURCES}
+        ${LVRS_BACKEND_HEADERS}
     QML_FILES
-        ${UIFRAMEWORK_QML_FILES}
+        ${LVRS_QML_FILES}
     RESOURCES
-        ${UIFRAMEWORK_RESOURCE_FILES}
+        ${LVRS_RESOURCE_FILES}
 )
 
-target_link_libraries(UIFramework
+target_link_libraries(LVRS
     PUBLIC
         Qt6::Quick
         Qt6::QuickControls2
@@ -155,101 +155,101 @@ target_link_libraries(UIFramework
         Qt6::Network
 )
 
-option(UIFRAMEWORK_BUILD_DEMO "Build the UIFramework demo application" ON)
-option(UIFRAMEWORK_BUILD_EXAMPLES "Build runnable example applications" ON)
-option(UIFRAMEWORK_BUILD_TESTS "Build UIFramework tests" ON)
+option(LVRS_BUILD_DEMO "Build the LVRS demo application" ON)
+option(LVRS_BUILD_EXAMPLES "Build runnable example applications" ON)
+option(LVRS_BUILD_TESTS "Build LVRS tests" ON)
 
-if(UIFRAMEWORK_BUILD_DEMO)
-    qt_add_executable(UIFrameworkDemo
+if(LVRS_BUILD_DEMO)
+    qt_add_executable(LVRSDemo
         MANUAL_FINALIZATION
         main.cpp
     )
 
-    qt_add_qml_module(UIFrameworkDemo
-        URI UIFrameworkDemo
+    qt_add_qml_module(LVRSDemo
+        URI LVRSDemo
         VERSION 1.0
         RESOURCE_PREFIX "/qt/qml"
-        OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/UIFrameworkDemo"
+        OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/LVRSDemo"
         QML_FILES
-            ${UIFRAMEWORK_DEMO_QML_FILES}
+            ${LVRS_DEMO_QML_FILES}
     )
 
-    target_link_libraries(UIFrameworkDemo
+    target_link_libraries(LVRSDemo
         PRIVATE
             Qt6::Quick
             Qt6::QuickControls2
-            UIFramework
+            LVRS
     )
 
-    set_target_properties(UIFrameworkDemo PROPERTIES
+    set_target_properties(LVRSDemo PROPERTIES
         MACOSX_BUNDLE TRUE
         WIN32_EXECUTABLE TRUE
-        OUTPUT_NAME "UIFramework"
+        OUTPUT_NAME "LVRS"
     )
 
     if(IOS)
-        set(UIFRAMEWORK_IOS_BUNDLE_ID "" CACHE STRING "Override iOS bundle identifier for UIFramework demo")
-        if(UIFRAMEWORK_IOS_BUNDLE_ID)
-            set_target_properties(UIFrameworkDemo PROPERTIES
-                XCODE_ATTRIBUTE_PRODUCT_BUNDLE_IDENTIFIER "${UIFRAMEWORK_IOS_BUNDLE_ID}"
+        set(LVRS_IOS_BUNDLE_ID "" CACHE STRING "Override iOS bundle identifier for LVRS demo")
+        if(LVRS_IOS_BUNDLE_ID)
+            set_target_properties(LVRSDemo PROPERTIES
+                XCODE_ATTRIBUTE_PRODUCT_BUNDLE_IDENTIFIER "${LVRS_IOS_BUNDLE_ID}"
             )
         endif()
     endif()
 
-    qt_finalize_executable(UIFrameworkDemo)
+    qt_finalize_executable(LVRSDemo)
 endif()
 
-if(UIFRAMEWORK_BUILD_EXAMPLES)
+if(LVRS_BUILD_EXAMPLES)
     add_subdirectory(example)
 endif()
 
-if(UIFRAMEWORK_BUILD_TESTS)
+if(LVRS_BUILD_TESTS)
     enable_testing()
     add_subdirectory(tests)
 endif()
 
-set(_uifw_export_targets UIFramework)
-if(TARGET UIFramework_resources_1)
-    list(APPEND _uifw_export_targets UIFramework_resources_1)
+set(_uifw_export_targets LVRS)
+if(TARGET LVRS_resources_1)
+    list(APPEND _uifw_export_targets LVRS_resources_1)
 endif()
-if(TARGET UIFramework_resources_2)
-    list(APPEND _uifw_export_targets UIFramework_resources_2)
+if(TARGET LVRS_resources_2)
+    list(APPEND _uifw_export_targets LVRS_resources_2)
 endif()
 
 install(TARGETS ${_uifw_export_targets}
-    EXPORT UIFrameworkTargets
+    EXPORT LVRSTargets
     ARCHIVE DESTINATION lib
     LIBRARY DESTINATION lib
     RUNTIME DESTINATION bin
-    INCLUDES DESTINATION include/UIFramework
+    INCLUDES DESTINATION include/LVRS
 )
 
-install(EXPORT UIFrameworkTargets
-    NAMESPACE UIFramework::
-    DESTINATION lib/cmake/UIFramework
+install(EXPORT LVRSTargets
+    NAMESPACE LVRS::
+    DESTINATION lib/cmake/LVRS
 )
 
 install(
     DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/backend/
-    DESTINATION include/UIFramework/backend
+    DESTINATION include/LVRS/backend
     FILES_MATCHING
         PATTERN "*.h"
 )
 
 configure_package_config_file(
-    "${CMAKE_CURRENT_LIST_DIR}/cmake/UIFrameworkConfig.cmake.in"
-    "${CMAKE_CURRENT_BINARY_DIR}/UIFrameworkConfig.cmake"
-    INSTALL_DESTINATION lib/cmake/UIFramework
+    "${CMAKE_CURRENT_LIST_DIR}/cmake/LVRSConfig.cmake.in"
+    "${CMAKE_CURRENT_BINARY_DIR}/LVRSConfig.cmake"
+    INSTALL_DESTINATION lib/cmake/LVRS
 )
 
 write_basic_package_version_file(
-    "${CMAKE_CURRENT_BINARY_DIR}/UIFrameworkConfigVersion.cmake"
+    "${CMAKE_CURRENT_BINARY_DIR}/LVRSConfigVersion.cmake"
     VERSION 1.0.0
     COMPATIBILITY SameMajorVersion
 )
 
 install(FILES
-    "${CMAKE_CURRENT_BINARY_DIR}/UIFrameworkConfig.cmake"
-    "${CMAKE_CURRENT_BINARY_DIR}/UIFrameworkConfigVersion.cmake"
-    DESTINATION lib/cmake/UIFramework
+    "${CMAKE_CURRENT_BINARY_DIR}/LVRSConfig.cmake"
+    "${CMAKE_CURRENT_BINARY_DIR}/LVRSConfigVersion.cmake"
+    DESTINATION lib/cmake/LVRS
 )

@@ -1,4 +1,4 @@
-set(UIFRAMEWORK_LAYOUT_QML_FILES
+set(LVRS_LAYOUT_QML_FILES
     qml/components/layout/AppHeader.qml
     qml/components/layout/AppScaffold.qml
     qml/components/layout/VStack.qml

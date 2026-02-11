@@ -17,7 +17,7 @@
 #include "backend/runtime/renderingmonitor.h"
 #include "backend/runtime/runtimeevents.h"
 
-Q_IMPORT_PLUGIN(UIFrameworkPlugin)
+Q_IMPORT_PLUGIN(LVRSPlugin)
 
 class RuntimeServicesTests : public QObject
 {

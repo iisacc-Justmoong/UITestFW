@@ -1,12 +1,12 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
-import UIFramework 1.0
+import LVRS 1.0
 
 Item {
     id: root
 
-    property string headerTitle: "UIFramework"
+    property string headerTitle: "LVRS"
     property string headerSubtitle: ""
     property var navModel: ["Overview", "Suites", "Runs", "Devices", "Reports", "Settings"]
     property int navIndex: 0
@@ -364,5 +364,5 @@ Item {
 }
 
 // API usage (external):
-// import UIFramework 1.0 as UIF
-// UIF.AppScaffold { headerTitle: "UIFramework"; navModel: ["Overview"] }
+// import LVRS 1.0 as UIF
+// UIF.AppScaffold { headerTitle: "LVRS"; navModel: ["Overview"] }

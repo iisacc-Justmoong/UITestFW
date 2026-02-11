@@ -1,6 +1,6 @@
 import QtQuick
 import QtQuick.Controls
-import UIFramework 1.0
+import LVRS 1.0
 
 Rectangle {
     id: control
@@ -62,7 +62,7 @@ Rectangle {
 }
 
 // API usage (external):
-// import UIFramework 1.0 as UIF
+// import LVRS 1.0 as UIF
 // UIF.Hierarchy {
 //     toolbarButtons: [UIF.ToolbarButton { buttonId: 1 }, UIF.ToolbarButton { buttonId: 2 }]
 //     UIF.HierarchyItem { label: "Root"; showChevron: true }

@@ -7,7 +7,7 @@
 #include <QDir>
 #include <QtPlugin>
 
-Q_IMPORT_PLUGIN(UIFrameworkPlugin)
+Q_IMPORT_PLUGIN(LVRSPlugin)
 
 class LayoutTests : public QObject
 {
@@ -42,7 +42,7 @@ void LayoutTests::vstack_default_spacing()
     const QByteArray qml = R"(
 import QtQuick
 import QtQuick.Layouts
-import UIFramework 1.0 as UIF
+import LVRS 1.0 as UIF
 
 Item {
     UIF.VStack {
@@ -76,7 +76,7 @@ void LayoutTests::hstack_default_spacing()
     const QByteArray qml = R"(
 import QtQuick
 import QtQuick.Layouts
-import UIFramework 1.0 as UIF
+import LVRS 1.0 as UIF
 
 Item {
     UIF.HStack {
@@ -110,7 +110,7 @@ void LayoutTests::vstack_alignment_name()
     const QByteArray qml = R"(
 import QtQuick
 import QtQuick.Layouts
-import UIFramework 1.0 as UIF
+import LVRS 1.0 as UIF
 
 Item {
     property int childAlign: child.Layout.alignment
@@ -139,7 +139,7 @@ void LayoutTests::hstack_alignment_name()
     const QByteArray qml = R"(
 import QtQuick
 import QtQuick.Layouts
-import UIFramework 1.0 as UIF
+import LVRS 1.0 as UIF
 
 Item {
     property int childAlign: child.Layout.alignment
@@ -168,7 +168,7 @@ void LayoutTests::spacer_min_length_vertical()
     const QByteArray qml = R"(
 import QtQuick
 import QtQuick.Layouts
-import UIFramework 1.0 as UIF
+import LVRS 1.0 as UIF
 
 Item {
     property bool fillHeight: spacer.Layout.fillHeight

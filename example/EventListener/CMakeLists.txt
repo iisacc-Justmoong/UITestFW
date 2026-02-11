@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.21)
 
 if(CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
-    project(UIFrameworkExampleEventListener LANGUAGES CXX)
+    project(LVRSExampleEventListener LANGUAGES CXX)
 
     set(CMAKE_CXX_STANDARD 20)
     set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -10,15 +10,15 @@ if(CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
     qt_standard_project_setup()
 endif()
 
-if(NOT TARGET UIFramework)
+if(NOT TARGET LVRS)
     add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/../.. backend_build)
 endif()
 
-qt_add_executable(UIFrameworkExampleEventListener
+qt_add_executable(LVRSExampleEventListener
     main.cpp
 )
 
-qt_add_qml_module(UIFrameworkExampleEventListener
+qt_add_qml_module(LVRSExampleEventListener
     URI ExampleEventListener
     VERSION 1.0
     RESOURCE_PREFIX "/qt/qml"
@@ -32,18 +32,18 @@ qt_add_qml_module(UIFrameworkExampleEventListener
         MultiTrigger.qml
 )
 
-target_link_libraries(UIFrameworkExampleEventListener
+target_link_libraries(LVRSExampleEventListener
     PRIVATE
         Qt6::Quick
         Qt6::QuickControls2
-        UIFramework
-        UIFrameworkplugin
-        UIFrameworkplugin_init
+        LVRS
+        LVRSplugin
+        LVRSplugin_init
 )
 
-add_custom_target(run_UIFrameworkExampleEventListener
-    COMMAND $<TARGET_FILE:UIFrameworkExampleEventListener>
-    DEPENDS UIFrameworkExampleEventListener
+add_custom_target(run_LVRSExampleEventListener
+    COMMAND $<TARGET_FILE:LVRSExampleEventListener>
+    DEPENDS LVRSExampleEventListener
     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
     USES_TERMINAL
 )

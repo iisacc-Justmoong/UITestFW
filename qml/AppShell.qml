@@ -1,5 +1,5 @@
 import QtQuick
-import UIFramework 1.0
+import LVRS 1.0
 
 ApplicationWindow {
     id: root
@@ -11,5 +11,5 @@ ApplicationWindow {
 }
 
 // API usage (external):
-// import UIFramework as UIF
-// UIF.AppShell { title: "UIFramework"; navItems: ["Overview"] }
+// import LVRS as UIF
+// UIF.AppShell { title: "LVRS"; navItems: ["Overview"] }

@@ -9,7 +9,7 @@
 #include <QKeyEvent>
 #include <QtPlugin>
 
-Q_IMPORT_PLUGIN(UIFrameworkPlugin)
+Q_IMPORT_PLUGIN(LVRSPlugin)
 
 class RuntimeEventsTests : public QObject
 {
@@ -37,7 +37,7 @@ static QScopedPointer<QObject> createRuntimeWindow(QQmlEngine &engine)
 {
     const QByteArray qml = R"(
 import QtQuick
-import UIFramework as UIF
+import LVRS as UIF
 
 UIF.ApplicationWindow {
     id: root

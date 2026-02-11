@@ -1,7 +1,7 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
-import UIFramework 1.0
+import LVRS 1.0
 
 ToolBar {
     id: root
@@ -84,5 +84,5 @@ ToolBar {
 }
 
 // API usage (external):
-// import UIFramework 1.0 as UIF
+// import LVRS 1.0 as UIF
 // UIF.AppHeader { title: "Dashboard"; subtitle: "Overview" }

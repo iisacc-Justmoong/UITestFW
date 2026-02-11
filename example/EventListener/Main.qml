@@ -1,5 +1,5 @@
 import QtQuick
-import UIFramework 1.0 as UIF
+import LVRS 1.0 as UIF
 
 UIF.ApplicationWindow {
     id: root
@@ -30,7 +30,7 @@ UIF.ApplicationWindow {
     readonly property var sections: [
         {
             "title": "Basic Click",
-            "subtitle": "Click trigger on a UIFramework button",
+            "subtitle": "Click trigger on a LVRS button",
             "source": "BasicClick.qml"
         },
         {

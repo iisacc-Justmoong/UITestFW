@@ -1,5 +1,5 @@
 import QtQuick
-import UIFramework 1.0
+import LVRS 1.0
 
 Item {
     id: control
@@ -65,7 +65,7 @@ Item {
 }
 
 // API usage (external):
-// import UIFramework 1.0 as UIF
+// import LVRS 1.0 as UIF
 // UIF.ProgressBar {
 //     width: 180
 //     size: regular

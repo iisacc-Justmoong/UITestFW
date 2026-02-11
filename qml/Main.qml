@@ -2,7 +2,7 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
-import UIFramework as UIF
+import LVRS as UIF
 
 UIF.ApplicationWindow {
     id: root
@@ -220,7 +220,7 @@ UIF.ApplicationWindow {
                             style: description
                             color: UIF.Theme.textSecondary
                             wrapMode: Text.WordWrap
-                            text: "이 페이지는 UIFramework의 핵심 컴포넌트를 상태별로 묶어 보여주는 시각 카탈로그이다."
+                            text: "이 페이지는 LVRS의 핵심 컴포넌트를 상태별로 묶어 보여주는 시각 카탈로그이다."
                         }
 
                         RowLayout {

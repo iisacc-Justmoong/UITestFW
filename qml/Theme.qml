@@ -1,13 +1,13 @@
 pragma Singleton
 import QtQuick
-import UIFramework 1.0
+import LVRS 1.0
 
 QtObject {
     readonly property bool dark: true
 
     readonly property string fontBody: FontPolicy.resolveFamily(FontPolicy.preferredFamily)
     readonly property string fontDisplay: FontPolicy.resolveFamily(FontPolicy.preferredFamily)
-    readonly property string iconSetBasePath: "qrc:/qt/qml/UIFramework/resources/iconset/"
+    readonly property string iconSetBasePath: "qrc:/qt/qml/LVRS/resources/iconset/"
 
     function iconPath(iconName) {
         const rawName = iconName === undefined || iconName === null ? "" : String(iconName)
@@ -224,5 +224,5 @@ QtObject {
 
 
 // API usage (external):
-// import UIFramework 1.0 as UIF
+// import LVRS 1.0 as UIF
 // Rectangle { color: UIF.Theme.window }

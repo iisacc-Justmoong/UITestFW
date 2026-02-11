@@ -1,7 +1,7 @@
 import QtQuick
 import QtQuick.Controls as Controls
 import QtQuick.Window
-import UIFramework 1.0
+import LVRS 1.0
 
 Controls.ApplicationWindow {
     id: root
@@ -132,5 +132,5 @@ Controls.ApplicationWindow {
 }
 
 // API usage (external):
-// import UIFramework as UIF
+// import LVRS as UIF
 // UIF.ApplicationWindow { title: "App" }

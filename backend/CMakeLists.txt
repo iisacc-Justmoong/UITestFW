@@ -1,4 +1,4 @@
-set(UIFRAMEWORK_BACKEND_SOURCES
+set(LVRS_BACKEND_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/io/backend.cpp
     ${CMAKE_CURRENT_LIST_DIR}/fonts/fontpolicy.cpp
     ${CMAKE_CURRENT_LIST_DIR}/runtime/renderquality.cpp
@@ -12,7 +12,7 @@ set(UIFRAMEWORK_BACKEND_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/text/textmarkup.cpp
 )
 
-set(UIFRAMEWORK_BACKEND_HEADERS
+set(LVRS_BACKEND_HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/io/backend.h
     ${CMAKE_CURRENT_LIST_DIR}/fonts/fontpolicy.h
     ${CMAKE_CURRENT_LIST_DIR}/runtime/renderquality.h
@@ -27,15 +27,15 @@ set(UIFRAMEWORK_BACKEND_HEADERS
 )
 
 if(APPLE)
-    list(APPEND UIFRAMEWORK_BACKEND_SOURCES
+    list(APPEND LVRS_BACKEND_SOURCES
         ${CMAKE_CURRENT_LIST_DIR}/platform/nativewindowstyle.mm
     )
 else()
-    list(APPEND UIFRAMEWORK_BACKEND_SOURCES
+    list(APPEND LVRS_BACKEND_SOURCES
         ${CMAKE_CURRENT_LIST_DIR}/platform/nativewindowstyle.cpp
     )
 endif()
 
-list(APPEND UIFRAMEWORK_BACKEND_HEADERS
+list(APPEND LVRS_BACKEND_HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/platform/nativewindowstyle.h
 )

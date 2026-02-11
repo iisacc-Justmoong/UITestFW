@@ -8,7 +8,7 @@
 #include <QQuickWindow>
 #include <QtPlugin>
 
-Q_IMPORT_PLUGIN(UIFrameworkPlugin)
+Q_IMPORT_PLUGIN(LVRSPlugin)
 
 class EventListenerTests : public QObject
 {
@@ -26,7 +26,7 @@ void EventListenerTests::click_trigger()
     engine.addImportPath(importBase);
     const QByteArray qml = R"(
 import QtQuick
-import UIFramework 1.0 as UIF
+import LVRS 1.0 as UIF
 
 Item {
     id: root
@@ -64,7 +64,7 @@ void EventListenerTests::global_context_requested_trigger()
     engine.addImportPath(importBase);
     const QByteArray qml = R"(
 import QtQuick
-import UIFramework 1.0 as UIF
+import LVRS 1.0 as UIF
 
 UIF.ApplicationWindow {
     id: root

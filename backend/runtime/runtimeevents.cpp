@@ -211,7 +211,7 @@ QString RuntimeEvents::processName() const
     const QString name = QCoreApplication::applicationName();
     if (!name.isEmpty())
         return name;
-    return QStringLiteral("UIFrameworkApp");
+    return QStringLiteral("LVRSApp");
 }
 
 QString RuntimeEvents::osName() const

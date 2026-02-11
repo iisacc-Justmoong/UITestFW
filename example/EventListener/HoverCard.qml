@@ -1,5 +1,5 @@
 import QtQuick
-import UIFramework 1.0 as UIF
+import LVRS 1.0 as UIF
 
 Rectangle {
     id: root

@@ -1,5 +1,5 @@
 import QtQuick
-import UIFramework 1.0
+import LVRS 1.0
 
 IconButton {
     id: control
@@ -34,5 +34,5 @@ IconButton {
 }
 
 // API usage (external):
-// import UIFramework 1.0 as UIF
+// import LVRS 1.0 as UIF
 // UIF.ToolbarButton { buttonId: 1; iconName: "view-more-symbolic-default" }

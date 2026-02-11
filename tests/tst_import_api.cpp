@@ -5,7 +5,7 @@
 #include <QDir>
 #include <QtPlugin>
 
-Q_IMPORT_PLUGIN(UIFrameworkPlugin)
+Q_IMPORT_PLUGIN(LVRSPlugin)
 
 class ImportApiTests : public QObject
 {
@@ -37,7 +37,7 @@ void ImportApiTests::versionless_import_application_window_loads()
     engine.addImportPath(importBase);
     const QByteArray qml = R"(
 import QtQuick
-import UIFramework as UIF
+import LVRS as UIF
 
 UIF.ApplicationWindow {
     width: 1200
@@ -114,7 +114,7 @@ void ImportApiTests::appshell_compat_loads()
     engine.addImportPath(importBase);
     const QByteArray qml = R"(
 import QtQuick
-import UIFramework as UIF
+import LVRS as UIF
 
 UIF.AppShell {
     width: 1000
@@ -141,12 +141,12 @@ void ImportApiTests::icon_name_mapping_loads()
     engine.addImportPath(importBase);
     const QByteArray qml = R"(
 import QtQuick
-import UIFramework as UIF
+import LVRS as UIF
 
 Item {
     id: root
 
-    property string iconRoot: "qrc:/qt/qml/UIFramework/resources/iconset/"
+    property string iconRoot: "qrc:/qt/qml/LVRS/resources/iconset/"
     property string expectedByName: iconRoot + "view-more-symbolic-default.svg"
     property string expectedByExt: iconRoot + "view-more-symbolic-borderless.svg"
     property string expectedByGroup: iconRoot + "pan-down-symbolic-default.svg"

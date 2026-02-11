@@ -4,7 +4,7 @@
 
 #include "backend/text/textmarkup.h"
 
-Q_IMPORT_PLUGIN(UIFrameworkPlugin)
+Q_IMPORT_PLUGIN(LVRSPlugin)
 
 class TextMarkupTests : public QObject
 {

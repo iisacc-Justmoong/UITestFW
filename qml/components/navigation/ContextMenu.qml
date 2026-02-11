@@ -1,7 +1,7 @@
 import QtQuick
 import QtQuick.Controls as Controls
 import QtQuick.Layouts
-import UIFramework 1.0
+import LVRS 1.0
 
 Controls.Menu {
     id: control
@@ -193,5 +193,5 @@ Controls.Menu {
 }
 
 // API usage (external):
-// import UIFramework 1.0 as UIF
+// import LVRS 1.0 as UIF
 // UIF.ContextMenu { items: [{ icon: "iconname", label: "Open", key: "cmd+o" }, { type: "divider" }, { icon: "iconname", label: "Share", key: "cmd+s", hasSubmenu: true }] }

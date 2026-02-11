@@ -1,6 +1,6 @@
 import QtQuick
 import QtQuick.Controls
-import UIFramework 1.0
+import LVRS 1.0
 
 Item {
     id: root
@@ -380,5 +380,5 @@ Item {
 }
 
 // API usage (external):
-// import UIFramework 1.0 as UIF
+// import LVRS 1.0 as UIF
 // UIF.PageRouter { routes: [{ path: "/", component: homePage }] }

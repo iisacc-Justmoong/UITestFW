@@ -44,15 +44,15 @@ void ensureBundledPretendardFontsLoaded()
     loaded = true;
 
     static const char *kFontResources[] = {
-        ":/qt/qml/UIFramework/resources/font/Pretendard-Regular.ttf",
-        ":/qt/qml/UIFramework/resources/font/Pretendard-Medium.ttf",
-        ":/qt/qml/UIFramework/resources/font/Pretendard-SemiBold.ttf",
-        ":/qt/qml/UIFramework/resources/font/Pretendard-Bold.ttf",
-        ":/qt/qml/UIFramework/resources/font/Pretendard-Light.ttf",
-        ":/qt/qml/UIFramework/resources/font/Pretendard-ExtraLight.ttf",
-        ":/qt/qml/UIFramework/resources/font/Pretendard-Thin.ttf",
-        ":/qt/qml/UIFramework/resources/font/Pretendard-ExtraBold.ttf",
-        ":/qt/qml/UIFramework/resources/font/Pretendard-Black.ttf"
+        ":/qt/qml/LVRS/resources/font/Pretendard-Regular.ttf",
+        ":/qt/qml/LVRS/resources/font/Pretendard-Medium.ttf",
+        ":/qt/qml/LVRS/resources/font/Pretendard-SemiBold.ttf",
+        ":/qt/qml/LVRS/resources/font/Pretendard-Bold.ttf",
+        ":/qt/qml/LVRS/resources/font/Pretendard-Light.ttf",
+        ":/qt/qml/LVRS/resources/font/Pretendard-ExtraLight.ttf",
+        ":/qt/qml/LVRS/resources/font/Pretendard-Thin.ttf",
+        ":/qt/qml/LVRS/resources/font/Pretendard-ExtraBold.ttf",
+        ":/qt/qml/LVRS/resources/font/Pretendard-Black.ttf"
     };
 
     for (const char *fontResource : kFontResources)

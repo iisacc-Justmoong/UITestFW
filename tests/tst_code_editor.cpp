@@ -8,7 +8,7 @@
 
 #include "test_utils.h"
 
-Q_IMPORT_PLUGIN(UIFrameworkPlugin)
+Q_IMPORT_PLUGIN(LVRSPlugin)
 
 class CodeEditorTests : public QObject
 {
@@ -26,7 +26,7 @@ void CodeEditorTests::code_editor_default_contract_and_utility_api()
 
     const QByteArray qml = R"(
 import QtQuick
-import UIFramework as UIF
+import LVRS as UIF
 
 Item {
     id: root
@@ -75,7 +75,7 @@ void CodeEditorTests::code_editor_submit_signal_and_fixed_plain_text_mode()
 
     const QByteArray qml = R"(
 import QtQuick
-import UIFramework as UIF
+import LVRS as UIF
 
 UIF.ApplicationWindow {
     id: root

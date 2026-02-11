@@ -16,7 +16,7 @@ Runtime rendering quality is driven by `UIF.RenderQuality` and is supersampled b
 
 ## Usage
 ```qml
-import UIFramework as UIF
+import LVRS as UIF
 
 UIF.ApplicationWindow {
     title: "App"

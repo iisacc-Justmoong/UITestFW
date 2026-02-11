@@ -6,7 +6,7 @@
 
 #include "backend/ExampleBootstrap.h"
 
-Q_IMPORT_PLUGIN(UIFrameworkPlugin)
+Q_IMPORT_PLUGIN(LVRSPlugin)
 
 int main(int argc, char *argv[])
 {

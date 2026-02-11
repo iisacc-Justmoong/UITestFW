@@ -1,5 +1,5 @@
 import QtQuick
-import UIFramework 1.0
+import LVRS 1.0
 
 AbstractInputBar {
     id: control
@@ -168,5 +168,5 @@ AbstractInputBar {
 }
 
 // API usage (external):
-// import UIFramework 1.0 as UIF
+// import LVRS 1.0 as UIF
 // UIF.InputField { placeholderText: "Search"; mode: searchMode }

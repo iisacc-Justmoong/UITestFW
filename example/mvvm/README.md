@@ -14,9 +14,9 @@ This example is buildable and runnable, and demonstrates the MVVM flow used in t
 From repository root:
 
 ```bash
-cmake -S . -B build-codex -DUIFRAMEWORK_BUILD_EXAMPLES=ON
-cmake --build build-codex --target UIFrameworkExampleMVVM
-./build-codex/example/mvvm/UIFrameworkExampleMVVM
+cmake -S . -B build-codex -DLVRS_BUILD_EXAMPLES=ON
+cmake --build build-codex --target LVRSExampleMVVM
+./build-codex/example/mvvm/LVRSExampleMVVM
 ```
 
 On macOS Finder, you can also click `example/run-mvvm.command`.
@@ -96,7 +96,7 @@ engine.load(QUrl("qrc:/qt/qml/Example/Main.qml"));
 ## QML Usage Pattern
 
 ```qml
-import UIFramework 1.0 as UIF
+import LVRS 1.0 as UIF
 
 ApplicationWindow {
     property var vm: UIF.ViewModels.get("Example")
@@ -202,7 +202,7 @@ engine.load(QUrl("qrc:/qt/qml/Example/Main.qml"));
 ## QML 사용 패턴
 
 ```qml
-import UIFramework 1.0 as UIF
+import LVRS 1.0 as UIF
 
 ApplicationWindow {
     property var vm: UIF.ViewModels.get("Example")

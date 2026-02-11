@@ -1,7 +1,7 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
-import UIFramework 1.0
+import LVRS 1.0
 
 Rectangle {
     id: root
@@ -78,5 +78,5 @@ Rectangle {
 }
 
 // API usage (external):
-// import UIFramework 1.0 as UIF
+// import LVRS 1.0 as UIF
 // UIF.AppCard { title: "Summary"; subtitle: "Detail" }

@@ -7,7 +7,7 @@
 
 #include "backend/io/backend.h"
 
-Q_IMPORT_PLUGIN(UIFrameworkPlugin)
+Q_IMPORT_PLUGIN(LVRSPlugin)
 
 class BackendIoTests : public QObject
 {

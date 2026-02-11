@@ -8,7 +8,7 @@
 
 #include "backend/graphics/svgmanager.h"
 
-Q_IMPORT_PLUGIN(UIFrameworkPlugin)
+Q_IMPORT_PLUGIN(LVRSPlugin)
 
 class SvgManagerTests : public QObject
 {

@@ -6,6 +6,7 @@ AbstractButton {
 
     property var router: null
     property string href: "/"
+    property alias to: control.href
     property var params: ({})
     property bool replace: false
     property var targetComponent: null
@@ -28,7 +29,7 @@ AbstractButton {
         return null
     }
 
-    onClicked: {
+    function triggerNavigation() {
         var targetRouter = resolveRouter()
         if (!targetRouter)
             return
@@ -46,6 +47,8 @@ AbstractButton {
         else
             targetRouter.go(href, params)
     }
+
+    onClicked: triggerNavigation()
 
     contentItem: Item {
         id: contentRoot
@@ -77,5 +80,5 @@ AbstractButton {
 }
 
 // API usage (external):
-// import LVRS 1.0 as UIF
-// UIF.Link { href: "/reports"; UIF.Label { text: "Reports"; style: description } }
+// import LVRS 1.0 as LV
+// LV.Link { href: "/reports"; LV.Label { text: "Reports"; style: description } }

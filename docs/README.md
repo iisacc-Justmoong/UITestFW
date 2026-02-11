@@ -37,8 +37,6 @@ Use the links below to navigate.
 ## Navigation
 - `docs/components/navigation/PageRouter.md`
 - `docs/components/navigation/Link.md`
-- `docs/components/navigation/LinkWrapper.md`
-- `docs/components/navigation/NavigationLink.md`
 
 ## Surfaces
 - `docs/components/surfaces/AppCard.md`

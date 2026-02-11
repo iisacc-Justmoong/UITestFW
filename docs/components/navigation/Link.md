@@ -2,13 +2,17 @@
 
 Location: `qml/components/navigation/Link.qml`
 
-Anchor-like control for navigation.
+Single navigation control for all click-to-route scenarios.
 
 ## Properties
 - `router`
 - `href`
+- `to` (alias of `href`)
+- `params`
 - `targetComponent`
 - `replace`
+- `text`
+- `underline`
 
 `router` is optional when `Navigator` has a registered `PageRouter`.
 
@@ -19,7 +23,7 @@ LV.Link { href: "/reports"; Text { text: "Reports" } }
 
 ## Practical Examples
 
-### Example 1: Text-only link
+### Example 1: Text-only route navigation
 ```qml
 import QtQuick
 import LVRS 1.0 as LV
@@ -31,23 +35,36 @@ LV.Link {
 }
 ```
 
-### Example 2: Link with custom child content
+### Example 2: `to` alias for route path
 ```qml
 import QtQuick
 import LVRS 1.0 as LV
 
 LV.Link {
-    href: "/runs"
+    text: "Open Overview"
+    to: "/overview"
+}
+```
 
-    Row {
-        spacing: 6
-        LV.Label { text: "View Runs"; style: body }
-        LV.Label { text: "→"; style: body }
+### Example 3: Link with custom child content (wrapper-style usage)
+```qml
+import QtQuick
+import LVRS 1.0 as LV
+
+LV.Link {
+    href: "/settings"
+
+    Rectangle {
+        width: 180
+        height: 40
+        radius: 8
+        color: LV.Theme.surfaceSolid
+        LV.Label { anchors.centerIn: parent; text: "Open Settings"; style: body }
     }
 }
 ```
 
-### Example 3: Replace current page and pass params
+### Example 4: Replace current page and pass params
 ```qml
 import QtQuick
 import LVRS 1.0 as LV
@@ -57,5 +74,24 @@ LV.Link {
     params: ({ source: "notifications" })
     replace: true
     text: "Go to latest failed run"
+}
+```
+
+### Example 5: Navigate directly to a component
+```qml
+import QtQuick
+import LVRS 1.0 as LV
+
+Item {
+    Component {
+        id: detailsPage
+        Rectangle { color: LV.Theme.windowAlt }
+    }
+
+    LV.Link {
+        targetComponent: detailsPage
+        replace: true
+        text: "Open Details"
+    }
 }
 ```

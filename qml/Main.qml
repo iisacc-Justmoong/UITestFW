@@ -539,12 +539,12 @@ UIF.ApplicationWindow {
                             width: parent.width
                             spacing: UIF.Theme.gap8
 
-                            UIF.NavigationLink {
+                            UIF.Link {
                                 text: "Go Overview"
                                 to: "/overview"
                             }
 
-                            UIF.NavigationLink {
+                            UIF.Link {
                                 text: "Go Reports"
                                 to: "/reports"
                             }
@@ -555,7 +555,7 @@ UIF.ApplicationWindow {
                                 underline: true
                             }
 
-                            UIF.LinkWrapper {
+                            UIF.Link {
                                 href: "/settings"
 
                                 Rectangle {
@@ -568,7 +568,7 @@ UIF.ApplicationWindow {
                                         anchors.centerIn: parent
                                         style: description
                                         color: UIF.Theme.textPrimary
-                                        text: "Wrapper -> Settings"
+                                        text: "Link -> Settings"
                                     }
                                 }
                             }

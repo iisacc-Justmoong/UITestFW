@@ -17,6 +17,7 @@ Item {
     property Component notFoundComponent: null
     property url notFoundSource: ""
     property bool registerAsGlobalNavigator: true
+    property var _trackedViewIds: []
 
     readonly property bool canGoBack: stackView.depth > 1
     readonly property int depth: stackView.depth
@@ -282,6 +283,7 @@ Item {
     }
 
     Component.onDestruction: {
+        releaseTrackedViewBindings()
         if (registerAsGlobalNavigator)
             Navigator.unregisterRouter(root)
     }
@@ -483,9 +485,50 @@ Item {
     }
 
     function syncViewStateTracker() {
+        var entries = buildViewTrackingEntries()
+        syncViewModelBindings(entries)
+
+        if (typeof Navigator !== "undefined"
+                && Navigator
+                && Navigator.router
+                && Navigator.router !== root)
+            return
+
         if (typeof ViewStateTracker === "undefined" || !ViewStateTracker || !ViewStateTracker.syncStack)
             return
-        ViewStateTracker.syncStack(buildViewTrackingEntries())
+        ViewStateTracker.syncStack(entries)
+    }
+
+    function syncViewModelBindings(entries) {
+        if (typeof ViewModels === "undefined" || !ViewModels || !ViewModels.unbindView)
+            return
+
+        var nextIds = {}
+        for (var i = 0; i < entries.length; i++) {
+            var entry = entries[i]
+            if (!entry || !entry.viewId)
+                continue
+            nextIds[String(entry.viewId)] = true
+        }
+
+        for (var j = 0; j < _trackedViewIds.length; j++) {
+            var existingId = _trackedViewIds[j]
+            if (!nextIds[existingId])
+                ViewModels.unbindView(existingId)
+        }
+
+        _trackedViewIds = Object.keys(nextIds)
+    }
+
+    function releaseTrackedViewBindings() {
+        if (typeof ViewModels === "undefined" || !ViewModels || !ViewModels.unbindView) {
+            _trackedViewIds = []
+            return
+        }
+
+        for (var i = 0; i < _trackedViewIds.length; i++)
+            ViewModels.unbindView(_trackedViewIds[i])
+        _trackedViewIds = []
     }
 
     function updateComponentPathStack(component, params, mode) {

@@ -17,7 +17,9 @@ private slots:
     void component_navigation_keeps_path_stack_in_sync();
     void page_router_updates_view_state_tracker_from_stack();
     void global_navigator_allows_one_line_navigation();
+    void global_navigator_falls_back_to_previous_router();
     void route_mvvm_binding_and_write_ownership_are_applied();
+    void route_mvvm_ownership_is_released_when_view_is_popped();
 };
 
 void PageRouterTests::route_params_are_passed_to_target_component()
@@ -330,6 +332,72 @@ Item {
     QCOMPARE(root->property("depth").toInt(), 2);
 }
 
+void PageRouterTests::global_navigator_falls_back_to_previous_router()
+{
+    QQmlEngine engine;
+    engine.addImportPath(TestUtils::qmlImportBase());
+
+    const QByteArray qml = R"(
+import QtQuick
+import LVRS as UIF
+
+Item {
+    id: root
+    width: 320
+    height: 240
+
+    property string firstCurrentPath: firstRouter.currentPath
+    property string secondCurrentPath: secondRouter.currentPath
+
+    Component { id: firstRootPage; Item { } }
+    Component { id: firstPrimaryPage; Item { } }
+    Component { id: secondRootPage; Item { } }
+    Component { id: secondSecondaryPage; Item { } }
+
+    UIF.PageRouter {
+        id: firstRouter
+        anchors.fill: parent
+        initialPath: "/"
+        routes: [
+            { path: "/", component: firstRootPage },
+            { path: "/primary", component: firstPrimaryPage }
+        ]
+    }
+
+    UIF.PageRouter {
+        id: secondRouter
+        anchors.fill: parent
+        initialPath: "/"
+        routes: [
+            { path: "/", component: secondRootPage },
+            { path: "/secondary", component: secondSecondaryPage }
+        ]
+    }
+
+    function goSecondary() {
+        UIF.Navigator.go("/secondary")
+    }
+
+    function fallbackToFirstAndGoPrimary() {
+        UIF.Navigator.unregisterRouter(secondRouter)
+        UIF.Navigator.go("/primary")
+    }
+}
+)";
+
+    QScopedPointer<QObject> root(TestUtils::createFromQml(engine, qml));
+    QVERIFY(root);
+    QTRY_COMPARE(root->property("firstCurrentPath").toString(), QStringLiteral("/"));
+    QTRY_COMPARE(root->property("secondCurrentPath").toString(), QStringLiteral("/"));
+
+    QVERIFY(QMetaObject::invokeMethod(root.data(), "goSecondary"));
+    QTRY_COMPARE(root->property("secondCurrentPath").toString(), QStringLiteral("/secondary"));
+    QCOMPARE(root->property("firstCurrentPath").toString(), QStringLiteral("/"));
+
+    QVERIFY(QMetaObject::invokeMethod(root.data(), "fallbackToFirstAndGoPrimary"));
+    QTRY_COMPARE(root->property("firstCurrentPath").toString(), QStringLiteral("/primary"));
+}
+
 void PageRouterTests::route_mvvm_binding_and_write_ownership_are_applied()
 {
     QQmlEngine engine;
@@ -427,6 +495,83 @@ Item {
 
     QVERIFY(QMetaObject::invokeMethod(root.data(), "goReports"));
     QTRY_COMPARE(root->property("canWriteReports").toBool(), false);
+}
+
+void PageRouterTests::route_mvvm_ownership_is_released_when_view_is_popped()
+{
+    QQmlEngine engine;
+    engine.addImportPath(TestUtils::qmlImportBase());
+
+    const QByteArray qml = R"(
+import QtQuick
+import LVRS as UIF
+
+Item {
+    id: root
+    width: 320
+    height: 240
+
+    property string ownerOverview: {
+        UIF.ViewModels.owners
+        return UIF.ViewModels.ownerOf("OverviewVM")
+    }
+    property string ownerReports: {
+        UIF.ViewModels.owners
+        return UIF.ViewModels.ownerOf("ReportsVM")
+    }
+    property bool canWriteReports: {
+        UIF.ViewModels.bindings
+        UIF.ViewModels.owners
+        return UIF.ViewModels.canWrite("/reports")
+    }
+
+    QtObject { id: overviewVm; property string status: "Idle" }
+    QtObject { id: reportsVm; property string status: "Ready" }
+
+    Component { id: overviewPage; Item { } }
+    Component { id: reportsPage; Item { } }
+
+    UIF.PageRouter {
+        id: router
+        anchors.fill: parent
+        initialPath: "/overview"
+        routes: [
+            { path: "/overview", component: overviewPage, viewModelKey: "OverviewVM", writable: true },
+            { path: "/reports", component: reportsPage, viewModelKey: "ReportsVM", writable: true }
+        ]
+    }
+
+    function prepare() {
+        UIF.ViewModels.clear()
+        UIF.ViewModels.set("OverviewVM", overviewVm)
+        UIF.ViewModels.set("ReportsVM", reportsVm)
+        router.setRoot("/overview")
+    }
+
+    function goReports() {
+        router.go("/reports")
+    }
+
+    function goBack() {
+        router.back()
+    }
+}
+)";
+
+    QScopedPointer<QObject> root(TestUtils::createFromQml(engine, qml));
+    QVERIFY(root);
+    QVERIFY(QMetaObject::invokeMethod(root.data(), "prepare"));
+
+    QTRY_COMPARE(root->property("ownerOverview").toString(), QStringLiteral("/overview"));
+    QCOMPARE(root->property("ownerReports").toString(), QString());
+
+    QVERIFY(QMetaObject::invokeMethod(root.data(), "goReports"));
+    QTRY_COMPARE(root->property("ownerReports").toString(), QStringLiteral("/reports"));
+    QCOMPARE(root->property("canWriteReports").toBool(), true);
+
+    QVERIFY(QMetaObject::invokeMethod(root.data(), "goBack"));
+    QTRY_COMPARE(root->property("ownerReports").toString(), QString());
+    QCOMPARE(root->property("canWriteReports").toBool(), false);
 }
 
 QTEST_MAIN(PageRouterTests)

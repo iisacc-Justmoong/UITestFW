@@ -126,21 +126,38 @@ bool ViewModelRegistry::bindView(const QString &viewId, const QString &key, bool
         return false;
     }
 
+    const QString previousKey = m_viewBindings.value(normalizedView);
+    const QString currentOwner = m_owners.value(normalizedKey);
+
+    if (writable && !currentOwner.isEmpty() && currentOwner != normalizedView) {
+        setLastError(QStringLiteral("ViewModel is already owned by another view"));
+        return false;
+    }
+
     bool ownershipChangedFlag = false;
-    if (writable) {
-        const QString owner = m_owners.value(normalizedKey);
-        if (!owner.isEmpty() && owner != normalizedView) {
-            setLastError(QStringLiteral("ViewModel is already owned by another view"));
-            return false;
+    if (!previousKey.isEmpty() && previousKey != normalizedKey) {
+        auto previousOwnerIt = m_owners.find(previousKey);
+        if (previousOwnerIt != m_owners.end() && previousOwnerIt.value() == normalizedView) {
+            m_owners.erase(previousOwnerIt);
+            ownershipChangedFlag = true;
         }
-        if (owner != normalizedView) {
+    }
+
+    if (writable) {
+        if (currentOwner != normalizedView) {
             m_owners.insert(normalizedKey, normalizedView);
+            ownershipChangedFlag = true;
+        }
+    } else {
+        auto ownerIt = m_owners.find(normalizedKey);
+        if (ownerIt != m_owners.end() && ownerIt.value() == normalizedView) {
+            m_owners.erase(ownerIt);
             ownershipChangedFlag = true;
         }
     }
 
     bool bindingsChanged = false;
-    if (m_viewBindings.value(normalizedView) != normalizedKey) {
+    if (previousKey != normalizedKey) {
         m_viewBindings.insert(normalizedView, normalizedKey);
         bindingsChanged = true;
     }

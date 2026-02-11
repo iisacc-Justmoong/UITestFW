@@ -53,6 +53,7 @@ private slots:
     void view_state_tracker_syncs_stack_and_status();
     void view_state_tracker_disable_override_changes_active_target();
     void viewmodels_registry_binding_ownership_and_write_permissions();
+    void viewmodels_registry_rebinding_clears_stale_ownership();
     void viewmodels_registry_tracks_keys_and_ownership();
     void viewmodels_registry_signal_and_prune_contract();
 };
@@ -257,6 +258,31 @@ void NavigationStateTests::viewmodels_registry_binding_ownership_and_write_permi
 
     registry.remove(QStringLiteral("Example"));
     QCOMPARE(registry.keyForView(QStringLiteral("OverviewView")), QString());
+}
+
+void NavigationStateTests::viewmodels_registry_rebinding_clears_stale_ownership()
+{
+    ViewModelRegistry registry;
+    auto *modelA = new MutableStatusModel;
+    auto *modelB = new MutableStatusModel;
+
+    registry.set(QStringLiteral("ModelA"), modelA);
+    registry.set(QStringLiteral("ModelB"), modelB);
+
+    QVERIFY(registry.bindView(QStringLiteral("EditorView"), QStringLiteral("ModelA"), true));
+    QCOMPARE(registry.ownerOf(QStringLiteral("ModelA")), QStringLiteral("EditorView"));
+    QCOMPARE(registry.ownerOf(QStringLiteral("ModelB")), QString());
+    QVERIFY(registry.canWrite(QStringLiteral("EditorView"), QStringLiteral("ModelA")));
+
+    QVERIFY(registry.bindView(QStringLiteral("EditorView"), QStringLiteral("ModelB"), true));
+    QCOMPARE(registry.ownerOf(QStringLiteral("ModelA")), QString());
+    QCOMPARE(registry.ownerOf(QStringLiteral("ModelB")), QStringLiteral("EditorView"));
+    QVERIFY(!registry.canWrite(QStringLiteral("EditorView"), QStringLiteral("ModelA")));
+    QVERIFY(registry.canWrite(QStringLiteral("EditorView"), QStringLiteral("ModelB")));
+
+    QVERIFY(registry.bindView(QStringLiteral("EditorView"), QStringLiteral("ModelB"), false));
+    QCOMPARE(registry.ownerOf(QStringLiteral("ModelB")), QString());
+    QVERIFY(!registry.canWrite(QStringLiteral("EditorView"), QStringLiteral("ModelB")));
 }
 
 void NavigationStateTests::viewmodels_registry_tracks_keys_and_ownership()

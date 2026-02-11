@@ -5,6 +5,7 @@ QtObject {
     id: root
 
     property var router: null
+    property var routerStack: []
 
     readonly property bool hasRouter: router !== null
     readonly property string currentPath:
@@ -12,20 +13,80 @@ QtObject {
     readonly property int depth:
         hasRouter && router.depth !== undefined ? router.depth : 0
 
+    function childIndexInParent(targetRouter) {
+        if (!targetRouter || !targetRouter.parent || targetRouter.parent.children === undefined)
+            return -1
+
+        var siblings = targetRouter.parent.children
+        var count = siblings.length !== undefined ? siblings.length : 0
+        for (var i = 0; i < count; i++) {
+            if (siblings[i] === targetRouter)
+                return i
+        }
+        return -1
+    }
+
+    function insertRouterBySiblingOrder(next, targetRouter) {
+        var targetIndex = childIndexInParent(targetRouter)
+        if (targetIndex < 0)
+            return false
+
+        for (var i = 0; i < next.length; i++) {
+            var candidate = next[i]
+            if (!candidate || candidate.parent !== targetRouter.parent)
+                continue
+            var candidateIndex = childIndexInParent(candidate)
+            if (candidateIndex < 0)
+                continue
+            if (candidateIndex > targetIndex) {
+                next.splice(i, 0, targetRouter)
+                return true
+            }
+        }
+        return false
+    }
+
+    function updateActiveRouterFromStack() {
+        var activeRouter = routerStack.length > 0 ? routerStack[routerStack.length - 1] : null
+        if (router === activeRouter)
+            return
+        router = activeRouter
+        if (router && router.syncViewStateTracker !== undefined)
+            router.syncViewStateTracker()
+    }
+
     function registerRouter(targetRouter) {
         if (!targetRouter)
             return false
-        if (router === targetRouter)
-            return true
-        router = targetRouter
+
+        var next = []
+        for (var i = 0; i < routerStack.length; i++) {
+            var candidate = routerStack[i]
+            if (candidate && candidate !== targetRouter)
+                next.push(candidate)
+        }
+        if (!insertRouterBySiblingOrder(next, targetRouter))
+            next.push(targetRouter)
+        routerStack = next
+        updateActiveRouterFromStack()
         return true
     }
 
     function unregisterRouter(targetRouter) {
-        if (!router)
+        if (!targetRouter) {
+            routerStack = []
+            updateActiveRouterFromStack()
             return
-        if (!targetRouter || router === targetRouter)
-            router = null
+        }
+
+        var next = []
+        for (var i = 0; i < routerStack.length; i++) {
+            var candidate = routerStack[i]
+            if (candidate && candidate !== targetRouter)
+                next.push(candidate)
+        }
+        routerStack = next
+        updateActiveRouterFromStack()
     }
 
     function canNavigate() {

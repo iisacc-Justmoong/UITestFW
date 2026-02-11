@@ -61,9 +61,67 @@ Item {
         return true
     }
 
+    function normalizedPath(value) {
+        var token = String(value || "").trim()
+        if (!token)
+            return ""
+        if (!token.startsWith("/"))
+            token = "/" + token
+        if (token.length > 1 && token.endsWith("/"))
+            token = token.slice(0, -1)
+        return token
+    }
+
+    function itemAt(index) {
+        if (!navModel)
+            return null
+        if (navModel.length !== undefined)
+            return navModel[index]
+        if (navModel.get !== undefined)
+            return navModel.get(index)
+        return null
+    }
+
+    function syncNavIndexToCurrentPath() {
+        var targetRouter = resolveRouter()
+        if (!targetRouter || targetRouter.currentPath === undefined)
+            return
+
+        var current = normalizedPath(targetRouter.currentPath)
+        if (!current)
+            return
+
+        var count = navModel && navModel.length !== undefined
+            ? navModel.length
+            : (navModel && navModel.count !== undefined ? navModel.count : 0)
+        for (var i = 0; i < count; i++) {
+            var candidate = normalizedPath(routeForItem(itemAt(i)))
+            if (!candidate)
+                continue
+            if (current === candidate || (candidate !== "/" && current.startsWith(candidate + "/"))) {
+                if (navIndex !== i)
+                    navIndex = i
+                return
+            }
+        }
+    }
+
     onWideChanged: {
         if (wide && navDrawer.opened)
             navDrawer.close()
+    }
+    onNavModelChanged: syncNavIndexToCurrentPath()
+    onPageRouterChanged: Qt.callLater(syncNavIndexToCurrentPath)
+
+    Connections {
+        target: root.resolveRouter()
+        ignoreUnknownSignals: true
+        function onCurrentPathChanged() {
+            root.syncNavIndexToCurrentPath()
+        }
+        function onNavigated(path, params) {
+            root.syncNavIndexToCurrentPath()
+        }
     }
 
     Component {
@@ -372,7 +430,10 @@ Item {
         }
     }
     QtObject {
-        Component.onCompleted: Debug.log("AppScaffold", "created")
+        Component.onCompleted: {
+            Debug.log("AppScaffold", "created")
+            root.syncNavIndexToCurrentPath()
+        }
     }
 
 }

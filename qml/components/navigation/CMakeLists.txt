@@ -2,8 +2,6 @@ set(LVRS_NAVIGATION_QML_FILES
     qml/components/navigation/Navigator.qml
     qml/components/navigation/PageRouter.qml
     qml/components/navigation/Link.qml
-    qml/components/navigation/LinkWrapper.qml
-    qml/components/navigation/NavigationLink.qml
     qml/components/navigation/ToolbarButton.qml
     qml/components/navigation/HierarchyToolbar.qml
     qml/components/navigation/HierarchyItem.qml

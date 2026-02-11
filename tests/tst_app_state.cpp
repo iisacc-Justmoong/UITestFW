@@ -15,6 +15,7 @@ private slots:
     void route_tracking_updates_models();
     void snapshot_sync_bridges_backend_state();
     void resilient_normalization_and_index_clamping();
+    void definitions_drive_route_matching();
 };
 
 void AppStateTests::defaults_and_progress_clamping()
@@ -50,7 +51,7 @@ void AppStateTests::route_tracking_updates_models()
 
     state.recordNavigation(QStringLiteral("/reports"));
     QCOMPARE(state.currentRoute(), QStringLiteral("/reports"));
-    QCOMPARE(state.scaffoldNavIndex(), 1);
+    QCOMPARE(state.scaffoldNavIndex(), -1);
     QCOMPARE(state.pageHistory().size(), 1);
     QCOMPARE(state.pageHistory().last(), QStringLiteral("/reports"));
 
@@ -109,7 +110,7 @@ void AppStateTests::resilient_normalization_and_index_clamping()
     state.setScaffoldNavIndex(99);
     QCOMPARE(state.scaffoldNavIndex(), 3);
     state.setScaffoldNavIndex(-9);
-    QCOMPARE(state.scaffoldNavIndex(), 0);
+    QCOMPARE(state.scaffoldNavIndex(), -1);
 
     state.syncPageHistory(QStringList {
         QStringLiteral("/overview"),
@@ -119,6 +120,36 @@ void AppStateTests::resilient_normalization_and_index_clamping()
     const QVariantList scaffold = state.scaffoldNavModel();
     QVERIFY(scaffold.size() >= 2);
     QCOMPARE(scaffold.at(1).toMap().value(QStringLiteral("badge")).toString(), QStringLiteral("2"));
+}
+
+void AppStateTests::definitions_drive_route_matching()
+{
+    AppState state;
+
+    state.setScaffoldDefinitions(QVariantList {
+        QVariantMap {
+            {QStringLiteral("label"), QStringLiteral("Overview")},
+            {QStringLiteral("path"), QStringLiteral("/overview")}
+        },
+        QVariantMap {
+            {QStringLiteral("label"), QStringLiteral("Reports")},
+            {QStringLiteral("path"), QStringLiteral("/reports")}
+        }
+    });
+
+    const QVariantList scaffoldModel = state.scaffoldNavModel();
+    QCOMPARE(scaffoldModel.size(), 2);
+    QCOMPARE(scaffoldModel.at(1).toMap().value(QStringLiteral("path")).toString(), QStringLiteral("/reports"));
+
+    state.recordNavigation(QStringLiteral("/reports"));
+    QCOMPARE(state.scaffoldNavIndex(), 1);
+
+    state.recordNavigation(QStringLiteral("not-found: reports"));
+    QCOMPARE(state.currentRoute(), QStringLiteral("not-found: /reports"));
+    QCOMPARE(state.scaffoldNavIndex(), -1);
+
+    const QVariantList refreshedScaffold = state.scaffoldNavModel();
+    QCOMPARE(refreshedScaffold.at(1).toMap().value(QStringLiteral("badge")).toString(), QStringLiteral("1"));
 }
 
 QTEST_MAIN(AppStateTests)

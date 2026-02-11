@@ -8,7 +8,6 @@
 
 namespace {
 constexpr qreal kEpsilon = 0.000001;
-constexpr int kScaffoldNavCount = 4;
 
 bool qrealEquals(qreal left, qreal right)
 {
@@ -50,12 +49,27 @@ QVariantMap createListEntry(const QString &label,
     item.insert(QStringLiteral("showChevron"), showChevron);
     return item;
 }
+
+QString normalizedPathToken(QString value)
+{
+    value = value.trimmed();
+    if (value.isEmpty())
+        return QString();
+    if (!value.startsWith(QLatin1Char('/')))
+        value.prepend(QLatin1Char('/'));
+    if (value.size() > 1 && value.endsWith(QLatin1Char('/')))
+        value.chop(1);
+    return value;
+}
 }
 
 AppState::AppState(QObject *parent)
     : QObject(parent)
     , m_currentRoute(QStringLiteral(LVRS_ROUTE_OVERVIEW))
 {
+    m_navDefinitions = defaultNavDefinitions();
+    m_scaffoldDefinitions = defaultScaffoldDefinitions();
+
     m_demoContextMenuItems = {
         QVariantMap {
             {QStringLiteral("id"), QStringLiteral("new")},
@@ -79,6 +93,7 @@ AppState::AppState(QObject *parent)
     };
 
     rebuildAllModels();
+    updateScaffoldIndexFromRoute();
 }
 
 QVariantList AppState::navItems() const
@@ -99,6 +114,37 @@ QVariantList AppState::demoListItems() const
 QVariantList AppState::demoContextMenuItems() const
 {
     return m_demoContextMenuItems;
+}
+
+QVariantList AppState::navDefinitions() const
+{
+    return m_navDefinitions;
+}
+
+void AppState::setNavDefinitions(const QVariantList &definitions)
+{
+    const QVariantList normalized = normalizedDefinitions(definitions, defaultNavDefinitions());
+    if (m_navDefinitions == normalized)
+        return;
+    m_navDefinitions = normalized;
+    rebuildNavItems();
+    emit navDefinitionsChanged();
+}
+
+QVariantList AppState::scaffoldDefinitions() const
+{
+    return m_scaffoldDefinitions;
+}
+
+void AppState::setScaffoldDefinitions(const QVariantList &definitions)
+{
+    const QVariantList normalized = normalizedDefinitions(definitions, defaultScaffoldDefinitions());
+    if (m_scaffoldDefinitions == normalized)
+        return;
+    m_scaffoldDefinitions = normalized;
+    rebuildScaffoldNavModel();
+    updateScaffoldIndexFromRoute();
+    emit scaffoldDefinitionsChanged();
 }
 
 bool AppState::alertOpen() const
@@ -182,7 +228,8 @@ int AppState::scaffoldNavIndex() const
 
 void AppState::setScaffoldNavIndex(int value)
 {
-    const int next = qBound(0, value, kScaffoldNavCount - 1);
+    const int maxIndex = m_scaffoldNavModel.isEmpty() ? -1 : m_scaffoldNavModel.size() - 1;
+    const int next = maxIndex < 0 ? -1 : qBound(-1, value, maxIndex);
     if (m_scaffoldNavIndex == next)
         return;
     m_scaffoldNavIndex = next;
@@ -222,6 +269,7 @@ void AppState::bootstrap()
         m_currentRoute = QStringLiteral(LVRS_ROUTE_OVERVIEW);
     setProgressCurrent(m_progressCurrent);
     rebuildAllModels();
+    updateScaffoldIndexFromRoute();
 }
 
 void AppState::nudgeProgress(qreal delta)
@@ -238,8 +286,11 @@ void AppState::recordNavigation(const QString &path)
     m_pageHistory.append(normalized);
     emit pageHistoryChanged();
 
-    const int count = m_routeVisitCounts.value(normalized).toInt() + 1;
-    m_routeVisitCounts.insert(normalized, count);
+    if (!isNotFoundRoute(normalized)) {
+        const QString canonical = stripNotFoundPrefix(normalized);
+        const int count = m_routeVisitCounts.value(canonical).toInt() + 1;
+        m_routeVisitCounts.insert(canonical, count);
+    }
     setCurrentRoute(normalized);
 }
 
@@ -289,20 +340,11 @@ void AppState::syncPageHistory(const QStringList &history)
     rebuildAllModels();
 }
 
-QString AppState::normalizeRoutePath(const QString &rawPath)
+QString AppState::normalizeBasicPath(const QString &rawPath)
 {
     QString value = rawPath.trimmed();
     if (value.isEmpty())
         return QString();
-
-    bool notFound = false;
-    if (value.startsWith(QStringLiteral("not-found:"), Qt::CaseInsensitive)) {
-        notFound = true;
-        value = value.mid(QStringLiteral("not-found:").size()).trimmed();
-    }
-
-    if (value.isEmpty())
-        value = QStringLiteral("/");
 
     if (value.contains(QStringLiteral("://"))) {
         const QUrl url(value);
@@ -322,30 +364,69 @@ QString AppState::normalizeRoutePath(const QString &rawPath)
     if (queryIndex >= 0)
         value = value.left(queryIndex);
 
+    if (value.isEmpty())
+        value = QStringLiteral("/");
     if (!value.startsWith(QLatin1Char('/')))
         value.prepend(QLatin1Char('/'));
     value.replace(QRegularExpression(QStringLiteral("/+")), QStringLiteral("/"));
     if (value.size() > 1 && value.endsWith(QLatin1Char('/')))
         value.chop(1);
+    return value;
+}
+
+QString AppState::normalizeRoutePath(const QString &rawPath) const
+{
+    QString value = rawPath.trimmed();
+    if (value.isEmpty())
+        return QString();
+
+    bool notFound = false;
+    if (value.startsWith(QStringLiteral("not-found:"), Qt::CaseInsensitive)) {
+        notFound = true;
+        value = value.mid(QStringLiteral("not-found:").size()).trimmed();
+    }
+
+    value = normalizeBasicPath(value);
+    if (value.isEmpty())
+        value = QStringLiteral("/");
+
+    QString rootPath = QStringLiteral(LVRS_ROUTE_OVERVIEW);
+    if (!m_scaffoldDefinitions.isEmpty()) {
+        const QString candidate = normalizedPathToken(m_scaffoldDefinitions.first().toMap().value(QStringLiteral("path")).toString());
+        if (!candidate.isEmpty())
+            rootPath = candidate;
+    }
 
     const QString lower = value.toLower();
-    if (lower == QStringLiteral("/") || lower == QStringLiteral("/home"))
-        value = QStringLiteral(LVRS_ROUTE_OVERVIEW);
-    else if (lower == QStringLiteral("/report"))
-        value = QStringLiteral(LVRS_ROUTE_REPORTS);
-    else if (lower == QStringLiteral("/run"))
-        value = QStringLiteral(LVRS_ROUTE_RUNS);
-    else if (lower == QStringLiteral("/device"))
-        value = QStringLiteral(LVRS_ROUTE_DEVICES);
-    else if (lower == QStringLiteral("/setting"))
-        value = QStringLiteral(LVRS_ROUTE_SETTINGS);
+    if (lower == QStringLiteral("/") || lower == QStringLiteral("/home")) {
+        value = rootPath;
+    } else {
+        const QVariantList mergedDefinitions = m_scaffoldDefinitions + m_navDefinitions;
+        for (const QVariant &entry : mergedDefinitions) {
+            const QString canonical = normalizedPathToken(entry.toMap().value(QStringLiteral("path")).toString());
+            if (canonical.isEmpty())
+                continue;
+            const QString canonicalLower = canonical.toLower();
+            if (lower == canonicalLower) {
+                value = canonical;
+                break;
+            }
+            if (canonicalLower.endsWith(QLatin1Char('s'))) {
+                const QString singular = canonicalLower.left(canonicalLower.size() - 1);
+                if (!singular.isEmpty() && lower == singular) {
+                    value = canonical;
+                    break;
+                }
+            }
+        }
+    }
 
     if (notFound)
         return QStringLiteral("not-found: ") + value;
     return value;
 }
 
-bool AppState::routeMatches(const QString &candidatePath, const QString &currentPath)
+bool AppState::routeMatches(const QString &candidatePath, const QString &currentPath) const
 {
     const QString candidate = stripNotFoundPrefix(normalizeRoutePath(candidatePath));
     const QString current = stripNotFoundPrefix(normalizeRoutePath(currentPath));
@@ -374,6 +455,94 @@ QString AppState::stripNotFoundPrefix(const QString &path)
     return payload;
 }
 
+QVariantList AppState::normalizedDefinitions(const QVariantList &definitions, const QVariantList &fallback) const
+{
+    QVariantList normalized;
+    normalized.reserve(definitions.size());
+
+    for (const QVariant &entry : definitions) {
+        const QVariantMap map = entry.toMap();
+        QString path = normalizedPathToken(map.value(QStringLiteral("path")).toString());
+        if (path.isEmpty())
+            continue;
+
+        QString label = map.value(QStringLiteral("label")).toString().trimmed();
+        if (label.isEmpty())
+            label = path;
+
+        QVariantMap item;
+        item.insert(QStringLiteral("path"), path);
+        item.insert(QStringLiteral("label"), label);
+        item.insert(QStringLiteral("icon"), map.value(QStringLiteral("icon")).toString());
+        item.insert(QStringLiteral("badge"), map.value(QStringLiteral("badge")).toString().trimmed());
+        normalized.append(item);
+    }
+
+    if (!normalized.isEmpty())
+        return normalized;
+    return fallback;
+}
+
+QVariantList AppState::defaultNavDefinitions() const
+{
+    return {
+        QVariantMap {
+            {QStringLiteral("label"), QStringLiteral("Overview")},
+            {QStringLiteral("icon"), QStringLiteral("◉")},
+            {QStringLiteral("badge"), QStringLiteral(LVRS_BADGE_OVERVIEW)},
+            {QStringLiteral("path"), QStringLiteral(LVRS_ROUTE_OVERVIEW)}
+        },
+        QVariantMap {
+            {QStringLiteral("label"), QStringLiteral("Controls")},
+            {QStringLiteral("icon"), QStringLiteral("▣")},
+            {QStringLiteral("badge"), QStringLiteral(LVRS_BADGE_CONTROLS)},
+            {QStringLiteral("path"), QStringLiteral(LVRS_ROUTE_RUNS)}
+        },
+        QVariantMap {
+            {QStringLiteral("label"), QStringLiteral("Navigation")},
+            {QStringLiteral("icon"), QStringLiteral("⇄")},
+            {QStringLiteral("badge"), QStringLiteral(LVRS_BADGE_NAVIGATION)},
+            {QStringLiteral("path"), QStringLiteral(LVRS_ROUTE_REPORTS)}
+        },
+        QVariantMap {
+            {QStringLiteral("label"), QStringLiteral("Layout")},
+            {QStringLiteral("icon"), QStringLiteral("◫")},
+            {QStringLiteral("badge"), QStringLiteral(LVRS_BADGE_LAYOUT)},
+            {QStringLiteral("path"), QStringLiteral(LVRS_ROUTE_SETTINGS)}
+        }
+    };
+}
+
+QVariantList AppState::defaultScaffoldDefinitions() const
+{
+    return {
+        QVariantMap {
+            {QStringLiteral("label"), QStringLiteral("Overview")},
+            {QStringLiteral("icon"), QStringLiteral("◉")},
+            {QStringLiteral("badge"), QStringLiteral("4")},
+            {QStringLiteral("path"), QStringLiteral(LVRS_ROUTE_OVERVIEW)}
+        },
+        QVariantMap {
+            {QStringLiteral("label"), QStringLiteral("Runs")},
+            {QStringLiteral("icon"), QStringLiteral("▣")},
+            {QStringLiteral("badge"), QStringLiteral(LVRS_BADGE_RUNS)},
+            {QStringLiteral("path"), QStringLiteral(LVRS_ROUTE_RUNS)}
+        },
+        QVariantMap {
+            {QStringLiteral("label"), QStringLiteral("Devices")},
+            {QStringLiteral("icon"), QStringLiteral("⌘")},
+            {QStringLiteral("badge"), QStringLiteral(LVRS_BADGE_DEVICES)},
+            {QStringLiteral("path"), QStringLiteral(LVRS_ROUTE_DEVICES)}
+        },
+        QVariantMap {
+            {QStringLiteral("label"), QStringLiteral("Settings")},
+            {QStringLiteral("icon"), QStringLiteral("⚙")},
+            {QStringLiteral("badge"), QStringLiteral(LVRS_BADGE_SETTINGS)},
+            {QStringLiteral("path"), QStringLiteral(LVRS_ROUTE_SETTINGS)}
+        }
+    };
+}
+
 qreal AppState::clampedProgress(qreal value) const
 {
     if (!qIsFinite(value))
@@ -385,18 +554,12 @@ qreal AppState::clampedProgress(qreal value) const
 
 QString AppState::routeForScaffoldIndex(int index) const
 {
-    switch (qBound(0, index, kScaffoldNavCount - 1)) {
-    case 0:
-        return QStringLiteral(LVRS_ROUTE_OVERVIEW);
-    case 1:
-        return QStringLiteral(LVRS_ROUTE_RUNS);
-    case 2:
-        return QStringLiteral(LVRS_ROUTE_DEVICES);
-    case 3:
-        return QStringLiteral(LVRS_ROUTE_SETTINGS);
-    default:
+    if (m_scaffoldNavModel.isEmpty())
         return QString();
-    }
+    if (index < 0 || index >= m_scaffoldNavModel.size())
+        return QString();
+
+    return normalizedPathToken(m_scaffoldNavModel.at(index).toMap().value(QStringLiteral("path")).toString());
 }
 
 int AppState::routeVisitCount(const QString &path) const
@@ -424,55 +587,45 @@ QString AppState::badgeForRoute(const QString &path, const QString &fallbackBadg
 
 void AppState::rebuildNavItems()
 {
-    const QVariantList next = {
-        createNavEntry(QStringLiteral("Overview"),
-                       QStringLiteral("◉"),
-                       badgeForRoute(QStringLiteral(LVRS_ROUTE_OVERVIEW), QStringLiteral(LVRS_BADGE_OVERVIEW)),
-                       QStringLiteral(LVRS_ROUTE_OVERVIEW),
-                       routeMatches(QStringLiteral(LVRS_ROUTE_OVERVIEW), m_currentRoute)),
-        createNavEntry(QStringLiteral("Controls"),
-                       QStringLiteral("▣"),
-                       QStringLiteral(LVRS_BADGE_CONTROLS),
-                       QStringLiteral(LVRS_ROUTE_RUNS),
-                       routeMatches(QStringLiteral(LVRS_ROUTE_RUNS), m_currentRoute)),
-        createNavEntry(QStringLiteral("Navigation"),
-                       QStringLiteral("⇄"),
-                       QStringLiteral(LVRS_BADGE_NAVIGATION),
-                       QStringLiteral(LVRS_ROUTE_REPORTS),
-                       routeMatches(QStringLiteral(LVRS_ROUTE_REPORTS), m_currentRoute)),
-        createNavEntry(QStringLiteral("Layout"),
-                       QStringLiteral("◫"),
-                       QStringLiteral(LVRS_BADGE_LAYOUT),
-                       QStringLiteral(LVRS_ROUTE_SETTINGS),
-                       routeMatches(QStringLiteral(LVRS_ROUTE_SETTINGS), m_currentRoute))
-    };
+    QVariantList next;
+    next.reserve(m_navDefinitions.size());
+
+    for (const QVariant &entry : m_navDefinitions) {
+        const QVariantMap definition = entry.toMap();
+        const QString path = normalizedPathToken(definition.value(QStringLiteral("path")).toString());
+        if (path.isEmpty())
+            continue;
+        const QString fallbackBadge = definition.value(QStringLiteral("badge")).toString();
+        next.append(createNavEntry(
+            definition.value(QStringLiteral("label")).toString(),
+            definition.value(QStringLiteral("icon")).toString(),
+            badgeForRoute(path, fallbackBadge),
+            path,
+            routeMatches(path, m_currentRoute)));
+    }
+
     LVRS_UPDATE_IF_CHANGED(m_navItems, next, navItemsChanged);
 }
 
 void AppState::rebuildScaffoldNavModel()
 {
-    const QVariantList next = {
-        createNavEntry(QStringLiteral("Overview"),
-                       QStringLiteral("◉"),
-                       badgeForRoute(QStringLiteral(LVRS_ROUTE_OVERVIEW), QStringLiteral("4")),
-                       QStringLiteral(LVRS_ROUTE_OVERVIEW),
-                       m_scaffoldNavIndex == 0),
-        createNavEntry(QStringLiteral("Runs"),
-                       QStringLiteral("▣"),
-                       badgeForRoute(QStringLiteral(LVRS_ROUTE_RUNS), QStringLiteral(LVRS_BADGE_RUNS)),
-                       QStringLiteral(LVRS_ROUTE_RUNS),
-                       m_scaffoldNavIndex == 1),
-        createNavEntry(QStringLiteral("Devices"),
-                       QStringLiteral("⌘"),
-                       badgeForRoute(QStringLiteral(LVRS_ROUTE_DEVICES), QStringLiteral(LVRS_BADGE_DEVICES)),
-                       QStringLiteral(LVRS_ROUTE_DEVICES),
-                       m_scaffoldNavIndex == 2),
-        createNavEntry(QStringLiteral("Settings"),
-                       QStringLiteral("⚙"),
-                       badgeForRoute(QStringLiteral(LVRS_ROUTE_SETTINGS), QStringLiteral(LVRS_BADGE_SETTINGS)),
-                       QStringLiteral(LVRS_ROUTE_SETTINGS),
-                       m_scaffoldNavIndex == 3)
-    };
+    QVariantList next;
+    next.reserve(m_scaffoldDefinitions.size());
+
+    for (int i = 0; i < m_scaffoldDefinitions.size(); ++i) {
+        const QVariantMap definition = m_scaffoldDefinitions.at(i).toMap();
+        const QString path = normalizedPathToken(definition.value(QStringLiteral("path")).toString());
+        if (path.isEmpty())
+            continue;
+        const QString fallbackBadge = definition.value(QStringLiteral("badge")).toString();
+        next.append(createNavEntry(
+            definition.value(QStringLiteral("label")).toString(),
+            definition.value(QStringLiteral("icon")).toString(),
+            badgeForRoute(path, fallbackBadge),
+            path,
+            m_scaffoldNavIndex == i));
+    }
+
     LVRS_UPDATE_IF_CHANGED(m_scaffoldNavModel, next, scaffoldNavModelChanged);
 }
 
@@ -506,6 +659,8 @@ void AppState::recalculateRouteCountsFromHistory()
 {
     QVariantMap counts;
     for (const QString &path : m_pageHistory) {
+        if (isNotFoundRoute(path))
+            continue;
         const QString normalized = stripNotFoundPrefix(normalizeRoutePath(path));
         if (normalized.isEmpty())
             continue;
@@ -516,20 +671,23 @@ void AppState::recalculateRouteCountsFromHistory()
 
 void AppState::updateScaffoldIndexFromRoute()
 {
-    if (isNotFoundRoute(m_currentRoute))
-        return;
+    int next = -1;
+    if (!isNotFoundRoute(m_currentRoute)) {
+        const QString route = stripNotFoundPrefix(m_currentRoute);
+        for (int i = 0; i < m_scaffoldNavModel.size(); ++i) {
+            const QString candidate = normalizedPathToken(m_scaffoldNavModel.at(i).toMap().value(QStringLiteral("path")).toString());
+            if (candidate.isEmpty())
+                continue;
+            if (routeMatches(candidate, route)) {
+                next = i;
+                break;
+            }
+        }
+    }
 
-    const QString route = stripNotFoundPrefix(m_currentRoute);
-    int next = 0;
-    if (routeMatches(QStringLiteral(LVRS_ROUTE_SETTINGS), route))
-        next = 3;
-    else if (routeMatches(QStringLiteral(LVRS_ROUTE_DEVICES), route))
-        next = 2;
-    else if (routeMatches(QStringLiteral(LVRS_ROUTE_RUNS), route)
-             || routeMatches(QStringLiteral(LVRS_ROUTE_REPORTS), route))
-        next = 1;
     if (m_scaffoldNavIndex != next) {
         m_scaffoldNavIndex = next;
+        rebuildScaffoldNavModel();
         emit scaffoldNavIndexChanged();
     }
 }

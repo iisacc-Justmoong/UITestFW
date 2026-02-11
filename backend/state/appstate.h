@@ -16,6 +16,8 @@ class AppState : public QObject
     Q_PROPERTY(QVariantList scaffoldNavModel READ scaffoldNavModel NOTIFY scaffoldNavModelChanged)
     Q_PROPERTY(QVariantList demoListItems READ demoListItems NOTIFY demoListItemsChanged)
     Q_PROPERTY(QVariantList demoContextMenuItems READ demoContextMenuItems NOTIFY demoContextMenuItemsChanged)
+    Q_PROPERTY(QVariantList navDefinitions READ navDefinitions WRITE setNavDefinitions NOTIFY navDefinitionsChanged)
+    Q_PROPERTY(QVariantList scaffoldDefinitions READ scaffoldDefinitions WRITE setScaffoldDefinitions NOTIFY scaffoldDefinitionsChanged)
 
     Q_PROPERTY(bool alertOpen READ alertOpen WRITE setAlertOpen NOTIFY alertOpenChanged)
     Q_PROPERTY(qreal progressStart READ progressStart WRITE setProgressStart NOTIFY progressChanged)
@@ -36,6 +38,10 @@ public:
     QVariantList scaffoldNavModel() const;
     QVariantList demoListItems() const;
     QVariantList demoContextMenuItems() const;
+    QVariantList navDefinitions() const;
+    void setNavDefinitions(const QVariantList &definitions);
+    QVariantList scaffoldDefinitions() const;
+    void setScaffoldDefinitions(const QVariantList &definitions);
 
     bool alertOpen() const;
     void setAlertOpen(bool value);
@@ -75,6 +81,8 @@ signals:
     void scaffoldNavModelChanged();
     void demoListItemsChanged();
     void demoContextMenuItemsChanged();
+    void navDefinitionsChanged();
+    void scaffoldDefinitionsChanged();
     void alertOpenChanged();
     void progressChanged();
     void currentRouteChanged();
@@ -85,10 +93,14 @@ signals:
     void pageHistoryChanged();
 
 private:
-    static QString normalizeRoutePath(const QString &rawPath);
-    static bool routeMatches(const QString &candidatePath, const QString &currentPath);
+    static QString normalizeBasicPath(const QString &rawPath);
+    QString normalizeRoutePath(const QString &rawPath) const;
+    bool routeMatches(const QString &candidatePath, const QString &currentPath) const;
     static bool isNotFoundRoute(const QString &path);
     static QString stripNotFoundPrefix(const QString &path);
+    QVariantList normalizedDefinitions(const QVariantList &definitions, const QVariantList &fallback) const;
+    QVariantList defaultNavDefinitions() const;
+    QVariantList defaultScaffoldDefinitions() const;
     qreal clampedProgress(qreal value) const;
     QString routeForScaffoldIndex(int index) const;
     int routeVisitCount(const QString &path) const;
@@ -105,6 +117,8 @@ private:
     QVariantList m_scaffoldNavModel;
     QVariantList m_demoListItems;
     QVariantList m_demoContextMenuItems;
+    QVariantList m_navDefinitions;
+    QVariantList m_scaffoldDefinitions;
 
     bool m_alertOpen = false;
     qreal m_progressStart = 0.0;

@@ -88,22 +88,28 @@ Item {
             return
 
         var current = normalizedPath(targetRouter.currentPath)
-        if (!current)
+        if (!current) {
+            if (navIndex !== -1)
+                navIndex = -1
             return
+        }
 
         var count = navModel && navModel.length !== undefined
             ? navModel.length
             : (navModel && navModel.count !== undefined ? navModel.count : 0)
+        var matchedIndex = -1
         for (var i = 0; i < count; i++) {
             var candidate = normalizedPath(routeForItem(itemAt(i)))
             if (!candidate)
                 continue
             if (current === candidate || (candidate !== "/" && current.startsWith(candidate + "/"))) {
-                if (navIndex !== i)
-                    navIndex = i
-                return
+                matchedIndex = i
+                break
             }
         }
+
+        if (navIndex !== matchedIndex)
+            navIndex = matchedIndex
     }
 
     onWideChanged: {

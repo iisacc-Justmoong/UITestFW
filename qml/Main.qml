@@ -41,8 +41,17 @@ UIF.ApplicationWindow {
         UIF.SvgManager.minimumScale >= 1.0
         && UIF.SvgManager.maximumScale >= UIF.SvgManager.minimumScale
     readonly property bool metricsPageCompliant:
-        UIF.AppState.pageHistory.length >= 0
-        && (viewStateSnapshot.loadedViews === undefined || viewStateSnapshot.loadedViews.length >= 0)
+        UIF.AppState.pageHistory.length > 0
+        && viewStateSnapshot
+        && viewStateSnapshot.stack !== undefined
+        && viewStateSnapshot.loadedViews !== undefined
+        && viewStateSnapshot.activeViews !== undefined
+        && viewStateSnapshot.inactiveViews !== undefined
+        && viewStateSnapshot.disabledViews !== undefined
+        && viewStateSnapshot.loadedViews.length === viewStateSnapshot.stack.length
+        && (viewStateSnapshot.activeViews.length
+            + viewStateSnapshot.inactiveViews.length
+            + viewStateSnapshot.disabledViews.length) === viewStateSnapshot.loadedViews.length
     readonly property int metricsTotalChecks: 6
     readonly property int metricsPassedChecks:
         (metricsRenderScaleCompliant ? 1 : 0)

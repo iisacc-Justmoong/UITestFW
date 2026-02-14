@@ -18,6 +18,17 @@ The framework target itself does not build an application executable; all runnab
 - Qt `Test` module only when `LVRS_BUILD_TESTS=ON`
 - Vulkan SDK/runtime available to CMake when `LVRS_ENFORCE_VULKAN=ON` (default)
 
+## Quick Install (Clone -> Install -> Use)
+
+```bash
+git clone <LVRS_REPO_URL>
+cd LVRS
+./install.sh
+```
+
+`install.sh` installs LVRS as a shared framework package and registers it in the user CMake package registry.
+After this step, downstream projects can use `find_package(LVRS CONFIG REQUIRED)` without manually appending LVRS to `CMAKE_PREFIX_PATH`.
+
 ## Build (Framework-First Default)
 
 Configure:
@@ -75,16 +86,12 @@ In your downstream app `CMakeLists.txt`:
 find_package(Qt6 6.5 REQUIRED COMPONENTS Quick QuickControls2)
 find_package(LVRS CONFIG REQUIRED)
 
-qt_add_executable(MyApp main.cpp)
-qt_add_qml_module(MyApp
+lvrs_add_qml_app(
+    TARGET MyApp
     URI MyApp
-    VERSION 1.0
-    RESOURCE_PREFIX "/qt/qml"
     QML_FILES
         Main.qml
 )
-
-lvrs_configure_qml_app(MyApp)
 ```
 
 In your QML:
@@ -95,7 +102,8 @@ import LVRS 1.0 as LV
 ```
 
 Only CMake configure/build/install is required. Manual file copy or custom plugin wiring is not required.
-`lvrs_configure_qml_app()` also applies a safe default runtime output directory (`<build>/bin`) when none is set, preventing executable name collisions with `qt_add_qml_module()` output folders.
+`lvrs_configure_qml_app()` applies a safe default runtime output directory (`<build>/bin`) when none is set, and auto-links/imports LVRS static QML plugin artifacts when the package is consumed as a static build.
+`lvrs_add_qml_app()` further reduces bootstrap overhead by auto-generating an app entrypoint when `SOURCES` is omitted.
 
 ## Rendering Backend Policy
 

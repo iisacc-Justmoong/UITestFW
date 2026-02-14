@@ -344,6 +344,7 @@ void RuntimeServicesTests::debug_logger_enabled_signal_and_message_format()
     QCOMPARE(enabledSpy.count(), 1);
     logger.setEnabled(true);
     QCOMPARE(enabledSpy.count(), 1);
+    logger.setStdoutMinimumLevel(QStringLiteral("LOG"));
 
     QStringList captured;
     g_capturedLogs = &captured;

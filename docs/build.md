@@ -1,5 +1,13 @@
 # Build and Runtime Setup
 
+## Quick Install
+
+```bash
+./install.sh
+```
+
+The installer configures/builds/installs LVRS in shared framework mode and registers the package in the user CMake package registry, so downstream `find_package(LVRS CONFIG REQUIRED)` works without manually adding the LVRS prefix path.
+
 ## Configure
 
 ```bash
@@ -58,19 +66,17 @@ Then, in any Qt Quick project:
 find_package(Qt6 6.5 REQUIRED COMPONENTS Quick QuickControls2)
 find_package(LVRS CONFIG REQUIRED)
 
-qt_add_executable(MyApp main.cpp)
-qt_add_qml_module(MyApp
+lvrs_add_qml_app(
+    TARGET MyApp
     URI MyApp
-    VERSION 1.0
-    RESOURCE_PREFIX "/qt/qml"
-    QML_FILES Main.qml
+    QML_FILES
+        Main.qml
 )
-
-lvrs_configure_qml_app(MyApp)
 ```
 
 Set `CMAKE_PREFIX_PATH` to the install prefix (`/path/to/lvrs-prefix`) when configuring the downstream project.
-`lvrs_configure_qml_app()` sets `QT_QML_IMPORT_PATH` for LVRS and applies a default executable output directory (`<build>/bin`) when unset, avoiding target-name collisions with QML module output folders.
+`lvrs_configure_qml_app()` sets `QT_QML_IMPORT_PATH` for installed-package consumption, applies a default executable output directory (`<build>/bin`) when unset, and auto-links/imports LVRS static QML plugin artifacts for static package builds.
+`lvrs_add_qml_app()` can generate a ready-to-run entrypoint automatically when `SOURCES` is omitted.
 
 ## Rendering Backend Enforcement
 

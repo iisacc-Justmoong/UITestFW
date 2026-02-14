@@ -42,11 +42,23 @@ qt_standard_project_setup()
 function(_lvrs_detect_qt_feature feature_name out_value out_header)
     set(_lvrs_qtgui_config_header "")
     if(DEFINED Qt6Gui_DIR)
+        get_filename_component(_lvrs_qt_prefix "${Qt6Gui_DIR}/../../.." ABSOLUTE)
         get_filename_component(_lvrs_qt_lib_dir "${Qt6Gui_DIR}/../.." ABSOLUTE)
-        set(_lvrs_candidate_header "${_lvrs_qt_lib_dir}/QtGui.framework/Headers/qtgui-config.h")
-        if(EXISTS "${_lvrs_candidate_header}")
-            set(_lvrs_qtgui_config_header "${_lvrs_candidate_header}")
-        endif()
+        set(_lvrs_qtgui_config_candidates
+            "${_lvrs_qt_lib_dir}/QtGui.framework/Headers/qtgui-config.h"
+            "${_lvrs_qt_prefix}/include/QtGui/qtgui-config.h"
+            "${_lvrs_qt_prefix}/include/QtGui.framework/Headers/qtgui-config.h"
+        )
+        foreach(_lvrs_candidate_header IN LISTS _lvrs_qtgui_config_candidates)
+            if(EXISTS "${_lvrs_candidate_header}")
+                set(_lvrs_qtgui_config_header "${_lvrs_candidate_header}")
+                break()
+            endif()
+        endforeach()
+        unset(_lvrs_qtgui_config_candidates)
+        unset(_lvrs_candidate_header)
+        unset(_lvrs_qt_prefix)
+        unset(_lvrs_qt_lib_dir)
     endif()
 
     if(NOT _lvrs_qtgui_config_header)
@@ -105,7 +117,7 @@ if(APPLE AND LVRS_ENABLE_APPLE_GL_LINK_SHIM)
         endif()
 
         if(_uifw_agl_rebuild)
-            set(_uifw_agl_stub "${CMAKE_CURRENT_BINARY_DIR}/agl_stub.c")
+            set(_uifw_agl_stub "${CMAKE_CURRENT_BINARY_DIR}/agl_stub.cpp")
             file(WRITE "${_uifw_agl_stub}" "void _uifw_dummy_agl(void) {}\n")
             set(_uifw_agl_arch_flags "")
             if(CMAKE_OSX_ARCHITECTURES)
@@ -197,7 +209,9 @@ add_library(LVRS::LVRS ALIAS LVRSCore)
 if(LVRS_APPLE_AGL_SHIM_ACTIVE)
     target_link_options(LVRSCore INTERFACE
         $<BUILD_INTERFACE:-F${LVRS_APPLE_AGL_FRAMEWORK_ROOT}>
+        $<BUILD_INTERFACE:-Wl,-rpath,${LVRS_APPLE_AGL_FRAMEWORK_ROOT}>
         $<INSTALL_INTERFACE:-F$<INSTALL_PREFIX>/${LVRS_APPLE_FRAMEWORK_INSTALL_DIR}>
+        $<INSTALL_INTERFACE:-Wl,-rpath,$<INSTALL_PREFIX>/${LVRS_APPLE_FRAMEWORK_INSTALL_DIR}>
     )
 endif()
 
@@ -316,26 +330,37 @@ if(LVRS_BUILD_TESTS)
     add_subdirectory(tests)
 endif()
 
-set(_uifw_export_targets LVRSCore)
-if(TARGET LVRSCore_resources_1)
-    list(APPEND _uifw_export_targets LVRSCore_resources_1)
-endif()
-if(TARGET LVRSCore_resources_2)
-    list(APPEND _uifw_export_targets LVRSCore_resources_2)
-endif()
+if(LVRS_BUILD_SHARED_LIBS)
+    install(TARGETS LVRSCore
+        EXPORT LVRSTargets
+        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+        INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/LVRS
+    )
 
-install(TARGETS ${_uifw_export_targets}
-    EXPORT LVRSTargets
-    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-    INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/LVRS
-)
+    install(EXPORT LVRSTargets
+        NAMESPACE LVRS::
+        DESTINATION ${LVRS_INSTALL_CMAKE_DIR}
+    )
+else()
+    install(TARGETS LVRSCore
+        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+        INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/LVRS
+    )
 
-install(EXPORT LVRSTargets
-    NAMESPACE LVRS::
-    DESTINATION ${LVRS_INSTALL_CMAKE_DIR}
-)
+    configure_file(
+        "${CMAKE_CURRENT_LIST_DIR}/cmake/LVRSTargetsStatic.cmake.in"
+        "${CMAKE_CURRENT_BINARY_DIR}/LVRSTargets.cmake"
+        @ONLY
+    )
+    install(FILES
+        "${CMAKE_CURRENT_BINARY_DIR}/LVRSTargets.cmake"
+        DESTINATION ${LVRS_INSTALL_CMAKE_DIR}
+    )
+endif()
 
 install(
     DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/backend/
@@ -377,5 +402,6 @@ install(FILES
     "${CMAKE_CURRENT_BINARY_DIR}/LVRSConfig.cmake"
     "${CMAKE_CURRENT_BINARY_DIR}/LVRSConfigVersion.cmake"
     "${CMAKE_CURRENT_LIST_DIR}/cmake/LVRSHelpers.cmake"
+    "${CMAKE_CURRENT_LIST_DIR}/cmake/LVRSAppEntryPoint.cpp.in"
     DESTINATION ${LVRS_INSTALL_CMAKE_DIR}
 )

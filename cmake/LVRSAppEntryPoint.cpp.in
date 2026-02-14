@@ -1,0 +1,13 @@
+#include "backend/runtime/appentry.h"
+
+#include <QString>
+
+int main(int argc, char *argv[])
+{
+    lvrs::QmlAppLaunchSpec launchSpec;
+    launchSpec.bootstrap.applicationName = QStringLiteral("@LVRS_ENTRY_APP_NAME@");
+    launchSpec.bootstrap.quickStyleName = QStringLiteral("@LVRS_ENTRY_STYLE@");
+    launchSpec.moduleUri = QStringLiteral("@LVRS_ENTRY_URI@");
+    launchSpec.rootObject = QStringLiteral("@LVRS_ENTRY_ROOT_OBJECT@");
+    return lvrs::runBootstrappedQmlApp(argc, argv, launchSpec);
+}

@@ -12,7 +12,9 @@
 #include "backend/io/backend.h"
 #include "backend/runtime/runtimeevents.h"
 
+#if defined(LVRS_USE_STATIC_QML_PLUGIN)
 Q_IMPORT_PLUGIN(LVRSPlugin)
+#endif
 
 class BackendIoTests : public QObject
 {

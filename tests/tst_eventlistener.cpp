@@ -8,7 +8,9 @@
 #include <QQuickWindow>
 #include <QtPlugin>
 
+#if defined(LVRS_USE_STATIC_QML_PLUGIN)
 Q_IMPORT_PLUGIN(LVRSPlugin)
+#endif
 
 class EventListenerTests : public QObject
 {

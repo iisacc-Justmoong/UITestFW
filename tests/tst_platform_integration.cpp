@@ -7,7 +7,9 @@
 #include "backend/platform/platforminfo.h"
 #include "test_utils.h"
 
+#if defined(LVRS_USE_STATIC_QML_PLUGIN)
 Q_IMPORT_PLUGIN(LVRSPlugin)
+#endif
 
 class PlatformIntegrationTests : public QObject
 {
@@ -97,8 +99,11 @@ LV.ApplicationWindow {
     {
         QQmlEngine engine;
         engine.addImportPath(TestUtils::qmlImportBase());
-        const QString mainPath = QFINDTESTDATA("../qml/Main.qml");
-        QVERIFY2(!mainPath.isEmpty(), "Failed to locate ../qml/Main.qml");
+        QString mainPath = QFINDTESTDATA("../example/VisualCatalog/qml/Main.qml");
+        if (mainPath.isEmpty())
+            mainPath = QFINDTESTDATA("../qml/Main.qml");
+        QVERIFY2(!mainPath.isEmpty(),
+                 "Failed to locate ../example/VisualCatalog/qml/Main.qml");
 
         QScopedPointer<QObject> root(TestUtils::loadQmlFile(engine, mainPath));
         QVERIFY(root);

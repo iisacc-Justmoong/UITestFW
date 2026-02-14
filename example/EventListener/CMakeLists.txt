@@ -37,9 +37,15 @@ target_link_libraries(LVRSExampleEventListener
         Qt6::Quick
         Qt6::QuickControls2
         LVRSCore
-        LVRSplugin
-        LVRSplugin_init
 )
+
+if(LVRS_STATIC_QML_PLUGIN_REQUIRED)
+    target_link_libraries(LVRSExampleEventListener
+        PRIVATE
+            LVRSplugin
+            LVRSplugin_init
+    )
+endif()
 
 add_custom_target(run_LVRSExampleEventListener
     COMMAND $<TARGET_FILE:LVRSExampleEventListener>

@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.21)
 
 if(CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
-    project(LVRSExampleMVVM LANGUAGES CXX)
+    project(LVRSExampleVisualCatalog LANGUAGES CXX)
 
     set(CMAKE_CXX_STANDARD 20)
     set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -14,22 +14,19 @@ if(NOT TARGET LVRSCore)
     add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/../.. backend_build)
 endif()
 
-qt_add_executable(LVRSExampleMVVM
+qt_add_executable(LVRSExampleVisualCatalog
     main.cpp
-    backend/ExampleBootstrap.cpp
-    backend/ExampleModel.cpp
-    backend/ExampleViewModel.cpp
 )
 
-qt_add_qml_module(LVRSExampleMVVM
-    URI ExampleMVVM
+qt_add_qml_module(LVRSExampleVisualCatalog
+    URI ExampleVisualCatalog
     VERSION 1.0
     RESOURCE_PREFIX "/qt/qml"
     QML_FILES
         qml/Main.qml
 )
 
-target_link_libraries(LVRSExampleMVVM
+target_link_libraries(LVRSExampleVisualCatalog
     PRIVATE
         Qt6::Quick
         Qt6::QuickControls2
@@ -37,21 +34,23 @@ target_link_libraries(LVRSExampleMVVM
 )
 
 if(LVRS_STATIC_QML_PLUGIN_REQUIRED)
-    target_link_libraries(LVRSExampleMVVM
+    target_link_libraries(LVRSExampleVisualCatalog
         PRIVATE
             LVRSplugin
             LVRSplugin_init
     )
 endif()
 
-target_include_directories(LVRSExampleMVVM
-    PRIVATE
-        ${CMAKE_CURRENT_SOURCE_DIR}
+set_target_properties(LVRSExampleVisualCatalog PROPERTIES
+    MACOSX_BUNDLE OFF
+    WIN32_EXECUTABLE TRUE
+    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
+    OUTPUT_NAME "LVRSExampleVisualCatalog"
 )
 
-add_custom_target(run_LVRSExampleMVVM
-    COMMAND $<TARGET_FILE:LVRSExampleMVVM>
-    DEPENDS LVRSExampleMVVM
+add_custom_target(run_LVRSExampleVisualCatalog
+    COMMAND $<TARGET_FILE:LVRSExampleVisualCatalog>
+    DEPENDS LVRSExampleVisualCatalog
     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
     USES_TERMINAL
 )

@@ -24,6 +24,7 @@ This documentation set is organized around runtime behavior, component contracts
 ## Backend Singletons
 
 - `docs/backend/Backend.md`
+- `docs/backend/AppBootstrap.md`
 - `docs/backend/RuntimeEvents.md`
 - `docs/backend/RenderMonitor.md`
 - `docs/backend/RenderQuality.md`
@@ -31,6 +32,7 @@ This documentation set is organized around runtime behavior, component contracts
 - `docs/backend/ViewStateTracker.md`
 - `docs/backend/ViewModels.md`
 - `docs/backend/Debug.md`
+- `docs/backend/DebugOutput.md`
 - `docs/backend/Platform.md`
 
 ## App Shell

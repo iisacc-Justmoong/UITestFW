@@ -4,7 +4,6 @@
 
 ```bash
 cmake -S . -B build \
-  -DLVRS_BUILD_DEMO=ON \
   -DLVRS_BUILD_EXAMPLES=ON \
   -DLVRS_BUILD_TESTS=ON
 ```
@@ -18,10 +17,12 @@ cmake --build build -j
 ## Run
 
 ```bash
-./build/bin/LVRS
+cmake --build build --target LVRSExampleVisualCatalog
+./build/bin/LVRSExampleVisualCatalog
 ```
 
-The demo target (`LVRSDemo`) is configured to emit the executable as `build/bin/LVRS`.
+The visual-catalog example target (`LVRSExampleVisualCatalog`) emits the executable as `build/bin/LVRSExampleVisualCatalog`.
+The framework library target (`LVRSCore`) itself does not emit a runnable app.
 
 ## Test
 
@@ -31,7 +32,6 @@ ctest --test-dir build --output-on-failure
 
 ## Build Options
 
-- `LVRS_BUILD_DEMO` (`ON`): build the visual-catalog application.
 - `LVRS_BUILD_EXAMPLES` (`ON`): build runnable examples.
 - `LVRS_BUILD_TESTS` (`ON`): build and register tests.
 - `LVRS_ENFORCE_VULKAN` (`ON`): fail CMake configure when Vulkan-capable dependencies are missing.
@@ -55,3 +55,5 @@ At runtime:
 - Qt 6.5+ with `Quick` and `QuickControls2` is required.
 - Vulkan and Qt feature checks happen in `CMakeLists.txt`.
 - Backend selection logic lives in `backend/runtime/vulkanbootstrap.cpp`.
+- Downstream app bootstrap template is provided at `main.cpp` (not built by default).
+- Recommended reusable bootstrap API is `backend/runtime/appbootstrap.h`.

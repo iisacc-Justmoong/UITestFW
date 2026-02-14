@@ -104,6 +104,10 @@ LV.ApplicationWindow {
     property int runtimeConsoleLastRenderFrameCount: 0
     property int runtimeConsoleLastIngestedSequence: 0
     property int runtimeConsoleLastHeartbeatSequence: 0
+    property bool renderPerformanceDegraded: false
+    property int renderPerformanceWarnEpochMs: 0
+    property int renderPerformanceErrorEpochMs: 0
+    property int renderPerformanceRecoveryStartEpochMs: -1
     property var runtimeConsoleRows: []
     property var runtimeConsoleHealth: ({})
     property var runtimeConsoleLastHeartbeat: ({ epochMs: 0, uptimeMs: 0, eventSequence: 0 })
@@ -120,6 +124,13 @@ LV.ApplicationWindow {
     property bool eventMonitorPaused: false
     property bool eventMonitorAutoScroll: true
     readonly property int eventMonitorSampleCount: eventMonitorSamplesModel.count
+    property int debuggerMaxRows: 96
+    property var debuggerRows: []
+    property var debuggerSummary: ({})
+    property string debuggerTextFilter: ""
+    property string debuggerComponentFilter: ""
+    property string debuggerLevelFilter: "all"
+    readonly property int debuggerVisibleCount: debuggerRows.length
 
     ListModel {
         id: eventMonitorSamplesModel
@@ -245,6 +256,62 @@ LV.ApplicationWindow {
 
     function openEventListenerConsole() {
         demoPageIndex = eventListenerPageIndex()
+    }
+
+    function debuggerApplyFilters() {
+        if (!LV.Debug || !LV.Debug.setFilters)
+            return
+        const levels = debuggerLevelFilter === "all" ? [] : [debuggerLevelFilter]
+        const componentToken = String(debuggerComponentFilter || "").trim()
+        const components = componentToken.length > 0 ? [componentToken] : []
+        LV.Debug.setFilters(levels, components, debuggerTextFilter)
+        debuggerRefresh()
+    }
+
+    function debuggerRefresh() {
+        if (!LV.Debug)
+            return
+        if (LV.Debug.runtimeCaptureEnabled && LV.Debug.attachRuntimeEvents && !LV.Debug.runtimeAttached)
+            LV.Debug.attachRuntimeEvents()
+        debuggerSummary = LV.Debug.summary ? LV.Debug.summary() : ({})
+        debuggerRows = LV.Debug.filteredEntries ? LV.Debug.filteredEntries(debuggerMaxRows) : []
+    }
+
+    function debuggerScheduleRefresh() {
+        if (debuggerRefreshTimer.running)
+            return
+        debuggerRefreshTimer.start()
+    }
+
+    function debuggerBootstrap() {
+        if (!LV.Debug)
+            return
+        LV.Debug.verboseOutput = false
+        LV.Debug.jsonOutput = false
+        LV.Debug.runtimeEchoEnabled = false
+        LV.Debug.runtimeEchoMinIntervalMs = Math.max(250, Number(LV.Debug.runtimeEchoMinIntervalMs || 0))
+        LV.Debug.stdoutMinimumLevel = "WARN"
+        if (LV.Debug.stdoutNoiseReductionEnabled !== undefined)
+            LV.Debug.stdoutNoiseReductionEnabled = true
+        if (LV.Debug.runtimeCaptureEnabled !== undefined)
+            LV.Debug.runtimeCaptureEnabled = true
+        if (LV.Debug.attachRuntimeEvents)
+            LV.Debug.attachRuntimeEvents()
+        debuggerApplyFilters()
+    }
+
+    function debuggerApplyRuntimeEchoExclude(rawText) {
+        if (!LV.Debug)
+            return
+        const parts = String(rawText || "").split(",")
+        const tokens = []
+        for (let i = 0; i < parts.length; i++) {
+            const token = String(parts[i]).trim()
+            if (token.length > 0)
+                tokens.push(token)
+        }
+        LV.Debug.runtimeEchoExcludeTypes = tokens
+        debuggerRefresh()
     }
 
     function eventMonitorMapHasEntries(mapValue) {
@@ -584,6 +651,60 @@ LV.ApplicationWindow {
         })
     }
 
+    function evaluateRenderPerformance() {
+        if (!LV.Debug || !LV.RenderMonitor || !LV.RenderMonitor.active)
+            return
+        const fps = Number(LV.RenderMonitor.fps || 0)
+        const lastFrameMs = Number(LV.RenderMonitor.lastFrameMs || 0)
+        const frameCount = Number(LV.RenderMonitor.frameCount || 0)
+        if (!isFinite(fps) || !isFinite(lastFrameMs) || frameCount <= 0)
+            return
+
+        const now = Date.now()
+        const severe = (lastFrameMs >= 50.0) || (fps > 0 && fps < 18.0)
+        const degraded = (lastFrameMs >= 33.0) || (fps > 0 && fps < 30.0)
+        const payload = {
+            fps: fps,
+            lastFrameMs: lastFrameMs,
+            frameCount: frameCount,
+            backend: LV.RenderQuality.graphicsBackend || "unknown"
+        }
+
+        if (severe) {
+            renderPerformanceDegraded = true
+            renderPerformanceRecoveryStartEpochMs = -1
+            if (now - renderPerformanceErrorEpochMs >= 1600) {
+                renderPerformanceErrorEpochMs = now
+                LV.Debug.error("RenderMonitor", "render-performance-severe", payload)
+            }
+            return
+        }
+
+        if (degraded) {
+            renderPerformanceDegraded = true
+            renderPerformanceRecoveryStartEpochMs = -1
+            if (now - renderPerformanceWarnEpochMs >= 2000) {
+                renderPerformanceWarnEpochMs = now
+                LV.Debug.warn("RenderMonitor", "render-performance-degraded", payload)
+            }
+            return
+        }
+
+        if (!renderPerformanceDegraded)
+            return
+
+        if (renderPerformanceRecoveryStartEpochMs < 0) {
+            renderPerformanceRecoveryStartEpochMs = now
+            return
+        }
+
+        if (now - renderPerformanceRecoveryStartEpochMs >= 3000) {
+            renderPerformanceDegraded = false
+            renderPerformanceRecoveryStartEpochMs = -1
+            LV.Debug.warn("RenderMonitor", "render-performance-recovered", payload)
+        }
+    }
+
     function runtimeConsoleIngestRuntimeEvent(eventData) {
         if (!eventData)
             return
@@ -791,6 +912,7 @@ LV.ApplicationWindow {
             LV.Backend.hookUserEvents()
         LV.Debug.enabled = true
         LV.Debug.log("Main", "visual-catalog-opened")
+        debuggerBootstrap()
         eventMonitorRecord("catalogOpened",
                            { route: LV.AppState.currentRoute, source: "main" },
                            "Main")
@@ -839,6 +961,30 @@ LV.ApplicationWindow {
     }
 
     Connections {
+        target: LV.Debug
+        ignoreUnknownSignals: true
+        function onEntriesChanged() {
+            root.debuggerScheduleRefresh()
+        }
+        function onRuntimeAttachedChanged() {
+            root.debuggerScheduleRefresh()
+        }
+        function onRuntimeCaptureEnabledChanged() {
+            root.debuggerScheduleRefresh()
+        }
+        function onPausedChanged() {
+            root.debuggerScheduleRefresh()
+        }
+    }
+
+    Timer {
+        id: debuggerRefreshTimer
+        interval: 120
+        repeat: false
+        onTriggered: root.debuggerRefresh()
+    }
+
+    Connections {
         target: LV.RenderMonitor
         ignoreUnknownSignals: true
         function onActiveChanged() {
@@ -851,6 +997,10 @@ LV.ApplicationWindow {
                                           frameCount: LV.RenderMonitor.frameCount
                                       },
                                       root.runtimeConsoleLastIngestedSequence + 1)
+            if (!LV.RenderMonitor.active) {
+                root.renderPerformanceDegraded = false
+                root.renderPerformanceRecoveryStartEpochMs = -1
+            }
         }
         function onStatsChanged() {
             const frameCount = LV.RenderMonitor.frameCount
@@ -866,6 +1016,7 @@ LV.ApplicationWindow {
                                           lastFrameMs: LV.RenderMonitor.lastFrameMs
                                       },
                                       root.runtimeConsoleLastIngestedSequence + 1)
+            root.evaluateRenderPerformance()
         }
     }
 
@@ -1686,6 +1837,314 @@ LV.ApplicationWindow {
                             LV.WheelScrollGuard {
                                 anchors.fill: parent
                                 targetFlickable: eventMonitorViewport
+                                consumeInside: true
+                            }
+                        }
+                    }
+                }
+
+                LV.AppCard {
+                    title: "Embedded Runtime Debugger"
+                    subtitle: "RuntimeEvents + Debug 로그를 통합 수집하는 내장 디버거"
+                    visible: root.demoPageIndex === 2
+                    Layout.fillWidth: true
+
+                    Column {
+                        width: parent.width
+                        spacing: LV.Theme.gap8
+
+                        Rectangle {
+                            width: parent.width
+                            radius: LV.Theme.radiusMd
+                            color: LV.Theme.surfaceGhost
+                            implicitHeight: debuggerHeaderColumn.implicitHeight + LV.Theme.gap8 * 2
+
+                            Column {
+                                id: debuggerHeaderColumn
+                                x: LV.Theme.gap8
+                                y: LV.Theme.gap8
+                                width: parent.width - LV.Theme.gap8 * 2
+                                spacing: LV.Theme.gap6
+
+                                LV.Label {
+                                    width: parent.width
+                                    style: body
+                                    color: LV.Theme.textPrimary
+                                    text: "attached=" + (!!root.debuggerSummary.runtimeAttached)
+                                        + " | capture=" + (!!root.debuggerSummary.runtimeCaptureEnabled)
+                                        + " | runtimeEcho=" + (!!root.debuggerSummary.runtimeEchoEnabled)
+                                        + " | paused=" + (!!root.debuggerSummary.paused)
+                                        + " | entries=" + (root.debuggerSummary.entryCount !== undefined ? root.debuggerSummary.entryCount : 0)
+                                        + " | visible=" + root.debuggerVisibleCount
+                                        + " | dropped=" + (root.debuggerSummary.droppedCount !== undefined ? root.debuggerSummary.droppedCount : 0)
+                                        + " | seq=" + (root.debuggerSummary.sequence !== undefined ? root.debuggerSummary.sequence : 0)
+                                }
+
+                                LV.Label {
+                                    width: parent.width
+                                    style: disabled
+                                    color: LV.Theme.textTertiary
+                                    text: "levels: LOG="
+                                        + (root.debuggerSummary.levelCounts && root.debuggerSummary.levelCounts.LOG !== undefined ? root.debuggerSummary.levelCounts.LOG : 0)
+                                        + " WARN="
+                                        + (root.debuggerSummary.levelCounts && root.debuggerSummary.levelCounts.WARN !== undefined ? root.debuggerSummary.levelCounts.WARN : 0)
+                                        + " ERROR="
+                                        + (root.debuggerSummary.levelCounts && root.debuggerSummary.levelCounts.ERROR !== undefined ? root.debuggerSummary.levelCounts.ERROR : 0)
+                                        + " RUNTIME="
+                                        + (root.debuggerSummary.levelCounts && root.debuggerSummary.levelCounts.RUNTIME !== undefined ? root.debuggerSummary.levelCounts.RUNTIME : 0)
+                                }
+
+                                Flow {
+                                    width: parent.width
+                                    spacing: LV.Theme.gap6
+
+                                    LV.LabelButton {
+                                        text: LV.Debug.paused ? "Resume Debugger" : "Pause Debugger"
+                                        tone: LV.Debug.paused ? LV.AbstractButton.Primary : LV.AbstractButton.Default
+                                        onClicked: {
+                                            LV.Debug.paused = !LV.Debug.paused
+                                            root.debuggerRefresh()
+                                        }
+                                    }
+
+                                    LV.LabelButton {
+                                        text: LV.Debug.runtimeCaptureEnabled ? "Runtime Capture On" : "Runtime Capture Off"
+                                        tone: LV.Debug.runtimeCaptureEnabled ? LV.AbstractButton.Primary : LV.AbstractButton.Default
+                                        onClicked: {
+                                            LV.Debug.runtimeCaptureEnabled = !LV.Debug.runtimeCaptureEnabled
+                                            if (LV.Debug.runtimeCaptureEnabled)
+                                                LV.Debug.attachRuntimeEvents()
+                                            else
+                                                LV.Debug.detachRuntimeEvents()
+                                            root.debuggerRefresh()
+                                        }
+                                    }
+
+                                    LV.LabelButton {
+                                        text: LV.Debug.runtimeEchoEnabled ? "Runtime Echo On" : "Runtime Echo Off"
+                                        tone: LV.Debug.runtimeEchoEnabled ? LV.AbstractButton.Primary : LV.AbstractButton.Default
+                                        onClicked: {
+                                            LV.Debug.runtimeEchoEnabled = !LV.Debug.runtimeEchoEnabled
+                                            root.debuggerRefresh()
+                                        }
+                                    }
+
+                                    LV.LabelButton {
+                                        text: LV.Debug.verboseOutput ? "Verbose On" : "Verbose Off"
+                                        tone: LV.Debug.verboseOutput ? LV.AbstractButton.Primary : LV.AbstractButton.Default
+                                        onClicked: {
+                                            LV.Debug.verboseOutput = !LV.Debug.verboseOutput
+                                            root.debuggerRefresh()
+                                        }
+                                    }
+
+                                    LV.LabelButton {
+                                        text: LV.Debug.jsonOutput ? "JSON On" : "JSON Off"
+                                        tone: LV.Debug.jsonOutput ? LV.AbstractButton.Primary : LV.AbstractButton.Default
+                                        onClicked: {
+                                            LV.Debug.jsonOutput = !LV.Debug.jsonOutput
+                                            root.debuggerRefresh()
+                                        }
+                                    }
+
+                                    LV.LabelButton {
+                                        text: LV.Debug.enabled ? "Stdout Log On" : "Stdout Log Off"
+                                        tone: LV.Debug.enabled ? LV.AbstractButton.Primary : LV.AbstractButton.Default
+                                        onClicked: LV.Debug.enabled = !LV.Debug.enabled
+                                    }
+
+                                    LV.LabelButton {
+                                        text: LV.Debug.stdoutNoiseReductionEnabled ? "Noise Filter On" : "Noise Filter Off"
+                                        tone: LV.Debug.stdoutNoiseReductionEnabled ? LV.AbstractButton.Primary : LV.AbstractButton.Default
+                                        onClicked: {
+                                            LV.Debug.stdoutNoiseReductionEnabled = !LV.Debug.stdoutNoiseReductionEnabled
+                                            root.debuggerRefresh()
+                                        }
+                                    }
+
+                                    LV.LabelButton {
+                                        text: "Clear Debug Buffer"
+                                        tone: LV.AbstractButton.Default
+                                        onClicked: {
+                                            LV.Debug.clearEntries()
+                                            root.debuggerRefresh()
+                                        }
+                                    }
+                                }
+
+                                RowLayout {
+                                    width: parent.width
+                                    spacing: LV.Theme.gap6
+
+                                    ComboBox {
+                                        id: debuggerStdoutLevelBox
+                                        Layout.preferredWidth: 130
+                                        model: ["LOG", "WARN", "ERROR", "NONE"]
+                                        currentIndex: Math.max(0, model.indexOf(LV.Debug.stdoutMinimumLevel))
+                                        onActivated: {
+                                            LV.Debug.stdoutMinimumLevel = String(currentText)
+                                            root.debuggerRefresh()
+                                        }
+                                    }
+
+                                    ComboBox {
+                                        id: debuggerLevelFilterBox
+                                        Layout.preferredWidth: 130
+                                        model: ["all", "log", "warn", "error", "runtime"]
+                                        currentIndex: Math.max(0, model.indexOf(root.debuggerLevelFilter))
+                                        onCurrentTextChanged: {
+                                            root.debuggerLevelFilter = String(currentText)
+                                            root.debuggerApplyFilters()
+                                        }
+                                    }
+
+                                    TextField {
+                                        id: debuggerComponentFilterField
+                                        Layout.preferredWidth: 180
+                                        placeholderText: "component filter"
+                                        text: root.debuggerComponentFilter
+                                        selectByMouse: true
+                                        onTextChanged: root.debuggerComponentFilter = text
+                                        onAccepted: root.debuggerApplyFilters()
+                                    }
+
+                                    TextField {
+                                        id: debuggerTextFilterField
+                                        Layout.fillWidth: true
+                                        placeholderText: "text filter"
+                                        text: root.debuggerTextFilter
+                                        selectByMouse: true
+                                        onTextChanged: root.debuggerTextFilter = text
+                                        onAccepted: root.debuggerApplyFilters()
+                                    }
+
+                                    LV.LabelButton {
+                                        text: "Apply"
+                                        tone: LV.AbstractButton.Default
+                                        onClicked: root.debuggerApplyFilters()
+                                    }
+                                }
+
+                                RowLayout {
+                                    width: parent.width
+                                    spacing: LV.Theme.gap6
+
+                                    SpinBox {
+                                        id: runtimeEchoIntervalBox
+                                        Layout.preferredWidth: 160
+                                        from: 0
+                                        to: 200
+                                        value: LV.Debug.runtimeEchoMinIntervalMs
+                                        editable: true
+                                        onValueModified: {
+                                            LV.Debug.runtimeEchoMinIntervalMs = value
+                                            root.debuggerRefresh()
+                                        }
+                                    }
+
+                                    TextField {
+                                        id: runtimeEchoExcludeField
+                                        Layout.fillWidth: true
+                                        placeholderText: "runtime echo exclude (comma-separated)"
+                                        text: LV.Debug.runtimeEchoExcludeTypes ? LV.Debug.runtimeEchoExcludeTypes.join(",") : ""
+                                        selectByMouse: true
+                                        onAccepted: root.debuggerApplyRuntimeEchoExclude(text)
+                                    }
+
+                                    LV.LabelButton {
+                                        text: "Apply Echo"
+                                        tone: LV.AbstractButton.Default
+                                        onClicked: root.debuggerApplyRuntimeEchoExclude(runtimeEchoExcludeField.text)
+                                    }
+                                }
+                            }
+                        }
+
+                        Rectangle {
+                            width: parent.width
+                            radius: LV.Theme.radiusMd
+                            color: LV.Theme.surfaceGhost
+                            implicitHeight: 260
+
+                            Flickable {
+                                id: debuggerViewport
+                                anchors.fill: parent
+                                anchors.margins: LV.Theme.gap8
+                                clip: true
+                                contentWidth: width
+                                contentHeight: debuggerColumn.implicitHeight
+                                boundsBehavior: Flickable.StopAtBounds
+
+                                Column {
+                                    id: debuggerColumn
+                                    width: debuggerViewport.width
+                                    spacing: LV.Theme.gap6
+
+                                    Repeater {
+                                        model: root.debuggerRows
+
+                                        delegate: Rectangle {
+                                            required property var modelData
+                                            width: parent.width
+                                            radius: LV.Theme.radiusSm
+                                            color: LV.Theme.surfaceAlt
+                                            border.width: 1
+                                            border.color: LV.Theme.contextMenuDivider
+                                            implicitHeight: debuggerRowColumn.implicitHeight + LV.Theme.gap8 * 2
+
+                                            Column {
+                                                id: debuggerRowColumn
+                                                anchors.fill: parent
+                                                anchors.margins: LV.Theme.gap8
+                                                spacing: LV.Theme.gap4
+
+                                                LV.Label {
+                                                    width: parent.width
+                                                    style: description
+                                                    color: LV.Theme.textPrimary
+                                                    text: modelData.message ? String(modelData.message) : "debug-entry"
+                                                    elide: Text.ElideRight
+                                                }
+
+                                                LV.Label {
+                                                    width: parent.width
+                                                    style: disabled
+                                                    color: LV.Theme.textTertiary
+                                                    text: "source=" + (modelData.source ? String(modelData.source) : "unknown")
+                                                        + " | level=" + (modelData.level ? String(modelData.level) : "none")
+                                                        + " | component=" + (modelData.component ? String(modelData.component) : "unknown")
+                                                        + " | event=" + (modelData.event ? String(modelData.event) : "unknown")
+                                                    wrapMode: Text.WordWrap
+                                                }
+
+                                                LV.Label {
+                                                    width: parent.width
+                                                    style: disabled
+                                                    color: LV.Theme.textTertiary
+                                                    text: root.eventMonitorJson(modelData.data !== undefined ? modelData.data : ({}))
+                                                    wrapMode: Text.WordWrap
+                                                }
+                                            }
+                                        }
+                                    }
+
+                                    LV.Label {
+                                        width: parent.width
+                                        visible: root.debuggerVisibleCount === 0
+                                        style: description
+                                        color: LV.Theme.textSecondary
+                                        text: "아직 수집된 디버거 엔트리가 없다."
+                                    }
+                                }
+
+                                ScrollBar.vertical: ScrollBar {
+                                    policy: ScrollBar.AsNeeded
+                                }
+                            }
+
+                            LV.WheelScrollGuard {
+                                anchors.fill: parent
+                                targetFlickable: debuggerViewport
                                 consumeInside: true
                             }
                         }

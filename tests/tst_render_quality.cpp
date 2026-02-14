@@ -7,7 +7,9 @@
 
 #include "backend/runtime/renderquality.h"
 
+#if defined(LVRS_USE_STATIC_QML_PLUGIN)
 Q_IMPORT_PLUGIN(LVRSPlugin)
+#endif
 
 class RenderQualityTests : public QObject
 {

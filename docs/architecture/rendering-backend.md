@@ -4,7 +4,7 @@ This document defines how LVRS selects and enforces graphics backends.
 
 ## Bootstrap Entry
 
-Runtime backend bootstrap occurs before `QGuiApplication` creation in `main.cpp`:
+Runtime backend bootstrap occurs before `QGuiApplication` creation via `lvrs::preApplicationBootstrap()` (`backend/runtime/appbootstrap.cpp`), and is used by app entrypoints such as `example/VisualCatalog/main.cpp`:
 
 - `RenderQuality::configureGlobalDefaults()`
 - `lvrs::bootstrapPreferredGraphicsBackend()`

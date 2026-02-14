@@ -18,6 +18,8 @@ The runtime model is built around two singleton layers.
 
 `EventListener` uses this backend-first state path by default, so high-level components can react consistently without manually wiring every source.
 
+Application entrypoints should use `lvrs::preApplicationBootstrap()` and `lvrs::postApplicationBootstrap()` to apply platform-aware graphics/font defaults in a consistent way. The root template `main.cpp` also supports CLI/env overrides (`--module`, `--root`, `--app-name`, `--style`) for downstream integration.
+
 ## UI Model
 
 The QML layer is grouped by concern.
@@ -27,7 +29,7 @@ The QML layer is grouped by concern.
 - `navigation`: routing, lists, hierarchy, context menu.
 - `surfaces`: overlays and cards.
 
-`Main.qml` serves as a visual catalog with tab pages and an EventListener runtime console, enabling rapid verification of style tokens, interactions, and event health.
+`example/VisualCatalog/qml/Main.qml` serves as a visual catalog with tab pages and an EventListener runtime console, enabling rapid verification of style tokens, interactions, and event health.
 
 ## Key Runtime Guarantees
 

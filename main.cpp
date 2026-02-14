@@ -1,70 +1,151 @@
-#include "backend/fonts/fontpolicy.h"
-#include "backend/runtime/renderquality.h"
-#include "backend/runtime/vulkanbootstrap.h"
+#include "backend/runtime/appentry.h"
 
-#include <QCoreApplication>
 #include <QDebug>
-#include <QFontDatabase>
-#include <QGuiApplication>
-#include <QQmlApplicationEngine>
+#include <QStringList>
 #include <QtPlugin>
 
+#if defined(LVRS_USE_STATIC_QML_PLUGIN)
 Q_IMPORT_PLUGIN(LVRSPlugin)
+#endif
 
 namespace {
-void loadBundledFonts()
+
+struct LaunchConfig {
+    QString appName = QStringLiteral("LVRSApp");
+    QString quickStyle = QStringLiteral("Basic");
+    QString moduleUri = QStringLiteral("YourAppModule");
+    QString rootObject = QStringLiteral("Main");
+    bool printHelp = false;
+};
+
+QString readEnvironmentOrDefault(const char *envName, const QString &fallback)
 {
-    static const char *kFontResources[] = {
-        ":/qt/qml/LVRS/resources/font/Pretendard-Regular.ttf",
-        ":/qt/qml/LVRS/resources/font/Pretendard-Medium.ttf",
-        ":/qt/qml/LVRS/resources/font/Pretendard-SemiBold.ttf",
-        ":/qt/qml/LVRS/resources/font/Pretendard-Bold.ttf",
-        ":/qt/qml/LVRS/resources/font/Pretendard-Light.ttf",
-        ":/qt/qml/LVRS/resources/font/Pretendard-ExtraLight.ttf",
-        ":/qt/qml/LVRS/resources/font/Pretendard-Thin.ttf",
-        ":/qt/qml/LVRS/resources/font/Pretendard-ExtraBold.ttf",
-        ":/qt/qml/LVRS/resources/font/Pretendard-Black.ttf"
-    };
+    const QString value = qEnvironmentVariable(envName).trimmed();
+    return value.isEmpty() ? fallback : value;
+}
 
-    for (const char *fontResource : kFontResources) {
-        if (QFontDatabase::addApplicationFont(QString::fromLatin1(fontResource)) < 0)
-            qWarning() << "Failed to load bundled font:" << fontResource;
+void printUsage(const QString &programName)
+{
+    const QString usage = QStringLiteral(
+                              "LVRS template launcher\n"
+                              "Usage: %1 [options]\n"
+                              "Options:\n"
+                              "  --module <uri>        QML module URI to load (default: YourAppModule)\n"
+                              "  --root <type>         Root QML type name (default: Main)\n"
+                              "  --app-name <name>     Application name\n"
+                              "  --style <name>        Qt Quick Controls style (default: Basic)\n"
+                              "  --help                Show this help\n"
+                              "Environment fallback:\n"
+                              "  LVRS_APP_MODULE_URI, LVRS_APP_ROOT_OBJECT, LVRS_APP_NAME, LVRS_QUICK_STYLE\n"
+                              "Static plugin:\n"
+                              "  LVRS_USE_STATIC_QML_PLUGIN is provided automatically for static builds.")
+                              .arg(programName);
+    qInfo().noquote() << usage;
+}
+
+bool parseSingleValueOption(
+    const QStringList &args,
+    int *index,
+    const QString &argument,
+    const QString &optionName,
+    QString *value,
+    bool *matched)
+{
+    *matched = false;
+    const QString inlinePrefix = optionName + QStringLiteral("=");
+
+    if (argument.startsWith(inlinePrefix)) {
+        *value = argument.sliced(inlinePrefix.size()).trimmed();
+        *matched = true;
+        return true;
     }
+
+    if (argument == optionName) {
+        const int nextIndex = *index + 1;
+        if (nextIndex >= args.size()) {
+            qCritical().noquote() << "Missing value for option:" << optionName;
+            return false;
+        }
+        *value = args.at(nextIndex).trimmed();
+        *index = nextIndex;
+        *matched = true;
+    }
+
+    return true;
 }
 
+bool parseLaunchConfig(const QStringList &args, LaunchConfig *config)
+{
+    for (int i = 1; i < args.size(); ++i) {
+        const QString argument = args.at(i).trimmed();
+        if (argument.isEmpty())
+            continue;
+
+        if (argument == QStringLiteral("--help") || argument == QStringLiteral("-h")) {
+            config->printHelp = true;
+            continue;
+        }
+
+        bool matched = false;
+
+        if (!parseSingleValueOption(args, &i, argument, QStringLiteral("--module"), &config->moduleUri, &matched))
+            return false;
+        if (matched)
+            continue;
+
+        if (!parseSingleValueOption(args, &i, argument, QStringLiteral("--root"), &config->rootObject, &matched))
+            return false;
+        if (matched)
+            continue;
+
+        if (!parseSingleValueOption(args, &i, argument, QStringLiteral("--app-name"), &config->appName, &matched))
+            return false;
+        if (matched)
+            continue;
+
+        if (!parseSingleValueOption(args, &i, argument, QStringLiteral("--style"), &config->quickStyle, &matched))
+            return false;
+        if (matched)
+            continue;
+
+        qWarning().noquote() << "Ignoring unknown option:" << argument;
+    }
+
+    return true;
 }
 
+} // namespace
+
+/*
+ * LVRS downstream app template entrypoint.
+ * This file is not built by the LVRS framework CMake target.
+ */
 int main(int argc, char *argv[])
 {
-    RenderQuality::configureGlobalDefaults();
+    QStringList args;
+    args.reserve(argc);
+    for (int i = 0; i < argc; ++i)
+        args.append(QString::fromLocal8Bit(argv[i]));
 
-    const lvrs::GraphicsBackendBootstrapResult backendBootstrap = lvrs::bootstrapPreferredGraphicsBackend();
-    if (!backendBootstrap.available) {
-        qCritical().noquote() << backendBootstrap.errorMessage;
+    LaunchConfig launchConfig;
+    launchConfig.appName = readEnvironmentOrDefault("LVRS_APP_NAME", launchConfig.appName);
+    launchConfig.quickStyle = readEnvironmentOrDefault("LVRS_QUICK_STYLE", launchConfig.quickStyle);
+    launchConfig.moduleUri = readEnvironmentOrDefault("LVRS_APP_MODULE_URI", launchConfig.moduleUri);
+    launchConfig.rootObject = readEnvironmentOrDefault("LVRS_APP_ROOT_OBJECT", launchConfig.rootObject);
+
+    if (!parseLaunchConfig(args, &launchConfig))
         return -1;
+
+    if (launchConfig.printHelp) {
+        printUsage(args.isEmpty() ? QStringLiteral("app") : args.first());
+        return 0;
     }
-    if (backendBootstrap.loaderName.isEmpty())
-        qInfo() << "LVRS graphics backend:" << backendBootstrap.backendName;
-    else
-        qInfo() << "LVRS graphics backend:" << backendBootstrap.backendName
-                << ", loader =" << backendBootstrap.loaderName;
 
-    QGuiApplication app(argc, argv);
-    app.setApplicationName(QStringLiteral("LVRS"));
-    loadBundledFonts();
-    FontPolicy::installPretendardFallbacks();
-    if (!FontPolicy::enforcePretendardFallback())
-        qWarning() << "Pretendard fallback could not be enforced.";
+    lvrs::QmlAppLaunchSpec launchSpec;
+    launchSpec.bootstrap.applicationName = launchConfig.appName;
+    launchSpec.bootstrap.quickStyleName = launchConfig.quickStyle;
+    launchSpec.moduleUri = launchConfig.moduleUri;
+    launchSpec.rootObject = launchConfig.rootObject;
 
-    QQmlApplicationEngine engine;
-    QObject::connect(
-        &engine,
-        &QQmlApplicationEngine::objectCreationFailed,
-        &app,
-        []() { QCoreApplication::exit(-1); },
-        Qt::QueuedConnection);
-
-    engine.loadFromModule(QStringLiteral("LVRSDemo"), QStringLiteral("Main"));
-
-    return app.exec();
+    return lvrs::runBootstrappedQmlApp(argc, argv, launchSpec);
 }

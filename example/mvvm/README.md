@@ -99,15 +99,16 @@ engine.load(QUrl("qrc:/qt/qml/Example/Main.qml"));
 ```qml
 import LVRS 1.0 as LV
 
-ApplicationWindow {
+LV.ApplicationWindow {
     property string viewId: "ExampleView"
     Component.onCompleted: LV.ViewModels.bindView(viewId, "Example", true)
     property var vm: LV.ViewModels.getForView(viewId)
 
     Column {
-        Text { text: vm ? ("Status: " + vm.status) : "No VM" }
-        Button {
+        LV.Label { text: vm ? ("Status: " + vm.status) : "No VM" }
+        LV.LabelButton {
             text: "Toggle"
+            tone: LV.AbstractButton.Primary
             onClicked: LV.ViewModels.updateProperty(viewId, "status",
                                                      vm.status === "Idle" ? "Working" : "Idle")
         }
@@ -213,15 +214,16 @@ engine.load(QUrl("qrc:/qt/qml/Example/Main.qml"));
 ```qml
 import LVRS 1.0 as LV
 
-ApplicationWindow {
+LV.ApplicationWindow {
     property string viewId: "ExampleView"
     Component.onCompleted: LV.ViewModels.bindView(viewId, "Example", true)
     property var vm: LV.ViewModels.getForView(viewId)
 
     Column {
-        Text { text: vm ? ("Status: " + vm.status) : "No VM" }
-        Button {
+        LV.Label { text: vm ? ("Status: " + vm.status) : "No VM" }
+        LV.LabelButton {
             text: "Toggle"
+            tone: LV.AbstractButton.Primary
             onClicked: LV.ViewModels.updateProperty(viewId, "status",
                                                      vm.status === "Idle" ? "Working" : "Idle")
         }

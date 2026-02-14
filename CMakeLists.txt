@@ -4,6 +4,8 @@ project(LVRS LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+option(LVRS_BUILD_SHARED_LIBS "Build LVRS as shared library for dynamic consumption" ON)
+
 find_package(Qt6 6.5 REQUIRED COMPONENTS Quick QuickControls2 Test Svg Network)
 find_package(Vulkan QUIET)
 include(CMakePackageConfigHelpers)
@@ -146,12 +148,24 @@ if(APPLE AND LVRS_FORCE_X86_QT_TOOLS)
     endif()
 endif()
 
-qt_add_library(LVRSCore STATIC)
+if(LVRS_BUILD_SHARED_LIBS)
+    set(_lvrs_library_type SHARED)
+else()
+    set(_lvrs_library_type STATIC)
+endif()
+
+qt_add_library(LVRSCore ${_lvrs_library_type})
 set_target_properties(LVRSCore PROPERTIES
     OUTPUT_NAME "LVRS"
     EXPORT_NAME "LVRS"
 )
 add_library(LVRS::LVRS ALIAS LVRSCore)
+
+set(LVRS_STATIC_QML_PLUGIN_REQUIRED OFF)
+if(NOT LVRS_BUILD_SHARED_LIBS)
+    set(LVRS_STATIC_QML_PLUGIN_REQUIRED ON)
+    target_compile_definitions(LVRSCore INTERFACE LVRS_USE_STATIC_QML_PLUGIN=1)
+endif()
 
 include(${CMAKE_CURRENT_LIST_DIR}/backend/CMakeLists.txt)
 include(${CMAKE_CURRENT_LIST_DIR}/qml/CMakeLists.txt)
@@ -237,56 +251,8 @@ target_link_libraries(LVRSCore
         Qt6::Network
 )
 
-option(LVRS_BUILD_DEMO "Build the LVRS demo application" ON)
 option(LVRS_BUILD_EXAMPLES "Build runnable example applications" ON)
 option(LVRS_BUILD_TESTS "Build LVRS tests" ON)
-
-if(LVRS_BUILD_DEMO)
-    qt_add_executable(LVRS
-        MANUAL_FINALIZATION
-        main.cpp
-    )
-
-    qt_add_qml_module(LVRS
-        URI LVRSDemo
-        VERSION 1.0
-        RESOURCE_PREFIX "/qt/qml"
-        OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/LVRSDemo"
-        QML_FILES
-            ${LVRS_DEMO_QML_FILES}
-    )
-
-    target_link_libraries(LVRS
-        PRIVATE
-            Qt6::Quick
-            Qt6::QuickControls2
-            LVRSCore
-            ${LVRS_VULKAN_TARGET}
-    )
-
-    set(_uifw_demo_macos_bundle OFF)
-    if(IOS)
-        set(_uifw_demo_macos_bundle ON)
-    endif()
-
-    set_target_properties(LVRS PROPERTIES
-        MACOSX_BUNDLE ${_uifw_demo_macos_bundle}
-        WIN32_EXECUTABLE TRUE
-        RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
-        OUTPUT_NAME "LVRS"
-    )
-
-    if(IOS)
-        set(LVRS_IOS_BUNDLE_ID "" CACHE STRING "Override iOS bundle identifier for LVRS demo")
-        if(LVRS_IOS_BUNDLE_ID)
-            set_target_properties(LVRS PROPERTIES
-                XCODE_ATTRIBUTE_PRODUCT_BUNDLE_IDENTIFIER "${LVRS_IOS_BUNDLE_ID}"
-            )
-        endif()
-    endif()
-
-    qt_finalize_executable(LVRS)
-endif()
 
 if(LVRS_BUILD_EXAMPLES)
     add_subdirectory(example)

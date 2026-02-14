@@ -1,34 +1,24 @@
-#include "backend/runtime/vulkanbootstrap.h"
+#include "backend/runtime/appentry.h"
 
-#include <QCoreApplication>
-#include <QGuiApplication>
-#include <QQuickStyle>
 #include <QQmlApplicationEngine>
 #include <QtPlugin>
 
 #include "backend/ExampleBootstrap.h"
 
+#if defined(LVRS_USE_STATIC_QML_PLUGIN)
 Q_IMPORT_PLUGIN(LVRSPlugin)
+#endif
 
 int main(int argc, char *argv[])
 {
-    if (!lvrs::bootstrapPreferredGraphicsBackend().available)
-        return -1;
+    lvrs::QmlAppLaunchSpec launchSpec;
+    launchSpec.bootstrap.applicationName = QStringLiteral("LVRSExampleMVVM");
+    launchSpec.bootstrap.quickStyleName = QStringLiteral("Basic");
+    launchSpec.moduleUri = QStringLiteral("ExampleMVVM");
+    launchSpec.rootObject = QStringLiteral("Main");
+    launchSpec.configureEngine = [](QQmlApplicationEngine &engine) {
+        setupExampleViewModel(&engine);
+    };
 
-    QQuickStyle::setStyle(QStringLiteral("Basic"));
-    QGuiApplication app(argc, argv);
-
-    QQmlApplicationEngine engine;
-    setupExampleViewModel(&engine);
-
-    QObject::connect(
-        &engine,
-        &QQmlApplicationEngine::objectCreationFailed,
-        &app,
-        []() { QCoreApplication::exit(-1); },
-        Qt::QueuedConnection);
-
-    engine.loadFromModule(QStringLiteral("ExampleMVVM"), QStringLiteral("Main"));
-
-    return app.exec();
+    return lvrs::runBootstrappedQmlApp(argc, argv, launchSpec);
 }

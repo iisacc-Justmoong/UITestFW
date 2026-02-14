@@ -11,6 +11,8 @@ Item {
     property bool enabled: true
     property int acceptedButtons: Qt.LeftButton
     property bool macControlClickAsRight: true
+    property int globalPressDedupMs: 24
+    property real globalPressDedupTolerancePx: 2.0
     property int contextDedupMs: 180
     property real contextDedupTolerancePx: 2.0
     property bool includeUiHit: true
@@ -19,6 +21,11 @@ Item {
     property double lastContextTimestamp: -1
     property real lastContextX: -1
     property real lastContextY: -1
+    property double lastGlobalPressTimestamp: -1
+    property real lastGlobalPressX: -1
+    property real lastGlobalPressY: -1
+    property int lastGlobalPressButtons: 0
+    property int lastGlobalPressModifiers: 0
 
     anchors.fill: parent
     visible: true
@@ -161,6 +168,26 @@ Item {
             && Math.abs(lastContextY - y) <= contextDedupTolerancePx
     }
 
+    function isDuplicateGlobalPress(x, y, buttons, modifiers, nowMs) {
+        if (lastGlobalPressTimestamp < 0)
+            return false
+        if ((nowMs - lastGlobalPressTimestamp) > globalPressDedupMs)
+            return false
+        if (Math.abs(lastGlobalPressX - x) > globalPressDedupTolerancePx)
+            return false
+        if (Math.abs(lastGlobalPressY - y) > globalPressDedupTolerancePx)
+            return false
+        return lastGlobalPressButtons === buttons && lastGlobalPressModifiers === modifiers
+    }
+
+    function rememberGlobalPress(x, y, buttons, modifiers, nowMs) {
+        lastGlobalPressTimestamp = nowMs
+        lastGlobalPressX = x
+        lastGlobalPressY = y
+        lastGlobalPressButtons = buttons
+        lastGlobalPressModifiers = modifiers
+    }
+
     function fireGlobalContext(x, y, buttons, modifiers, reason, source) {
         const nowMs = Date.now()
         if (root.isDuplicateContextEvent(x, y, nowMs))
@@ -197,6 +224,10 @@ Item {
         enabled: root.enabled && root.isGlobalPointerTrigger(root.trigger)
         function onMousePressed(x, y, buttons, modifiers) {
             if (root.trigger === "globalPressed") {
+                const nowMs = Date.now()
+                if (root.isDuplicateGlobalPress(x, y, buttons, modifiers, nowMs))
+                    return
+                root.rememberGlobalPress(x, y, buttons, modifiers, nowMs)
                 root.fire(root.globalMousePayload(x, y, buttons, modifiers))
                 return
             }

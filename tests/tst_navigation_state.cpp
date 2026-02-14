@@ -10,7 +10,9 @@
 #include "backend/navigation/viewstatetracker.h"
 #include "backend/state/viewmodelregistry.h"
 
+#if defined(LVRS_USE_STATIC_QML_PLUGIN)
 Q_IMPORT_PLUGIN(LVRSPlugin)
+#endif
 
 class MutableStatusModel : public QObject
 {

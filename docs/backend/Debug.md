@@ -2,18 +2,16 @@
 
 Location: `backend/runtime/debuglogger.h` / `backend/runtime/debuglogger.cpp`
 
-Debug logger singleton for QML and C++.
+`Debug`는 QML/C++ 공용 로거 singleton이며, 메모리 버퍼와 stdout 출력을 함께 제공한다.
 
-## Properties
-- `enabled` (bool)
+핵심 API:
 
-## Methods
 - `log(component, event, data?)`
 - `warn(component, event, data?)`
 - `error(component, event, data?)`
+- `entries(limit?)`, `filteredEntries(limit?)`, `summary()`
+- `attachRuntimeEvents()`, `detachRuntimeEvents()`
 
-## Usage
-```qml
-LV.Debug.enabled = true
-LV.Debug.log("AppCard", "created", { id: "card-1" })
-```
+정확한 출력 스키마와 필드 정의는 다음 문서를 기준으로 확인한다.
+
+- `docs/backend/DebugOutput.md`

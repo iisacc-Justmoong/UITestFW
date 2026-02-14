@@ -6,9 +6,14 @@ function(uifw_add_test test_name test_source)
             Qt6::Quick
             Qt6::QuickControls2
             LVRSCore
-            LVRSplugin
-            LVRSplugin_init
     )
+    if(LVRS_STATIC_QML_PLUGIN_REQUIRED)
+        target_link_libraries(${test_name}
+            PRIVATE
+                LVRSplugin
+                LVRSplugin_init
+        )
+    endif()
     add_test(NAME ${test_name} COMMAND ${test_name})
     set_tests_properties(${test_name} PROPERTIES
         ENVIRONMENT "QT_QPA_PLATFORM=offscreen;QT_QUICK_CONTROLS_STYLE=Basic"

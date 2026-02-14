@@ -1,11 +1,13 @@
 # LVRS
 
-LVRS is a Qt 6.5+ UI framework and reference application focused on deterministic rendering, event observability, and reusable QML components.
+LVRS is a Qt 6.5+ UI framework focused on deterministic rendering, event observability, and reusable QML components.
 
 The repository ships three layers together:
 - A reusable static QML module (`LVRS`) with components and C++ singletons.
-- A demo executable (`LVRS`) that acts as a visual catalog and runtime console.
+- Runnable example applications under `example/`, including the visual-catalog demo.
 - Tests covering event flow, text editing behavior, import API, and backend wiring.
+
+The framework target itself does not build an application executable; all runnable apps are example targets.
 
 ## Requirements
 
@@ -21,7 +23,6 @@ Configure:
 
 ```bash
 cmake -S . -B build \
-  -DLVRS_BUILD_DEMO=ON \
   -DLVRS_BUILD_EXAMPLES=ON \
   -DLVRS_BUILD_TESTS=ON
 ```
@@ -32,10 +33,11 @@ Build:
 cmake --build build -j
 ```
 
-Run demo executable:
+Run visual-catalog demo:
 
 ```bash
-./build/bin/LVRS
+cmake --build build --target LVRSExampleVisualCatalog
+./build/bin/LVRSExampleVisualCatalog
 ```
 
 Run tests:
@@ -46,7 +48,7 @@ ctest --test-dir build --output-on-failure
 
 ## Rendering Backend Policy
 
-At runtime, graphics backend selection is bootstrapped in `main.cpp` via `bootstrapPreferredGraphicsBackend()`.
+At runtime, graphics backend selection is bootstrapped through `backend/runtime/appbootstrap.*` from each app entrypoint.
 
 - Windows/Linux: Vulkan is selected and loader availability is validated.
 - macOS: Metal is selected first when Qt Metal support exists; Vulkan (MoltenVK) is fallback.
@@ -61,10 +63,12 @@ When enabled, configure fails if:
 
 ## Project Layout
 
-- `main.cpp`: app entrypoint, backend bootstrap, font loading.
 - `backend/`: C++ singletons (`RuntimeEvents`, `Backend`, `RenderMonitor`, `RenderQuality`, etc.).
+- `backend/runtime/appbootstrap.h`, `backend/runtime/appbootstrap.cpp`: reusable pre/post app bootstrap API for downstream apps.
 - `qml/`: QML module entry files and components.
-- `qml/Main.qml`: visual catalog with tab pages and EventListener runtime console.
+- `main.cpp`: downstream app template entrypoint (reference only, not built by framework CMake targets). CLI/env override로 `module/root/app-name/style`을 주입할 수 있다.
+- `example/VisualCatalog/main.cpp`: visual-catalog app entrypoint, backend bootstrap, font loading.
+- `example/VisualCatalog/qml/Main.qml`: visual catalog with tab pages and EventListener runtime console.
 - `resources/iconset/`: SVG icon source set used for theme accent extraction.
 - `tests/`: Qt tests for components and runtime services.
 - `docs/`: full technical documentation index.
@@ -81,7 +85,7 @@ The event system now centers on a daemon-style flow:
 
 ## Main Visual Catalog
 
-`qml/Main.qml` is no longer a single long preview page. It is a tab-oriented design-system console with dedicated pages for:
+`example/VisualCatalog/qml/Main.qml` is a tab-oriented design-system console with dedicated pages for:
 - Overview
 - Typography
 - EventListener console

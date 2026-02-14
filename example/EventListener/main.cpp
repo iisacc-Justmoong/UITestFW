@@ -1,30 +1,18 @@
-#include "backend/runtime/vulkanbootstrap.h"
+#include "backend/runtime/appentry.h"
 
-#include <QCoreApplication>
-#include <QGuiApplication>
-#include <QQuickStyle>
-#include <QQmlApplicationEngine>
 #include <QtPlugin>
 
+#if defined(LVRS_USE_STATIC_QML_PLUGIN)
 Q_IMPORT_PLUGIN(LVRSPlugin)
+#endif
 
 int main(int argc, char *argv[])
 {
-    if (!lvrs::bootstrapPreferredGraphicsBackend().available)
-        return -1;
+    lvrs::QmlAppLaunchSpec launchSpec;
+    launchSpec.bootstrap.applicationName = QStringLiteral("LVRSExampleEventListener");
+    launchSpec.bootstrap.quickStyleName = QStringLiteral("Basic");
+    launchSpec.moduleUri = QStringLiteral("ExampleEventListener");
+    launchSpec.rootObject = QStringLiteral("Main");
 
-    QQuickStyle::setStyle(QStringLiteral("Basic"));
-    QGuiApplication app(argc, argv);
-
-    QQmlApplicationEngine engine;
-    QObject::connect(
-        &engine,
-        &QQmlApplicationEngine::objectCreationFailed,
-        &app,
-        []() { QCoreApplication::exit(-1); },
-        Qt::QueuedConnection);
-
-    engine.loadFromModule(QStringLiteral("ExampleEventListener"), QStringLiteral("Main"));
-
-    return app.exec();
+    return lvrs::runBootstrappedQmlApp(argc, argv, launchSpec);
 }

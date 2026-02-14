@@ -9,9 +9,8 @@ Q_IMPORT_PLUGIN(LVRSPlugin)
 int main(int argc, char *argv[])
 {
     lvrs::QmlAppLaunchSpec launchSpec;
-    launchSpec.bootstrap.applicationName = QStringLiteral("LVRSExampleTypingPractice");
-    launchSpec.bootstrap.quickStyleName = QStringLiteral("Basic");
-    launchSpec.moduleUri = QStringLiteral("ExampleTypingPractice");
+    launchSpec.bootstrap.applicationName = QStringLiteral("LVRSExampleVisualCatalog");
+    launchSpec.moduleUri = QStringLiteral("ExampleVisualCatalog");
     launchSpec.rootObject = QStringLiteral("Main");
 
     return lvrs::runBootstrappedQmlApp(argc, argv, launchSpec);

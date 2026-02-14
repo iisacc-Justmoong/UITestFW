@@ -7,10 +7,6 @@ set(LVRS_QML_FILES
 
 set_source_files_properties(qml/Theme.qml PROPERTIES QT_QML_SINGLETON_TYPE TRUE)
 
-set(LVRS_DEMO_QML_FILES
-    qml/Main.qml
-)
-
 include(${CMAKE_CURRENT_LIST_DIR}/components/CMakeLists.txt)
 list(APPEND LVRS_QML_FILES ${LVRS_COMPONENT_QML_FILES})
 

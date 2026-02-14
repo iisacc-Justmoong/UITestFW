@@ -31,9 +31,15 @@ target_link_libraries(LVRSExampleTypingPractice
         Qt6::Quick
         Qt6::QuickControls2
         LVRSCore
-        LVRSplugin
-        LVRSplugin_init
 )
+
+if(LVRS_STATIC_QML_PLUGIN_REQUIRED)
+    target_link_libraries(LVRSExampleTypingPractice
+        PRIVATE
+            LVRSplugin
+            LVRSplugin_init
+    )
+endif()
 
 add_custom_target(run_LVRSExampleTypingPractice
     COMMAND $<TARGET_FILE:LVRSExampleTypingPractice>

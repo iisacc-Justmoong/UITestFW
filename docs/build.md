@@ -34,21 +34,22 @@ ctest --test-dir build --output-on-failure
 
 - `LVRS_BUILD_EXAMPLES` (`ON`): build runnable examples.
 - `LVRS_BUILD_TESTS` (`ON`): build and register tests.
-- `LVRS_ENFORCE_VULKAN` (`ON`): fail CMake configure when Vulkan-capable dependencies are missing.
+- `LVRS_ENFORCE_VULKAN` (`ON`): fail CMake configure when the platform-fixed graphics backend requirements are missing.
 - `LVRS_FORCE_X86_QT_TOOLS` (`OFF`): run Qt host tools through Rosetta when required.
 
 ## Rendering Backend Enforcement
 
 At configure time, when `LVRS_ENFORCE_VULKAN=ON`:
 
-- A linkable Vulkan runtime target must exist (`Vulkan::Vulkan`).
-- Qt Vulkan feature must be enabled (`QT_FEATURE_vulkan >= 0`).
+- macOS/iOS must provide Qt Metal support (`QT_FEATURE_metal >= 0`).
+- Windows/Linux/Android must provide Qt Vulkan support (`QT_FEATURE_vulkan >= 0`) and a linkable Vulkan runtime target (`Vulkan::Vulkan`).
 
 At runtime:
 
-- macOS prefers Metal, then Vulkan fallback.
-- Other platforms prefer Vulkan.
-- Startup fails fast if no backend can be initialized.
+- macOS/iOS are fixed to Metal.
+- Windows/Linux/Android are fixed to Vulkan.
+- Other platforms use Qt default backend selection as fallback.
+- Startup fails fast if a fixed backend cannot be initialized.
 
 ## Notes
 

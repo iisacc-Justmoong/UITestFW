@@ -50,16 +50,16 @@ ctest --test-dir build --output-on-failure
 
 At runtime, graphics backend selection is bootstrapped through `backend/runtime/appbootstrap.*` from each app entrypoint.
 
-- Windows/Linux: Vulkan is selected and loader availability is validated.
-- macOS: Metal is selected first when Qt Metal support exists; Vulkan (MoltenVK) is fallback.
-- If no usable backend is available, app startup fails fast with a clear error message.
+- macOS/iOS: Metal is fixed.
+- Windows/Linux/Android: Vulkan is fixed and runtime loader availability is validated on desktop Vulkan platforms.
+- Other platforms: Qt default backend selection is used as fallback.
+- If a fixed backend cannot be initialized, app startup fails fast with a clear error message.
 
-Build-time Vulkan enforcement is controlled by:
+Build-time backend enforcement is controlled by:
 - `LVRS_ENFORCE_VULKAN` (default `ON`)
 
 When enabled, configure fails if:
-- A linkable Vulkan runtime target is unavailable.
-- Qt was built without Vulkan support (`QT_FEATURE_vulkan < 0`).
+- The platform-fixed backend requirements are not satisfied (`QT_FEATURE_metal` for macOS/iOS, `QT_FEATURE_vulkan` and Vulkan runtime for Windows/Linux/Android).
 
 ## Project Layout
 

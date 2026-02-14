@@ -16,7 +16,7 @@ option(LVRS_FORCE_X86_QT_TOOLS "Force Qt host tools to run under x86_64 (Rosetta
 option(LVRS_ENABLE_APPLE_GL_LINK_SHIM "Provide a minimal AGL shim only for Apple linker compatibility" ON)
 option(LVRS_ENFORCE_VULKAN "Fail configure if Vulkan-capable Qt/runtime are unavailable" ON)
 
-function(_lvrs_detect_qt_vulkan_feature out_value out_header)
+function(_lvrs_detect_qt_feature feature_name out_value out_header)
     set(_lvrs_qtgui_config_header "")
     if(DEFINED Qt6Gui_DIR)
         get_filename_component(_lvrs_qt_lib_dir "${Qt6Gui_DIR}/../.." ABSOLUTE)
@@ -32,16 +32,24 @@ function(_lvrs_detect_qt_vulkan_feature out_value out_header)
         return()
     endif()
 
-    file(STRINGS "${_lvrs_qtgui_config_header}" _lvrs_vulkan_feature_line REGEX "^#define QT_FEATURE_vulkan ")
-    if(_lvrs_vulkan_feature_line MATCHES "(-?[0-9]+)$")
-        set(_lvrs_vulkan_feature "${CMAKE_MATCH_1}")
+    string(TOLOWER "${feature_name}" _lvrs_feature_name)
+    file(STRINGS "${_lvrs_qtgui_config_header}" _lvrs_feature_line REGEX "^#define QT_FEATURE_${_lvrs_feature_name} ")
+    if(_lvrs_feature_line MATCHES "(-?[0-9]+)$")
+        set(_lvrs_feature_value "${CMAKE_MATCH_1}")
     else()
-        set(_lvrs_vulkan_feature "")
+        set(_lvrs_feature_value "")
     endif()
 
-    set(${out_value} "${_lvrs_vulkan_feature}" PARENT_SCOPE)
+    set(${out_value} "${_lvrs_feature_value}" PARENT_SCOPE)
     set(${out_header} "${_lvrs_qtgui_config_header}" PARENT_SCOPE)
 endfunction()
+
+set(LVRS_FORCED_BACKEND "default")
+if(CMAKE_SYSTEM_NAME STREQUAL "Darwin" OR CMAKE_SYSTEM_NAME STREQUAL "iOS")
+    set(LVRS_FORCED_BACKEND "metal")
+elseif(WIN32 OR ANDROID OR CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    set(LVRS_FORCED_BACKEND "vulkan")
+endif()
 
 if(APPLE AND LVRS_ENABLE_APPLE_GL_LINK_SHIM)
     if(NOT EXISTS "/System/Library/Frameworks/AGL.framework/AGL")
@@ -206,39 +214,55 @@ if(TARGET LVRSCoreplugin_init)
     add_library(LVRSplugin_init ALIAS LVRSCoreplugin_init)
 endif()
 
-if(TARGET Vulkan::Headers)
-    set(LVRS_VULKAN_TARGET Vulkan::Headers)
-elseif(TARGET Vulkan::Vulkan)
-    set(LVRS_VULKAN_TARGET Vulkan::Vulkan)
-else()
-    find_path(LVRS_VULKAN_INCLUDE_DIR NAMES vulkan/vulkan.h)
-    if(NOT LVRS_VULKAN_INCLUDE_DIR)
-        message(FATAL_ERROR "Vulkan headers are required, but vulkan/vulkan.h could not be found.")
+if(LVRS_FORCED_BACKEND STREQUAL "vulkan")
+    if(TARGET Vulkan::Headers)
+        set(LVRS_VULKAN_TARGET Vulkan::Headers)
+    elseif(TARGET Vulkan::Vulkan)
+        set(LVRS_VULKAN_TARGET Vulkan::Vulkan)
+    else()
+        find_path(LVRS_VULKAN_INCLUDE_DIR NAMES vulkan/vulkan.h)
+        if(NOT LVRS_VULKAN_INCLUDE_DIR)
+            message(FATAL_ERROR "Vulkan headers are required on this platform, but vulkan/vulkan.h could not be found.")
+        endif()
+        add_library(LVRSVulkanHeaders INTERFACE)
+        target_include_directories(LVRSVulkanHeaders INTERFACE "${LVRS_VULKAN_INCLUDE_DIR}")
+        add_library(Vulkan::Headers ALIAS LVRSVulkanHeaders)
+        set(LVRS_VULKAN_TARGET Vulkan::Headers)
+        message(STATUS "Using header-only Vulkan dependency from: ${LVRS_VULKAN_INCLUDE_DIR}")
     endif()
-    add_library(LVRSVulkanHeaders INTERFACE)
-    target_include_directories(LVRSVulkanHeaders INTERFACE "${LVRS_VULKAN_INCLUDE_DIR}")
-    add_library(Vulkan::Headers ALIAS LVRSVulkanHeaders)
-    set(LVRS_VULKAN_TARGET Vulkan::Headers)
-    message(STATUS "Using header-only Vulkan dependency from: ${LVRS_VULKAN_INCLUDE_DIR}")
 endif()
 
 if(LVRS_ENFORCE_VULKAN)
-    if(NOT TARGET Vulkan::Vulkan)
-        message(FATAL_ERROR
-            "LVRS_ENFORCE_VULKAN=ON requires a linkable Vulkan runtime target (Vulkan::Vulkan). "
-            "Current configure only resolved header-only Vulkan.")
-    endif()
+    if(LVRS_FORCED_BACKEND STREQUAL "vulkan")
+        if(NOT TARGET Vulkan::Vulkan)
+            message(FATAL_ERROR
+                "LVRS_ENFORCE_VULKAN=ON requires a linkable Vulkan runtime target (Vulkan::Vulkan) on this platform. "
+                "Current configure only resolved header-only Vulkan.")
+        endif()
 
-    _lvrs_detect_qt_vulkan_feature(_lvrs_qt_vulkan_feature _lvrs_qtgui_config_header)
-    if(_lvrs_qt_vulkan_feature STREQUAL "")
-        message(FATAL_ERROR
-            "LVRS_ENFORCE_VULKAN=ON but QT_FEATURE_vulkan could not be resolved from qtgui-config.h.")
-    endif()
+        _lvrs_detect_qt_feature(vulkan _lvrs_qt_vulkan_feature _lvrs_qtgui_config_header)
+        if(_lvrs_qt_vulkan_feature STREQUAL "")
+            message(FATAL_ERROR
+                "LVRS_ENFORCE_VULKAN=ON but QT_FEATURE_vulkan could not be resolved from qtgui-config.h.")
+        endif()
 
-    if(_lvrs_qt_vulkan_feature LESS 0)
-        message(FATAL_ERROR
-            "LVRS_ENFORCE_VULKAN=ON but this Qt build has QT_FEATURE_vulkan=${_lvrs_qt_vulkan_feature} "
-            "(${_lvrs_qtgui_config_header}). Install/rebuild Qt with Vulkan support.")
+        if(_lvrs_qt_vulkan_feature LESS 0)
+            message(FATAL_ERROR
+                "LVRS_ENFORCE_VULKAN=ON but this Qt build has QT_FEATURE_vulkan=${_lvrs_qt_vulkan_feature} "
+                "(${_lvrs_qtgui_config_header}). Install/rebuild Qt with Vulkan support.")
+        endif()
+    elseif(LVRS_FORCED_BACKEND STREQUAL "metal")
+        _lvrs_detect_qt_feature(metal _lvrs_qt_metal_feature _lvrs_qtgui_config_header)
+        if(_lvrs_qt_metal_feature STREQUAL "")
+            message(FATAL_ERROR
+                "LVRS_ENFORCE_VULKAN=ON but QT_FEATURE_metal could not be resolved from qtgui-config.h.")
+        endif()
+
+        if(_lvrs_qt_metal_feature LESS 0)
+            message(FATAL_ERROR
+                "LVRS_ENFORCE_VULKAN=ON and this platform requires Metal, but this Qt build has QT_FEATURE_metal=${_lvrs_qt_metal_feature} "
+                "(${_lvrs_qtgui_config_header}). Install/rebuild Qt with Metal support.")
+        endif()
     endif()
 endif()
 

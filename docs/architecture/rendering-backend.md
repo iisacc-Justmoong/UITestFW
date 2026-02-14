@@ -13,24 +13,28 @@ If bootstrap returns unavailable, app exits with error.
 
 ## Platform Rules
 
-### macOS
+### macOS / iOS
 
-- Prefer Metal when `QT_FEATURE_metal > 0`.
-- If Metal unavailable but Qt Vulkan is enabled, try Vulkan fallback (MoltenVK).
-- Vulkan fallback attempts loader discovery (`QT_VULKAN_LIB`, Homebrew paths, default symbols).
+- Fixed to Metal.
+- If Qt Metal support is unavailable, bootstrap fails immediately.
 
-### Windows / Linux
+### Windows / Linux / Android
 
-- Prefer Vulkan.
-- Runtime checks loader availability before startup continues.
+- Fixed to Vulkan.
+- Desktop Vulkan platforms validate loader availability before startup continues.
+
+### Other platforms
+
+- No forced backend.
+- Qt default backend selection is used.
 
 ## Build-Time Enforcement
 
 `CMakeLists.txt` provides `LVRS_ENFORCE_VULKAN` (default `ON`).
 
 When enabled:
-- Configure fails if no linkable Vulkan runtime target exists.
-- Configure fails if Qt was built without Vulkan support.
+- On macOS/iOS, configure fails if Qt Metal support is unavailable.
+- On Windows/Linux/Android, configure fails if Vulkan runtime/feature requirements are unavailable.
 
 This enforcement is intentionally strict to surface deployment misconfiguration early.
 
@@ -40,7 +44,7 @@ On startup, LVRS logs backend and loader:
 - `LVRS graphics backend: metal`
 - `LVRS graphics backend: vulkan, loader = ...`
 
-When backend cannot be initialized, error text includes next-step guidance (for example MoltenVK loader hints).
+When a fixed backend cannot be initialized, error text includes next-step guidance.
 
 ## Related Components
 

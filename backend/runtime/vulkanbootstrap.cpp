@@ -59,10 +59,15 @@ QStringList buildVulkanLoaderCandidates()
     candidates.append("vulkan");
     candidates.append("libvulkan.1");
     candidates.append("libMoltenVK");
+#elif defined(Q_OS_ANDROID)
+    candidates.append("libvulkan.so");
+    candidates.append("libvulkan.so.1");
+    candidates.append("vulkan");
 #elif defined(Q_OS_WIN)
     candidates.append("vulkan-1");
 #else
     candidates.append("vulkan");
+    candidates.append("libvulkan.so");
     candidates.append("libvulkan.so.1");
 #endif
 
@@ -109,7 +114,7 @@ GraphicsBackendBootstrapResult bootstrapPreferredGraphicsBackend()
 
     qputenv("QSG_RHI_PREFER_SOFTWARE_RENDERER", QByteArrayLiteral("0"));
 
-#if defined(Q_OS_MACOS)
+#if defined(Q_OS_MACOS) || defined(Q_OS_IOS)
 #if defined(QT_FEATURE_metal) && QT_FEATURE_metal > 0
     qputenv("QSG_RHI_BACKEND", QByteArrayLiteral("metal"));
     QQuickWindow::setGraphicsApi(QSGRendererInterface::Metal);
@@ -118,15 +123,28 @@ GraphicsBackendBootstrapResult bootstrapPreferredGraphicsBackend()
     return result;
 #endif
 
+    result.errorMessage =
+        QStringLiteral("Metal backend is required on macOS/iOS, but this Qt build has no Metal support.");
+    return result;
+
+#elif defined(Q_OS_WIN) || defined(Q_OS_LINUX) || defined(Q_OS_ANDROID)
 #if defined(QT_FEATURE_vulkan) && QT_FEATURE_vulkan > 0
     qputenv("QSG_RHI_BACKEND", QByteArrayLiteral("vulkan"));
     QQuickWindow::setGraphicsApi(QSGRendererInterface::Vulkan);
 
+#if defined(Q_OS_ANDROID)
+    result.available = true;
+    result.backendName = QStringLiteral("vulkan");
+    result.loaderName = QStringLiteral("system");
+    return result;
+#else
     if (qEnvironmentVariableIsEmpty("VK_ICD_FILENAMES")) {
+#if defined(Q_OS_MACOS)
         if (QFileInfo::exists("/opt/homebrew/etc/vulkan/icd.d/MoltenVK_icd.json"))
             qputenv("VK_ICD_FILENAMES", QByteArrayLiteral("/opt/homebrew/etc/vulkan/icd.d/MoltenVK_icd.json"));
         else if (QFileInfo::exists("/usr/local/etc/vulkan/icd.d/MoltenVK_icd.json"))
             qputenv("VK_ICD_FILENAMES", QByteArrayLiteral("/usr/local/etc/vulkan/icd.d/MoltenVK_icd.json"));
+#endif
     }
 
     QString lastError;
@@ -139,39 +157,23 @@ GraphicsBackendBootstrapResult bootstrapPreferredGraphicsBackend()
     }
 
     result.errorMessage =
-        QStringLiteral("Metal is unavailable and Vulkan fallback initialization failed. Install MoltenVK and set QT_VULKAN_LIB to libMoltenVK.dylib.");
+        QStringLiteral("Vulkan backend is required on this platform. Install Vulkan runtime and set QT_VULKAN_LIB appropriately.");
     if (!lastError.isEmpty())
         result.errorMessage += QStringLiteral(" Last loader error: %1").arg(lastError);
     return result;
-#else
-    result.errorMessage =
-        QStringLiteral("This Qt build does not include Metal or Vulkan support on macOS.");
-    return result;
 #endif
 #else
-#if defined(QT_FEATURE_vulkan) && QT_FEATURE_vulkan > 0
-    qputenv("QSG_RHI_BACKEND", QByteArrayLiteral("vulkan"));
-    QQuickWindow::setGraphicsApi(QSGRendererInterface::Vulkan);
-
-    QString lastError;
-    QString loaderName;
-    if (tryLoadVulkanRuntime(&loaderName, &lastError)) {
-        result.available = true;
-        result.backendName = QStringLiteral("vulkan");
-        result.loaderName = loaderName;
-        return result;
-    }
-
     result.errorMessage =
-        QStringLiteral("No Vulkan loader found. Install Vulkan runtime and set QT_VULKAN_LIB appropriately.");
-    if (!lastError.isEmpty())
-        result.errorMessage += QStringLiteral(" Last loader error: %1").arg(lastError);
-    return result;
-#else
-    result.errorMessage =
-        QStringLiteral("This Qt build does not include Vulkan support.");
+        QStringLiteral("Vulkan backend is required on this platform, but this Qt build has no Vulkan support.");
     return result;
 #endif
+
+#else
+    qunsetenv("QSG_RHI_BACKEND");
+    QQuickWindow::setGraphicsApi(QSGRendererInterface::Unknown);
+    result.available = true;
+    result.backendName = QStringLiteral("default");
+    return result;
 #endif
 }
 }

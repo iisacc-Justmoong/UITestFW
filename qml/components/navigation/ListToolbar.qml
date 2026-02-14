@@ -107,5 +107,5 @@ Item {
 }
 
 // API usage (external):
-// import LVRS 1.0 as UIF
-// UIF.ListToolbar { icon1: "iconname"; icon2: "qrc:/.../icon.svg"; icon3: "iconname" }
+// import LVRS 1.0 as LV
+// LV.ListToolbar { icon1: "iconname"; icon2: "qrc:/.../icon.svg"; icon3: "iconname" }

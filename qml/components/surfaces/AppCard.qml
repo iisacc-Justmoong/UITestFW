@@ -78,5 +78,5 @@ Rectangle {
 }
 
 // API usage (external):
-// import LVRS 1.0 as UIF
-// UIF.AppCard { title: "Summary"; subtitle: "Detail" }
+// import LVRS 1.0 as LV
+// LV.AppCard { title: "Summary"; subtitle: "Detail" }

@@ -1,5 +1,5 @@
 import QtQuick
-import LVRS 1.0 as UIF
+import LVRS 1.0 as LV
 
 Rectangle {
     id: root
@@ -8,17 +8,17 @@ Rectangle {
 
     width: 240
     height: 40
-    radius: UIF.Theme.radiusSm
-    color: UIF.Theme.subSurface
+    radius: LV.Theme.radiusSm
+    color: LV.Theme.subSurface
     property string lastMessage: "Press Enter"
 
-    UIF.Label {
+    LV.Label {
         anchors.centerIn: parent
         text: root.lastMessage
         style: body
     }
 
-    UIF.EventListener {
+    LV.EventListener {
         trigger: "keyPressed"
         action: (event) => {
             const readable = event.text && event.text.length > 0
@@ -29,7 +29,7 @@ Rectangle {
         }
     }
 
-    UIF.EventListener {
+    LV.EventListener {
         trigger: "keyReleased"
         action: (event) => {
             const readable = event.text && event.text.length > 0

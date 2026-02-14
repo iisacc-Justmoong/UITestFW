@@ -132,5 +132,5 @@ Controls.ApplicationWindow {
 }
 
 // API usage (external):
-// import LVRS as UIF
-// UIF.ApplicationWindow { title: "App" }
+// import LVRS as LV
+// LV.ApplicationWindow { title: "App" }

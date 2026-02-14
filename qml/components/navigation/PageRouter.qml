@@ -556,7 +556,7 @@ Item {
 }
 
 // API usage (external):
-// import LVRS 1.0 as UIF
-// UIF.PageRouter {
+// import LVRS 1.0 as LV
+// LV.PageRouter {
 //     routes: [{ path: "/", component: homePage, viewModelKey: "OverviewVM", writable: true }]
 // }

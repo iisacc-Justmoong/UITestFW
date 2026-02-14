@@ -5,7 +5,10 @@
 #include <QDebug>
 #include <QFontDatabase>
 #include <QGuiApplication>
+#include <QLibrary>
+#include <QQuickWindow>
 #include <QQmlApplicationEngine>
+#include <QSGRendererInterface>
 #include <QtPlugin>
 
 Q_IMPORT_PLUGIN(LVRSPlugin)
@@ -30,12 +33,27 @@ void loadBundledFonts()
             qWarning() << "Failed to load bundled font:" << fontResource;
     }
 }
+
+void configureGraphicsBackend()
+{
+    QLibrary vulkanLoader(QStringLiteral("vulkan"));
+    if (vulkanLoader.load()) {
+        vulkanLoader.unload();
+        QQuickWindow::setGraphicsApi(QSGRendererInterface::Vulkan);
+        qInfo() << "LVRS graphics backend preference: Vulkan";
+        return;
+    }
+
+    QQuickWindow::setGraphicsApi(QSGRendererInterface::OpenGL);
+    qWarning() << "LVRS graphics backend fallback: OpenGL";
+}
 }
 
 int main(int argc, char *argv[])
 {
     RenderQuality::configureGlobalDefaults();
     QGuiApplication app(argc, argv);
+    configureGraphicsBackend();
     app.setApplicationName(QStringLiteral("LVRS"));
     loadBundledFonts();
     FontPolicy::installPretendardFallbacks();

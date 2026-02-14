@@ -445,5 +445,5 @@ Item {
 }
 
 // API usage (external):
-// import LVRS 1.0 as UIF
-// UIF.AppScaffold { headerTitle: "LVRS"; navModel: ["Overview"] }
+// import LVRS 1.0 as LV
+// LV.AppScaffold { headerTitle: "LVRS"; navModel: ["Overview"] }

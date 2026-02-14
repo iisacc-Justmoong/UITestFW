@@ -151,5 +151,5 @@ QtObject {
 }
 
 // API usage (external):
-// import LVRS 1.0 as UIF
-// UIF.Navigator.go("/reports")
+// import LVRS 1.0 as LV
+// LV.Navigator.go("/reports")

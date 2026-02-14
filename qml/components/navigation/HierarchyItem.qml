@@ -203,5 +203,5 @@ AbstractButton {
 }
 
 // API usage (external):
-// import LVRS 1.0 as UIF
-// UIF.HierarchyItem { label: "Main Camera"; iconGlyph: "■"; indentLevel: 1; showChevron: true }
+// import LVRS 1.0 as LV
+// LV.HierarchyItem { label: "Main Camera"; iconGlyph: "■"; indentLevel: 1; showChevron: true }

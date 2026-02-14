@@ -13,13 +13,21 @@ Controls.Menu {
     property bool autoCloseOnTrigger: true
     property color menuColor: Theme.contextMenuSurface
     property color dividerColor: Theme.contextMenuDivider
+    property real menuOpacity: 0.5
+    readonly property color resolvedMenuColor:
+        Qt.rgba(menuColor.r, menuColor.g, menuColor.b, Math.max(0.0, Math.min(menuOpacity, 1.0)))
 
     signal itemTriggered(int index, var item)
 
-    modal: false
+    modal: true
+    dim: false
     focus: true
     padding: Theme.gap4
-    closePolicy: Controls.Popup.CloseOnEscape | Controls.Popup.CloseOnPressOutside | Controls.Popup.CloseOnPressOutsideParent
+    closePolicy: Controls.Popup.CloseOnEscape
+        | Controls.Popup.CloseOnPressOutside
+        | Controls.Popup.CloseOnPressOutsideParent
+        | Controls.Popup.CloseOnReleaseOutside
+        | Controls.Popup.CloseOnReleaseOutsideParent
     parent: Controls.Overlay.overlay
 
     readonly property int entryCount: {
@@ -137,7 +145,7 @@ Controls.Menu {
 
     background: Rectangle {
         radius: Theme.radiusSm
-        color: control.menuColor
+        color: control.resolvedMenuColor
         antialiasing: true
     }
 
@@ -193,5 +201,5 @@ Controls.Menu {
 }
 
 // API usage (external):
-// import LVRS 1.0 as UIF
-// UIF.ContextMenu { items: [{ icon: "iconname", label: "Open", key: "cmd+o" }, { type: "divider" }, { icon: "iconname", label: "Share", key: "cmd+s", hasSubmenu: true }] }
+// import LVRS 1.0 as LV
+// LV.ContextMenu { items: [{ icon: "iconname", label: "Open", key: "cmd+o" }, { type: "divider" }, { icon: "iconname", label: "Share", key: "cmd+s", hasSubmenu: true }] }

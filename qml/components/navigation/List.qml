@@ -139,5 +139,5 @@ Item {
 }
 
 // API usage (external):
-// import LVRS 1.0 as UIF
-// UIF.List { toolbarIcon1: "iconname"; toolbarIcon2: "iconname"; toolbarIcon3: "iconname"; items: [{label: "Item"}] }
+// import LVRS 1.0 as LV
+// LV.List { toolbarIcon1: "iconname"; toolbarIcon2: "iconname"; toolbarIcon3: "iconname"; items: [{label: "Item"}] }

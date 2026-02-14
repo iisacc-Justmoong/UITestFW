@@ -25,5 +25,5 @@ Item {
 }
 
 // API usage (external):
-// import LVRS 1.0 as UIF
-// UIF.MenuDivider { }
+// import LVRS 1.0 as LV
+// LV.MenuDivider { }

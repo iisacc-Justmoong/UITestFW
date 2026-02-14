@@ -1,5 +1,5 @@
 import QtQuick
-import LVRS 1.0 as UIF
+import LVRS 1.0 as LV
 
 Item {
     id: root
@@ -9,13 +9,13 @@ Item {
     implicitWidth: triggerButton.implicitWidth
     implicitHeight: triggerButton.implicitHeight
 
-    UIF.LabelButton {
+    LV.LabelButton {
         id: triggerButton
         text: "Click me"
-        tone: UIF.AbstractButton.Default
+        tone: LV.AbstractButton.Default
     }
 
-    UIF.EventListener {
+    LV.EventListener {
         trigger: "clicked"
         action: () => root.eventRaised("clicked", "LabelButton clicked")
     }

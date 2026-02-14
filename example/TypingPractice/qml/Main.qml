@@ -1,7 +1,7 @@
 import QtQuick
-import LVRS 1.0 as UIF
+import LVRS 1.0 as LV
 
-UIF.ApplicationWindow {
+LV.ApplicationWindow {
     id: root
 
     visible: true
@@ -107,7 +107,7 @@ UIF.ApplicationWindow {
     Flickable {
         id: scrollArea
         anchors.fill: parent
-        anchors.margins: UIF.Theme.gap24
+        anchors.margins: LV.Theme.gap24
         clip: true
         contentWidth: width
         contentHeight: contentColumn.implicitHeight
@@ -115,9 +115,9 @@ UIF.ApplicationWindow {
         Column {
             id: contentColumn
             width: scrollArea.width
-            spacing: UIF.Theme.gap12
+            spacing: LV.Theme.gap12
 
-            UIF.AppCard {
+            LV.AppCard {
                 id: targetCard
                 width: parent.width
                 title: "Target Sentence"
@@ -125,16 +125,16 @@ UIF.ApplicationWindow {
 
                 Column {
                     width: targetCard.width - (targetCard.cardPadding * 2)
-                    spacing: UIF.Theme.gap10
+                    spacing: LV.Theme.gap10
 
-                    UIF.Label {
+                    LV.Label {
                         width: parent.width
                         style: body
                         wrapMode: Text.WordWrap
                         text: root.targetText
                     }
 
-                    UIF.ProgressBar {
+                    LV.ProgressBar {
                         width: parent.width
                         size: regular
                         startValue: 0
@@ -142,7 +142,7 @@ UIF.ApplicationWindow {
                         currentValue: root.progressChars
                     }
 
-                    UIF.Label {
+                    LV.Label {
                         width: parent.width
                         style: caption
                         text: "진행: " + root.progressChars + " / " + root.targetLength
@@ -150,7 +150,7 @@ UIF.ApplicationWindow {
                 }
             }
 
-            UIF.AppCard {
+            LV.AppCard {
                 id: inputCard
                 width: parent.width
                 title: "Typing Input"
@@ -158,9 +158,9 @@ UIF.ApplicationWindow {
 
                 Column {
                     width: inputCard.width - (inputCard.cardPadding * 2)
-                    spacing: UIF.Theme.gap10
+                    spacing: LV.Theme.gap10
 
-                    UIF.InputField {
+                    LV.InputField {
                         id: typingInput
                         width: parent.width
                         enabled: root.running && !root.roundFinished
@@ -170,31 +170,31 @@ UIF.ApplicationWindow {
                     }
 
                     Row {
-                        spacing: UIF.Theme.gap8
+                        spacing: LV.Theme.gap8
 
-                        UIF.LabelButton {
+                        LV.LabelButton {
                             text: root.running ? "Running" : "Start"
-                            tone: UIF.AbstractButton.Primary
+                            tone: LV.AbstractButton.Primary
                             enabled: !root.running
                             onClicked: root.startRound()
                         }
 
-                        UIF.LabelButton {
+                        LV.LabelButton {
                             text: "Reset"
-                            tone: UIF.AbstractButton.Default
+                            tone: LV.AbstractButton.Default
                             enabled: !root.running
                             onClicked: root.resetRound()
                         }
 
-                        UIF.LabelButton {
+                        LV.LabelButton {
                             text: "Next Text"
-                            tone: UIF.AbstractButton.Default
+                            tone: LV.AbstractButton.Default
                             enabled: !root.running
                             onClicked: root.nextText()
                         }
                     }
 
-                    UIF.Label {
+                    LV.Label {
                         width: parent.width
                         style: description
                         wrapMode: Text.WordWrap
@@ -203,7 +203,7 @@ UIF.ApplicationWindow {
                 }
             }
 
-            UIF.AppCard {
+            LV.AppCard {
                 id: metricsCard
                 width: parent.width
                 title: "Metrics"
@@ -211,28 +211,28 @@ UIF.ApplicationWindow {
 
                 Column {
                     width: metricsCard.width - (metricsCard.cardPadding * 2)
-                    spacing: UIF.Theme.gap8
+                    spacing: LV.Theme.gap8
 
                     Row {
-                        spacing: UIF.Theme.gap8
-                        UIF.Label { style: body; text: "Elapsed: " + root.elapsedSeconds + "s" }
-                        UIF.Label { style: body; text: "Rounds: " + root.completedRounds }
+                        spacing: LV.Theme.gap8
+                        LV.Label { style: body; text: "Elapsed: " + root.elapsedSeconds + "s" }
+                        LV.Label { style: body; text: "Rounds: " + root.completedRounds }
                     }
 
                     Row {
-                        spacing: UIF.Theme.gap8
-                        UIF.Label { style: body; text: "Correct: " + root.correctChars }
-                        UIF.Label { style: body; text: "Wrong: " + root.wrongChars }
+                        spacing: LV.Theme.gap8
+                        LV.Label { style: body; text: "Correct: " + root.correctChars }
+                        LV.Label { style: body; text: "Wrong: " + root.wrongChars }
                     }
 
                     Row {
-                        spacing: UIF.Theme.gap8
-                        UIF.Label { style: body; text: "Accuracy: " + root.roundValue(root.accuracy) + "%" }
-                        UIF.Label { style: body; text: "WPM: " + root.roundValue(root.wpm) }
-                        UIF.Label { style: body; text: "CPM: " + root.roundValue(root.cpm) }
+                        spacing: LV.Theme.gap8
+                        LV.Label { style: body; text: "Accuracy: " + root.roundValue(root.accuracy) + "%" }
+                        LV.Label { style: body; text: "WPM: " + root.roundValue(root.wpm) }
+                        LV.Label { style: body; text: "CPM: " + root.roundValue(root.cpm) }
                     }
 
-                    UIF.Label {
+                    LV.Label {
                         width: parent.width
                         style: caption
                         wrapMode: Text.WordWrap

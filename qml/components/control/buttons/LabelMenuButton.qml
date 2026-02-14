@@ -69,5 +69,5 @@ AbstractButton {
 }
 
 // API usage (external):
-// import LVRS 1.0 as UIF
-// UIF.LabelMenuButton { text: "Open"; tone: UIF.AbstractButton.Default }
+// import LVRS 1.0 as LV
+// LV.LabelMenuButton { text: "Open"; tone: LV.AbstractButton.Default }

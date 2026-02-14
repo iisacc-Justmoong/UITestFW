@@ -258,5 +258,5 @@ FocusScope {
 }
 
 // API usage (external):
-// import LVRS 1.0 as UIF
-// UIF.TextEditor { mode: plainTextMode; text: "Hello **bold**"; onSubmitted: save(text) }
+// import LVRS 1.0 as LV
+// LV.TextEditor { mode: plainTextMode; text: "Hello **bold**"; onSubmitted: save(text) }

@@ -107,5 +107,5 @@ Controls.Switch {
 }
 
 // API usage (external):
-// import LVRS 1.0 as UIF
-// UIF.ToggleSwitch { checked: true }
+// import LVRS 1.0 as LV
+// LV.ToggleSwitch { checked: true }

@@ -148,5 +148,5 @@ Item {
 }
 
 // API usage (external):
-// import LVRS 1.0 as UIF
-// UIF.HierarchyToolbar { UIF.ToolbarButton { buttonId: 1 } UIF.ToolbarButton { buttonId: 2 } }
+// import LVRS 1.0 as LV
+// LV.HierarchyToolbar { LV.ToolbarButton { buttonId: 1 } LV.ToolbarButton { buttonId: 2 } }

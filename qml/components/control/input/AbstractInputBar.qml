@@ -181,5 +181,5 @@ FocusScope {
 }
 
 // API usage (external):
-// import LVRS 1.0 as UIF
-// UIF.AbstractInputBar { placeholderText: "Search"; leadingItems: UIF.Label { text: "⌕"; style: body } }
+// import LVRS 1.0 as LV
+// LV.AbstractInputBar { placeholderText: "Search"; leadingItems: LV.Label { text: "⌕"; style: body } }

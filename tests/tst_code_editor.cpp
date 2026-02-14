@@ -26,7 +26,7 @@ void CodeEditorTests::code_editor_default_contract_and_utility_api()
 
     const QByteArray qml = R"(
 import QtQuick
-import LVRS as UIF
+import LVRS as LV
 
 Item {
     id: root
@@ -37,11 +37,11 @@ Item {
         && editor.showSnippetHeader
         && editor.wrapMode === TextEdit.NoWrap
         && editor.textFormat === TextEdit.PlainText
-        && editor.fontPixelSize === UIF.Theme.textBody
+        && editor.fontPixelSize === LV.Theme.textBody
         && editor.backgroundColorFocused === editor.backgroundColor
         && editor.backgroundColorDisabled === editor.backgroundColor
 
-    UIF.CodeEditor {
+    LV.CodeEditor {
         id: editor
         objectName: "codeEditor"
         width: 460
@@ -75,9 +75,9 @@ void CodeEditorTests::code_editor_submit_signal_and_fixed_plain_text_mode()
 
     const QByteArray qml = R"(
 import QtQuick
-import LVRS as UIF
+import LVRS as LV
 
-UIF.ApplicationWindow {
+LV.ApplicationWindow {
     id: root
     width: 640
     height: 420
@@ -91,7 +91,7 @@ UIF.ApplicationWindow {
     property bool fixedModeReady: editor.wrapMode === TextEdit.NoWrap
         && editor.textFormat === TextEdit.PlainText
 
-    UIF.CodeEditor {
+    LV.CodeEditor {
         id: editor
         objectName: "codeEditor"
         anchors.fill: parent

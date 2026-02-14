@@ -1,5 +1,5 @@
 import QtQuick
-import LVRS 1.0 as UIF
+import LVRS 1.0 as LV
 
 Item {
     id: root
@@ -10,13 +10,13 @@ Item {
     implicitHeight: holdButton.implicitHeight
     property bool pressedNow: false
 
-    UIF.LabelButton {
+    LV.LabelButton {
         id: holdButton
         text: "Hold"
-        tone: root.pressedNow ? UIF.AbstractButton.Primary : UIF.AbstractButton.Default
+        tone: root.pressedNow ? LV.AbstractButton.Primary : LV.AbstractButton.Default
     }
 
-    UIF.EventListener {
+    LV.EventListener {
         trigger: "pressed"
         action: () => {
             root.pressedNow = true
@@ -24,7 +24,7 @@ Item {
         }
     }
 
-    UIF.EventListener {
+    LV.EventListener {
         trigger: "released"
         action: () => {
             root.pressedNow = false

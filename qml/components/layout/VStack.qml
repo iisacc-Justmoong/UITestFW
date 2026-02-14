@@ -112,5 +112,5 @@ Item {
 }
 
 // API usage (external):
-// import LVRS 1.0 as UIF
-// UIF.VStack { spacing: 8; UIF.Label { text: "Title"; style: body } }
+// import LVRS 1.0 as LV
+// LV.VStack { spacing: 8; LV.Label { text: "Title"; style: body } }

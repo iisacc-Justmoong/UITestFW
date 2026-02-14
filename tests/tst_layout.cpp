@@ -42,10 +42,10 @@ void LayoutTests::vstack_default_spacing()
     const QByteArray qml = R"(
 import QtQuick
 import QtQuick.Layouts
-import LVRS 1.0 as UIF
+import LVRS 1.0 as LV
 
 Item {
-    UIF.VStack {
+    LV.VStack {
         id: stack
         spacing: -1
     }
@@ -76,10 +76,10 @@ void LayoutTests::hstack_default_spacing()
     const QByteArray qml = R"(
 import QtQuick
 import QtQuick.Layouts
-import LVRS 1.0 as UIF
+import LVRS 1.0 as LV
 
 Item {
-    UIF.HStack {
+    LV.HStack {
         id: stack
         spacing: -1
     }
@@ -110,12 +110,12 @@ void LayoutTests::vstack_alignment_name()
     const QByteArray qml = R"(
 import QtQuick
 import QtQuick.Layouts
-import LVRS 1.0 as UIF
+import LVRS 1.0 as LV
 
 Item {
     property int childAlign: child.Layout.alignment
 
-    UIF.VStack {
+    LV.VStack {
         alignmentName: "leading"
         Rectangle {
             id: child
@@ -139,12 +139,12 @@ void LayoutTests::hstack_alignment_name()
     const QByteArray qml = R"(
 import QtQuick
 import QtQuick.Layouts
-import LVRS 1.0 as UIF
+import LVRS 1.0 as LV
 
 Item {
     property int childAlign: child.Layout.alignment
 
-    UIF.HStack {
+    LV.HStack {
         alignmentName: "bottom"
         Rectangle {
             id: child
@@ -168,14 +168,14 @@ void LayoutTests::spacer_min_length_vertical()
     const QByteArray qml = R"(
 import QtQuick
 import QtQuick.Layouts
-import LVRS 1.0 as UIF
+import LVRS 1.0 as LV
 
 Item {
     property bool fillHeight: spacer.Layout.fillHeight
     property int minHeight: spacer.Layout.minimumHeight
 
-    UIF.VStack {
-        UIF.Spacer {
+    LV.VStack {
+        LV.Spacer {
             id: spacer
             minLength: 12
         }

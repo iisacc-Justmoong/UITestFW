@@ -126,5 +126,5 @@ Item {
 }
 
 // API usage (external):
-// import LVRS 1.0 as UIF
-// UIF.ZStack { Rectangle { width: 40; height: 40 } }
+// import LVRS 1.0 as LV
+// LV.ZStack { Rectangle { width: 40; height: 40 } }

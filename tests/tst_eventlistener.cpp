@@ -26,7 +26,7 @@ void EventListenerTests::click_trigger()
     engine.addImportPath(importBase);
     const QByteArray qml = R"(
 import QtQuick
-import LVRS 1.0 as UIF
+import LVRS 1.0 as LV
 
 Item {
     id: root
@@ -36,7 +36,7 @@ Item {
 
     Rectangle {
         anchors.fill: parent
-        UIF.EventListener {
+        LV.EventListener {
             objectName: "listener"
             trigger: "clicked"
             action: () => root.count++
@@ -64,9 +64,9 @@ void EventListenerTests::global_context_requested_trigger()
     engine.addImportPath(importBase);
     const QByteArray qml = R"(
 import QtQuick
-import LVRS 1.0 as UIF
+import LVRS 1.0 as LV
 
-UIF.ApplicationWindow {
+LV.ApplicationWindow {
     id: root
     width: 240
     height: 140
@@ -74,7 +74,7 @@ UIF.ApplicationWindow {
     title: "EventListenerGlobalContextTest"
 
     property int contextCount: 0
-    property bool runtimeRunning: UIF.RuntimeEvents.running
+    property bool runtimeRunning: LV.RuntimeEvents.running
     property string lastSource: ""
     property int lastReason: -2
 
@@ -82,10 +82,10 @@ UIF.ApplicationWindow {
         contextCount = 0
         lastSource = ""
         lastReason = -2
-        UIF.RuntimeEvents.resetCounters()
+        LV.RuntimeEvents.resetCounters()
     }
 
-    UIF.EventListener {
+    LV.EventListener {
         trigger: "globalContextRequested"
         enabled: true
         action: function(mouse) {

@@ -11,5 +11,5 @@ ApplicationWindow {
 }
 
 // API usage (external):
-// import LVRS as UIF
-// UIF.AppShell { title: "LVRS"; navItems: ["Overview"] }
+// import LVRS as LV
+// LV.AppShell { title: "LVRS"; navItems: ["Overview"] }

@@ -84,5 +84,5 @@ ToolBar {
 }
 
 // API usage (external):
-// import LVRS 1.0 as UIF
-// UIF.AppHeader { title: "Dashboard"; subtitle: "Overview" }
+// import LVRS 1.0 as LV
+// LV.AppHeader { title: "Dashboard"; subtitle: "Overview" }

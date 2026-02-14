@@ -26,7 +26,7 @@ void TextEditorTests::text_editor_default_contract_and_utility_api()
 
     const QByteArray qml = R"(
 import QtQuick
-import LVRS as UIF
+import LVRS as LV
 
 Item {
     id: root
@@ -39,11 +39,11 @@ Item {
         && editor.enforceModeDefaults
         && editor.backgroundColorFocused === editor.backgroundColor
         && editor.backgroundColorDisabled === editor.backgroundColor
-    property bool bodyTokenReady: editor.fontPixelSize === UIF.Theme.textBody
-        && editor.fontWeight === UIF.Theme.textBodyWeight
-        && editor.textLineHeight === UIF.Theme.textBodyLineHeight
+    property bool bodyTokenReady: editor.fontPixelSize === LV.Theme.textBody
+        && editor.fontWeight === LV.Theme.textBodyWeight
+        && editor.textLineHeight === LV.Theme.textBodyLineHeight
 
-    UIF.TextEditor {
+    LV.TextEditor {
         id: editor
         objectName: "textEditor"
         width: 420
@@ -82,9 +82,9 @@ void TextEditorTests::text_editor_mode_independent_render_contract_and_submit_si
 
     const QByteArray qml = R"(
 import QtQuick
-import LVRS as UIF
+import LVRS as LV
 
-UIF.ApplicationWindow {
+LV.ApplicationWindow {
     id: root
     width: 640
     height: 420
@@ -102,7 +102,7 @@ UIF.ApplicationWindow {
         && editor.effectiveWrapMode === TextEdit.Wrap
         && editor.effectiveTextFormat === TextEdit.PlainText
 
-    UIF.TextEditor {
+    LV.TextEditor {
         id: editor
         objectName: "textEditor"
         anchors.fill: parent

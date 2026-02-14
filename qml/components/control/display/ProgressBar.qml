@@ -4,7 +4,7 @@ import LVRS 1.0
 Item {
     id: control
 
-    // Size constants for API usage: UIF.ProgressBar { size: regular }
+    // Size constants for API usage: LV.ProgressBar { size: regular }
     readonly property int large: 0
     readonly property int regular: 1
 
@@ -65,8 +65,8 @@ Item {
 }
 
 // API usage (external):
-// import LVRS 1.0 as UIF
-// UIF.ProgressBar {
+// import LVRS 1.0 as LV
+// LV.ProgressBar {
 //     width: 180
 //     size: regular
 //     startValue: 0

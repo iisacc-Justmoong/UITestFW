@@ -29,7 +29,7 @@ void PageRouterTests::route_params_are_passed_to_target_component()
 
     const QByteArray qml = R"(
 import QtQuick
-import LVRS as UIF
+import LVRS as LV
 
 Item {
     id: root
@@ -60,7 +60,7 @@ Item {
         }
     }
 
-    UIF.PageRouter {
+    LV.PageRouter {
         id: router
         anchors.fill: parent
         initialPath: "/"
@@ -101,7 +101,7 @@ void PageRouterTests::component_navigation_keeps_path_stack_in_sync()
 
     const QByteArray qml = R"(
 import QtQuick
-import LVRS as UIF
+import LVRS as LV
 
 Item {
     id: root
@@ -126,7 +126,7 @@ Item {
         }
     }
 
-    UIF.PageRouter {
+    LV.PageRouter {
         id: router
         anchors.fill: parent
         initialPath: "/"
@@ -188,23 +188,23 @@ void PageRouterTests::page_router_updates_view_state_tracker_from_stack()
 
     const QByteArray qml = R"(
 import QtQuick
-import LVRS as UIF
+import LVRS as LV
 
 Item {
     id: root
     width: 320
     height: 240
 
-    property string activeView: UIF.ViewStateTracker.currentActiveView
+    property string activeView: LV.ViewStateTracker.currentActiveView
     property string rootState: {
-        UIF.ViewStateTracker.stack
-        return UIF.ViewStateTracker.stateOf("/")
+        LV.ViewStateTracker.stack
+        return LV.ViewStateTracker.stateOf("/")
     }
     property string runState: {
-        UIF.ViewStateTracker.stack
-        return UIF.ViewStateTracker.stateOf("/runs/42")
+        LV.ViewStateTracker.stack
+        return LV.ViewStateTracker.stateOf("/runs/42")
     }
-    property int loadedCount: UIF.ViewStateTracker.loadedCount
+    property int loadedCount: LV.ViewStateTracker.loadedCount
 
     Component {
         id: homePage
@@ -216,7 +216,7 @@ Item {
         Item { property string runId: "" }
     }
 
-    UIF.PageRouter {
+    LV.PageRouter {
         id: router
         anchors.fill: parent
         initialPath: "/"
@@ -227,7 +227,7 @@ Item {
     }
 
     function resetTracker() {
-        UIF.ViewStateTracker.clear()
+        LV.ViewStateTracker.clear()
         router.setRoot("/")
     }
 
@@ -269,7 +269,7 @@ void PageRouterTests::global_navigator_allows_one_line_navigation()
 
     const QByteArray qml = R"(
 import QtQuick
-import LVRS as UIF
+import LVRS as LV
 
 Item {
     id: root
@@ -283,7 +283,7 @@ Item {
     Component { id: reportsPage; Item { } }
     Component { id: settingsPage; Item { } }
 
-    UIF.PageRouter {
+    LV.PageRouter {
         id: router
         anchors.fill: parent
         initialPath: "/"
@@ -294,14 +294,14 @@ Item {
         ]
     }
 
-    UIF.Link {
+    LV.Link {
         id: globalLink
         visible: false
         href: "/settings"
     }
 
     function goReportsInOneLine() {
-        UIF.Navigator.go("/reports")
+        LV.Navigator.go("/reports")
     }
 
     function goSettingsByLink() {
@@ -309,7 +309,7 @@ Item {
     }
 
     function goBackInOneLine() {
-        UIF.Navigator.back()
+        LV.Navigator.back()
     }
 }
 )";
@@ -339,7 +339,7 @@ void PageRouterTests::global_navigator_falls_back_to_previous_router()
 
     const QByteArray qml = R"(
 import QtQuick
-import LVRS as UIF
+import LVRS as LV
 
 Item {
     id: root
@@ -354,7 +354,7 @@ Item {
     Component { id: secondRootPage; Item { } }
     Component { id: secondSecondaryPage; Item { } }
 
-    UIF.PageRouter {
+    LV.PageRouter {
         id: firstRouter
         anchors.fill: parent
         initialPath: "/"
@@ -364,7 +364,7 @@ Item {
         ]
     }
 
-    UIF.PageRouter {
+    LV.PageRouter {
         id: secondRouter
         anchors.fill: parent
         initialPath: "/"
@@ -375,12 +375,12 @@ Item {
     }
 
     function goSecondary() {
-        UIF.Navigator.go("/secondary")
+        LV.Navigator.go("/secondary")
     }
 
     function fallbackToFirstAndGoPrimary() {
-        UIF.Navigator.unregisterRouter(secondRouter)
-        UIF.Navigator.go("/primary")
+        LV.Navigator.unregisterRouter(secondRouter)
+        LV.Navigator.go("/primary")
     }
 }
 )";
@@ -405,7 +405,7 @@ void PageRouterTests::route_mvvm_binding_and_write_ownership_are_applied()
 
     const QByteArray qml = R"(
 import QtQuick
-import LVRS as UIF
+import LVRS as LV
 
 Item {
     id: root
@@ -413,22 +413,22 @@ Item {
     height: 240
 
     property string ownerOverview: {
-        UIF.ViewModels.owners
-        return UIF.ViewModels.ownerOf("OverviewVM")
+        LV.ViewModels.owners
+        return LV.ViewModels.ownerOf("OverviewVM")
     }
     property string ownerReports: {
-        UIF.ViewModels.owners
-        return UIF.ViewModels.ownerOf("ReportsVM")
+        LV.ViewModels.owners
+        return LV.ViewModels.ownerOf("ReportsVM")
     }
     property bool canWriteOverview: {
-        UIF.ViewModels.bindings
-        UIF.ViewModels.owners
-        return UIF.ViewModels.canWrite("/overview")
+        LV.ViewModels.bindings
+        LV.ViewModels.owners
+        return LV.ViewModels.canWrite("/overview")
     }
     property bool canWriteReports: {
-        UIF.ViewModels.bindings
-        UIF.ViewModels.owners
-        return UIF.ViewModels.canWrite("/reports")
+        LV.ViewModels.bindings
+        LV.ViewModels.owners
+        return LV.ViewModels.canWrite("/reports")
     }
     property string overviewStatus: overviewVm.status
 
@@ -452,7 +452,7 @@ Item {
         Item { }
     }
 
-    UIF.PageRouter {
+    LV.PageRouter {
         id: router
         anchors.fill: parent
         initialPath: "/overview"
@@ -463,9 +463,9 @@ Item {
     }
 
     function prepare() {
-        UIF.ViewModels.clear()
-        UIF.ViewModels.set("OverviewVM", overviewVm)
-        UIF.ViewModels.set("ReportsVM", reportsVm)
+        LV.ViewModels.clear()
+        LV.ViewModels.set("OverviewVM", overviewVm)
+        LV.ViewModels.set("ReportsVM", reportsVm)
         router.setRoot("/overview")
     }
 
@@ -474,7 +474,7 @@ Item {
     }
 
     function writeOverviewStatus(nextStatus) {
-        UIF.ViewModels.updateProperty("/overview", "status", nextStatus)
+        LV.ViewModels.updateProperty("/overview", "status", nextStatus)
     }
 }
 )";
@@ -504,7 +504,7 @@ void PageRouterTests::route_mvvm_ownership_is_released_when_view_is_popped()
 
     const QByteArray qml = R"(
 import QtQuick
-import LVRS as UIF
+import LVRS as LV
 
 Item {
     id: root
@@ -512,17 +512,17 @@ Item {
     height: 240
 
     property string ownerOverview: {
-        UIF.ViewModels.owners
-        return UIF.ViewModels.ownerOf("OverviewVM")
+        LV.ViewModels.owners
+        return LV.ViewModels.ownerOf("OverviewVM")
     }
     property string ownerReports: {
-        UIF.ViewModels.owners
-        return UIF.ViewModels.ownerOf("ReportsVM")
+        LV.ViewModels.owners
+        return LV.ViewModels.ownerOf("ReportsVM")
     }
     property bool canWriteReports: {
-        UIF.ViewModels.bindings
-        UIF.ViewModels.owners
-        return UIF.ViewModels.canWrite("/reports")
+        LV.ViewModels.bindings
+        LV.ViewModels.owners
+        return LV.ViewModels.canWrite("/reports")
     }
 
     QtObject { id: overviewVm; property string status: "Idle" }
@@ -531,7 +531,7 @@ Item {
     Component { id: overviewPage; Item { } }
     Component { id: reportsPage; Item { } }
 
-    UIF.PageRouter {
+    LV.PageRouter {
         id: router
         anchors.fill: parent
         initialPath: "/overview"
@@ -542,9 +542,9 @@ Item {
     }
 
     function prepare() {
-        UIF.ViewModels.clear()
-        UIF.ViewModels.set("OverviewVM", overviewVm)
-        UIF.ViewModels.set("ReportsVM", reportsVm)
+        LV.ViewModels.clear()
+        LV.ViewModels.set("OverviewVM", overviewVm)
+        LV.ViewModels.set("ReportsVM", reportsVm)
         router.setRoot("/overview")
     }
 

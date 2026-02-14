@@ -5,6 +5,7 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 find_package(Qt6 6.5 REQUIRED COMPONENTS Quick QuickControls2 Test Svg Network)
+find_package(Vulkan QUIET)
 include(CMakePackageConfigHelpers)
 
 qt_standard_project_setup()
@@ -146,6 +147,22 @@ qt_add_qml_module(LVRS
         ${LVRS_RESOURCE_FILES}
 )
 
+if(TARGET Vulkan::Headers)
+    set(LVRS_VULKAN_TARGET Vulkan::Headers)
+elseif(TARGET Vulkan::Vulkan)
+    set(LVRS_VULKAN_TARGET Vulkan::Vulkan)
+else()
+    find_path(LVRS_VULKAN_INCLUDE_DIR NAMES vulkan/vulkan.h)
+    if(NOT LVRS_VULKAN_INCLUDE_DIR)
+        message(FATAL_ERROR "Vulkan headers are required, but vulkan/vulkan.h could not be found.")
+    endif()
+    add_library(LVRSVulkanHeaders INTERFACE)
+    target_include_directories(LVRSVulkanHeaders INTERFACE "${LVRS_VULKAN_INCLUDE_DIR}")
+    add_library(Vulkan::Headers ALIAS LVRSVulkanHeaders)
+    set(LVRS_VULKAN_TARGET Vulkan::Headers)
+    message(STATUS "Using header-only Vulkan dependency from: ${LVRS_VULKAN_INCLUDE_DIR}")
+endif()
+
 target_link_libraries(LVRS
     PUBLIC
         Qt6::Quick
@@ -179,6 +196,7 @@ if(LVRS_BUILD_DEMO)
             Qt6::Quick
             Qt6::QuickControls2
             LVRS
+            ${LVRS_VULKAN_TARGET}
     )
 
     set(_uifw_demo_macos_bundle OFF)

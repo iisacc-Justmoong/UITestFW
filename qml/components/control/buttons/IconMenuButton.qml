@@ -131,5 +131,5 @@ AbstractButton {
 }
 
 // API usage (external):
-// import LVRS 1.0 as UIF
-// UIF.IconMenuButton { tone: UIF.AbstractButton.Default; iconName: "viewMoreSymbolicDefault" }
+// import LVRS 1.0 as LV
+// LV.IconMenuButton { tone: LV.AbstractButton.Default; iconName: "viewMoreSymbolicDefault" }

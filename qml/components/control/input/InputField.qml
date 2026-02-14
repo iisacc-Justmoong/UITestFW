@@ -168,5 +168,5 @@ AbstractInputBar {
 }
 
 // API usage (external):
-// import LVRS 1.0 as UIF
-// UIF.InputField { placeholderText: "Search"; mode: searchMode }
+// import LVRS 1.0 as LV
+// LV.InputField { placeholderText: "Search"; mode: searchMode }

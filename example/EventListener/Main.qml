@@ -1,7 +1,7 @@
 import QtQuick
-import LVRS 1.0 as UIF
+import LVRS 1.0 as LV
 
-UIF.ApplicationWindow {
+LV.ApplicationWindow {
     id: root
     visible: true
     width: 920
@@ -112,9 +112,9 @@ UIF.ApplicationWindow {
 
     Item {
         anchors.fill: parent
-        anchors.margins: UIF.Theme.gap24
+        anchors.margins: LV.Theme.gap24
 
-        UIF.AppCard {
+        LV.AppCard {
             id: monitorCard
             anchors.left: parent.left
             anchors.right: parent.right
@@ -124,9 +124,9 @@ UIF.ApplicationWindow {
 
             Column {
                 width: monitorCard.width - (monitorCard.cardPadding * 2)
-                spacing: UIF.Theme.gap10
+                spacing: LV.Theme.gap10
 
-                UIF.Label {
+                LV.Label {
                     width: parent.width
                     style: body
                     wrapMode: Text.WordWrap
@@ -135,7 +135,7 @@ UIF.ApplicationWindow {
                           + " | Last Section: " + root.lastSection
                 }
 
-                UIF.Label {
+                LV.Label {
                     width: parent.width
                     style: description
                     wrapMode: Text.WordWrap
@@ -143,35 +143,35 @@ UIF.ApplicationWindow {
                 }
 
                 Row {
-                    spacing: UIF.Theme.gap8
+                    spacing: LV.Theme.gap8
 
-                    UIF.LabelButton {
+                    LV.LabelButton {
                         text: "Clear Monitor"
-                        tone: UIF.AbstractButton.Default
+                        tone: LV.AbstractButton.Default
                         onClicked: root.clearMonitor()
                     }
                 }
 
                 Row {
                     width: parent.width
-                    spacing: UIF.Theme.gap8
+                    spacing: LV.Theme.gap8
 
-                    UIF.Label {
+                    LV.Label {
                         style: caption
                         text: "clicked: " + (root.eventCounters.clicked || 0)
                     }
 
-                    UIF.Label {
+                    LV.Label {
                         style: caption
                         text: "pressed: " + (root.eventCounters.pressed || 0)
                     }
 
-                    UIF.Label {
+                    LV.Label {
                         style: caption
                         text: "released: " + (root.eventCounters.released || 0)
                     }
 
-                    UIF.Label {
+                    LV.Label {
                         style: caption
                         text: "hoverChanged: " + (root.eventCounters.hoverChanged || 0)
                     }
@@ -179,24 +179,24 @@ UIF.ApplicationWindow {
 
                 Row {
                     width: parent.width
-                    spacing: UIF.Theme.gap8
+                    spacing: LV.Theme.gap8
 
-                    UIF.Label {
+                    LV.Label {
                         style: caption
                         text: "entered: " + (root.eventCounters.entered || 0)
                     }
 
-                    UIF.Label {
+                    LV.Label {
                         style: caption
                         text: "exited: " + (root.eventCounters.exited || 0)
                     }
 
-                    UIF.Label {
+                    LV.Label {
                         style: caption
                         text: "keyPressed: " + (root.eventCounters.keyPressed || 0)
                     }
 
-                    UIF.Label {
+                    LV.Label {
                         style: caption
                         text: "keyReleased: " + (root.eventCounters.keyReleased || 0)
                     }
@@ -205,14 +205,14 @@ UIF.ApplicationWindow {
                 Rectangle {
                     width: parent.width
                     height: 210
-                    radius: UIF.Theme.radiusSm
-                    color: UIF.Theme.subSurface
+                    radius: LV.Theme.radiusSm
+                    color: LV.Theme.subSurface
                     clip: true
 
                     Flickable {
                         id: monitorScroll
                         anchors.fill: parent
-                        anchors.margins: UIF.Theme.gap6
+                        anchors.margins: LV.Theme.gap6
                         clip: true
                         contentWidth: width
                         contentHeight: monitorColumn.implicitHeight
@@ -220,9 +220,9 @@ UIF.ApplicationWindow {
                         Column {
                             id: monitorColumn
                             width: monitorScroll.width
-                            spacing: UIF.Theme.gap4
+                            spacing: LV.Theme.gap4
 
-                            UIF.Label {
+                            LV.Label {
                                 width: parent.width
                                 visible: root.eventHistory.length === 0
                                 style: body
@@ -234,33 +234,33 @@ UIF.ApplicationWindow {
 
                                 delegate: Rectangle {
                                     width: monitorColumn.width
-                                    height: logRow.implicitHeight + (UIF.Theme.gap4 * 2)
-                                    radius: UIF.Theme.radiusSm
-                                    color: UIF.Theme.surfaceSolid
+                                    height: logRow.implicitHeight + (LV.Theme.gap4 * 2)
+                                    radius: LV.Theme.radiusSm
+                                    color: LV.Theme.surfaceSolid
 
                                     Row {
                                         id: logRow
                                         anchors.left: parent.left
                                         anchors.right: parent.right
                                         anchors.verticalCenter: parent.verticalCenter
-                                        anchors.margins: UIF.Theme.gap4
-                                        spacing: UIF.Theme.gap6
+                                        anchors.margins: LV.Theme.gap4
+                                        spacing: LV.Theme.gap6
 
-                                        UIF.Label {
+                                        LV.Label {
                                             width: 62
                                             style: caption
                                             text: modelData.time
                                         }
 
-                                        UIF.Label {
+                                        LV.Label {
                                             width: 230
                                             style: description
                                             elide: Text.ElideRight
                                             text: modelData.section + " / " + modelData.type
                                         }
 
-                                        UIF.Label {
-                                            width: Math.max(90, logRow.width - 62 - 230 - (UIF.Theme.gap6 * 2))
+                                        LV.Label {
+                                            width: Math.max(90, logRow.width - 62 - 230 - (LV.Theme.gap6 * 2))
                                             style: body
                                             elide: Text.ElideRight
                                             text: modelData.detail
@@ -279,23 +279,23 @@ UIF.ApplicationWindow {
             anchors.left: parent.left
             anchors.right: parent.right
             anchors.top: monitorCard.bottom
-            anchors.topMargin: UIF.Theme.gap12
+            anchors.topMargin: LV.Theme.gap12
             anchors.bottom: parent.bottom
             clip: true
             contentWidth: width
-            contentHeight: sectionColumn.implicitHeight + UIF.Theme.gap24
+            contentHeight: sectionColumn.implicitHeight + LV.Theme.gap24
 
             Column {
                 id: sectionColumn
                 x: 0
                 y: 0
                 width: sampleScroll.width
-                spacing: UIF.Theme.gap12
+                spacing: LV.Theme.gap12
 
                 Repeater {
                     model: root.sections
 
-                    delegate: UIF.AppCard {
+                    delegate: LV.AppCard {
                         id: sectionCard
                         width: sectionColumn.width
                         title: modelData.title

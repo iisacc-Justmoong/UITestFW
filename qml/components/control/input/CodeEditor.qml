@@ -206,5 +206,5 @@ FocusScope {
 }
 
 // API usage (external):
-// import LVRS 1.0 as UIF
-// UIF.CodeEditor { snippetTitle: "init.ts"; snippetLanguage: "TypeScript"; text: "const ready = true" }
+// import LVRS 1.0 as LV
+// LV.CodeEditor { snippetTitle: "init.ts"; snippetLanguage: "TypeScript"; text: "const ready = true" }

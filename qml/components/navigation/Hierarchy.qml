@@ -62,9 +62,9 @@ Rectangle {
 }
 
 // API usage (external):
-// import LVRS 1.0 as UIF
-// UIF.Hierarchy {
-//     toolbarButtons: [UIF.ToolbarButton { buttonId: 1 }, UIF.ToolbarButton { buttonId: 2 }]
-//     UIF.HierarchyItem { label: "Root"; showChevron: true }
-//     UIF.HierarchyItem { label: "Child"; indentLevel: 1 }
+// import LVRS 1.0 as LV
+// LV.Hierarchy {
+//     toolbarButtons: [LV.ToolbarButton { buttonId: 1 }, LV.ToolbarButton { buttonId: 2 }]
+//     LV.HierarchyItem { label: "Root"; showChevron: true }
+//     LV.HierarchyItem { label: "Child"; indentLevel: 1 }
 // }

@@ -37,38 +37,38 @@ static QScopedPointer<QObject> createRuntimeWindow(QQmlEngine &engine)
 {
     const QByteArray qml = R"(
 import QtQuick
-import LVRS as UIF
+import LVRS as LV
 
-UIF.ApplicationWindow {
+LV.ApplicationWindow {
     id: root
     width: 640
     height: 420
     visible: false
     title: "RuntimeEventsTest"
 
-    property bool running: UIF.RuntimeEvents.running
-    property int pid: UIF.RuntimeEvents.pid
-    property string osLabel: UIF.RuntimeEvents.osName
-    property bool idleState: UIF.RuntimeEvents.idle
-    property int keyPressCount: UIF.RuntimeEvents.keyPressCount
-    property int keyReleaseCount: UIF.RuntimeEvents.keyReleaseCount
-    property int mouseMoveCount: UIF.RuntimeEvents.mouseMoveCount
-    property int mousePressCount: UIF.RuntimeEvents.mousePressCount
-    property int mouseReleaseCount: UIF.RuntimeEvents.mouseReleaseCount
-    property int uiCreatedCount: UIF.RuntimeEvents.uiCreatedCount
-    property int uiShownCount: UIF.RuntimeEvents.uiShownCount
-    property int uiHiddenCount: UIF.RuntimeEvents.uiHiddenCount
-    property double uptimeMs: UIF.RuntimeEvents.uptimeMs
-    property double rssBytes: UIF.RuntimeEvents.rssBytes
+    property bool running: LV.RuntimeEvents.running
+    property int pid: LV.RuntimeEvents.pid
+    property string osLabel: LV.RuntimeEvents.osName
+    property bool idleState: LV.RuntimeEvents.idle
+    property int keyPressCount: LV.RuntimeEvents.keyPressCount
+    property int keyReleaseCount: LV.RuntimeEvents.keyReleaseCount
+    property int mouseMoveCount: LV.RuntimeEvents.mouseMoveCount
+    property int mousePressCount: LV.RuntimeEvents.mousePressCount
+    property int mouseReleaseCount: LV.RuntimeEvents.mouseReleaseCount
+    property int uiCreatedCount: LV.RuntimeEvents.uiCreatedCount
+    property int uiShownCount: LV.RuntimeEvents.uiShownCount
+    property int uiHiddenCount: LV.RuntimeEvents.uiHiddenCount
+    property double uptimeMs: LV.RuntimeEvents.uptimeMs
+    property double rssBytes: LV.RuntimeEvents.rssBytes
 
     function resetMonitor() {
-        UIF.RuntimeEvents.resetCounters()
-        UIF.RuntimeEvents.idleTimeoutMs = 150
-        UIF.RuntimeEvents.markActivity()
+        LV.RuntimeEvents.resetCounters()
+        LV.RuntimeEvents.idleTimeoutMs = 150
+        LV.RuntimeEvents.markActivity()
     }
 
     function pokeActivity() {
-        UIF.RuntimeEvents.markActivity()
+        LV.RuntimeEvents.markActivity()
     }
 }
 )";

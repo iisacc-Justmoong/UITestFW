@@ -185,5 +185,5 @@ AbstractButton {
 }
 
 // API usage (external):
-// import LVRS 1.0 as UIF
-// UIF.MenuItem { iconName: "iconname"; state: selectedState; label: "Label"; key: "key" }
+// import LVRS 1.0 as LV
+// LV.MenuItem { iconName: "iconname"; state: selectedState; label: "Label"; key: "key" }

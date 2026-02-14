@@ -175,5 +175,5 @@ Item {
 }
 
 // API usage (external):
-// import LVRS 1.0 as UIF
-// UIF.HierarchyList { UIF.HierarchyItem { label: "Root" } UIF.HierarchyItem { label: "Child"; indentLevel: 1 } }
+// import LVRS 1.0 as LV
+// LV.HierarchyList { LV.HierarchyItem { label: "Root" } LV.HierarchyItem { label: "Child"; indentLevel: 1 } }

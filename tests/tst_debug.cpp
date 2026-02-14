@@ -22,13 +22,13 @@ void DebugTests::debug_enabled_toggle()
     engine.addImportPath(importBase);
     const QByteArray qml = R"(
 import QtQuick
-import LVRS 1.0 as UIF
+import LVRS 1.0 as LV
 
 Item {
     Component.onCompleted: {
-        UIF.Debug.enabled = true
-        UIF.Debug.log("Test", "enabled")
-        UIF.Debug.enabled = false
+        LV.Debug.enabled = true
+        LV.Debug.log("Test", "enabled")
+        LV.Debug.enabled = false
     }
 }
 )";

@@ -89,5 +89,5 @@ AbstractButton {
 }
 
 // API usage (external):
-// import LVRS 1.0 as UIF
-// UIF.CheckBox { text: "Remember me"; checked: true }
+// import LVRS 1.0 as LV
+// LV.CheckBox { text: "Remember me"; checked: true }

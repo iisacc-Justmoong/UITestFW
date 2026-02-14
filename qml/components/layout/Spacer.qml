@@ -82,5 +82,5 @@ Item {
 }
 
 // API usage (external):
-// import LVRS 1.0 as UIF
-// UIF.Spacer { minLength: 12 }
+// import LVRS 1.0 as LV
+// LV.Spacer { minLength: 12 }

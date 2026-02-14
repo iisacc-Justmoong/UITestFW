@@ -28,5 +28,5 @@ AbstractButton {
 }
 
 // API usage (external):
-// import LVRS 1.0 as UIF
-// UIF.AlertButton { text: "Button"; tone: UIF.AbstractButton.Primary }
+// import LVRS 1.0 as LV
+// LV.AlertButton { text: "Button"; tone: LV.AbstractButton.Primary }

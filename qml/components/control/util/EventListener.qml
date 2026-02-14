@@ -160,5 +160,5 @@ Item {
 }
 
 // API usage (external):
-// import LVRS 1.0 as UIF
-// UIF.Label { UIF.EventListener { trigger: "clicked"; action: () => console.log("click") } }
+// import LVRS 1.0 as LV
+// LV.Label { LV.EventListener { trigger: "clicked"; action: () => console.log("click") } }

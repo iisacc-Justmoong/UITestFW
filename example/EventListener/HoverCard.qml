@@ -1,5 +1,5 @@
 import QtQuick
-import LVRS 1.0 as UIF
+import LVRS 1.0 as LV
 
 Rectangle {
     id: root
@@ -8,17 +8,17 @@ Rectangle {
 
     width: 140
     height: 48
-    radius: UIF.Theme.radiusSm
-    color: hovered ? UIF.Theme.surfaceAlt : UIF.Theme.surfaceSolid
+    radius: LV.Theme.radiusSm
+    color: hovered ? LV.Theme.surfaceAlt : LV.Theme.surfaceSolid
     property bool hovered: false
 
-    UIF.Label {
+    LV.Label {
         anchors.centerIn: parent
         text: "Hover me"
         style: body
     }
 
-    UIF.EventListener {
+    LV.EventListener {
         trigger: "hoverChanged"
         action: (e) => {
             hovered = e.containsMouse

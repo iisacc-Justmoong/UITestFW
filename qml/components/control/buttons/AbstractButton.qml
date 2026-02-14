@@ -114,5 +114,5 @@ Controls.AbstractButton {
 }
 
 // API usage (external):
-// import LVRS 1.0 as UIF
-// UIF.AbstractButton { text: "Action"; tone: UIF.AbstractButton.Primary }
+// import LVRS 1.0 as LV
+// LV.AbstractButton { text: "Action"; tone: LV.AbstractButton.Primary }

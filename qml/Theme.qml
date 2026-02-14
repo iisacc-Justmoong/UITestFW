@@ -259,5 +259,5 @@ QtObject {
 
 
 // API usage (external):
-// import LVRS 1.0 as UIF
-// Rectangle { color: UIF.Theme.window }
+// import LVRS 1.0 as LV
+// Rectangle { color: LV.Theme.window }

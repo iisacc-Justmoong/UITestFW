@@ -239,8 +239,8 @@ Item {
 }
 
 // API usage (external):
-// import LVRS 1.0 as UIF
-// UIF.Alert {
+// import LVRS 1.0 as LV
+// LV.Alert {
 //     open: true
 //     title: "Alert Dialog"
 //     message: "It can have 2 or 3 actions depending on your needs."

@@ -116,5 +116,5 @@ AbstractButton {
 }
 
 // API usage (external):
-// import LVRS 1.0 as UIF
-// UIF.ListItem { label: "Label"; detail: "key"; iconName: "iconname"; showChevron: true }
+// import LVRS 1.0 as LV
+// LV.ListItem { label: "Label"; detail: "key"; iconName: "iconname"; showChevron: true }

@@ -1,5 +1,5 @@
 import QtQuick
-import LVRS 1.0 as UIF
+import LVRS 1.0 as LV
 
 Item {
     id: root
@@ -9,13 +9,13 @@ Item {
     implicitWidth: rightClickTarget.implicitWidth
     implicitHeight: rightClickTarget.implicitHeight
 
-    UIF.LabelButton {
+    LV.LabelButton {
         id: rightClickTarget
         text: "Right click"
-        tone: UIF.AbstractButton.Default
+        tone: LV.AbstractButton.Default
     }
 
-    UIF.EventListener {
+    LV.EventListener {
         trigger: "clicked"
         acceptedButtons: Qt.RightButton
         action: (mouse) => root.eventRaised(

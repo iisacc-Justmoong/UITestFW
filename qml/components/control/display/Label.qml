@@ -4,7 +4,7 @@ import LVRS 1.0
 Item {
     id: control
 
-    // Style constants for API usage: UIF.Label { style: body }
+    // Style constants for API usage: LV.Label { style: body }
     readonly property int title: 0
     readonly property int title2: 1
     readonly property int header: 2
@@ -165,5 +165,5 @@ Item {
 }
 
 // API usage (external):
-// import LVRS 1.0 as UIF
-// UIF.Label { text: "Label"; style: body }
+// import LVRS 1.0 as LV
+// LV.Label { text: "Label"; style: body }

@@ -12,6 +12,34 @@ qt_standard_project_setup()
 
 option(LVRS_FORCE_X86_QT_TOOLS "Force Qt host tools to run under x86_64 (Rosetta)" OFF)
 option(LVRS_ENABLE_APPLE_GL_LINK_SHIM "Provide a minimal AGL shim only for Apple linker compatibility" ON)
+option(LVRS_ENFORCE_VULKAN "Fail configure if Vulkan-capable Qt/runtime are unavailable" ON)
+
+function(_lvrs_detect_qt_vulkan_feature out_value out_header)
+    set(_lvrs_qtgui_config_header "")
+    if(DEFINED Qt6Gui_DIR)
+        get_filename_component(_lvrs_qt_lib_dir "${Qt6Gui_DIR}/../.." ABSOLUTE)
+        set(_lvrs_candidate_header "${_lvrs_qt_lib_dir}/QtGui.framework/Headers/qtgui-config.h")
+        if(EXISTS "${_lvrs_candidate_header}")
+            set(_lvrs_qtgui_config_header "${_lvrs_candidate_header}")
+        endif()
+    endif()
+
+    if(NOT _lvrs_qtgui_config_header)
+        set(${out_value} "" PARENT_SCOPE)
+        set(${out_header} "" PARENT_SCOPE)
+        return()
+    endif()
+
+    file(STRINGS "${_lvrs_qtgui_config_header}" _lvrs_vulkan_feature_line REGEX "^#define QT_FEATURE_vulkan ")
+    if(_lvrs_vulkan_feature_line MATCHES "(-?[0-9]+)$")
+        set(_lvrs_vulkan_feature "${CMAKE_MATCH_1}")
+    else()
+        set(_lvrs_vulkan_feature "")
+    endif()
+
+    set(${out_value} "${_lvrs_vulkan_feature}" PARENT_SCOPE)
+    set(${out_header} "${_lvrs_qtgui_config_header}" PARENT_SCOPE)
+endfunction()
 
 if(APPLE AND LVRS_ENABLE_APPLE_GL_LINK_SHIM)
     if(NOT EXISTS "/System/Library/Frameworks/AGL.framework/AGL")
@@ -161,6 +189,26 @@ else()
     add_library(Vulkan::Headers ALIAS LVRSVulkanHeaders)
     set(LVRS_VULKAN_TARGET Vulkan::Headers)
     message(STATUS "Using header-only Vulkan dependency from: ${LVRS_VULKAN_INCLUDE_DIR}")
+endif()
+
+if(LVRS_ENFORCE_VULKAN)
+    if(NOT TARGET Vulkan::Vulkan)
+        message(FATAL_ERROR
+            "LVRS_ENFORCE_VULKAN=ON requires a linkable Vulkan runtime target (Vulkan::Vulkan). "
+            "Current configure only resolved header-only Vulkan.")
+    endif()
+
+    _lvrs_detect_qt_vulkan_feature(_lvrs_qt_vulkan_feature _lvrs_qtgui_config_header)
+    if(_lvrs_qt_vulkan_feature STREQUAL "")
+        message(FATAL_ERROR
+            "LVRS_ENFORCE_VULKAN=ON but QT_FEATURE_vulkan could not be resolved from qtgui-config.h.")
+    endif()
+
+    if(_lvrs_qt_vulkan_feature LESS 0)
+        message(FATAL_ERROR
+            "LVRS_ENFORCE_VULKAN=ON but this Qt build has QT_FEATURE_vulkan=${_lvrs_qt_vulkan_feature} "
+            "(${_lvrs_qtgui_config_header}). Install/rebuild Qt with Vulkan support.")
+    endif()
 endif()
 
 target_link_libraries(LVRS

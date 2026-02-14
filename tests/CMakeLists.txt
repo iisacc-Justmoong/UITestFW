@@ -5,7 +5,7 @@ function(uifw_add_test test_name test_source)
             Qt6::Test
             Qt6::Quick
             Qt6::QuickControls2
-            LVRS
+            LVRSCore
             LVRSplugin
             LVRSplugin_init
     )

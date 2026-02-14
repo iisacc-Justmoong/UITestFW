@@ -10,7 +10,7 @@ if(CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
     qt_standard_project_setup()
 endif()
 
-if(NOT TARGET LVRS)
+if(NOT TARGET LVRSCore)
     add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/../.. backend_build)
 endif()
 
@@ -30,7 +30,7 @@ target_link_libraries(LVRSExampleTypingPractice
     PRIVATE
         Qt6::Quick
         Qt6::QuickControls2
-        LVRS
+        LVRSCore
         LVRSplugin
         LVRSplugin_init
 )

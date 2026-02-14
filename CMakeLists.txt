@@ -93,14 +93,20 @@ if(APPLE AND LVRS_ENABLE_APPLE_GL_LINK_SHIM)
         if(NOT EXISTS "${_uifw_agl_versions}/Current")
             file(CREATE_LINK "A" "${_uifw_agl_versions}/Current" SYMBOLIC)
         endif()
-        if(EXISTS "${_uifw_agl_framework}/AGL")
+        if(EXISTS "${_uifw_agl_framework}/AGL" OR IS_SYMLINK "${_uifw_agl_framework}/AGL")
             file(REMOVE "${_uifw_agl_framework}/AGL")
         endif()
         file(CREATE_LINK "Versions/Current/AGL" "${_uifw_agl_framework}/AGL" SYMBOLIC)
+        if(EXISTS "${_uifw_agl_framework}/Headers" OR IS_SYMLINK "${_uifw_agl_framework}/Headers")
+            file(REMOVE "${_uifw_agl_framework}/Headers")
+        endif()
         if(EXISTS "${_uifw_agl_framework}/Headers")
             file(REMOVE_RECURSE "${_uifw_agl_framework}/Headers")
         endif()
         file(CREATE_LINK "Versions/Current/Headers" "${_uifw_agl_framework}/Headers" SYMBOLIC)
+        if(EXISTS "${_uifw_agl_framework}/Resources" OR IS_SYMLINK "${_uifw_agl_framework}/Resources")
+            file(REMOVE "${_uifw_agl_framework}/Resources")
+        endif()
         if(EXISTS "${_uifw_agl_framework}/Resources")
             file(REMOVE_RECURSE "${_uifw_agl_framework}/Resources")
         endif()
@@ -140,13 +146,17 @@ if(APPLE AND LVRS_FORCE_X86_QT_TOOLS)
     endif()
 endif()
 
-qt_add_library(LVRS STATIC)
-add_library(LVRS::LVRS ALIAS LVRS)
+qt_add_library(LVRSCore STATIC)
+set_target_properties(LVRSCore PROPERTIES
+    OUTPUT_NAME "LVRS"
+    EXPORT_NAME "LVRS"
+)
+add_library(LVRS::LVRS ALIAS LVRSCore)
 
 include(${CMAKE_CURRENT_LIST_DIR}/backend/CMakeLists.txt)
 include(${CMAKE_CURRENT_LIST_DIR}/qml/CMakeLists.txt)
 
-target_include_directories(LVRS
+target_include_directories(LVRSCore
     PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/backend>
@@ -161,7 +171,7 @@ target_include_directories(LVRS
         $<INSTALL_INTERFACE:include/LVRS>
 )
 
-qt_add_qml_module(LVRS
+qt_add_qml_module(LVRSCore
     URI LVRS
     VERSION 1.0
     RESOURCE_PREFIX "/qt/qml"
@@ -174,6 +184,13 @@ qt_add_qml_module(LVRS
     RESOURCES
         ${LVRS_RESOURCE_FILES}
 )
+
+if(TARGET LVRSCoreplugin)
+    add_library(LVRSplugin ALIAS LVRSCoreplugin)
+endif()
+if(TARGET LVRSCoreplugin_init)
+    add_library(LVRSplugin_init ALIAS LVRSCoreplugin_init)
+endif()
 
 if(TARGET Vulkan::Headers)
     set(LVRS_VULKAN_TARGET Vulkan::Headers)
@@ -211,7 +228,7 @@ if(LVRS_ENFORCE_VULKAN)
     endif()
 endif()
 
-target_link_libraries(LVRS
+target_link_libraries(LVRSCore
     PUBLIC
         Qt6::Quick
         Qt6::QuickControls2
@@ -225,12 +242,12 @@ option(LVRS_BUILD_EXAMPLES "Build runnable example applications" ON)
 option(LVRS_BUILD_TESTS "Build LVRS tests" ON)
 
 if(LVRS_BUILD_DEMO)
-    qt_add_executable(LVRSDemo
+    qt_add_executable(LVRS
         MANUAL_FINALIZATION
         main.cpp
     )
 
-    qt_add_qml_module(LVRSDemo
+    qt_add_qml_module(LVRS
         URI LVRSDemo
         VERSION 1.0
         RESOURCE_PREFIX "/qt/qml"
@@ -239,11 +256,11 @@ if(LVRS_BUILD_DEMO)
             ${LVRS_DEMO_QML_FILES}
     )
 
-    target_link_libraries(LVRSDemo
+    target_link_libraries(LVRS
         PRIVATE
             Qt6::Quick
             Qt6::QuickControls2
-            LVRS
+            LVRSCore
             ${LVRS_VULKAN_TARGET}
     )
 
@@ -252,7 +269,7 @@ if(LVRS_BUILD_DEMO)
         set(_uifw_demo_macos_bundle ON)
     endif()
 
-    set_target_properties(LVRSDemo PROPERTIES
+    set_target_properties(LVRS PROPERTIES
         MACOSX_BUNDLE ${_uifw_demo_macos_bundle}
         WIN32_EXECUTABLE TRUE
         RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
@@ -262,13 +279,13 @@ if(LVRS_BUILD_DEMO)
     if(IOS)
         set(LVRS_IOS_BUNDLE_ID "" CACHE STRING "Override iOS bundle identifier for LVRS demo")
         if(LVRS_IOS_BUNDLE_ID)
-            set_target_properties(LVRSDemo PROPERTIES
+            set_target_properties(LVRS PROPERTIES
                 XCODE_ATTRIBUTE_PRODUCT_BUNDLE_IDENTIFIER "${LVRS_IOS_BUNDLE_ID}"
             )
         endif()
     endif()
 
-    qt_finalize_executable(LVRSDemo)
+    qt_finalize_executable(LVRS)
 endif()
 
 if(LVRS_BUILD_EXAMPLES)
@@ -280,12 +297,12 @@ if(LVRS_BUILD_TESTS)
     add_subdirectory(tests)
 endif()
 
-set(_uifw_export_targets LVRS)
-if(TARGET LVRS_resources_1)
-    list(APPEND _uifw_export_targets LVRS_resources_1)
+set(_uifw_export_targets LVRSCore)
+if(TARGET LVRSCore_resources_1)
+    list(APPEND _uifw_export_targets LVRSCore_resources_1)
 endif()
-if(TARGET LVRS_resources_2)
-    list(APPEND _uifw_export_targets LVRS_resources_2)
+if(TARGET LVRSCore_resources_2)
+    list(APPEND _uifw_export_targets LVRSCore_resources_2)
 endif()
 
 install(TARGETS ${_uifw_export_targets}

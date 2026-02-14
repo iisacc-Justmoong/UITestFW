@@ -6,9 +6,9 @@ AbstractButton {
     id: control
 
     tone: AbstractButton.Accent
-    readonly property string iconNameDefault: "view-more-symbolic-default"
-    readonly property string iconNameBorderless: "view-more-symbolic-borderless"
-    readonly property string iconNameDisabled: "view-more-symbolic-disabled"
+    readonly property string iconNameDefault: "viewMoreSymbolicDefault"
+    readonly property string iconNameBorderless: "viewMoreSymbolicBorderless"
+    readonly property string iconNameDisabled: "viewMoreSymbolicDisabled"
     readonly property url iconSourceDefault: Theme.iconPath(control.iconNameDefault)
     readonly property url iconSourceBorderless: Theme.iconPath(control.iconNameBorderless)
     readonly property url iconSourceDisabled: Theme.iconPath(control.iconNameDisabled)
@@ -47,10 +47,10 @@ AbstractButton {
                     control.resolvedIconSource.toString(),
                     control.iconSize)
     }
-    readonly property string indicatorNameDefault: "pan-down-symbolic-default"
-    readonly property string indicatorNameBorderless: "pan-down-symbolic-borderless"
-    readonly property string indicatorNameAccent: "pan-down-symbolic-accent"
-    readonly property string indicatorNameDisabled: "pan-down-symbolic-disabled"
+    readonly property string indicatorNameDefault: "panDownSymbolicDefault"
+    readonly property string indicatorNameBorderless: "panDownSymbolicBorderless"
+    readonly property string indicatorNameAccent: "panDownSymbolicAccent"
+    readonly property string indicatorNameDisabled: "panDownSymbolicDisabled"
     readonly property string resolvedIndicatorName: !control.effectiveEnabled
         ? control.indicatorNameDisabled
         : control.tone === AbstractButton.Borderless
@@ -145,4 +145,4 @@ AbstractButton {
 
 // API usage (external):
 // import LVRS 1.0 as UIF
-// UIF.IconMenuButton { tone: UIF.AbstractButton.Default; iconName: "view-more-symbolic-default" }
+// UIF.IconMenuButton { tone: UIF.AbstractButton.Default; iconName: "viewMoreSymbolicDefault" }

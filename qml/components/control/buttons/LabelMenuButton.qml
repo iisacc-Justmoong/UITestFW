@@ -6,10 +6,10 @@ AbstractButton {
     id: control
 
     tone: AbstractButton.Accent
-    readonly property string indicatorNameDefault: "pan-down-symbolic-default"
-    readonly property string indicatorNameBorderless: "pan-down-symbolic-borderless"
-    readonly property string indicatorNameAccent: "pan-down-symbolic-accent"
-    readonly property string indicatorNameDisabled: "pan-down-symbolic-disabled"
+    readonly property string indicatorNameDefault: "panDownSymbolicDefault"
+    readonly property string indicatorNameBorderless: "panDownSymbolicBorderless"
+    readonly property string indicatorNameAccent: "panDownSymbolicAccent"
+    readonly property string indicatorNameDisabled: "panDownSymbolicDisabled"
     readonly property string resolvedIndicatorName: !control.effectiveEnabled
         ? control.indicatorNameDisabled
         : control.tone === AbstractButton.Borderless

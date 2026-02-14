@@ -6,7 +6,7 @@ Icon-first button variant aligned with the Figma Button component.
 
 ## Properties
 - `tone` (`Accent`, `Default`, `Borderless`, `Destructive`, `Disabled`)
-- `iconName` (optional icon set name, e.g. `view-more-symbolic-default`)
+- `iconName` (optional icon set name, e.g. `viewMoreSymbolicDefault`)
 - `icon.name` (Qt grouped property, optional icon set name)
 - `iconSource` (optional explicit URL override)
 - `iconGlyph` (optional text fallback)
@@ -19,7 +19,7 @@ LV.IconButton { tone: LV.AbstractButton.Accent }
 ```qml
 LV.IconButton {
     tone: LV.AbstractButton.Default
-    iconName: "pan-down-symbolic-default"
+    iconName: "panDownSymbolicDefault"
 }
 ```
 
@@ -32,7 +32,7 @@ import LVRS 1.0 as LV
 
 LV.IconButton {
     tone: LV.AbstractButton.Accent
-    iconName: "view-more-symbolic-default"
+    iconName: "viewMoreSymbolicDefault"
     onClicked: console.log("Open actions")
 }
 ```
@@ -44,7 +44,7 @@ import LVRS 1.0 as LV
 
 LV.IconButton {
     tone: LV.AbstractButton.Borderless
-    iconName: "pan-down-symbolic-borderless"
+    iconName: "panDownSymbolicBorderless"
     onClicked: console.log("Expand row")
 }
 ```

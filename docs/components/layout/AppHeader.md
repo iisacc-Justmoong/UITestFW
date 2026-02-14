@@ -44,7 +44,7 @@ LV.AppHeader {
 
     LV.IconButton {
         tone: LV.AbstractButton.Borderless
-        iconName: "view-more-symbolic-borderless"
+        iconName: "viewMoreSymbolicBorderless"
         onClicked: console.log("More actions")
     }
 

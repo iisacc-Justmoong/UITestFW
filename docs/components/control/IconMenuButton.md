@@ -6,7 +6,7 @@ Icon + chevron menu button variant aligned with the Figma Button component.
 
 ## Properties
 - `tone` (`Accent`, `Default`, `Borderless`, `Destructive`, `Disabled`)
-- `iconName` (optional icon set name, e.g. `view-more-symbolic-default`)
+- `iconName` (optional icon set name, e.g. `viewMoreSymbolicDefault`)
 - `icon.name` (Qt grouped property, optional icon set name)
 - `iconSource` (optional explicit URL override)
 - `iconGlyph` (optional text fallback)
@@ -18,7 +18,7 @@ LV.IconMenuButton { tone: LV.AbstractButton.Default }
 
 ```qml
 LV.IconMenuButton {
-    iconName: "view-more-symbolic-borderless"
+    iconName: "viewMoreSymbolicBorderless"
     tone: LV.AbstractButton.Borderless
 }
 ```
@@ -32,7 +32,7 @@ import LVRS 1.0 as LV
 
 LV.IconMenuButton {
     tone: LV.AbstractButton.Default
-    iconName: "view-more-symbolic-default"
+    iconName: "viewMoreSymbolicDefault"
     onClicked: console.log("Open sort menu")
 }
 ```
@@ -44,7 +44,7 @@ import LVRS 1.0 as LV
 
 LV.IconMenuButton {
     tone: LV.AbstractButton.Borderless
-    iconName: "view-more-symbolic-borderless"
+    iconName: "viewMoreSymbolicBorderless"
     onClicked: console.log("Toolbar menu")
 }
 ```

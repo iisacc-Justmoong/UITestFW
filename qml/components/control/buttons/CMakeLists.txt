@@ -7,11 +7,11 @@ set(LVRS_CONTROL_BUTTON_QML_FILES
 )
 
 set(LVRS_CONTROL_BUTTON_RESOURCE_FILES
-    resources/iconset/view-more-symbolic-default.svg
-    resources/iconset/view-more-symbolic-borderless.svg
-    resources/iconset/view-more-symbolic-disabled.svg
-    resources/iconset/pan-down-symbolic-default.svg
-    resources/iconset/pan-down-symbolic-accent.svg
-    resources/iconset/pan-down-symbolic-borderless.svg
-    resources/iconset/pan-down-symbolic-disabled.svg
+    resources/iconset/viewMoreSymbolicDefault.svg
+    resources/iconset/viewMoreSymbolicBorderless.svg
+    resources/iconset/viewMoreSymbolicDisabled.svg
+    resources/iconset/panDownSymbolicDefault.svg
+    resources/iconset/panDownSymbolicAccent.svg
+    resources/iconset/panDownSymbolicBorderless.svg
+    resources/iconset/panDownSymbolicDisabled.svg
 )

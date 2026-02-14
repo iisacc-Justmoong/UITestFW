@@ -6,9 +6,9 @@ AbstractButton {
     id: control
 
     tone: AbstractButton.Accent
-    readonly property string iconNameDefault: "view-more-symbolic-default"
-    readonly property string iconNameBorderless: "view-more-symbolic-borderless"
-    readonly property string iconNameDisabled: "view-more-symbolic-disabled"
+    readonly property string iconNameDefault: "viewMoreSymbolicDefault"
+    readonly property string iconNameBorderless: "viewMoreSymbolicBorderless"
+    readonly property string iconNameDisabled: "viewMoreSymbolicDisabled"
     readonly property url iconSourceDefault: Theme.iconPath(control.iconNameDefault)
     readonly property url iconSourceBorderless: Theme.iconPath(control.iconNameBorderless)
     readonly property url iconSourceDisabled: Theme.iconPath(control.iconNameDisabled)
@@ -120,4 +120,4 @@ AbstractButton {
 
 // API usage (external):
 // import LVRS 1.0 as UIF
-// UIF.IconButton { tone: UIF.AbstractButton.Accent; iconName: "view-more-symbolic-default" }
+// UIF.IconButton { tone: UIF.AbstractButton.Accent; iconName: "viewMoreSymbolicDefault" }

@@ -35,4 +35,4 @@ IconButton {
 
 // API usage (external):
 // import LVRS 1.0 as UIF
-// UIF.ToolbarButton { buttonId: 1; iconName: "view-more-symbolic-default" }
+// UIF.ToolbarButton { buttonId: 1; iconName: "viewMoreSymbolicDefault" }

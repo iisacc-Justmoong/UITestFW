@@ -613,9 +613,9 @@ UIF.ApplicationWindow {
                         UIF.List {
                             width: parent.width
                             items: UIF.AppState.demoListItems
-                            toolbarIcon1: "view-more-symbolic-default"
-                            toolbarIcon2: "view-more-symbolic-default"
-                            toolbarIcon3: "view-more-symbolic-default"
+                            toolbarIcon1: "viewMoreSymbolicDefault"
+                            toolbarIcon2: "viewMoreSymbolicDefault"
+                            toolbarIcon3: "viewMoreSymbolicDefault"
                         }
                     }
                 }
@@ -742,11 +742,11 @@ UIF.ApplicationWindow {
                                 UIF.AppState.hierarchyActiveButtonId = buttonId >= 0 ? buttonId : (index + 1)
                             }
                             toolbarButtons: [
-                                UIF.ToolbarButton { buttonId: 1; iconName: "view-more-symbolic-default" },
-                                UIF.ToolbarButton { buttonId: 2; iconName: "view-more-symbolic-default" },
-                                UIF.ToolbarButton { buttonId: 3; iconName: "view-more-symbolic-default" },
-                                UIF.ToolbarButton { buttonId: 4; iconName: "view-more-symbolic-default" },
-                                UIF.ToolbarButton { buttonId: 5; iconName: "view-more-symbolic-default" }
+                                UIF.ToolbarButton { buttonId: 1; iconName: "viewMoreSymbolicDefault" },
+                                UIF.ToolbarButton { buttonId: 2; iconName: "viewMoreSymbolicDefault" },
+                                UIF.ToolbarButton { buttonId: 3; iconName: "viewMoreSymbolicDefault" },
+                                UIF.ToolbarButton { buttonId: 4; iconName: "viewMoreSymbolicDefault" },
+                                UIF.ToolbarButton { buttonId: 5; iconName: "viewMoreSymbolicDefault" }
                             ]
 
                             UIF.HierarchyItem { label: "World"; iconGlyph: "□"; showChevron: true; expanded: true; selected: true }

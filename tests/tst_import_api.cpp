@@ -186,42 +186,42 @@ Item {
     id: root
 
     property string iconRoot: "qrc:/qt/qml/LVRS/resources/iconset/"
-    property string expectedByName: iconRoot + "view-more-symbolic-default.svg"
-    property string expectedByExt: iconRoot + "view-more-symbolic-borderless.svg"
-    property string expectedByGroup: iconRoot + "pan-down-symbolic-default.svg"
-    property string expectedByUrl: iconRoot + "pan-down-symbolic-accent.svg"
-    property string expectedMenuByName: iconRoot + "pan-down-symbolic-borderless.svg"
-    property bool themeAddsSvg: UIF.Theme.iconPath("pan-down-symbolic-disabled") === iconRoot + "pan-down-symbolic-disabled.svg"
-    property bool themeKeepsSvg: UIF.Theme.iconPath("pan-down-symbolic-disabled.svg") === iconRoot + "pan-down-symbolic-disabled.svg"
+    property string expectedByName: iconRoot + "viewMoreSymbolicDefault.svg"
+    property string expectedByExt: iconRoot + "viewMoreSymbolicBorderless.svg"
+    property string expectedByGroup: iconRoot + "panDownSymbolicDefault.svg"
+    property string expectedByUrl: iconRoot + "panDownSymbolicAccent.svg"
+    property string expectedMenuByName: iconRoot + "panDownSymbolicBorderless.svg"
+    property bool themeAddsSvg: UIF.Theme.iconPath("panDownSymbolicDisabled") === iconRoot + "panDownSymbolicDisabled.svg"
+    property bool themeKeepsSvg: UIF.Theme.iconPath("panDownSymbolicDisabled.svg") === iconRoot + "panDownSymbolicDisabled.svg"
 
     UIF.IconButton {
         id: byName
-        iconName: "view-more-symbolic-default"
+        iconName: "viewMoreSymbolicDefault"
         visible: false
     }
 
     UIF.IconButton {
         id: byExt
-        iconName: "view-more-symbolic-borderless.svg"
+        iconName: "viewMoreSymbolicBorderless.svg"
         visible: false
     }
 
     UIF.IconButton {
         id: byGroupName
-        icon.name: "pan-down-symbolic-default"
+        icon.name: "panDownSymbolicDefault"
         visible: false
     }
 
     UIF.IconButton {
         id: byUrl
         iconSource: root.expectedByUrl
-        iconName: "view-more-symbolic-default"
+        iconName: "viewMoreSymbolicDefault"
         visible: false
     }
 
     UIF.IconMenuButton {
         id: menuByName
-        iconName: "pan-down-symbolic-borderless"
+        iconName: "panDownSymbolicBorderless"
         visible: false
     }
 

@@ -68,7 +68,7 @@ LV.ApplicationWindow {
     LV.IconButton {
         parent: win.headerActions
         tone: LV.AbstractButton.Borderless
-        iconName: "view-more-symbolic-borderless"
+        iconName: "viewMoreSymbolicBorderless"
         onClicked: LV.Navigator.go("/reports")
     }
 

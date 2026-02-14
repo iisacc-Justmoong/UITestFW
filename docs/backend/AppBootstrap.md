@@ -2,7 +2,7 @@
 
 Location: `backend/runtime/appbootstrap.h` / `backend/runtime/appbootstrap.cpp`
 
-`AppBootstrap`은 플랫폼별 렌더 백엔드, 렌더 품질 기본값, 폰트/텍스트 폴백을 앱 엔트리포인트에서 일관되게 적용하기 위한 통합 초기화 API이다.
+`AppBootstrap` is an integrated initialization API that applies platform-specific render backend policy, render-quality defaults, and font/text fallbacks consistently at app entrypoints.
 
 ## API
 
@@ -37,13 +37,13 @@ lvrs::postApplicationBootstrap(app, options);
 
 ## Notes
 
-- `preApplicationBootstrap`는 `QGuiApplication` 생성 전 호출한다.
-- `postApplicationBootstrap`는 `QGuiApplication` 생성 직후 호출한다.
-- 루트 `main.cpp`는 이 API를 사용하는 downstream 템플릿이며, 프레임워크 빌드 대상에는 포함되지 않는다.
+- Call `preApplicationBootstrap` before creating `QGuiApplication`.
+- Call `postApplicationBootstrap` right after creating `QGuiApplication`.
+- Root `main.cpp` is a downstream template that uses this API and is not included in framework build targets.
 
 ## Root `main.cpp` template overrides
 
-루트 템플릿 엔트리포인트(`main.cpp`)는 환경변수/CLI로 앱별 설정을 바로 주입할 수 있다.
+The root template entrypoint (`main.cpp`) can inject app-specific settings directly through environment variables and CLI arguments.
 
 - CLI:
   - `--module <uri>`
@@ -56,4 +56,4 @@ lvrs::postApplicationBootstrap(app, options);
   - `LVRS_APP_NAME`
   - `LVRS_QUICK_STYLE`
 
-정적 QML 플러그인으로 LVRS를 링크하는 앱은 `LVRS_USE_STATIC_QML_PLUGIN`을 정의해 `Q_IMPORT_PLUGIN(LVRSPlugin)` 경로를 활성화한다.
+Apps linking LVRS as a static QML plugin should define `LVRS_USE_STATIC_QML_PLUGIN` to enable the `Q_IMPORT_PLUGIN(LVRSPlugin)` path.

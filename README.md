@@ -14,17 +14,16 @@ The framework target itself does not build an application executable; all runnab
 - CMake 3.21+
 - C++20 compiler
 - Qt 6.5+
-- Qt modules: `Quick`, `QuickControls2`, `Qml`, `Svg`, `Network`, `Test`
+- Qt modules: `Quick`, `QuickControls2`, `Qml`, `Svg`, `Network`
+- Qt `Test` module only when `LVRS_BUILD_TESTS=ON`
 - Vulkan SDK/runtime available to CMake when `LVRS_ENFORCE_VULKAN=ON` (default)
 
-## Build and Run
+## Build (Framework-First Default)
 
 Configure:
 
 ```bash
-cmake -S . -B build \
-  -DLVRS_BUILD_EXAMPLES=ON \
-  -DLVRS_BUILD_TESTS=ON
+cmake -S . -B build
 ```
 
 Build:
@@ -33,18 +32,70 @@ Build:
 cmake --build build -j
 ```
 
+By default, LVRS builds as an installable framework package (no example app, no tests).
+
+## Build and Run Examples
+
+```bash
+cmake -S . -B build-dev \
+  -DLVRS_BUILD_EXAMPLES=ON \
+  -DLVRS_BUILD_TESTS=ON
+cmake --build build-dev -j
+```
+
 Run visual-catalog demo:
 
 ```bash
-cmake --build build --target LVRSExampleVisualCatalog
-./build/bin/LVRSExampleVisualCatalog
+cmake --build build-dev --target LVRSExampleVisualCatalog
+./build-dev/bin/LVRSExampleVisualCatalog
 ```
 
 Run tests:
 
 ```bash
-ctest --test-dir build --output-on-failure
+ctest --test-dir build-dev --output-on-failure
 ```
+
+## Use in Any Qt Quick Project
+
+Install LVRS once:
+
+```bash
+cmake -S . -B build-install \
+  -DLVRS_BUILD_EXAMPLES=OFF \
+  -DLVRS_BUILD_TESTS=OFF \
+  -DCMAKE_INSTALL_PREFIX=/path/to/lvrs-prefix
+cmake --build build-install -j
+cmake --install build-install
+```
+
+In your downstream app `CMakeLists.txt`:
+
+```cmake
+find_package(Qt6 6.5 REQUIRED COMPONENTS Quick QuickControls2)
+find_package(LVRS CONFIG REQUIRED)
+
+qt_add_executable(MyApp main.cpp)
+qt_add_qml_module(MyApp
+    URI MyApp
+    VERSION 1.0
+    RESOURCE_PREFIX "/qt/qml"
+    QML_FILES
+        Main.qml
+)
+
+lvrs_configure_qml_app(MyApp)
+```
+
+In your QML:
+
+```qml
+import QtQuick
+import LVRS 1.0 as LV
+```
+
+Only CMake configure/build/install is required. Manual file copy or custom plugin wiring is not required.
+`lvrs_configure_qml_app()` also applies a safe default runtime output directory (`<build>/bin`) when none is set, preventing executable name collisions with `qt_add_qml_module()` output folders.
 
 ## Rendering Backend Policy
 
@@ -66,7 +117,7 @@ When enabled, configure fails if:
 - `backend/`: C++ singletons (`RuntimeEvents`, `Backend`, `RenderMonitor`, `RenderQuality`, etc.).
 - `backend/runtime/appbootstrap.h`, `backend/runtime/appbootstrap.cpp`: reusable pre/post app bootstrap API for downstream apps.
 - `qml/`: QML module entry files and components.
-- `main.cpp`: downstream app template entrypoint (reference only, not built by framework CMake targets). CLI/env override로 `module/root/app-name/style`을 주입할 수 있다.
+- `main.cpp`: downstream app template entrypoint (reference only, not built by framework CMake targets). CLI/env overrides can inject `module/root/app-name/style`.
 - `example/VisualCatalog/main.cpp`: visual-catalog app entrypoint, backend bootstrap, font loading.
 - `example/VisualCatalog/qml/Main.qml`: visual catalog with tab pages and EventListener runtime console.
 - `resources/iconset/`: SVG icon source set used for theme accent extraction.

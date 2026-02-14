@@ -1,20 +1,43 @@
 cmake_minimum_required(VERSION 3.21)
-project(LVRS LANGUAGES CXX)
+project(LVRS VERSION 1.0.0 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-option(LVRS_BUILD_SHARED_LIBS "Build LVRS as shared library for dynamic consumption" ON)
-
-find_package(Qt6 6.5 REQUIRED COMPONENTS Quick QuickControls2 Test Svg Network)
-find_package(Vulkan QUIET)
+include(GNUInstallDirs)
 include(CMakePackageConfigHelpers)
 
-qt_standard_project_setup()
+option(LVRS_BUILD_SHARED_LIBS "Build LVRS as shared library for dynamic consumption" ON)
+option(LVRS_BUILD_EXAMPLES "Build runnable example applications" OFF)
+option(LVRS_BUILD_TESTS "Build LVRS tests" OFF)
+option(LVRS_INSTALL_QML_MODULE "Install LVRS QML module directory for downstream imports" ON)
 
 option(LVRS_FORCE_X86_QT_TOOLS "Force Qt host tools to run under x86_64 (Rosetta)" OFF)
 option(LVRS_ENABLE_APPLE_GL_LINK_SHIM "Provide a minimal AGL shim only for Apple linker compatibility" ON)
 option(LVRS_ENFORCE_VULKAN "Fail configure if Vulkan-capable Qt/runtime are unavailable" ON)
+
+set(LVRS_INSTALL_CMAKE_DIR "${CMAKE_INSTALL_LIBDIR}/cmake/LVRS")
+set(LVRS_QML_MODULE_INSTALL_BASE "${CMAKE_INSTALL_LIBDIR}/qt6/qml")
+set(LVRS_QML_MODULE_INSTALL_DIR "${LVRS_QML_MODULE_INSTALL_BASE}/LVRS")
+set(LVRS_APPLE_FRAMEWORK_INSTALL_DIR "${CMAKE_INSTALL_LIBDIR}")
+set(LVRS_QML_IMPORT_PATH "${CMAKE_CURRENT_BINARY_DIR}")
+set(LVRS_QML_MODULE_PATH "${CMAKE_CURRENT_BINARY_DIR}/LVRS")
+set(LVRS_APPLE_AGL_SHIM_ACTIVE OFF)
+set(LVRS_APPLE_AGL_FRAMEWORK_ROOT "")
+
+include(${CMAKE_CURRENT_LIST_DIR}/cmake/LVRSHelpers.cmake)
+
+find_package(Qt6 6.5 REQUIRED COMPONENTS Quick QuickControls2 Qml Svg Network)
+if(LVRS_BUILD_TESTS)
+    find_package(Qt6 6.5 REQUIRED COMPONENTS Test)
+endif()
+find_package(Vulkan QUIET)
+
+if(COMMAND qt_policy)
+    qt_policy(SET QTP0004 NEW)
+endif()
+
+qt_standard_project_setup()
 
 function(_lvrs_detect_qt_feature feature_name out_value out_header)
     set(_lvrs_qtgui_config_header "")
@@ -91,7 +114,7 @@ if(APPLE AND LVRS_ENABLE_APPLE_GL_LINK_SHIM)
                 endforeach()
             endif()
             execute_process(
-                COMMAND "${CMAKE_CXX_COMPILER}" ${_uifw_agl_arch_flags} -dynamiclib "${_uifw_agl_stub}" -o "${_uifw_agl_binary}"
+                COMMAND "${CMAKE_CXX_COMPILER}" ${_uifw_agl_arch_flags} -dynamiclib "${_uifw_agl_stub}" -install_name "@rpath/AGL.framework/Versions/A/AGL" -o "${_uifw_agl_binary}"
                 RESULT_VARIABLE _uifw_agl_build_result
             )
             if(NOT _uifw_agl_build_result EQUAL 0)
@@ -121,6 +144,8 @@ if(APPLE AND LVRS_ENABLE_APPLE_GL_LINK_SHIM)
             file(REMOVE_RECURSE "${_uifw_agl_framework}/Resources")
         endif()
         file(CREATE_LINK "Versions/Current/Resources" "${_uifw_agl_framework}/Resources" SYMBOLIC)
+        set(LVRS_APPLE_AGL_SHIM_ACTIVE ON)
+        set(LVRS_APPLE_AGL_FRAMEWORK_ROOT "${_uifw_framework_root}")
         set(CMAKE_FRAMEWORK_PATH "${_uifw_framework_root}" ${CMAKE_FRAMEWORK_PATH})
         add_link_options("-F${_uifw_framework_root}")
     endif()
@@ -169,6 +194,13 @@ set_target_properties(LVRSCore PROPERTIES
 )
 add_library(LVRS::LVRS ALIAS LVRSCore)
 
+if(LVRS_APPLE_AGL_SHIM_ACTIVE)
+    target_link_options(LVRSCore INTERFACE
+        $<BUILD_INTERFACE:-F${LVRS_APPLE_AGL_FRAMEWORK_ROOT}>
+        $<INSTALL_INTERFACE:-F$<INSTALL_PREFIX>/${LVRS_APPLE_FRAMEWORK_INSTALL_DIR}>
+    )
+endif()
+
 set(LVRS_STATIC_QML_PLUGIN_REQUIRED OFF)
 if(NOT LVRS_BUILD_SHARED_LIBS)
     set(LVRS_STATIC_QML_PLUGIN_REQUIRED ON)
@@ -190,14 +222,14 @@ target_include_directories(LVRSCore
         $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/backend/state>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/backend/graphics>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/backend/text>
-        $<INSTALL_INTERFACE:include/LVRS>
+        $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/LVRS>
 )
 
 qt_add_qml_module(LVRSCore
     URI LVRS
     VERSION 1.0
     RESOURCE_PREFIX "/qt/qml"
-    OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/LVRS"
+    OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/LVRS"
     SOURCES
         ${LVRS_BACKEND_SOURCES}
         ${LVRS_BACKEND_HEADERS}
@@ -275,9 +307,6 @@ target_link_libraries(LVRSCore
         Qt6::Network
 )
 
-option(LVRS_BUILD_EXAMPLES "Build runnable example applications" ON)
-option(LVRS_BUILD_TESTS "Build LVRS tests" ON)
-
 if(LVRS_BUILD_EXAMPLES)
     add_subdirectory(example)
 endif()
@@ -297,38 +326,56 @@ endif()
 
 install(TARGETS ${_uifw_export_targets}
     EXPORT LVRSTargets
-    ARCHIVE DESTINATION lib
-    LIBRARY DESTINATION lib
-    RUNTIME DESTINATION bin
-    INCLUDES DESTINATION include/LVRS
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+    INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/LVRS
 )
 
 install(EXPORT LVRSTargets
     NAMESPACE LVRS::
-    DESTINATION lib/cmake/LVRS
+    DESTINATION ${LVRS_INSTALL_CMAKE_DIR}
 )
 
 install(
     DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/backend/
-    DESTINATION include/LVRS/backend
+    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/LVRS/backend
     FILES_MATCHING
         PATTERN "*.h"
 )
 
+if(LVRS_INSTALL_QML_MODULE)
+    install(
+        DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/LVRS/"
+        DESTINATION "${LVRS_QML_MODULE_INSTALL_DIR}"
+    )
+endif()
+
+if(LVRS_APPLE_AGL_SHIM_ACTIVE)
+    install(
+        DIRECTORY "${LVRS_APPLE_AGL_FRAMEWORK_ROOT}/AGL.framework"
+        DESTINATION "${LVRS_APPLE_FRAMEWORK_INSTALL_DIR}"
+    )
+endif()
+
 configure_package_config_file(
     "${CMAKE_CURRENT_LIST_DIR}/cmake/LVRSConfig.cmake.in"
     "${CMAKE_CURRENT_BINARY_DIR}/LVRSConfig.cmake"
-    INSTALL_DESTINATION lib/cmake/LVRS
+    INSTALL_DESTINATION ${LVRS_INSTALL_CMAKE_DIR}
+    PATH_VARS
+        LVRS_QML_MODULE_INSTALL_BASE
+        LVRS_QML_MODULE_INSTALL_DIR
 )
 
 write_basic_package_version_file(
     "${CMAKE_CURRENT_BINARY_DIR}/LVRSConfigVersion.cmake"
-    VERSION 1.0.0
+    VERSION ${PROJECT_VERSION}
     COMPATIBILITY SameMajorVersion
 )
 
 install(FILES
     "${CMAKE_CURRENT_BINARY_DIR}/LVRSConfig.cmake"
     "${CMAKE_CURRENT_BINARY_DIR}/LVRSConfigVersion.cmake"
-    DESTINATION lib/cmake/LVRS
+    "${CMAKE_CURRENT_LIST_DIR}/cmake/LVRSHelpers.cmake"
+    DESTINATION ${LVRS_INSTALL_CMAKE_DIR}
 )

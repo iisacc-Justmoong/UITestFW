@@ -2,9 +2,9 @@
 
 Location: `backend/runtime/debuglogger.h` / `backend/runtime/debuglogger.cpp`
 
-`Debug`는 QML/C++ 공용 로거 singleton이며, 메모리 버퍼와 stdout 출력을 함께 제공한다.
+`Debug` is a shared QML/C++ logger singleton that provides both an in-memory buffer and stdout output.
 
-핵심 API:
+Core API:
 
 - `log(component, event, data?)`
 - `warn(component, event, data?)`
@@ -12,6 +12,6 @@ Location: `backend/runtime/debuglogger.h` / `backend/runtime/debuglogger.cpp`
 - `entries(limit?)`, `filteredEntries(limit?)`, `summary()`
 - `attachRuntimeEvents()`, `detachRuntimeEvents()`
 
-정확한 출력 스키마와 필드 정의는 다음 문서를 기준으로 확인한다.
+For the exact output schema and field definitions, refer to:
 
 - `docs/backend/DebugOutput.md`

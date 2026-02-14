@@ -1,6 +1,39 @@
 @PACKAGE_INIT@
 
 include(CMakeFindDependencyMacro)
-find_dependency(Qt6 6.5 REQUIRED COMPONENTS Quick QuickControls2)
+find_dependency(Qt6 6.5 REQUIRED COMPONENTS Quick QuickControls2 Qml Svg Network)
 
 include("${CMAKE_CURRENT_LIST_DIR}/LVRSTargets.cmake")
+
+set(LVRS_QML_IMPORT_PATH "@PACKAGE_LVRS_QML_MODULE_INSTALL_BASE@")
+set(LVRS_QML_MODULE_PATH "@PACKAGE_LVRS_QML_MODULE_INSTALL_DIR@")
+
+# Qt's qml plugin auto-link path expects a plain target name ("LVRSCoreplugin")
+# from LVRS module metadata. Provide a compatibility imported target so downstream
+# projects do not need to define custom aliases.
+if(NOT TARGET LVRSCoreplugin)
+    set(_lvrs_plugin_candidates
+        "${LVRS_QML_MODULE_PATH}/${CMAKE_SHARED_LIBRARY_PREFIX}LVRSCoreplugin${CMAKE_SHARED_LIBRARY_SUFFIX}"
+        "${LVRS_QML_MODULE_PATH}/LVRSCoreplugin${CMAKE_SHARED_LIBRARY_SUFFIX}"
+        "${LVRS_QML_MODULE_PATH}/${CMAKE_STATIC_LIBRARY_PREFIX}LVRSCoreplugin${CMAKE_STATIC_LIBRARY_SUFFIX}"
+        "${LVRS_QML_MODULE_PATH}/LVRSCoreplugin${CMAKE_STATIC_LIBRARY_SUFFIX}"
+    )
+
+    foreach(_lvrs_plugin_candidate IN LISTS _lvrs_plugin_candidates)
+        if(EXISTS "${_lvrs_plugin_candidate}")
+            add_library(LVRSCoreplugin UNKNOWN IMPORTED)
+            set_target_properties(LVRSCoreplugin PROPERTIES
+                IMPORTED_LOCATION "${_lvrs_plugin_candidate}"
+                INTERFACE_LINK_LIBRARIES "LVRS::LVRS"
+            )
+            break()
+        endif()
+    endforeach()
+
+    unset(_lvrs_plugin_candidate)
+    unset(_lvrs_plugin_candidates)
+endif()
+
+include("${CMAKE_CURRENT_LIST_DIR}/LVRSHelpers.cmake")
+
+check_required_components(LVRS)

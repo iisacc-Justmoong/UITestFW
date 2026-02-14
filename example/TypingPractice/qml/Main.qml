@@ -26,7 +26,7 @@ LV.ApplicationWindow {
     property bool roundFinished: false
     property int elapsedSeconds: 0
     property int completedRounds: 0
-    property string statusMessage: "시작을 누르면 타자 연습이 시작된다."
+    property string statusMessage: "Press Start to begin typing practice."
 
     readonly property int targetLength: targetText.length
     readonly property int typedLength: typedText.length
@@ -77,7 +77,7 @@ LV.ApplicationWindow {
         elapsedSeconds = 0
         typedText = ""
         typingInput.text = ""
-        statusMessage = "연습 중이다. 문장을 정확히 입력하면 완료된다."
+        statusMessage = "In progress. Type the sentence exactly to finish."
         typingInput.forceInputFocus()
     }
 
@@ -85,7 +85,7 @@ LV.ApplicationWindow {
         running = false
         roundFinished = true
         completedRounds += 1
-        statusMessage = "완료: 정확도 " + roundValue(accuracy) + "%, WPM " + roundValue(wpm)
+        statusMessage = "Completed: Accuracy " + roundValue(accuracy) + "%, WPM " + roundValue(wpm)
     }
 
     function resetRound() {
@@ -94,14 +94,14 @@ LV.ApplicationWindow {
         elapsedSeconds = 0
         typedText = ""
         typingInput.text = ""
-        statusMessage = "초기화 완료. 시작을 눌러 다시 진행한다."
+        statusMessage = "Reset complete. Press Start to begin again."
     }
 
     function nextText() {
         textIndex = (textIndex + 1) % practiceTexts.length
         targetText = String(practiceTexts[textIndex])
         resetRound()
-        statusMessage = "새 문장으로 변경되었다."
+        statusMessage = "Switched to a new sentence."
     }
 
     Flickable {
@@ -121,7 +121,7 @@ LV.ApplicationWindow {
                 id: targetCard
                 width: parent.width
                 title: "Target Sentence"
-                subtitle: "문장을 정확히 입력한다"
+                subtitle: "Type the sentence accurately"
 
                 Column {
                     width: targetCard.width - (targetCard.cardPadding * 2)
@@ -145,7 +145,7 @@ LV.ApplicationWindow {
                     LV.Label {
                         width: parent.width
                         style: caption
-                        text: "진행: " + root.progressChars + " / " + root.targetLength
+                        text: "Progress: " + root.progressChars + " / " + root.targetLength
                     }
                 }
             }
@@ -154,7 +154,7 @@ LV.ApplicationWindow {
                 id: inputCard
                 width: parent.width
                 title: "Typing Input"
-                subtitle: "실제 입력 영역"
+                subtitle: "Input area"
 
                 Column {
                     width: inputCard.width - (inputCard.cardPadding * 2)
@@ -164,7 +164,7 @@ LV.ApplicationWindow {
                         id: typingInput
                         width: parent.width
                         enabled: root.running && !root.roundFinished
-                        placeholderText: "Start를 누르면 입력 가능하다"
+                        placeholderText: "Press Start to enable input"
                         onTextEdited: root.evaluateInput(text)
                         onAccepted: root.evaluateInput(text)
                     }
@@ -207,7 +207,7 @@ LV.ApplicationWindow {
                 id: metricsCard
                 width: parent.width
                 title: "Metrics"
-                subtitle: "정확도와 속도 지표"
+                subtitle: "Accuracy and speed metrics"
 
                 Column {
                     width: metricsCard.width - (metricsCard.cardPadding * 2)
@@ -236,7 +236,7 @@ LV.ApplicationWindow {
                         width: parent.width
                         style: caption
                         wrapMode: Text.WordWrap
-                        text: "입력 길이: " + root.typedLength + " / " + root.targetLength
+                        text: "Input length: " + root.typedLength + " / " + root.targetLength
                     }
                 }
             }

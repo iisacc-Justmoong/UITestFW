@@ -33,16 +33,9 @@ target_link_libraries(LVRSExampleMVVM
     PRIVATE
         Qt6::Quick
         Qt6::QuickControls2
-        LVRSCore
 )
 
-if(LVRS_STATIC_QML_PLUGIN_REQUIRED)
-    target_link_libraries(LVRSExampleMVVM
-        PRIVATE
-            LVRSplugin
-            LVRSplugin_init
-    )
-endif()
+lvrs_configure_qml_app(LVRSExampleMVVM)
 
 target_include_directories(LVRSExampleMVVM
     PRIVATE

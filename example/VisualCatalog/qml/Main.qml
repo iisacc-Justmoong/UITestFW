@@ -10,7 +10,7 @@ LV.ApplicationWindow {
     width: 1480
     height: 980
     title: "UI Framework Visual Catalog"
-    subtitle: "컴포넌트 시각 점검용 메인 뷰"
+    subtitle: "Main view for visual component inspection"
     navItems: LV.AppState.navItems
 
     readonly property bool compactGallery: width < 1260
@@ -140,98 +140,98 @@ LV.ApplicationWindow {
         {
             tab: "Overview",
             component: "ApplicationWindow + AppState",
-            pageDoc: "애플리케이션 루트 상태와 공통 액션의 관찰 지점을 제공하는 페이지이다. Alert, ContextMenu, Progress와 RenderMonitor 트리거를 한 화면에서 재현해 상호작용 회귀를 빠르게 판별하도록 설계했다.",
-            componentDoc: "상태 변경은 AppState를 통해 단일 경로로 흘러가며, UI는 상태 스냅샷을 구독해 즉시 반영된다.",
-            apiDoc: "핵심 API: LV.ApplicationWindow, LV.AppState, LV.RenderMonitor, LV.Alert, LV.ContextMenu",
-            checklist: "버튼 클릭 후 상태 값 동기화 여부, 오버레이 열림/닫힘, 모니터 start/stop 동작"
+            pageDoc: "This page provides observability points for application root state and common actions. It reproduces Alert, ContextMenu, Progress, and RenderMonitor triggers on one screen to quickly identify interaction regressions.",
+            componentDoc: "State changes flow through AppState as a single path, and the UI reflects updates immediately by subscribing to state snapshots.",
+            apiDoc: "Core API: LV.ApplicationWindow, LV.AppState, LV.RenderMonitor, LV.Alert, LV.ContextMenu",
+            checklist: "State synchronization after button clicks, overlay open/close behavior, monitor start/stop behavior"
         },
         {
             tab: "Typography",
             component: "Label",
-            pageDoc: "테마 타이포그래피 토큰을 스케일별로 검증하는 페이지이다. 스타일 명세와 렌더 결과가 일치하는지 즉시 확인한다.",
-            componentDoc: "Label은 style enum을 통해 폰트 크기, weight, lineHeight, color 계층을 일관되게 적용한다.",
-            apiDoc: "핵심 API: LV.Label(style: title/title2/header/header2/body/description/caption/disabled)",
-            checklist: "텍스트 계층 대비, 폰트 fallback, 줄바꿈 시 lineHeight 유지"
+            pageDoc: "This page validates theme typography tokens across scales and immediately verifies rendered output against style specifications.",
+            componentDoc: "Label applies font size, weight, lineHeight, and color hierarchy consistently through the style enum.",
+            apiDoc: "Core API: LV.Label(style: title/title2/header/header2/body/description/caption/disabled)",
+            checklist: "Text hierarchy contrast, font fallback behavior, lineHeight preservation during wrapping"
         },
         {
             tab: "EventListener",
             component: "Event Listener Value Monitor",
-            pageDoc: "이벤트 리스너가 반환하는 payload를 중심으로 좌표, 입력 상태, UI hit 정보를 실시간 감시하는 페이지이다.",
-            componentDoc: "global/local EventListener 트리거에서 수집한 반환값을 단일 모니터 모델로 집계해 상태 패널과 샘플 리스트로 제공한다.",
-            apiDoc: "핵심 API: LV.EventListener(trigger/action/includeUiHit), globalPressedEvent/globalContextEvent, LV.Backend.currentUserInputState()",
-            checklist: "트리거별 payload 정확성, 마지막 이벤트 타깃 식별, 입력 상태 동기화, 샘플 누락 여부"
+            pageDoc: "This page monitors coordinates, input state, and UI hit information in real time based on payloads returned by EventListener.",
+            componentDoc: "Payloads collected from global/local EventListener triggers are aggregated into a single monitor model and presented as status panels and sample lists.",
+            apiDoc: "Core API: LV.EventListener(trigger/action/includeUiHit), globalPressedEvent/globalContextEvent, LV.Backend.currentUserInputState()",
+            checklist: "Per-trigger payload accuracy, last event target identification, input state synchronization, missing sample detection"
         },
         {
             tab: "Buttons",
             component: "LabelButton/IconButton/LabelMenuButton/IconMenuButton",
-            pageDoc: "버튼 패밀리와 tone 상태 조합을 검증하는 페이지이다. Figma 규격의 고정 높이/패딩과 상호작용 상태색을 동시에 점검한다.",
-            componentDoc: "Primary, Default, Borderless, Destructive, Disabled 톤이 공통 버튼 기반에서 일관된 정책으로 렌더된다.",
-            apiDoc: "핵심 API: tone, text, iconName, showIndicator, enabled",
-            checklist: "높이 20px 유지, hover/pressed/inactive 색상, 아이콘/라벨 정렬"
+            pageDoc: "This page validates button-family and tone-state combinations. It checks fixed Figma height/padding and interaction state colors together.",
+            componentDoc: "Primary, Default, Borderless, Destructive, and Disabled tones render with a consistent policy on a shared button base.",
+            apiDoc: "Core API: tone, text, iconName, showIndicator, enabled",
+            checklist: "Maintain 20px height, hover/pressed/inactive colors, icon/label alignment"
         },
         {
             tab: "Accent",
             component: "Theme Accent Tokens",
-            pageDoc: "아이콘셋에서 추출한 accent 토큰을 전수 검증하는 페이지이다. 실제 토큰명과 헥스 값의 매핑을 시각적으로 확인한다.",
-            componentDoc: "각 토큰은 Theme singleton에서 중앙 관리되며 컴포넌트 상태 테마의 원천 데이터로 사용된다.",
-            apiDoc: "핵심 API: LV.Theme.accent* 토큰, accentPreviewTokens 모델",
-            checklist: "토큰 누락 여부, 이름-색상 대응, transparent 처리"
+            pageDoc: "This page performs full verification of accent tokens extracted from the icon set. It visually validates mapping between token names and hex values.",
+            componentDoc: "Each token is centrally managed in the Theme singleton and used as source data for component state themes.",
+            apiDoc: "Core API: LV.Theme.accent* tokens, accentPreviewTokens model",
+            checklist: "Token coverage, name-color mapping, transparent handling"
         },
         {
             tab: "Inputs",
             component: "InputField",
-            pageDoc: "텍스트 입력 컴포넌트의 상태 전이를 점검하는 페이지이다. placeholder, readOnly, disabled, password, search 모드를 한 번에 확인한다.",
-            componentDoc: "입력 필드는 단일 베이스 컴포넌트에 모드별 UI 정책을 얹어 동작하므로 상태 회귀 점검이 핵심이다.",
-            apiDoc: "핵심 API: text, placeholderText, readOnly, enabled, echoMode, mode, inputMethodHints",
-            checklist: "포커스 전이, 커서/선택 동작, 모드별 아이콘/패딩"
+            pageDoc: "This page checks state transitions of text input components. It verifies placeholder, readOnly, disabled, password, and search modes together.",
+            componentDoc: "Input fields layer mode-specific UI policies on a single base component, so state regression checks are critical.",
+            apiDoc: "Core API: text, placeholderText, readOnly, enabled, echoMode, mode, inputMethodHints",
+            checklist: "Focus transitions, cursor/selection behavior, mode-specific icon/padding"
         },
         {
             tab: "Editors",
             component: "TextEditor + CodeEditor",
-            pageDoc: "문서 입력과 코드 입력 시나리오를 병렬 비교하는 페이지이다. 고정 높이 편집영역과 내부 스크롤, 제출 단축키를 검증한다.",
-            componentDoc: "TextEditor는 마크다운/리치텍스트 프리뷰 경로를 포함하고, CodeEditor는 모노스페이스 코드 입력 경로에 집중한다.",
-            apiDoc: "핵심 API: editorHeight, mode, snippetTitle, snippetLanguage, submitted(text)",
-            checklist: "입력 중 레이아웃 밀림 방지, 내부 스크롤 분리, Ctrl/Cmd+Enter 제출"
+            pageDoc: "This page compares document-input and code-input scenarios in parallel. It validates fixed editor height, internal scrolling, and submit shortcuts.",
+            componentDoc: "TextEditor includes markdown/rich-text preview paths, while CodeEditor focuses on monospace code input paths.",
+            apiDoc: "Core API: editorHeight, mode, snippetTitle, snippetLanguage, submitted(text)",
+            checklist: "Prevent layout push during typing, isolate internal scrolling, Ctrl/Cmd+Enter submit"
         },
         {
             tab: "Checks",
             component: "CheckBox/RadioButton/ToggleSwitch",
-            pageDoc: "선택형 컨트롤의 상태 일관성을 확인하는 페이지이다. checked, unchecked, disabled 조합이 테마와 함께 정상 동작하는지 검증한다.",
-            componentDoc: "세 컴포넌트는 선택 시각화 방식은 다르지만 상태 전이 계약은 동일해야 한다.",
-            apiDoc: "핵심 API: checked, enabled, text",
-            checklist: "클릭 hit 영역, disabled 시 포인터 차단, 그룹 선택 배타성"
+            pageDoc: "This page verifies state consistency of selectable controls. It checks whether checked, unchecked, and disabled combinations work correctly with theme behavior.",
+            componentDoc: "These three components use different selection visualizations but must share the same state-transition contract.",
+            apiDoc: "Core API: checked, enabled, text",
+            checklist: "Click hit area, pointer blocking in disabled state, group-selection exclusivity"
         },
         {
             tab: "Navigation",
             component: "PageRouter + Link + List",
-            pageDoc: "라우팅/링크/리스트 탐색 경로를 검증하는 페이지이다. 경로 전환 시 뷰 교체와 상태 기록이 정상 반영되는지 확인한다.",
-            componentDoc: "Link는 선언형 이동을 제공하고 PageRouter는 경로-컴포넌트 매핑을 담당하며, List는 탐색형 표면을 구성한다.",
-            apiDoc: "핵심 API: LV.Link(to/href), LV.PageRouter(routes, initialPath), LV.List(items)",
-            checklist: "경로 기록(PageMonitor), fallback 경로 처리, 리스트 활성 아이템 반응"
+            pageDoc: "This page validates routing, link, and list-navigation flows. It confirms view replacement and state recording during route transitions.",
+            componentDoc: "Link provides declarative navigation, PageRouter maps routes to components, and List builds navigation surfaces.",
+            apiDoc: "Core API: LV.Link(to/href), LV.PageRouter(routes, initialPath), LV.List(items)",
+            checklist: "Route history (PageMonitor), fallback-route handling, active list-item response"
         },
         {
             tab: "Layout",
             component: "HStack/VStack/ZStack/Spacer",
-            pageDoc: "레이아웃 원시 컴포넌트의 배치 규칙을 확인하는 페이지이다. 정렬, 간격, 확장 동작을 시각적으로 검증한다.",
-            componentDoc: "레이아웃 primitive는 상위 컴포넌트의 구조적 안정성을 좌우하므로 spacing/align 정책의 일관성이 중요하다.",
-            apiDoc: "핵심 API: spacing, alignmentName, Spacer.minLength, Layout.*",
-            checklist: "컨테이너 리사이즈 시 정렬 유지, Spacer 유효 동작, z-order 겹침"
+            pageDoc: "This page verifies layout-primitives placement rules and visually checks alignment, spacing, and expansion behavior.",
+            componentDoc: "Layout primitives determine structural stability of upper components, so spacing/align policy consistency is important.",
+            apiDoc: "Core API: spacing, alignmentName, Spacer.minLength, Layout.*",
+            checklist: "Alignment preservation during container resize, Spacer validity, z-order overlap"
         },
         {
             tab: "Hierarchy",
             component: "Hierarchy + HierarchyList + HierarchyItem",
-            pageDoc: "계층형 데이터 표시와 탐색 인터랙션을 검증하는 페이지이다. 모델 입력만으로 트리 전개/축약/선택이 구현되는지 확인한다.",
-            componentDoc: "행 클릭은 활성화만 수행하고, 접힘/펼침은 우측 chevron 입력만 처리하도록 동작을 분리했다.",
-            apiDoc: "핵심 API: model/treeModel, expandAll(), collapseAll(), activeListItemKey",
-            checklist: "chevron 전용 토글, 키보드 네비게이션, 내부 스크롤 이벤트 분리"
+            pageDoc: "This page validates hierarchical data presentation and navigation interaction. It checks whether tree expand/collapse/select is driven purely by model input.",
+            componentDoc: "Row clicks only activate items, while collapse/expand is handled only by right-side chevron interaction.",
+            apiDoc: "Core API: model/treeModel, expandAll(), collapseAll(), activeListItemKey",
+            checklist: "Chevron-only toggle, keyboard navigation, internal scroll-event isolation"
         },
         {
             tab: "Scaffold",
             component: "AppScaffold",
-            pageDoc: "실제 앱 골격의 헤더/네비게이션/콘텐츠 구성을 검증하는 페이지이다. 페이지 전환 시 프레임 레벨 상태 동기화를 확인한다.",
-            componentDoc: "AppScaffold는 상위 정보구조를 유지하며 내부 콘텐츠 교체를 흡수하는 shell 컴포넌트이다.",
-            apiDoc: "핵심 API: navModel, navIndex, headerTitle/headerSubtitle, onNavActivated",
-            checklist: "선택 인덱스 동기화, 헤더 액션 정렬, 내부 콘텐츠 영역 안정성"
+            pageDoc: "This page validates header, navigation, and content composition of a real app shell. It checks frame-level state synchronization during page transitions.",
+            componentDoc: "AppScaffold preserves top-level information structure and absorbs inner-content replacement as a shell component.",
+            apiDoc: "Core API: navModel, navIndex, headerTitle/headerSubtitle, onNavActivated",
+            checklist: "Selected-index synchronization, header action alignment, inner content-area stability"
         }
     ]
     readonly property var currentDemoPage: {
@@ -1175,7 +1175,7 @@ LV.ApplicationWindow {
 
         LV.AppCard {
             title: "Developer Page Brief"
-            subtitle: (root.currentDemoPage.tab || "Unknown") + " 페이지 및 컴포넌트 해설"
+            subtitle: (root.currentDemoPage.tab || "Unknown") + " page and component guide"
             Layout.fillWidth: true
 
             Column {
@@ -1195,7 +1195,7 @@ LV.ApplicationWindow {
                     style: description
                     color: LV.Theme.textSecondary
                     wrapMode: Text.WordWrap
-                    text: "핵심 컴포넌트: " + (root.currentDemoPage.component || "")
+                    text: "Core components: " + (root.currentDemoPage.component || "")
                 }
 
                 LV.Label {
@@ -1219,7 +1219,7 @@ LV.ApplicationWindow {
                     style: caption
                     color: LV.Theme.textTertiary
                     wrapMode: Text.WordWrap
-                    text: "검증 체크포인트: " + (root.currentDemoPage.checklist || "")
+                    text: "Validation checkpoints: " + (root.currentDemoPage.checklist || "")
                 }
 
                 Rectangle {
@@ -1279,7 +1279,7 @@ LV.ApplicationWindow {
 
                 LV.AppCard {
                     title: "Overview"
-                    subtitle: "컴포넌트 탐색 시작점"
+                    subtitle: "Component exploration starting point"
                     visible: root.demoPageIndex === 0
                     Layout.fillWidth: true
 
@@ -1292,7 +1292,7 @@ LV.ApplicationWindow {
                             style: description
                             color: LV.Theme.textSecondary
                             wrapMode: Text.WordWrap
-                            text: "이 페이지는 LVRS의 핵심 컴포넌트를 상태별로 묶어 보여주는 시각 카탈로그이다."
+                            text: "This page is a visual catalog that groups core LVRS components by state."
                         }
 
                         RowLayout {
@@ -1390,7 +1390,7 @@ LV.ApplicationWindow {
 
                 LV.AppCard {
                     title: "Typography"
-                    subtitle: "Label 스타일 스케일"
+                    subtitle: "Label style scale"
                     visible: root.demoPageIndex === 1
                     Layout.fillWidth: true
 
@@ -1411,7 +1411,7 @@ LV.ApplicationWindow {
 
                 LV.AppCard {
                     title: "Event Listener Value Monitor"
-                    subtitle: "EventListener가 반환하는 payload 중심 실시간 모니터"
+                    subtitle: "Real-time monitor focused on payloads returned by EventListener"
                     visible: root.demoPageIndex === 2
                     Layout.fillWidth: true
 
@@ -1437,7 +1437,7 @@ LV.ApplicationWindow {
                                 anchors.margins: LV.Theme.gap10
                                 style: body
                                 color: LV.Theme.textPrimary
-                                text: "Event Capture Zone: 클릭/휠/키 입력을 여기에서 발생시키면 EventListener 반환값이 아래 모니터로 즉시 반영된다."
+                                text: "Event Capture Zone: Trigger click/wheel/key input here and EventListener return values are reflected immediately in the monitor below."
                                 wrapMode: Text.WordWrap
                             }
 
@@ -1825,7 +1825,7 @@ LV.ApplicationWindow {
                                         visible: root.eventMonitorSampleCount === 0
                                         style: description
                                         color: LV.Theme.textSecondary
-                                        text: "아직 수집된 EventListener 반환값 샘플이 없다."
+                                        text: "No EventListener return-value samples have been collected yet."
                                     }
                                 }
 
@@ -1845,7 +1845,7 @@ LV.ApplicationWindow {
 
                 LV.AppCard {
                     title: "Embedded Runtime Debugger"
-                    subtitle: "RuntimeEvents + Debug 로그를 통합 수집하는 내장 디버거"
+                    subtitle: "Built-in debugger that aggregates RuntimeEvents + Debug logs"
                     visible: root.demoPageIndex === 2
                     Layout.fillWidth: true
 
@@ -2133,7 +2133,7 @@ LV.ApplicationWindow {
                                         visible: root.debuggerVisibleCount === 0
                                         style: description
                                         color: LV.Theme.textSecondary
-                                        text: "아직 수집된 디버거 엔트리가 없다."
+                                        text: "No debugger entries have been collected yet."
                                     }
                                 }
 
@@ -2153,7 +2153,7 @@ LV.ApplicationWindow {
 
                 LV.AppCard {
                     title: "Buttons"
-                    subtitle: "Tone별 버튼 패밀리 + 상태 테마 스와치"
+                    subtitle: "Button families by tone + state-theme swatches"
                     visible: root.demoPageIndex === 3
                     Layout.fillWidth: true
 
@@ -2328,7 +2328,7 @@ LV.ApplicationWindow {
 
                 LV.AppCard {
                     title: "Accent Palette"
-                    subtitle: "iconset 기반 전체 accent 컬러 프리뷰"
+                    subtitle: "Full accent color preview based on iconset"
                     visible: root.demoPageIndex === 4
                     Layout.fillWidth: true
 
@@ -2389,7 +2389,7 @@ LV.ApplicationWindow {
 
                 LV.AppCard {
                     title: "Input Fields"
-                    subtitle: "텍스트 입력 상태"
+                    subtitle: "Text input states"
                     visible: root.demoPageIndex === 5
                     Layout.fillWidth: true
 
@@ -2449,7 +2449,7 @@ LV.ApplicationWindow {
 
                 LV.AppCard {
                     title: "Editors"
-                    subtitle: "TextEditor와 CodeEditor"
+                    subtitle: "TextEditor and CodeEditor"
                     visible: root.demoPageIndex === 6
                     Layout.fillWidth: true
 
@@ -2481,7 +2481,7 @@ LV.ApplicationWindow {
 
                 LV.AppCard {
                     title: "Check Controls"
-                    subtitle: "선택형 컴포넌트"
+                    subtitle: "Selectable components"
                     visible: root.demoPageIndex === 7
                     Layout.fillWidth: true
 
@@ -2710,7 +2710,7 @@ LV.ApplicationWindow {
 
                 LV.AppCard {
                     title: "Hierarchy / Outliner"
-                    subtitle: "model 기반 자동 계층화 + 키보드 탐색"
+                    subtitle: "Model-based automatic hierarchy + keyboard navigation"
                     visible: root.demoPageIndex === 10
                     Layout.fillWidth: true
 
@@ -2818,7 +2818,7 @@ LV.ApplicationWindow {
                                 style: body
                                 color: LV.Theme.textPrimary
                                 wrapMode: Text.WordWrap
-                                text: "개발자는 model만 선언하면 들여쓰기/부모-자식 관계/노드 가시성이 자동으로 계산된다."
+                                text: "Developers only declare the model; indentation, parent-child relationships, and node visibility are computed automatically."
                             }
 
                             LV.Label {
@@ -2859,7 +2859,7 @@ LV.ApplicationWindow {
                                 style: description
                                 color: LV.Theme.textSecondary
                                 wrapMode: Text.WordWrap
-                                text: "최종 사용자는 상하좌우 키로 노드 이동 및 펼침/접기를 수행할 수 있다."
+                                text: "End users can move between nodes and expand/collapse with arrow keys."
                             }
                         }
                     }
@@ -2867,7 +2867,7 @@ LV.ApplicationWindow {
 
                 LV.AppCard {
                     title: "App Scaffold Preview"
-                    subtitle: "실제 페이지 골격 미리보기"
+                    subtitle: "Real app shell preview"
                     visible: root.demoPageIndex === 11
                     Layout.fillWidth: true
 
@@ -2900,7 +2900,7 @@ LV.ApplicationWindow {
                                 }
 
                                 LV.Label {
-                                    text: "현재 선택된 항목에 따라 내부 콘텐츠를 바꾸는 구조를 점검할 수 있다."
+                                    text: "This lets you inspect a structure that switches inner content based on the currently selected item."
                                     style: description
                                     color: LV.Theme.textSecondary
                                     wrapMode: Text.WordWrap

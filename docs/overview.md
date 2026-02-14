@@ -7,7 +7,7 @@ LVRS is a Qt 6.5+ QML framework with a production-style runtime event daemon and
 - Stable component contracts: reusable controls and navigation primitives.
 - Observable runtime: global input/UI/render/navigation events exposed to QML.
 - Deterministic rendering policy: explicit backend bootstrap and quality controls.
-- Practical integration: static plugin-friendly CMake layout for downstream apps.
+- Practical integration: installable CMake package with downstream helper API (`lvrs_configure_qml_app`).
 
 ## Runtime Model
 

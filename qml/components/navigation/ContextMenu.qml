@@ -3,7 +3,7 @@ import QtQuick.Controls as Controls
 import QtQuick.Layouts
 import LVRS 1.0
 
-Controls.Menu {
+Controls.Popup {
     id: control
 
     property var items: []
@@ -29,6 +29,18 @@ Controls.Menu {
         | Controls.Popup.CloseOnReleaseOutside
         | Controls.Popup.CloseOnReleaseOutsideParent
     parent: Controls.Overlay.overlay
+    Controls.Overlay.modal: Item {
+        anchors.fill: parent
+
+        MouseArea {
+            anchors.fill: parent
+            acceptedButtons: Qt.AllButtons
+            onPressed: function(mouse) {
+                mouse.accepted = true
+                control.close()
+            }
+        }
+    }
 
     readonly property int entryCount: {
         if (!items)

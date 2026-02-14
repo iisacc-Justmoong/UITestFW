@@ -274,10 +274,7 @@ LV.ApplicationWindow {
                                 id: menuButton
                                 text: "Open Context Menu"
                                 tone: LV.AbstractButton.Default
-                                onClicked: {
-                                    const origin = menuButton.mapToItem(null, 0, menuButton.height + 6)
-                                    demoContextMenu.openAt(origin.x, origin.y)
-                                }
+                                onClicked: demoContextMenu.openFor(menuButton, 0, menuButton.height + 6)
                             }
 
                             LV.LabelButton {
@@ -683,6 +680,7 @@ LV.ApplicationWindow {
                         LV.TextEditor {
                             Layout.fillWidth: true
                             Layout.preferredHeight: 240
+                            editorHeight: 152
                             mode: markdownMode
                             text: "# Notes\\n- Build verification\\n- Visual inspection\\n\\n`Ctrl+Enter` submits."
                             placeholderText: "Write markdown notes"

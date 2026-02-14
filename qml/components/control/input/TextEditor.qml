@@ -29,6 +29,7 @@ FocusScope {
     property int wrapMode: TextEdit.Wrap
     property int textFormat: TextEdit.PlainText
     property int fieldMinHeight: Theme.controlHeightMd * 3
+    property int editorHeight: fieldMinHeight
     property int insetHorizontal: Theme.gap10
     property int insetVertical: Theme.gap8
     property int cornerRadius: Theme.radiusMd
@@ -70,6 +71,7 @@ FocusScope {
     readonly property int previewHeight: previewVisible
         ? Math.max(outputMinHeight, previewText.implicitHeight + insetVertical * 2)
         : 0
+    readonly property int resolvedEditorHeight: Math.max(fieldMinHeight, editorHeight)
     readonly property bool focused: activeFocus || editor.activeFocus
     readonly property bool empty: editor.text.length === 0 && editor.preeditText.length === 0
     readonly property bool canUndo: editor.canUndo
@@ -110,7 +112,7 @@ FocusScope {
                        Theme.inputMinWidth,
                        editor.implicitWidth + control.insetHorizontal * 2
                    )
-    implicitHeight: Math.max(control.fieldMinHeight, editor.paintedHeight + control.insetVertical * 2)
+    implicitHeight: control.resolvedEditorHeight
                     + (previewVisible ? outputSpacing + previewHeight : 0)
     activeFocusOnTab: true
 
@@ -119,8 +121,7 @@ FocusScope {
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.top: parent.top
-        anchors.bottom: control.previewVisible ? previewPane.top : parent.bottom
-        anchors.bottomMargin: control.previewVisible ? control.outputSpacing : 0
+        height: control.resolvedEditorHeight
 
         Rectangle {
             anchors.fill: parent
@@ -215,7 +216,8 @@ FocusScope {
         id: previewPane
         anchors.left: parent.left
         anchors.right: parent.right
-        anchors.bottom: parent.bottom
+        anchors.top: editArea.bottom
+        anchors.topMargin: control.outputSpacing
         visible: control.previewVisible
         height: control.previewHeight
         radius: control.cornerRadius

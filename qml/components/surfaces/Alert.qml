@@ -18,6 +18,10 @@ Item {
     property bool useOverlayLayer: true
     property int maxWidth: Theme.dialogMaxWidth
     property int minWidth: Theme.dialogMinWidth
+    property color backdropColor: Theme.overlayBackdrop
+    property color cardBackgroundColor: "#2C2D30"
+    property color cardFrameColor: "#5A5D63"
+    property real cardFrameWidth: Theme.strokeThin
 
     readonly property int preferredWidth: 328
     readonly property int sidePadding: Theme.gap24
@@ -56,7 +60,7 @@ Item {
 
     Rectangle {
         anchors.fill: parent
-        color: Theme.overlayBackdrop
+        color: root.backdropColor
         visible: root.open
 
         MouseArea {
@@ -76,7 +80,10 @@ Item {
                                  Math.min(root.preferredWidth,
                                           root.width - (root.sidePadding * 2))))
         radius: Theme.radiusLg
-        color: "#282828"
+        color: root.cardBackgroundColor
+        border.width: root.cardFrameWidth
+        border.color: root.cardFrameColor
+        antialiasing: true
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.verticalCenter: parent.verticalCenter
 

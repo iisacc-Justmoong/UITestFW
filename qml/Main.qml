@@ -382,54 +382,79 @@ LV.ApplicationWindow {
                         width: parent.width
                         spacing: LV.Theme.gap12
 
-                        LV.Label { text: "Primary"; style: caption; color: LV.Theme.textTertiary }
-                        Flow {
-                            width: parent.width
-                            spacing: LV.Theme.gap8
-                            LV.LabelButton { text: "Label"; tone: LV.AbstractButton.Primary }
-                            LV.IconButton { tone: LV.AbstractButton.Primary }
-                            LV.LabelMenuButton { text: "Menu"; tone: LV.AbstractButton.Primary }
-                            LV.IconMenuButton { tone: LV.AbstractButton.Primary }
+                        LV.Label {
+                            text: "Figma Node 44:599"
+                            style: caption
+                            color: LV.Theme.textTertiary
                         }
 
-                        LV.Label { text: "Default"; style: caption; color: LV.Theme.textTertiary }
-                        Flow {
+                        Rectangle {
                             width: parent.width
-                            spacing: LV.Theme.gap8
-                            LV.LabelButton { text: "Label"; tone: LV.AbstractButton.Default }
-                            LV.IconButton { tone: LV.AbstractButton.Default }
-                            LV.LabelMenuButton { text: "Menu"; tone: LV.AbstractButton.Default }
-                            LV.IconMenuButton { tone: LV.AbstractButton.Default }
-                        }
+                            radius: LV.Theme.radiusSm
+                            color: LV.Theme.accentCharcoal
+                            implicitHeight: figmaButtonRows.implicitHeight + LV.Theme.gap20 * 2
 
-                        LV.Label { text: "Borderless"; style: caption; color: LV.Theme.textTertiary }
-                        Flow {
-                            width: parent.width
-                            spacing: LV.Theme.gap8
-                            LV.LabelButton { text: "Label"; tone: LV.AbstractButton.Borderless }
-                            LV.IconButton { tone: LV.AbstractButton.Borderless }
-                            LV.LabelMenuButton { text: "Menu"; tone: LV.AbstractButton.Borderless }
-                            LV.IconMenuButton { tone: LV.AbstractButton.Borderless }
-                        }
+                            Column {
+                                id: figmaButtonRows
+                                x: LV.Theme.gap20
+                                y: LV.Theme.gap20
+                                spacing: 29
 
-                        LV.Label { text: "Destructive"; style: caption; color: LV.Theme.textTertiary }
-                        Flow {
-                            width: parent.width
-                            spacing: LV.Theme.gap8
-                            LV.LabelButton { text: "Label"; tone: LV.AbstractButton.Destructive }
-                            LV.IconButton { tone: LV.AbstractButton.Destructive }
-                            LV.LabelMenuButton { text: "Menu"; tone: LV.AbstractButton.Destructive }
-                            LV.IconMenuButton { tone: LV.AbstractButton.Destructive }
-                        }
+                                Row {
+                                    spacing: 0
+                                    LV.LabelButton { text: "Button"; tone: LV.AbstractButton.Primary }
+                                    Item { width: 33; height: 1 }
+                                    LV.IconButton { tone: LV.AbstractButton.Primary }
+                                    Item { width: 83; height: 1 }
+                                    LV.LabelMenuButton { text: "Open"; tone: LV.AbstractButton.Primary }
+                                    Item { width: 18; height: 1 }
+                                    LV.IconMenuButton { tone: LV.AbstractButton.Primary }
+                                }
 
-                        LV.Label { text: "Disabled"; style: caption; color: LV.Theme.textTertiary }
-                        Flow {
-                            width: parent.width
-                            spacing: LV.Theme.gap8
-                            LV.LabelButton { text: "Label"; tone: LV.AbstractButton.Disabled }
-                            LV.IconButton { tone: LV.AbstractButton.Disabled }
-                            LV.LabelMenuButton { text: "Menu"; tone: LV.AbstractButton.Disabled }
-                            LV.IconMenuButton { tone: LV.AbstractButton.Disabled }
+                                Row {
+                                    spacing: 0
+                                    LV.LabelButton { text: "Button"; tone: LV.AbstractButton.Default }
+                                    Item { width: 33; height: 1 }
+                                    LV.IconButton { tone: LV.AbstractButton.Default }
+                                    Item { width: 83; height: 1 }
+                                    LV.LabelMenuButton { text: "Open"; tone: LV.AbstractButton.Default }
+                                    Item { width: 18; height: 1 }
+                                    LV.IconMenuButton { tone: LV.AbstractButton.Default }
+                                }
+
+                                Row {
+                                    spacing: 0
+                                    LV.LabelButton { text: "Button"; tone: LV.AbstractButton.Borderless }
+                                    Item { width: 33; height: 1 }
+                                    LV.IconButton { tone: LV.AbstractButton.Borderless }
+                                    Item { width: 83; height: 1 }
+                                    LV.LabelMenuButton { text: "Open"; tone: LV.AbstractButton.Borderless }
+                                    Item { width: 18; height: 1 }
+                                    LV.IconMenuButton { tone: LV.AbstractButton.Borderless }
+                                }
+
+                                Row {
+                                    spacing: 0
+                                    LV.LabelButton { text: "Button"; tone: LV.AbstractButton.Destructive }
+                                    Item { width: 33; height: 1 }
+                                    LV.IconButton { tone: LV.AbstractButton.Destructive }
+                                    Item { width: 83; height: 1 }
+                                    LV.LabelMenuButton { text: "Open"; tone: LV.AbstractButton.Destructive }
+                                    Item { width: 18; height: 1 }
+                                    LV.IconMenuButton { tone: LV.AbstractButton.Destructive }
+                                }
+
+                                Row {
+                                    spacing: 0
+                                    LV.LabelButton { text: "Button"; tone: LV.AbstractButton.Disabled }
+                                    Item { width: 33; height: 1 }
+                                    LV.IconButton { tone: LV.AbstractButton.Disabled }
+                                    Item { width: 83; height: 1 }
+                                    LV.LabelMenuButton { text: "Open"; tone: LV.AbstractButton.Disabled }
+                                    Item { width: 18; height: 1 }
+                                    LV.IconMenuButton { tone: LV.AbstractButton.Disabled }
+                                }
+                            }
                         }
 
                         LV.Label { text: "State Swatches"; style: caption; color: LV.Theme.textTertiary }
@@ -925,7 +950,7 @@ LV.ApplicationWindow {
 
                 LV.AppCard {
                     title: "Hierarchy / Outliner"
-                    subtitle: "ToolbarButton x N + HierarchyItem x N"
+                    subtitle: "model 기반 자동 계층화 + 키보드 탐색"
                     Layout.fillWidth: true
 
                     Rectangle {
@@ -953,21 +978,71 @@ LV.ApplicationWindow {
                                 LV.ToolbarButton { buttonId: 4; iconName: "viewMoreSymbolicDefault" },
                                 LV.ToolbarButton { buttonId: 5; iconName: "viewMoreSymbolicDefault" }
                             ]
-
-                            LV.HierarchyItem { label: "World"; iconGlyph: "□"; showChevron: true; expanded: true; selected: true }
-                            LV.HierarchyItem { label: "Environment"; iconGlyph: "□"; indentLevel: 1; showChevron: true }
-                            LV.HierarchyItem { label: "Directional Light"; iconGlyph: "□"; indentLevel: 2; showChevron: false }
-                            LV.HierarchyItem { label: "Sky Light"; iconGlyph: "□"; indentLevel: 2; showChevron: false }
-                            LV.HierarchyItem { label: "Characters"; iconGlyph: "□"; indentLevel: 1; showChevron: true }
-                            LV.HierarchyItem { label: "Player"; iconGlyph: "□"; indentLevel: 2; showChevron: true }
-                            LV.HierarchyItem { label: "Camera Boom"; iconGlyph: "□"; indentLevel: 3; showChevron: false }
-                            LV.HierarchyItem { label: "Camera"; iconGlyph: "□"; indentLevel: 3; showChevron: false }
-                            LV.HierarchyItem { label: "Enemies"; iconGlyph: "□"; indentLevel: 2; showChevron: true }
-                            LV.HierarchyItem { label: "Enemy_01"; iconGlyph: "□"; indentLevel: 3; showChevron: false }
-                            LV.HierarchyItem { label: "Enemy_02"; iconGlyph: "□"; indentLevel: 3; showChevron: false }
-                            LV.HierarchyItem { label: "Props"; iconGlyph: "□"; indentLevel: 1; showChevron: true }
-                            LV.HierarchyItem { label: "Barrel_A"; iconGlyph: "□"; indentLevel: 2; showChevron: false }
-                            LV.HierarchyItem { label: "Crate_B"; iconGlyph: "□"; indentLevel: 2; showChevron: false }
+                            model: [
+                                {
+                                    key: "world",
+                                    itemId: 100,
+                                    label: "World",
+                                    iconGlyph: "□",
+                                    expanded: true,
+                                    selected: true,
+                                    children: [
+                                        {
+                                            key: "environment",
+                                            itemId: 110,
+                                            label: "Environment",
+                                            iconGlyph: "□",
+                                            expanded: true,
+                                            children: [
+                                                { key: "directional-light", itemId: 111, label: "Directional Light", iconGlyph: "□" },
+                                                { key: "sky-light", itemId: 112, label: "Sky Light", iconGlyph: "□" }
+                                            ]
+                                        },
+                                        {
+                                            key: "characters",
+                                            itemId: 120,
+                                            label: "Characters",
+                                            iconGlyph: "□",
+                                            expanded: true,
+                                            children: [
+                                                {
+                                                    key: "player",
+                                                    itemId: 121,
+                                                    label: "Player",
+                                                    iconGlyph: "□",
+                                                    expanded: true,
+                                                    children: [
+                                                        { key: "camera-boom", itemId: 122, label: "Camera Boom", iconGlyph: "□" },
+                                                        { key: "camera", itemId: 123, label: "Camera", iconGlyph: "□" }
+                                                    ]
+                                                },
+                                                {
+                                                    key: "enemies",
+                                                    itemId: 130,
+                                                    label: "Enemies",
+                                                    iconGlyph: "□",
+                                                    expanded: true,
+                                                    children: [
+                                                        { key: "enemy-01", itemId: 131, label: "Enemy_01", iconGlyph: "□" },
+                                                        { key: "enemy-02", itemId: 132, label: "Enemy_02", iconGlyph: "□" }
+                                                    ]
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            key: "props",
+                                            itemId: 140,
+                                            label: "Props",
+                                            iconGlyph: "□",
+                                            expanded: true,
+                                            children: [
+                                                { key: "barrel-a", itemId: 141, label: "Barrel_A", iconGlyph: "□" },
+                                                { key: "crate-b", itemId: 142, label: "Crate_B", iconGlyph: "□" }
+                                            ]
+                                        }
+                                    ]
+                                }
+                            ]
                         }
 
                         Column {
@@ -982,7 +1057,7 @@ LV.ApplicationWindow {
                                 style: body
                                 color: LV.Theme.textPrimary
                                 wrapMode: Text.WordWrap
-                                text: "툴바는 상단 고정이며 버튼은 단일 선택으로 동작한다."
+                                text: "개발자는 model만 선언하면 들여쓰기/부모-자식 관계/노드 가시성이 자동으로 계산된다."
                             }
 
                             LV.Label {
@@ -998,7 +1073,32 @@ LV.ApplicationWindow {
                                 style: description
                                 color: LV.Theme.textSecondary
                                 wrapMode: Text.WordWrap
-                                text: "아이템과 아이콘/텍스트는 각각의 컴포넌트 인자로 주입 가능하다."
+                                text: "activeListItemKey = " + hierarchyPreview.activeListItemKey
+                            }
+
+                            RowLayout {
+                                width: parent.width
+                                spacing: LV.Theme.gap8
+
+                                LV.LabelButton {
+                                    text: "Expand All"
+                                    tone: LV.AbstractButton.Default
+                                    onClicked: hierarchyPreview.expandAll()
+                                }
+
+                                LV.LabelButton {
+                                    text: "Collapse to Root"
+                                    tone: LV.AbstractButton.Default
+                                    onClicked: hierarchyPreview.collapseAll(true)
+                                }
+                            }
+
+                            LV.Label {
+                                width: parent.width
+                                style: description
+                                color: LV.Theme.textSecondary
+                                wrapMode: Text.WordWrap
+                                text: "최종 사용자는 상하좌우 키로 노드 이동 및 펼침/접기를 수행할 수 있다."
                             }
                         }
                     }

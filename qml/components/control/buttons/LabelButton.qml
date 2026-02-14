@@ -5,11 +5,13 @@ AbstractButton {
     id: control
 
     tone: AbstractButton.Primary
+    readonly property int figmaButtonHeight: Theme.gap20
     horizontalPadding: Theme.gap8
-    verticalPadding: control.tone === AbstractButton.Primary ? Theme.gap2 : Theme.gap4
+    verticalPadding: Theme.gap4
     spacing: Theme.gapNone
     cornerRadius: Theme.radiusSm
-    implicitHeight: contentItem.implicitHeight + topPadding + bottomPadding
+    height: figmaButtonHeight
+    implicitHeight: figmaButtonHeight
     implicitWidth: contentItem.implicitWidth + leftPadding + rightPadding
 
     contentItem: Label {

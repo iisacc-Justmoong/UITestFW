@@ -7,7 +7,12 @@ AbstractButton {
 
     readonly property bool __isHierarchyItem: true
     property int itemId: -1
+    property string itemKey: ""
+    property string parentItemKey: ""
+    property string pathLabel: ""
     property var hierarchyList: null
+    property var nodeData: null
+    property bool generatedByTreeModel: false
 
     text: "Label"
     property alias label: control.text
@@ -17,6 +22,7 @@ AbstractButton {
     property bool showChevron: true
     property bool expanded: false
     property bool selected: false
+    property bool expandOnRowClick: false
 
     property int indentLevel: 0
     property int indentStep: 13
@@ -66,6 +72,8 @@ AbstractButton {
     backgroundColorDisabled: rowBackgroundColor
 
     onClicked: {
+        if (control.expandOnRowClick && control.showChevron && control.enabled)
+            control.expanded = !control.expanded
         if (hierarchyList && hierarchyList.requestActivate)
             hierarchyList.requestActivate(control)
     }
@@ -189,7 +197,11 @@ AbstractButton {
     }
 
     onShowChevronChanged: chevronCanvas.requestPaint()
-    onExpandedChanged: chevronCanvas.requestPaint()
+    onExpandedChanged: {
+        chevronCanvas.requestPaint()
+        if (control.hierarchyList && control.hierarchyList.notifyExpansionChanged)
+            control.hierarchyList.notifyExpansionChanged(control)
+    }
     onChevronColorChanged: chevronCanvas.requestPaint()
     onEnabledChanged: chevronCanvas.requestPaint()
 

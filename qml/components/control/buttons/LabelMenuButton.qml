@@ -6,6 +6,7 @@ AbstractButton {
     id: control
 
     tone: AbstractButton.Primary
+    readonly property int figmaButtonHeight: Theme.gap20
     readonly property string indicatorNameDefault: "panDownSymbolicDefault"
     readonly property string indicatorNameBorderless: "panDownSymbolicBorderless"
     readonly property string indicatorNameAccent: "panDownSymbolicAccent"
@@ -29,8 +30,10 @@ AbstractButton {
     verticalPadding: Theme.gap2
     spacing: Theme.gap2
     cornerRadius: Theme.radiusSm
-    implicitHeight: contentItem.implicitHeight + topPadding + bottomPadding
+    height: figmaButtonHeight
+    implicitHeight: figmaButtonHeight
     implicitWidth: contentItem.implicitWidth + leftPadding + rightPadding
+    clip: true
 
     contentItem: RowLayout {
         spacing: Theme.gap2

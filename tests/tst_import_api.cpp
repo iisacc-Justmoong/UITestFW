@@ -16,6 +16,9 @@ private slots:
     void versionless_import_window_loads();
     void appshell_compat_loads();
     void icon_name_mapping_loads();
+    void hierarchy_tree_model_api_loads();
+    void hierarchy_string_array_model_loads();
+    void button_padding_matches_figma_spec();
 };
 
 static QObject *createFromQml(QQmlEngine &engine, const QByteArray &qml)
@@ -242,6 +245,184 @@ Item {
     QVERIFY(root->property("byGroupOk").toBool());
     QVERIFY(root->property("byUrlOk").toBool());
     QVERIFY(root->property("menuByNameOk").toBool());
+}
+
+void ImportApiTests::hierarchy_tree_model_api_loads()
+{
+    QQmlEngine engine;
+    const QString importBase = QDir::cleanPath(QCoreApplication::applicationDirPath() + "/..");
+    engine.addImportPath(importBase);
+    const QByteArray qml = R"(
+import QtQuick
+import LVRS as LV
+
+Item {
+    width: 640
+    height: 420
+
+    LV.Hierarchy {
+        id: hierarchy
+        objectName: "hierarchy"
+        width: 280
+        height: 300
+        model: [
+            {
+                key: "root",
+                itemId: 10,
+                text: "Root",
+                icon: "viewMoreSymbolicDefault",
+                expanded: true,
+                children: [
+                    {
+                        key: "child-a",
+                        itemId: 11,
+                        text: "Child A",
+                        icon: "viewMoreSymbolicDefault",
+                        expanded: false,
+                        children: [
+                            { key: "leaf-a1", itemId: 12, text: "Leaf A1", icon: "viewMoreSymbolicBorderless" }
+                        ]
+                    },
+                    {
+                        key: "child-b",
+                        itemId: 20,
+                        text: "Child B",
+                        icon: "viewMoreSymbolicDisabled"
+                    }
+                ]
+            }
+        ]
+    }
+
+    Component.onCompleted: {
+        Qt.callLater(function() {
+            hierarchy.activateListItemByKey("leaf-a1")
+        })
+    }
+
+    property bool treeApiReady:
+        hierarchy.activeListItem !== null
+        && hierarchy.activeListItemKey === "leaf-a1"
+        && hierarchy.activeListItemId === 12
+        && hierarchy.activeListItem.label === "Leaf A1"
+        && hierarchy.activeListItem.iconName === "viewMoreSymbolicBorderless"
+        && hierarchy.activeListItem.pathLabel === "Root / Child A / Leaf A1"
+}
+)";
+
+    QScopedPointer<QObject> root(createFromQml(engine, qml));
+    QVERIFY(root);
+    QTRY_VERIFY(root->property("treeApiReady").toBool());
+}
+
+void ImportApiTests::hierarchy_string_array_model_loads()
+{
+    QQmlEngine engine;
+    const QString importBase = QDir::cleanPath(QCoreApplication::applicationDirPath() + "/..");
+    engine.addImportPath(importBase);
+    const QByteArray qml = R"(
+import QtQuick
+import LVRS as LV
+
+Item {
+    LV.Hierarchy {
+        id: hierarchy
+        width: 240
+        height: 220
+        model: ["Overview", "Reports", "Settings"]
+    }
+
+    property bool stringModelReady:
+        hierarchy.activeListItem !== null
+        && hierarchy.activeListItem.label === "Overview"
+        && hierarchy.activeListItemKey === "0"
+}
+)";
+
+    QScopedPointer<QObject> root(createFromQml(engine, qml));
+    QVERIFY(root);
+    QTRY_VERIFY(root->property("stringModelReady").toBool());
+}
+
+void ImportApiTests::button_padding_matches_figma_spec()
+{
+    QQmlEngine engine;
+    const QString importBase = QDir::cleanPath(QCoreApplication::applicationDirPath() + "/..");
+    engine.addImportPath(importBase);
+    const QByteArray qml = R"(
+import QtQuick
+import LVRS as LV
+
+Item {
+    LV.LabelButton { id: labelButton; text: "Button"; tone: LV.AbstractButton.Primary; visible: false }
+    LV.IconButton { id: iconButton; tone: LV.AbstractButton.Primary; visible: false }
+    LV.LabelMenuButton { id: labelMenuButton; text: "Open"; tone: LV.AbstractButton.Primary; visible: false }
+    LV.IconMenuButton { id: iconMenuButton; tone: LV.AbstractButton.Primary; visible: false }
+    LV.LabelButton { id: labelButtonDefault; text: "Button"; tone: LV.AbstractButton.Default; visible: false }
+    LV.IconButton { id: iconButtonDefault; tone: LV.AbstractButton.Default; visible: false }
+    LV.LabelMenuButton { id: labelMenuButtonDefault; text: "Open"; tone: LV.AbstractButton.Default; visible: false }
+    LV.IconMenuButton { id: iconMenuButtonDefault; tone: LV.AbstractButton.Default; visible: false }
+    LV.LabelButton { id: labelButtonBorderless; text: "Button"; tone: LV.AbstractButton.Borderless; visible: false }
+    LV.IconButton { id: iconButtonBorderless; tone: LV.AbstractButton.Borderless; visible: false }
+    LV.LabelMenuButton { id: labelMenuButtonBorderless; text: "Open"; tone: LV.AbstractButton.Borderless; visible: false }
+    LV.IconMenuButton { id: iconMenuButtonBorderless; tone: LV.AbstractButton.Borderless; visible: false }
+    LV.LabelButton { id: labelButtonDestructive; text: "Button"; tone: LV.AbstractButton.Destructive; visible: false }
+    LV.IconButton { id: iconButtonDestructive; tone: LV.AbstractButton.Destructive; visible: false }
+    LV.LabelMenuButton { id: labelMenuButtonDestructive; text: "Open"; tone: LV.AbstractButton.Destructive; visible: false }
+    LV.IconMenuButton { id: iconMenuButtonDestructive; tone: LV.AbstractButton.Destructive; visible: false }
+    LV.LabelButton { id: labelButtonDisabled; text: "Button"; tone: LV.AbstractButton.Disabled; visible: false }
+    LV.IconButton { id: iconButtonDisabled; tone: LV.AbstractButton.Disabled; visible: false }
+    LV.LabelMenuButton { id: labelMenuButtonDisabled; text: "Open"; tone: LV.AbstractButton.Disabled; visible: false }
+    LV.IconMenuButton { id: iconMenuButtonDisabled; tone: LV.AbstractButton.Disabled; visible: false }
+
+    property bool figmaPaddingReady:
+        labelButton.horizontalPadding === LV.Theme.gap8
+        && labelButton.verticalPadding === LV.Theme.gap4
+        && iconButton.horizontalPadding === LV.Theme.gap2
+        && iconButton.verticalPadding === LV.Theme.gap2
+        && labelMenuButton.horizontalPadding === LV.Theme.gap8
+        && labelMenuButton.verticalPadding === LV.Theme.gap2
+        && iconMenuButton.horizontalPadding === LV.Theme.gap2
+        && iconMenuButton.verticalPadding === LV.Theme.gap2
+        && labelMenuButton.spacing === LV.Theme.gap2
+        && iconMenuButton.spacing === LV.Theme.gap4
+        && Math.abs(labelButton.implicitHeight - LV.Theme.gap20) < 0.01
+        && Math.abs(iconButton.implicitHeight - LV.Theme.gap20) < 0.01
+        && Math.abs(labelMenuButton.implicitHeight - LV.Theme.gap20) < 0.01
+        && Math.abs(iconMenuButton.implicitHeight - LV.Theme.gap20) < 0.01
+        && Math.abs(labelButton.implicitHeight - iconButton.implicitHeight) < 0.01
+        && Math.abs(iconButton.implicitHeight - labelMenuButton.implicitHeight) < 0.01
+        && Math.abs(labelMenuButton.implicitHeight - iconMenuButton.implicitHeight) < 0.01
+        && Math.abs(labelButton.height - LV.Theme.gap20) < 0.01
+        && Math.abs(iconButton.height - LV.Theme.gap20) < 0.01
+        && Math.abs(labelMenuButton.height - LV.Theme.gap20) < 0.01
+        && Math.abs(iconMenuButton.height - LV.Theme.gap20) < 0.01
+        && Math.abs(labelButtonDefault.height - LV.Theme.gap20) < 0.01
+        && Math.abs(iconButtonDefault.height - LV.Theme.gap20) < 0.01
+        && Math.abs(labelMenuButtonDefault.height - LV.Theme.gap20) < 0.01
+        && Math.abs(iconMenuButtonDefault.height - LV.Theme.gap20) < 0.01
+        && Math.abs(labelButtonBorderless.height - LV.Theme.gap20) < 0.01
+        && Math.abs(iconButtonBorderless.height - LV.Theme.gap20) < 0.01
+        && Math.abs(labelMenuButtonBorderless.height - LV.Theme.gap20) < 0.01
+        && Math.abs(iconMenuButtonBorderless.height - LV.Theme.gap20) < 0.01
+        && Math.abs(labelButtonDestructive.height - LV.Theme.gap20) < 0.01
+        && Math.abs(iconButtonDestructive.height - LV.Theme.gap20) < 0.01
+        && Math.abs(labelMenuButtonDestructive.height - LV.Theme.gap20) < 0.01
+        && Math.abs(iconMenuButtonDestructive.height - LV.Theme.gap20) < 0.01
+        && Math.abs(labelButtonDisabled.implicitHeight - LV.Theme.gap20) < 0.01
+        && Math.abs(iconButtonDisabled.implicitHeight - LV.Theme.gap20) < 0.01
+        && Math.abs(labelMenuButtonDisabled.implicitHeight - LV.Theme.gap20) < 0.01
+        && Math.abs(iconMenuButtonDisabled.implicitHeight - LV.Theme.gap20) < 0.01
+        && Math.abs(labelButtonDisabled.height - LV.Theme.gap20) < 0.01
+        && Math.abs(iconButtonDisabled.height - LV.Theme.gap20) < 0.01
+        && Math.abs(labelMenuButtonDisabled.height - LV.Theme.gap20) < 0.01
+        && Math.abs(iconMenuButtonDisabled.height - LV.Theme.gap20) < 0.01
+}
+)";
+
+    QScopedPointer<QObject> root(createFromQml(engine, qml));
+    QVERIFY(root);
+    QVERIFY(root->property("figmaPaddingReady").toBool());
 }
 
 QTEST_MAIN(ImportApiTests)

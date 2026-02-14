@@ -96,169 +96,25 @@ LV.ApplicationWindow {
         + (metricsPageCompliant ? 1 : 0)
     readonly property bool metricsPass: metricsPassedChecks === metricsTotalChecks
     readonly property string metricsSummary: metricsPassedChecks + "/" + metricsTotalChecks
-    property string componentConsoleFilter: "all"
-    readonly property var componentConsoleEntries: [
-        {
-            name: "LabelButton",
-            group: "control/buttons",
-            changeType: "modified",
-            status: "verified",
-            summary: "Figma 44:599 규격에 맞춰 px=8, py=4, height=20을 고정했다.",
-            file: "qml/components/control/buttons/LabelButton.qml",
-            states: "primary/default/borderless/destructive/disabled",
-            lastUpdated: "2026-02-14"
-        },
-        {
-            name: "IconButton",
-            group: "control/buttons",
-            changeType: "modified",
-            status: "verified",
-            summary: "아이콘 전용 패딩(p=2)과 20px 고정 높이를 적용했다.",
-            file: "qml/components/control/buttons/IconButton.qml",
-            states: "primary/default/borderless/destructive/disabled",
-            lastUpdated: "2026-02-14"
-        },
-        {
-            name: "LabelMenuButton",
-            group: "control/buttons",
-            changeType: "modified",
-            status: "verified",
-            summary: "텍스트+인디케이터 버튼 간격(gap=2), px=8, py=2와 height=20을 반영했다.",
-            file: "qml/components/control/buttons/LabelMenuButton.qml",
-            states: "primary/default/borderless/destructive/disabled",
-            lastUpdated: "2026-02-14"
-        },
-        {
-            name: "IconMenuButton",
-            group: "control/buttons",
-            changeType: "modified",
-            status: "verified",
-            summary: "아이콘+인디케이터 복합 버튼의 gap=4, p=2, height=20을 고정했다.",
-            file: "qml/components/control/buttons/IconMenuButton.qml",
-            states: "primary/default/borderless/destructive/disabled",
-            lastUpdated: "2026-02-14"
-        },
-        {
-            name: "HierarchyList",
-            group: "navigation",
-            changeType: "refactored",
-            status: "verified",
-            summary: "배열/목록 모델 입력에서 문자열+아이콘을 계층형으로 펼치도록 기본 동작을 전환했다.",
-            file: "qml/components/navigation/HierarchyList.qml",
-            states: "flatten/expand/select/keyboard",
-            lastUpdated: "2026-02-14"
-        },
-        {
-            name: "Hierarchy",
-            group: "navigation",
-            changeType: "refactored",
-            status: "verified",
-            summary: "treeModel 호환을 유지하면서 model 중심 API로 래퍼를 동기화했다.",
-            file: "qml/components/navigation/Hierarchy.qml",
-            states: "activate/expand/collapse",
-            lastUpdated: "2026-02-14"
-        },
-        {
-            name: "HierarchyItem",
-            group: "navigation",
-            changeType: "modified",
-            status: "monitoring",
-            summary: "row 배경/chevron/아이콘 렌더 동작을 모델 기반 리스트와 맞물리도록 조정했다.",
-            file: "qml/components/navigation/HierarchyItem.qml",
-            states: "active/expanded/disabled",
-            lastUpdated: "2026-02-14"
-        },
-        {
-            name: "Accent Palette",
-            group: "theme",
-            changeType: "added",
-            status: "verified",
-            summary: "iconset의 전체 색상 토큰을 accent 계열로 추가하고 프리뷰를 연결했다.",
-            file: "qml/Theme.qml",
-            states: "token-preview",
-            lastUpdated: "2026-02-14"
-        },
-        {
-            name: "Visual Catalog Main",
-            group: "catalog",
-            changeType: "modified",
-            status: metricsPass ? "verified" : "monitoring",
-            summary: "버튼/계층/색상 프리뷰와 운영 지표를 통합한 카탈로그 구성을 유지한다.",
-            file: "qml/Main.qml",
-            states: "runtime/quality/layout",
-            lastUpdated: "2026-02-14"
-        },
-        {
-            name: "Render Backend Bootstrap",
-            group: "runtime",
-            changeType: "refactored",
-            status: metricsRuntimeCompliant ? "verified" : "monitoring",
-            summary: "플랫폼별 렌더러 우선순위 정책(Vulkan/Metal)을 적용한 부트스트랩 경로를 유지한다.",
-            file: "main.cpp",
-            states: "backend-selection",
-            lastUpdated: "2026-02-14"
-        }
-    ]
-    readonly property int componentConsoleTotalCount: componentConsoleEntries.length
-    readonly property int componentConsoleAddedCount: countComponentEntriesByType("added")
-    readonly property int componentConsoleModifiedCount: countComponentEntriesByType("modified")
-    readonly property int componentConsoleRefactoredCount: countComponentEntriesByType("refactored")
-    readonly property int componentConsoleVerifiedCount: countComponentEntriesByStatus("verified")
-    readonly property int componentConsoleMonitoringCount: countComponentEntriesByStatus("monitoring")
-    readonly property int componentConsoleFilteredCount: countVisibleComponentEntries()
-    readonly property real componentConsoleVerifiedRatio: componentConsoleTotalCount > 0
-        ? componentConsoleVerifiedCount / componentConsoleTotalCount
-        : 0
-    readonly property var componentConsoleSummaryCards: [
-        { label: "Tracked", value: String(componentConsoleTotalCount), tone: "primary" },
-        { label: "Added", value: String(componentConsoleAddedCount), tone: "added" },
-        { label: "Modified", value: String(componentConsoleModifiedCount), tone: "modified" },
-        { label: "Refactored", value: String(componentConsoleRefactoredCount), tone: "refactored" },
-        { label: "Verified", value: String(componentConsoleVerifiedCount), tone: "verified" },
-        { label: "Monitoring", value: String(componentConsoleMonitoringCount), tone: "monitoring" }
-    ]
-    readonly property var componentConsoleChecks: [
-        {
-            name: "Render Scale Policy",
-            pass: metricsRenderScaleCompliant,
-            detail: "Supersample x" + effectiveSupersampleScale.toFixed(2)
-        },
-        {
-            name: "Font Fallback Policy",
-            pass: metricsFontFallbackCompliant,
-            detail: "Font family resolved"
-        },
-        {
-            name: "Theme Typography Policy",
-            pass: metricsThemeTextCompliant,
-            detail: "Text style token compliance"
-        },
-        {
-            name: "Runtime Telemetry",
-            pass: metricsRuntimeCompliant,
-            detail: runtimeSnapshot ? "pid=" + runtimeSnapshot.pid : "runtime unavailable"
-        },
-        {
-            name: "SVG Runtime Policy",
-            pass: metricsSvgCompliant,
-            detail: "scale=[" + LV.SvgManager.minimumScale + ", " + LV.SvgManager.maximumScale + "]"
-        },
-        {
-            name: "Page Stack Consistency",
-            pass: metricsPageCompliant,
-            detail: "history=" + LV.AppState.pageHistory.length
-        },
-        {
-            name: "Component Ledger Coverage",
-            pass: componentConsoleTotalCount >= 8,
-            detail: "entries=" + componentConsoleTotalCount
-        },
-        {
-            name: "Button Variant Lock",
-            pass: true,
-            detail: "4 families x 5 tones x 20px"
-        }
-    ]
+    property string runtimeConsoleFilter: "all"
+    property bool runtimeConsolePaused: false
+    property bool runtimeConsoleAutoScroll: true
+    property int runtimeConsoleMaxRows: 240
+    property int runtimeConsoleDroppedCount: 0
+    property int runtimeConsoleLastRenderFrameCount: 0
+    property int runtimeConsoleLastIngestedSequence: 0
+    property int runtimeConsoleLastHeartbeatSequence: 0
+    property var runtimeConsoleRows: []
+    property var runtimeConsoleHealth: ({})
+    property var runtimeConsoleLastHeartbeat: ({ epochMs: 0, uptimeMs: 0, eventSequence: 0 })
+    readonly property int runtimeConsoleTotalCount: runtimeConsoleRows.length
+    readonly property int runtimeConsoleVisibleCount: runtimeConsoleCountByFilter(runtimeConsoleFilter)
+    readonly property int runtimeConsoleRuntimeCount: runtimeConsoleCountByCategory("runtime")
+    readonly property int runtimeConsoleInputCount: runtimeConsoleCountByCategory("input")
+    readonly property int runtimeConsoleUiCount: runtimeConsoleCountByCategory("ui")
+    readonly property int runtimeConsoleRenderCount: runtimeConsoleCountByCategory("render")
+    readonly property int runtimeConsoleNavigationCount: runtimeConsoleCountByCategory("navigation")
+    readonly property int runtimeConsoleSystemCount: runtimeConsoleCountByCategory("system")
     property int demoPageIndex: 0
     readonly property var demoPages: [
         {
@@ -279,11 +135,11 @@ LV.ApplicationWindow {
         },
         {
             tab: "Console",
-            component: "Design System Console",
-            pageDoc: "변경 레저와 런타임 품질 지표를 결합한 운영형 데모 페이지이다. 컴포넌트 변경 상태와 시스템 적합성 체크를 단일 콘솔로 노출한다.",
-            componentDoc: "필터 기반 목록, 상태 배지, 지표 카드와 체크 보드를 통해 개발 중 품질 게이팅 포인트를 시각화한다.",
-            apiDoc: "핵심 API: componentConsoleEntries, countEntriesForFilter(), metrics* 집합",
-            checklist: "필터별 카운트 정확성, verified/monitoring 색상 매핑, 스크롤 가시성"
+            component: "Runtime Event Daemon Console",
+            pageDoc: "앱 런타임 시작부터 입력/우클릭/컨텍스트/UI 생성·소멸/렌더/내비게이션까지 모든 핵심 이벤트를 단일 콘솔로 감시하는 페이지이다.",
+            componentDoc: "RuntimeEvents 대몬의 eventSequence, daemonHealth, recentEvents를 중심으로 RenderMonitor·PageMonitor·ViewStateTracker 신호를 합류시켜 운영 콘솔을 구성한다.",
+            apiDoc: "핵심 API: LV.RuntimeEvents(daemonHealth/eventRecorded/recentEvents), LV.RenderMonitor(statsChanged), LV.PageMonitor(history), globalPressedEvent/globalContextEvent",
+            checklist: "대몬 running/attached 상태, 이벤트 누락·드롭 카운트, 필터 정확성, 스크롤 자동 추적"
         },
         {
             tab: "Buttons",
@@ -417,94 +273,285 @@ LV.ApplicationWindow {
         ]
     }
 
-    function countComponentEntriesByType(changeType) {
-        let count = 0
-        for (let i = 0; i < componentConsoleEntries.length; i++) {
-            const entry = componentConsoleEntries[i]
-            if (entry && String(entry.changeType) === changeType)
-                count += 1
-        }
-        return count
+    function runtimeConsoleTwoDigits(value) {
+        return value < 10 ? "0" + value : String(value)
     }
 
-    function countComponentEntriesByStatus(status) {
-        let count = 0
-        for (let i = 0; i < componentConsoleEntries.length; i++) {
-            const entry = componentConsoleEntries[i]
-            if (entry && String(entry.status) === status)
-                count += 1
-        }
-        return count
+    function runtimeConsoleTimestamp(epochMs) {
+        const stamp = Number(epochMs || 0)
+        if (stamp <= 0)
+            return "--:--:--.---"
+        const date = new Date(stamp)
+        const hh = runtimeConsoleTwoDigits(date.getHours())
+        const mm = runtimeConsoleTwoDigits(date.getMinutes())
+        const ss = runtimeConsoleTwoDigits(date.getSeconds())
+        const msValue = date.getMilliseconds()
+        const mmm = msValue < 10 ? "00" + msValue : (msValue < 100 ? "0" + msValue : String(msValue))
+        return hh + ":" + mm + ":" + ss + "." + mmm
     }
 
-    function componentEntryVisible(entry) {
-        if (!entry)
-            return false
-        if (componentConsoleFilter === "all")
-            return true
-        if (componentConsoleFilter === "added" || componentConsoleFilter === "modified" || componentConsoleFilter === "refactored")
-            return String(entry.changeType) === componentConsoleFilter
-        return String(entry.status) === componentConsoleFilter
+    function runtimeConsoleCategoryForType(eventType) {
+        const type = String(eventType || "")
+        if (type.indexOf("key-") === 0
+            || type.indexOf("mouse-") === 0
+            || type.indexOf("hover-") === 0
+            || type.indexOf("context-") === 0
+            || type.indexOf("global-") === 0)
+            return "input"
+        if (type === "ui-event")
+            return "ui"
+        if (type.indexOf("render-") === 0)
+            return "render"
+        if (type.indexOf("route-") === 0 || type.indexOf("viewstack-") === 0)
+            return "navigation"
+        if (type.indexOf("daemon-") === 0
+            || type.indexOf("window-") === 0
+            || type.indexOf("catalog-") === 0
+            || type.indexOf("counters-") === 0)
+            return "runtime"
+        return "system"
     }
 
-    function countVisibleComponentEntries() {
-        let count = 0
-        for (let i = 0; i < componentConsoleEntries.length; i++) {
-            if (componentEntryVisible(componentConsoleEntries[i]))
-                count += 1
-        }
-        return count
-    }
-
-    function componentStatusColor(status) {
-        if (status === "verified")
-            return LV.Theme.success
-        if (status === "monitoring")
-            return LV.Theme.warning
-        if (status === "blocked")
-            return LV.Theme.danger
-        return LV.Theme.accentBlue
-    }
-
-    function componentStatusBackground(status) {
-        if (status === "verified")
-            return LV.Theme.accentGreenMuted
-        if (status === "monitoring")
-            return LV.Theme.accentBrownMuted
-        if (status === "blocked")
-            return LV.Theme.accentRedBrownDark
-        return LV.Theme.accentBlueMuted
-    }
-
-    function componentChangeTypeColor(changeType) {
-        if (changeType === "added")
-            return LV.Theme.accentBlueBright
-        if (changeType === "modified")
-            return LV.Theme.accentPurple
-        if (changeType === "refactored")
+    function runtimeConsoleCategoryColor(category) {
+        if (category === "runtime")
+            return LV.Theme.accentBlue
+        if (category === "input")
             return LV.Theme.accentOrangeMuted
-        return LV.Theme.accentGrayMuted
+        if (category === "ui")
+            return LV.Theme.accentGreenBright
+        if (category === "render")
+            return LV.Theme.accentPurple
+        if (category === "navigation")
+            return LV.Theme.accentYellow
+        return LV.Theme.accentGray
     }
 
-    function countEntriesForFilter(filterValue) {
-        if (filterValue === "all")
-            return componentConsoleTotalCount
+    function runtimeConsoleCategoryBackground(category) {
+        if (category === "runtime")
+            return LV.Theme.accentBlueMuted
+        if (category === "input")
+            return LV.Theme.accentBrownMuted
+        if (category === "ui")
+            return LV.Theme.accentGreenMuted
+        if (category === "render")
+            return LV.Theme.accentPurpleDarker
+        if (category === "navigation")
+            return LV.Theme.accentBrownDarker
+        return LV.Theme.surfaceGhost
+    }
+
+    function runtimeConsoleSummaryForEvent(eventType, payload) {
+        const type = String(eventType || "unknown")
+        if (type === "key-press" || type === "key-release")
+            return type + " key=" + (payload.key !== undefined ? payload.key : "n/a")
+        if (type === "mouse-press" || type === "mouse-release" || type === "mouse-move" || type === "hover-move")
+            return type + " @" + Math.round(payload.x || 0) + "," + Math.round(payload.y || 0)
+        if (type === "context-requested" || type === "global-context")
+            return type + " reason=" + (payload.reason !== undefined ? payload.reason : "n/a")
+        if (type === "ui-event")
+            return "ui-event " + (payload.eventType || "unknown")
+        if (type === "window-attached")
+            return "window attached " + (payload.width || 0) + "x" + (payload.height || 0)
+        if (type === "daemon-started" || type === "daemon-stopped")
+            return type
+        if (type === "render-stats")
+            return "render fps=" + Number(payload.fps || 0).toFixed(1)
+        if (type === "route-recorded")
+            return "route " + (payload.path || "unknown")
+        if (type === "viewstack-changed")
+            return "viewstack depth=" + (payload.depth !== undefined ? payload.depth : "n/a")
+        if (type === "global-pressed")
+            return "global pressed @" + Math.round(payload.globalX || 0) + "," + Math.round(payload.globalY || 0)
+        return type
+    }
+
+    function runtimeConsoleDetailForEvent(payload) {
+        if (!payload)
+            return ""
+        const tokens = []
+        if (payload.objectName)
+            tokens.push("object=" + payload.objectName)
+        if (payload.className)
+            tokens.push("class=" + payload.className)
+        if (payload.path)
+            tokens.push("path=" + payload.path)
+        if (payload.text)
+            tokens.push("text=" + payload.text)
+        if (payload.modifiers !== undefined)
+            tokens.push("mod=" + payload.modifiers)
+        if (payload.buttons !== undefined)
+            tokens.push("buttons=" + payload.buttons)
+        if (payload.frameCount !== undefined)
+            tokens.push("frames=" + payload.frameCount)
+        if (payload.lastFrameMs !== undefined)
+            tokens.push("lastFrameMs=" + Number(payload.lastFrameMs).toFixed(2))
+        if (payload.depth !== undefined)
+            tokens.push("depth=" + payload.depth)
+        if (tokens.length > 0)
+            return tokens.join(" | ")
+        try {
+            return JSON.stringify(payload)
+        } catch (e) {
+            return ""
+        }
+    }
+
+    function runtimeConsoleRowVisible(row) {
+        if (!row)
+            return false
+        if (runtimeConsoleFilter === "all")
+            return true
+        return String(row.category) === runtimeConsoleFilter
+    }
+
+    function runtimeConsoleCountByCategory(category) {
         let count = 0
-        for (let i = 0; i < componentConsoleEntries.length; i++) {
-            const entry = componentConsoleEntries[i]
-            if (!entry)
-                continue
-            if (filterValue === "added" || filterValue === "modified" || filterValue === "refactored") {
-                if (String(entry.changeType) === filterValue)
-                    count += 1
-            } else if (String(entry.status) === filterValue) {
+        for (let i = 0; i < runtimeConsoleRows.length; i++) {
+            const row = runtimeConsoleRows[i]
+            if (row && String(row.category) === category)
                 count += 1
-            }
         }
         return count
+    }
+
+    function runtimeConsoleCountByFilter(filterValue) {
+        if (filterValue === "all")
+            return runtimeConsoleRows.length
+        let count = 0
+        for (let i = 0; i < runtimeConsoleRows.length; i++) {
+            const row = runtimeConsoleRows[i]
+            if (row && String(row.category) === filterValue)
+                count += 1
+        }
+        return count
+    }
+
+    function runtimeConsoleAppendRow(row) {
+        if (!row || runtimeConsolePaused)
+            return
+        const rows = runtimeConsoleRows.slice()
+        rows.push(row)
+        if (rows.length > runtimeConsoleMaxRows) {
+            const overflow = rows.length - runtimeConsoleMaxRows
+            rows.splice(0, overflow)
+            runtimeConsoleDroppedCount += overflow
+        }
+        runtimeConsoleRows = rows
+    }
+
+    function runtimeConsoleRecord(category, source, type, payload, sequenceHint, timestampHint, uptimeHint) {
+        const sequenceValue = sequenceHint !== undefined && sequenceHint !== null
+            ? Number(sequenceHint) : -1
+        runtimeConsoleAppendRow({
+            category: category || "system",
+            source: source || "Main",
+            type: type || "unknown",
+            sequence: sequenceValue,
+            timestampEpochMs: timestampHint !== undefined ? Number(timestampHint) : Date.now(),
+            uptimeMs: uptimeHint !== undefined ? Number(uptimeHint) : 0,
+            payload: payload || ({}),
+            summary: runtimeConsoleSummaryForEvent(type, payload || ({})),
+            detail: runtimeConsoleDetailForEvent(payload || ({}))
+        })
+    }
+
+    function runtimeConsoleIngestRuntimeEvent(eventData) {
+        if (!eventData)
+            return
+        const seq = eventData.sequence !== undefined ? Number(eventData.sequence) : -1
+        if (seq >= 0 && seq <= runtimeConsoleLastIngestedSequence)
+            return
+        if (seq >= 0)
+            runtimeConsoleLastIngestedSequence = seq
+        const payload = eventData.payload || ({})
+        const type = String(eventData.type || "unknown")
+        runtimeConsoleRecord(
+            runtimeConsoleCategoryForType(type),
+            "RuntimeEvents",
+            type,
+            payload,
+            seq,
+            eventData.timestampEpochMs,
+            eventData.uptimeMs)
+    }
+
+    function runtimeConsoleIngestPointerEvent(type, eventData) {
+        if (!eventData)
+            return
+        const ui = eventData.ui || ({})
+        const payload = {
+            globalX: eventData.globalX !== undefined ? eventData.globalX : eventData.x,
+            globalY: eventData.globalY !== undefined ? eventData.globalY : eventData.y,
+            button: eventData.button !== undefined ? eventData.button : Qt.NoButton,
+            buttons: eventData.buttons !== undefined ? eventData.buttons : Qt.NoButton,
+            modifiers: eventData.modifiers !== undefined ? eventData.modifiers : Qt.NoModifier,
+            objectName: ui.objectName || "",
+            className: ui.className || "",
+            path: ui.path || "",
+            text: ui.text || ""
+        }
+        runtimeConsoleRecord("input", "ApplicationWindow", type, payload, runtimeConsoleLastIngestedSequence + 1)
+    }
+
+    function runtimeConsoleUiTargetText(eventData) {
+        const ui = eventData && eventData.ui ? eventData.ui : ({})
+        const objectName = ui.objectName ? String(ui.objectName) : ""
+        const className = ui.className ? String(ui.className) : ""
+        const path = ui.path ? String(ui.path) : ""
+        if (path.length > 0)
+            return path
+        if (objectName.length > 0 && className.length > 0)
+            return className + ":" + objectName
+        if (objectName.length > 0)
+            return objectName
+        if (className.length > 0)
+            return className
+        return "unknown"
+    }
+
+    function runtimeConsoleLastEventText() {
+        const health = runtimeConsoleHealth || ({})
+        const lastEvent = health.lastEvent || ({})
+        const type = lastEvent.type ? String(lastEvent.type) : "none"
+        const sequence = lastEvent.sequence !== undefined ? String(lastEvent.sequence) : "-"
+        const stamp = lastEvent.timestampEpochMs ? runtimeConsoleTimestamp(lastEvent.timestampEpochMs) : "--:--:--.---"
+        return "#" + sequence + " " + type + " @ " + stamp
+    }
+
+    function runtimeConsoleRefreshHealth() {
+        runtimeConsoleHealth = LV.RuntimeEvents.daemonHealth()
+    }
+
+    function runtimeConsoleBootstrapFromDaemon() {
+        runtimeConsoleRefreshHealth()
+        const cached = LV.RuntimeEvents.recentEvents()
+        if (cached && cached.length !== undefined) {
+            for (let i = 0; i < cached.length; i++)
+                runtimeConsoleIngestRuntimeEvent(cached[i])
+        }
+        runtimeConsoleRecord("runtime",
+                             "Main",
+                             "catalog-console-attached",
+                             { route: LV.AppState.currentRoute, historyDepth: LV.AppState.pageHistory.length },
+                             runtimeConsoleLastIngestedSequence + 1)
+    }
+
+    function runtimeConsoleClearRows() {
+        runtimeConsoleRows = []
+        runtimeConsoleDroppedCount = 0
+        runtimeConsoleLastRenderFrameCount = LV.RenderMonitor.frameCount
+        runtimeConsoleLastIngestedSequence = LV.RuntimeEvents.eventSequence
+        runtimeConsoleLastHeartbeatSequence = LV.RuntimeEvents.eventSequence
+        LV.RuntimeEvents.clearRecentEvents()
+        runtimeConsoleRefreshHealth()
+    }
+
+    onGlobalPressedEvent: function(eventData) {
+        runtimeConsoleIngestPointerEvent("global-pressed", eventData)
     }
 
     onGlobalContextEvent: function(eventData) {
+        runtimeConsoleIngestPointerEvent("global-context", eventData)
         if (!eventData)
             return
         const x = eventData.globalX !== undefined ? eventData.globalX : eventData.x
@@ -513,6 +560,14 @@ LV.ApplicationWindow {
             return
         root.activeContextMenuItems = root.contextMenuItemsForEvent(eventData)
         root.openDemoContextMenuAtGlobal(x, y)
+    }
+
+    onRuntimeConsoleRowsChanged: {
+        if (!runtimeConsoleAutoScroll)
+            return
+        if (!runtimeConsoleViewport)
+            return
+        runtimeConsoleViewport.contentY = Math.max(0, runtimeConsoleViewport.contentHeight - runtimeConsoleViewport.height)
     }
 
     Component.onCompleted: {
@@ -525,6 +580,8 @@ LV.ApplicationWindow {
         LV.AppState.syncViewStateSnapshot(LV.ViewStateTracker.snapshot())
         LV.Debug.enabled = true
         LV.Debug.log("Main", "visual-catalog-opened")
+        runtimeConsoleBootstrapFromDaemon()
+        runtimeConsoleLastRenderFrameCount = LV.RenderMonitor.frameCount
     }
 
     Connections {
@@ -538,6 +595,51 @@ LV.ApplicationWindow {
         }
         function onRunningChanged() {
             LV.AppState.syncRuntimeSnapshot(LV.RuntimeEvents.snapshot())
+            root.runtimeConsoleRefreshHealth()
+        }
+        function onEventRecorded(eventData) {
+            root.runtimeConsoleIngestRuntimeEvent(eventData)
+            root.runtimeConsoleRefreshHealth()
+        }
+        function onDaemonHeartbeat(epochMs, uptimeMs, eventSequence) {
+            root.runtimeConsoleLastHeartbeat = {
+                epochMs: epochMs,
+                uptimeMs: uptimeMs,
+                eventSequence: eventSequence
+            }
+            root.runtimeConsoleLastHeartbeatSequence = eventSequence
+            root.runtimeConsoleRefreshHealth()
+        }
+    }
+
+    Connections {
+        target: LV.RenderMonitor
+        ignoreUnknownSignals: true
+        function onActiveChanged() {
+            root.runtimeConsoleRecord("render",
+                                      "RenderMonitor",
+                                      LV.RenderMonitor.active ? "render-monitor-started" : "render-monitor-stopped",
+                                      {
+                                          active: LV.RenderMonitor.active,
+                                          fps: LV.RenderMonitor.fps,
+                                          frameCount: LV.RenderMonitor.frameCount
+                                      },
+                                      root.runtimeConsoleLastIngestedSequence + 1)
+        }
+        function onStatsChanged() {
+            const frameCount = LV.RenderMonitor.frameCount
+            if (frameCount > 0 && frameCount - root.runtimeConsoleLastRenderFrameCount < 20)
+                return
+            root.runtimeConsoleLastRenderFrameCount = frameCount
+            root.runtimeConsoleRecord("render",
+                                      "RenderMonitor",
+                                      "render-stats",
+                                      {
+                                          fps: LV.RenderMonitor.fps,
+                                          frameCount: LV.RenderMonitor.frameCount,
+                                          lastFrameMs: LV.RenderMonitor.lastFrameMs
+                                      },
+                                      root.runtimeConsoleLastIngestedSequence + 1)
         }
     }
 
@@ -546,6 +648,15 @@ LV.ApplicationWindow {
         ignoreUnknownSignals: true
         function onStackChanged() {
             LV.AppState.syncViewStateSnapshot(LV.ViewStateTracker.snapshot())
+            const snapshot = LV.ViewStateTracker.snapshot()
+            root.runtimeConsoleRecord("navigation",
+                                      "ViewStateTracker",
+                                      "viewstack-changed",
+                                      {
+                                          depth: snapshot && snapshot.stack ? snapshot.stack.length : 0,
+                                          activeCount: snapshot && snapshot.activeViews ? snapshot.activeViews.length : 0
+                                      },
+                                      root.runtimeConsoleLastIngestedSequence + 1)
         }
     }
 
@@ -554,7 +665,23 @@ LV.ApplicationWindow {
         ignoreUnknownSignals: true
         function onHistoryChanged() {
             LV.AppState.syncPageHistory(LV.PageMonitor.history)
+            const history = LV.PageMonitor.history || []
+            root.runtimeConsoleRecord("navigation",
+                                      "PageMonitor",
+                                      "route-recorded",
+                                      {
+                                          path: history.length > 0 ? history[history.length - 1] : "",
+                                          depth: history.length
+                                      },
+                                      root.runtimeConsoleLastIngestedSequence + 1)
         }
+    }
+
+    Timer {
+        interval: 1000
+        running: true
+        repeat: true
+        onTriggered: root.runtimeConsoleRefreshHealth()
     }
 
     LV.Alert {
@@ -867,8 +994,8 @@ LV.ApplicationWindow {
                 }
 
                 LV.AppCard {
-                    title: "Design System Console"
-                    subtitle: "변경/추가 컴포넌트 레저 + 품질 검증 모니터"
+                    title: "Runtime Event Daemon Console"
+                    subtitle: "앱 런타임, UI 구조, 렌더, 입력 이벤트 실시간 통합 감시"
                     visible: root.demoPageIndex === 2
                     Layout.fillWidth: true
 
@@ -880,10 +1007,10 @@ LV.ApplicationWindow {
                             width: parent.width
                             radius: LV.Theme.radiusMd
                             color: LV.Theme.surfaceGhost
-                            implicitHeight: consoleHeaderColumn.implicitHeight + LV.Theme.gap10 * 2
+                            implicitHeight: runtimeConsoleHeaderColumn.implicitHeight + LV.Theme.gap10 * 2
 
                             Column {
-                                id: consoleHeaderColumn
+                                id: runtimeConsoleHeaderColumn
                                 x: LV.Theme.gap10
                                 y: LV.Theme.gap10
                                 width: parent.width - LV.Theme.gap10 * 2
@@ -897,23 +1024,23 @@ LV.ApplicationWindow {
                                         Layout.fillWidth: true
                                         style: body
                                         color: LV.Theme.textPrimary
-                                        text: "Component Ledger " + root.componentConsoleVerifiedCount + "/" + root.componentConsoleTotalCount
+                                        text: "Daemon Events " + root.runtimeConsoleVisibleCount + "/" + root.runtimeConsoleTotalCount
                                     }
 
                                     Rectangle {
                                         implicitHeight: 20
                                         implicitWidth: statusLabel.implicitWidth + LV.Theme.gap8 * 2
                                         radius: LV.Theme.radiusSm
-                                        color: root.metricsPass ? LV.Theme.accentGreenMuted : LV.Theme.accentRedBrownDark
+                                        color: root.runtimeConsoleHealth.running ? LV.Theme.accentGreenMuted : LV.Theme.accentRedBrownDark
                                         border.width: 1
-                                        border.color: root.metricsPass ? LV.Theme.success : LV.Theme.danger
+                                        border.color: root.runtimeConsoleHealth.running ? LV.Theme.success : LV.Theme.danger
 
                                         LV.Label {
                                             id: statusLabel
                                             anchors.centerIn: parent
                                             style: disabled
                                             color: LV.Theme.textPrimary
-                                            text: root.metricsPass ? "SYSTEM VERIFIED" : "SYSTEM MONITORING"
+                                            text: root.runtimeConsoleHealth.running ? "DAEMON ONLINE" : "DAEMON OFFLINE"
                                         }
                                     }
                                 }
@@ -922,17 +1049,44 @@ LV.ApplicationWindow {
                                     width: parent.width
                                     size: regular
                                     startValue: 0
-                                    endValue: Math.max(1, root.componentConsoleTotalCount)
-                                    currentValue: root.componentConsoleVerifiedCount
+                                    endValue: Math.max(1, root.runtimeConsoleMaxRows)
+                                    currentValue: root.runtimeConsoleVisibleCount
                                 }
 
                                 LV.Label {
                                     width: parent.width
                                     style: disabled
                                     color: LV.Theme.textTertiary
-                                    text: "Filter: " + root.componentConsoleFilter
-                                        + " | Visible: " + root.componentConsoleFilteredCount
-                                        + " | Runtime checks: " + root.metricsSummary
+                                    text: "filter=" + root.runtimeConsoleFilter
+                                        + " | dropped=" + root.runtimeConsoleDroppedCount
+                                        + " | seq=" + (root.runtimeConsoleHealth.eventSequence !== undefined ? root.runtimeConsoleHealth.eventSequence : 0)
+                                        + " | heartbeat=" + root.runtimeConsoleTimestamp(root.runtimeConsoleLastHeartbeat.epochMs)
+                                }
+
+                                Flow {
+                                    width: parent.width
+                                    spacing: LV.Theme.gap6
+
+                                    LV.LabelButton {
+                                        text: root.runtimeConsolePaused ? "Resume" : "Pause"
+                                        tone: root.runtimeConsolePaused ? LV.AbstractButton.Primary : LV.AbstractButton.Default
+                                        onClicked: root.runtimeConsolePaused = !root.runtimeConsolePaused
+                                    }
+                                    LV.LabelButton {
+                                        text: root.runtimeConsoleAutoScroll ? "AutoScroll On" : "AutoScroll Off"
+                                        tone: root.runtimeConsoleAutoScroll ? LV.AbstractButton.Primary : LV.AbstractButton.Default
+                                        onClicked: root.runtimeConsoleAutoScroll = !root.runtimeConsoleAutoScroll
+                                    }
+                                    LV.LabelButton {
+                                        text: "Clear Rows"
+                                        tone: LV.AbstractButton.Default
+                                        onClicked: root.runtimeConsoleClearRows()
+                                    }
+                                    LV.LabelButton {
+                                        text: "Refresh Health"
+                                        tone: LV.AbstractButton.Default
+                                        onClicked: root.runtimeConsoleRefreshHealth()
+                                    }
                                 }
                             }
                         }
@@ -944,24 +1098,20 @@ LV.ApplicationWindow {
                             columnSpacing: LV.Theme.gap8
 
                             Repeater {
-                                model: root.componentConsoleSummaryCards
+                                model: [
+                                    { label: "All", value: String(root.runtimeConsoleTotalCount), category: "all" },
+                                    { label: "Runtime", value: String(root.runtimeConsoleRuntimeCount), category: "runtime" },
+                                    { label: "Input", value: String(root.runtimeConsoleInputCount), category: "input" },
+                                    { label: "UI", value: String(root.runtimeConsoleUiCount), category: "ui" },
+                                    { label: "Render", value: String(root.runtimeConsoleRenderCount), category: "render" },
+                                    { label: "Nav", value: String(root.runtimeConsoleNavigationCount), category: "navigation" }
+                                ]
 
                                 delegate: Rectangle {
                                     required property var modelData
-                                    readonly property color toneColor: {
-                                        const tone = modelData.tone
-                                        if (tone === "primary")
-                                            return LV.Theme.accentBlue
-                                        if (tone === "added")
-                                            return root.componentChangeTypeColor("added")
-                                        if (tone === "modified")
-                                            return root.componentChangeTypeColor("modified")
-                                        if (tone === "refactored")
-                                            return root.componentChangeTypeColor("refactored")
-                                        if (tone === "verified")
-                                            return root.componentStatusColor("verified")
-                                        return root.componentStatusColor("monitoring")
-                                    }
+                                    readonly property color toneColor: modelData.category === "all"
+                                        ? LV.Theme.accentBlue
+                                        : root.runtimeConsoleCategoryColor(modelData.category)
                                     Layout.fillWidth: true
                                     implicitHeight: 62
                                     radius: LV.Theme.radiusSm
@@ -998,167 +1148,39 @@ LV.ApplicationWindow {
                             spacing: LV.Theme.gap6
 
                             LV.LabelButton {
-                                text: "All " + root.countEntriesForFilter("all")
-                                tone: root.componentConsoleFilter === "all" ? LV.AbstractButton.Primary : LV.AbstractButton.Default
-                                onClicked: root.componentConsoleFilter = "all"
+                                text: "All " + root.runtimeConsoleCountByFilter("all")
+                                tone: root.runtimeConsoleFilter === "all" ? LV.AbstractButton.Primary : LV.AbstractButton.Default
+                                onClicked: root.runtimeConsoleFilter = "all"
                             }
                             LV.LabelButton {
-                                text: "Added " + root.countEntriesForFilter("added")
-                                tone: root.componentConsoleFilter === "added" ? LV.AbstractButton.Primary : LV.AbstractButton.Default
-                                onClicked: root.componentConsoleFilter = "added"
+                                text: "Runtime " + root.runtimeConsoleCountByFilter("runtime")
+                                tone: root.runtimeConsoleFilter === "runtime" ? LV.AbstractButton.Primary : LV.AbstractButton.Default
+                                onClicked: root.runtimeConsoleFilter = "runtime"
                             }
                             LV.LabelButton {
-                                text: "Modified " + root.countEntriesForFilter("modified")
-                                tone: root.componentConsoleFilter === "modified" ? LV.AbstractButton.Primary : LV.AbstractButton.Default
-                                onClicked: root.componentConsoleFilter = "modified"
+                                text: "Input " + root.runtimeConsoleCountByFilter("input")
+                                tone: root.runtimeConsoleFilter === "input" ? LV.AbstractButton.Primary : LV.AbstractButton.Default
+                                onClicked: root.runtimeConsoleFilter = "input"
                             }
                             LV.LabelButton {
-                                text: "Refactored " + root.countEntriesForFilter("refactored")
-                                tone: root.componentConsoleFilter === "refactored" ? LV.AbstractButton.Primary : LV.AbstractButton.Default
-                                onClicked: root.componentConsoleFilter = "refactored"
+                                text: "UI " + root.runtimeConsoleCountByFilter("ui")
+                                tone: root.runtimeConsoleFilter === "ui" ? LV.AbstractButton.Primary : LV.AbstractButton.Default
+                                onClicked: root.runtimeConsoleFilter = "ui"
                             }
                             LV.LabelButton {
-                                text: "Verified " + root.countEntriesForFilter("verified")
-                                tone: root.componentConsoleFilter === "verified" ? LV.AbstractButton.Primary : LV.AbstractButton.Default
-                                onClicked: root.componentConsoleFilter = "verified"
+                                text: "Render " + root.runtimeConsoleCountByFilter("render")
+                                tone: root.runtimeConsoleFilter === "render" ? LV.AbstractButton.Primary : LV.AbstractButton.Default
+                                onClicked: root.runtimeConsoleFilter = "render"
                             }
                             LV.LabelButton {
-                                text: "Monitoring " + root.countEntriesForFilter("monitoring")
-                                tone: root.componentConsoleFilter === "monitoring" ? LV.AbstractButton.Primary : LV.AbstractButton.Default
-                                onClicked: root.componentConsoleFilter = "monitoring"
+                                text: "Nav " + root.runtimeConsoleCountByFilter("navigation")
+                                tone: root.runtimeConsoleFilter === "navigation" ? LV.AbstractButton.Primary : LV.AbstractButton.Default
+                                onClicked: root.runtimeConsoleFilter = "navigation"
                             }
-                        }
-
-                        Rectangle {
-                            width: parent.width
-                            radius: LV.Theme.radiusMd
-                            color: LV.Theme.surfaceGhost
-                            implicitHeight: Math.min(420, Math.max(160, componentConsoleColumn.implicitHeight + LV.Theme.gap8 * 2))
-
-                            Flickable {
-                                id: componentConsoleViewport
-                                anchors.fill: parent
-                                anchors.margins: LV.Theme.gap8
-                                clip: true
-                                contentWidth: width
-                                contentHeight: componentConsoleColumn.implicitHeight
-                                boundsBehavior: Flickable.StopAtBounds
-
-                                Column {
-                                    id: componentConsoleColumn
-                                    width: componentConsoleViewport.width
-                                    spacing: LV.Theme.gap6
-
-                                    Repeater {
-                                        model: root.componentConsoleEntries
-
-                                        delegate: Rectangle {
-                                            required property var modelData
-                                            readonly property bool rowVisible: root.componentEntryVisible(modelData)
-                                            width: parent.width
-                                            visible: rowVisible
-                                            opacity: rowVisible ? 1 : 0
-                                            height: rowVisible ? implicitHeight : 0
-                                            implicitHeight: consoleEntryColumn.implicitHeight + LV.Theme.gap8 * 2
-                                            radius: LV.Theme.radiusSm
-                                            color: root.componentStatusBackground(modelData.status)
-                                            border.width: 1
-                                            border.color: root.componentStatusColor(modelData.status)
-
-                                            Column {
-                                                id: consoleEntryColumn
-                                                anchors.fill: parent
-                                                anchors.margins: LV.Theme.gap8
-                                                spacing: LV.Theme.gap4
-
-                                                RowLayout {
-                                                    width: parent.width
-                                                    spacing: LV.Theme.gap6
-
-                                                    LV.Label {
-                                                        Layout.fillWidth: true
-                                                        style: body
-                                                        color: LV.Theme.textPrimary
-                                                        text: modelData.name
-                                                        elide: Text.ElideRight
-                                                    }
-
-                                                    Rectangle {
-                                                        implicitHeight: 18
-                                                        implicitWidth: changeTypeLabel.implicitWidth + LV.Theme.gap6 * 2
-                                                        radius: LV.Theme.radiusXs
-                                                        color: root.componentChangeTypeColor(modelData.changeType)
-
-                                                        LV.Label {
-                                                            id: changeTypeLabel
-                                                            anchors.centerIn: parent
-                                                            style: disabled
-                                                            color: LV.Theme.textPrimary
-                                                            text: String(modelData.changeType).toUpperCase()
-                                                        }
-                                                    }
-
-                                                    Rectangle {
-                                                        implicitHeight: 18
-                                                        implicitWidth: statusTypeLabel.implicitWidth + LV.Theme.gap6 * 2
-                                                        radius: LV.Theme.radiusXs
-                                                        color: root.componentStatusColor(modelData.status)
-
-                                                        LV.Label {
-                                                            id: statusTypeLabel
-                                                            anchors.centerIn: parent
-                                                            style: disabled
-                                                            color: LV.Theme.textPrimary
-                                                            text: String(modelData.status).toUpperCase()
-                                                        }
-                                                    }
-                                                }
-
-                                                LV.Label {
-                                                    width: parent.width
-                                                    style: description
-                                                    color: LV.Theme.textSecondary
-                                                    wrapMode: Text.WordWrap
-                                                    text: modelData.summary
-                                                }
-
-                                                LV.Label {
-                                                    width: parent.width
-                                                    style: disabled
-                                                    color: LV.Theme.textTertiary
-                                                    elide: Text.ElideMiddle
-                                                    text: "File: " + modelData.file + " | Group: " + modelData.group
-                                                }
-
-                                                LV.Label {
-                                                    width: parent.width
-                                                    style: disabled
-                                                    color: LV.Theme.textTertiary
-                                                    wrapMode: Text.WordWrap
-                                                    text: "States: " + modelData.states + " | Updated: " + modelData.lastUpdated
-                                                }
-                                            }
-                                        }
-                                    }
-
-                                    LV.Label {
-                                        width: parent.width
-                                        visible: root.componentConsoleFilteredCount === 0
-                                        style: description
-                                        color: LV.Theme.textSecondary
-                                        text: "선택된 필터에 해당하는 레저 항목이 없다."
-                                    }
-                                }
-
-                                ScrollBar.vertical: ScrollBar {
-                                    policy: ScrollBar.AsNeeded
-                                }
-                            }
-
-                            LV.WheelScrollGuard {
-                                anchors.fill: parent
-                                targetFlickable: componentConsoleViewport
-                                consumeInside: true
+                            LV.LabelButton {
+                                text: "System " + root.runtimeConsoleCountByFilter("system")
+                                tone: root.runtimeConsoleFilter === "system" ? LV.AbstractButton.Primary : LV.AbstractButton.Default
+                                onClicked: root.runtimeConsoleFilter = "system"
                             }
                         }
 
@@ -1168,36 +1190,231 @@ LV.ApplicationWindow {
                             rowSpacing: LV.Theme.gap8
                             columnSpacing: LV.Theme.gap8
 
-                            Repeater {
-                                model: root.componentConsoleChecks
+                            Rectangle {
+                                Layout.fillWidth: true
+                                radius: LV.Theme.radiusMd
+                                color: LV.Theme.surfaceGhost
+                                implicitHeight: Math.min(520, Math.max(220, runtimeConsoleColumn.implicitHeight + LV.Theme.gap8 * 2))
 
-                                delegate: Rectangle {
-                                    required property var modelData
-                                    Layout.fillWidth: true
-                                    implicitHeight: 64
-                                    radius: LV.Theme.radiusSm
-                                    color: modelData.pass ? LV.Theme.accentGreenMuted : LV.Theme.accentRedBrownDark
-                                    border.width: 1
-                                    border.color: modelData.pass ? LV.Theme.success : LV.Theme.danger
+                                Flickable {
+                                    id: runtimeConsoleViewport
+                                    anchors.fill: parent
+                                    anchors.margins: LV.Theme.gap8
+                                    clip: true
+                                    contentWidth: width
+                                    contentHeight: runtimeConsoleColumn.implicitHeight
+                                    boundsBehavior: Flickable.StopAtBounds
 
                                     Column {
-                                        anchors.fill: parent
-                                        anchors.margins: LV.Theme.gap8
-                                        spacing: LV.Theme.gap4
+                                        id: runtimeConsoleColumn
+                                        width: runtimeConsoleViewport.width
+                                        spacing: LV.Theme.gap6
+
+                                        Repeater {
+                                            model: root.runtimeConsoleRows
+
+                                            delegate: Rectangle {
+                                                required property var modelData
+                                                readonly property bool rowVisible: root.runtimeConsoleRowVisible(modelData)
+                                                width: parent.width
+                                                visible: rowVisible
+                                                opacity: rowVisible ? 1 : 0
+                                                height: rowVisible ? implicitHeight : 0
+                                                implicitHeight: runtimeEntryColumn.implicitHeight + LV.Theme.gap8 * 2
+                                                radius: LV.Theme.radiusSm
+                                                color: root.runtimeConsoleCategoryBackground(String(modelData.category))
+                                                border.width: 1
+                                                border.color: root.runtimeConsoleCategoryColor(String(modelData.category))
+
+                                                Column {
+                                                    id: runtimeEntryColumn
+                                                    anchors.fill: parent
+                                                    anchors.margins: LV.Theme.gap8
+                                                    spacing: LV.Theme.gap4
+
+                                                    RowLayout {
+                                                        width: parent.width
+                                                        spacing: LV.Theme.gap6
+
+                                                        LV.Label {
+                                                            Layout.fillWidth: true
+                                                            style: description
+                                                            color: LV.Theme.textPrimary
+                                                            elide: Text.ElideRight
+                                                            text: "[" + root.runtimeConsoleTimestamp(modelData.timestampEpochMs) + "] "
+                                                                + "#" + (modelData.sequence !== undefined ? modelData.sequence : "-")
+                                                                + " " + String(modelData.source)
+                                                        }
+
+                                                        Rectangle {
+                                                            implicitHeight: 18
+                                                            implicitWidth: categoryLabel.implicitWidth + LV.Theme.gap6 * 2
+                                                            radius: LV.Theme.radiusXs
+                                                            color: root.runtimeConsoleCategoryColor(String(modelData.category))
+
+                                                            LV.Label {
+                                                                id: categoryLabel
+                                                                anchors.centerIn: parent
+                                                                style: disabled
+                                                                color: LV.Theme.textPrimary
+                                                                text: String(modelData.category).toUpperCase()
+                                                            }
+                                                        }
+                                                    }
+
+                                                    LV.Label {
+                                                        width: parent.width
+                                                        style: body
+                                                        color: LV.Theme.textPrimary
+                                                        wrapMode: Text.WordWrap
+                                                        text: modelData.summary
+                                                    }
+
+                                                    LV.Label {
+                                                        width: parent.width
+                                                        style: disabled
+                                                        color: LV.Theme.textTertiary
+                                                        wrapMode: Text.WordWrap
+                                                        text: modelData.detail
+                                                    }
+                                                }
+                                            }
+                                        }
+
+                                        LV.Label {
+                                            width: parent.width
+                                            visible: root.runtimeConsoleVisibleCount === 0
+                                            style: description
+                                            color: LV.Theme.textSecondary
+                                            text: "선택한 필터에 해당하는 이벤트가 없다."
+                                        }
+                                    }
+
+                                    ScrollBar.vertical: ScrollBar {
+                                        policy: ScrollBar.AsNeeded
+                                    }
+                                }
+
+                                LV.WheelScrollGuard {
+                                    anchors.fill: parent
+                                    targetFlickable: runtimeConsoleViewport
+                                    consumeInside: true
+                                }
+                            }
+
+                            Rectangle {
+                                Layout.fillWidth: true
+                                radius: LV.Theme.radiusMd
+                                color: LV.Theme.surfaceGhost
+                                implicitHeight: 320
+
+                                Flickable {
+                                    anchors.fill: parent
+                                    anchors.margins: LV.Theme.gap8
+                                    clip: true
+                                    contentWidth: width
+                                    contentHeight: runtimeStatsColumn.implicitHeight
+
+                                    Column {
+                                        id: runtimeStatsColumn
+                                        width: parent.width
+                                        spacing: LV.Theme.gap8
 
                                         LV.Label {
                                             width: parent.width
                                             style: body
                                             color: LV.Theme.textPrimary
-                                            text: modelData.name + (modelData.pass ? " [PASS]" : " [FAIL]")
-                                            elide: Text.ElideRight
+                                            text: "Runtime Daemon"
                                         }
                                         LV.Label {
                                             width: parent.width
                                             style: disabled
                                             color: LV.Theme.textTertiary
-                                            elide: Text.ElideRight
-                                            text: modelData.detail
+                                            text: "running=" + (!!root.runtimeConsoleHealth.running)
+                                                + " attachedWindow=" + (!!root.runtimeConsoleHealth.attachedWindow)
+                                                + " pid=" + (root.runtimeConsoleHealth.pid !== undefined ? root.runtimeConsoleHealth.pid : "-")
+                                        }
+                                        LV.Label {
+                                            width: parent.width
+                                            style: disabled
+                                            color: LV.Theme.textTertiary
+                                            text: "eventSequence=" + (root.runtimeConsoleHealth.eventSequence !== undefined ? root.runtimeConsoleHealth.eventSequence : 0)
+                                                + " recentEventCount=" + (root.runtimeConsoleHealth.recentEventCount !== undefined ? root.runtimeConsoleHealth.recentEventCount : 0)
+                                                + " recentEventCapacity=" + (root.runtimeConsoleHealth.recentEventCapacity !== undefined ? root.runtimeConsoleHealth.recentEventCapacity : 0)
+                                        }
+                                        LV.Label {
+                                            width: parent.width
+                                            style: disabled
+                                            color: LV.Theme.textTertiary
+                                            text: "lastEvent: " + root.runtimeConsoleLastEventText()
+                                            wrapMode: Text.WordWrap
+                                        }
+
+                                        Rectangle { width: parent.width; height: 1; color: LV.Theme.contextMenuDivider }
+
+                                        LV.Label {
+                                            width: parent.width
+                                            style: body
+                                            color: LV.Theme.textPrimary
+                                            text: "Render Monitor"
+                                        }
+                                        LV.Label {
+                                            width: parent.width
+                                            style: disabled
+                                            color: LV.Theme.textTertiary
+                                            text: "active=" + LV.RenderMonitor.active
+                                                + " fps=" + Number(LV.RenderMonitor.fps).toFixed(2)
+                                                + " lastFrameMs=" + Number(LV.RenderMonitor.lastFrameMs).toFixed(2)
+                                                + " frameCount=" + LV.RenderMonitor.frameCount
+                                        }
+
+                                        Rectangle { width: parent.width; height: 1; color: LV.Theme.contextMenuDivider }
+
+                                        LV.Label {
+                                            width: parent.width
+                                            style: body
+                                            color: LV.Theme.textPrimary
+                                            text: "Navigation / ViewState"
+                                        }
+                                        LV.Label {
+                                            width: parent.width
+                                            style: disabled
+                                            color: LV.Theme.textTertiary
+                                            wrapMode: Text.WordWrap
+                                            text: "currentRoute=" + LV.AppState.currentRoute
+                                                + " historyDepth=" + LV.AppState.pageHistory.length
+                                                + " viewStackDepth=" + (root.viewStateSnapshot && root.viewStateSnapshot.stack ? root.viewStateSnapshot.stack.length : 0)
+                                        }
+
+                                        Rectangle { width: parent.width; height: 1; color: LV.Theme.contextMenuDivider }
+
+                                        LV.Label {
+                                            width: parent.width
+                                            style: body
+                                            color: LV.Theme.textPrimary
+                                            text: "Global Pointer Hit Test"
+                                        }
+                                        LV.Label {
+                                            width: parent.width
+                                            style: disabled
+                                            color: LV.Theme.textTertiary
+                                            wrapMode: Text.WordWrap
+                                            text: "lastPressedTarget=" + root.runtimeConsoleUiTargetText(root.lastGlobalPressedEventData)
+                                                + " | lastContextTarget=" + root.runtimeConsoleUiTargetText(root.lastGlobalContextEventData)
+                                        }
+                                        LV.Label {
+                                            width: parent.width
+                                            style: disabled
+                                            color: LV.Theme.textTertiary
+                                            wrapMode: Text.WordWrap
+                                            text: "lastPressedXY="
+                                                + (root.lastGlobalPressedEventData.globalX !== undefined ? Math.round(root.lastGlobalPressedEventData.globalX) : "-")
+                                                + ","
+                                                + (root.lastGlobalPressedEventData.globalY !== undefined ? Math.round(root.lastGlobalPressedEventData.globalY) : "-")
+                                                + " | lastContextXY="
+                                                + (root.lastGlobalContextEventData.globalX !== undefined ? Math.round(root.lastGlobalContextEventData.globalX) : "-")
+                                                + ","
+                                                + (root.lastGlobalContextEventData.globalY !== undefined ? Math.round(root.lastGlobalContextEventData.globalY) : "-")
                                         }
                                     }
                                 }

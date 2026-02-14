@@ -1,14 +1,12 @@
 #include "backend/fonts/fontpolicy.h"
 #include "backend/runtime/renderquality.h"
+#include "backend/runtime/vulkanbootstrap.h"
 
 #include <QCoreApplication>
 #include <QDebug>
 #include <QFontDatabase>
 #include <QGuiApplication>
-#include <QLibrary>
-#include <QQuickWindow>
 #include <QQmlApplicationEngine>
-#include <QSGRendererInterface>
 #include <QtPlugin>
 
 Q_IMPORT_PLUGIN(LVRSPlugin)
@@ -34,45 +32,22 @@ void loadBundledFonts()
     }
 }
 
-bool enforceVulkanBackend()
-{
-    qputenv("QSG_RHI_BACKEND", QByteArrayLiteral("vulkan"));
-    qputenv("QSG_RHI_PREFER_SOFTWARE_RENDERER", QByteArrayLiteral("0"));
-    QQuickWindow::setGraphicsApi(QSGRendererInterface::Vulkan);
-
-    const char *kVulkanLoaders[] = {
-#if defined(Q_OS_WIN)
-        "vulkan-1"
-#elif defined(Q_OS_MACOS)
-        "vulkan",
-        "MoltenVK",
-        "libvulkan.1",
-        "libMoltenVK"
-#else
-        "vulkan",
-        "libvulkan.so.1"
-#endif
-    };
-
-    for (const char *loaderName : kVulkanLoaders) {
-        QLibrary vulkanLoader(QString::fromLatin1(loaderName));
-        if (vulkanLoader.load()) {
-            vulkanLoader.unload();
-            qInfo() << "LVRS graphics backend: Vulkan (forced), loader =" << loaderName;
-            return true;
-        }
-    }
-
-    qCritical() << "No Vulkan loader found. LVRS requires Vulkan rendering.";
-    return false;
-}
 }
 
 int main(int argc, char *argv[])
 {
     RenderQuality::configureGlobalDefaults();
-    if (!enforceVulkanBackend())
+
+    const lvrs::GraphicsBackendBootstrapResult backendBootstrap = lvrs::bootstrapPreferredGraphicsBackend();
+    if (!backendBootstrap.available) {
+        qCritical().noquote() << backendBootstrap.errorMessage;
         return -1;
+    }
+    if (backendBootstrap.loaderName.isEmpty())
+        qInfo() << "LVRS graphics backend:" << backendBootstrap.backendName;
+    else
+        qInfo() << "LVRS graphics backend:" << backendBootstrap.backendName
+                << ", loader =" << backendBootstrap.loaderName;
 
     QGuiApplication app(argc, argv);
     app.setApplicationName(QStringLiteral("LVRS"));

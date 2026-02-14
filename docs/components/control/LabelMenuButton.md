@@ -6,7 +6,7 @@ Label + chevron menu button variant aligned with the Figma Button component.
 
 ## Properties
 - `text`
-- `tone` (`Accent`, `Default`, `Borderless`, `Destructive`, `Disabled`)
+- `tone` (`Primary`, `Default`, `Borderless`, `Destructive`, `Disabled`)
 
 ## Usage
 ```qml
@@ -46,14 +46,14 @@ LV.LabelMenuButton {
 }
 ```
 
-### Example 3: Accent menu button for creation flows
+### Example 3: Primary menu button for creation flows
 ```qml
 import QtQuick
 import LVRS 1.0 as LV
 
 LV.LabelMenuButton {
     text: "New"
-    tone: LV.AbstractButton.Accent
+    tone: LV.AbstractButton.Primary
     onClicked: console.log("Choose creation type")
 }
 ```

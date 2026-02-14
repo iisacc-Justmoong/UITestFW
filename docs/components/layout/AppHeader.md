@@ -50,7 +50,7 @@ LV.AppHeader {
 
     LV.LabelButton {
         text: "New Run"
-        tone: LV.AbstractButton.Accent
+        tone: LV.AbstractButton.Primary
     }
 }
 ```

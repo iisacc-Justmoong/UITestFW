@@ -43,7 +43,7 @@ Item {
         anchors.top: parent.top
         anchors.topMargin: 40
         text: "Continue"
-        tone: LV.AbstractButton.Accent
+        tone: LV.AbstractButton.Primary
         enabled: accepted
     }
 }

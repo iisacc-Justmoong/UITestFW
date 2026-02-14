@@ -14,6 +14,40 @@ UIF.ApplicationWindow {
     navItems: UIF.AppState.navItems
 
     readonly property bool compactGallery: width < 1260
+    readonly property var accentPreviewTokens: [
+        { name: "accentTransparent", hex: "transparent", color: UIF.Theme.accentTransparent },
+        { name: "accentWhite", hex: "#FFFFFF", color: UIF.Theme.accentWhite },
+        { name: "accentHexCed0d6", hex: "#CED0D6", color: UIF.Theme.accentHexCed0d6 },
+        { name: "accentHex548af7", hex: "#548AF7", color: UIF.Theme.accentHex548af7 },
+        { name: "accentHexDb5c5c", hex: "#DB5C5C", color: UIF.Theme.accentHexDb5c5c },
+        { name: "accentHex43454a", hex: "#43454A", color: UIF.Theme.accentHex43454a },
+        { name: "accentHex57965c", hex: "#57965C", color: UIF.Theme.accentHex57965c },
+        { name: "accentHex25324d", hex: "#25324D", color: UIF.Theme.accentHex25324d },
+        { name: "accentHexC77d55", hex: "#C77D55", color: UIF.Theme.accentHexC77d55 },
+        { name: "accentHex253627", hex: "#253627", color: UIF.Theme.accentHex253627 },
+        { name: "accentHexF2c55c", hex: "#F2C55C", color: UIF.Theme.accentHexF2c55c },
+        { name: "accentHex402929", hex: "#402929", color: UIF.Theme.accentHex402929 },
+        { name: "accentHex868a91", hex: "#868A91", color: UIF.Theme.accentHex868a91 },
+        { name: "accentHexD6ae58", hex: "#D6AE58", color: UIF.Theme.accentHexD6ae58 },
+        { name: "accentHex45322b", hex: "#45322B", color: UIF.Theme.accentHex45322b },
+        { name: "accentHexA571e6", hex: "#A571E6", color: UIF.Theme.accentHexA571e6 },
+        { name: "accentHex3d3223", hex: "#3D3223", color: UIF.Theme.accentHex3d3223 },
+        { name: "accentHex1e1f22", hex: "#1E1F22", color: UIF.Theme.accentHex1e1f22 },
+        { name: "accentHexB4b8bf", hex: "#B4B8BF", color: UIF.Theme.accentHexB4b8bf },
+        { name: "accentHex3574f0", hex: "#3574F0", color: UIF.Theme.accentHex3574f0 },
+        { name: "accentHex2f2936", hex: "#2F2936", color: UIF.Theme.accentHex2f2936 },
+        { name: "accentHexF0f1f2", hex: "#F0F1F2", color: UIF.Theme.accentHexF0f1f2 },
+        { name: "accentHexE55765", hex: "#E55765", color: UIF.Theme.accentHexE55765 },
+        { name: "accentHex5e3838", hex: "#5E3838", color: UIF.Theme.accentHex5e3838 },
+        { name: "accentHex5a5d63", hex: "#5A5D63", color: UIF.Theme.accentHex5a5d63 },
+        { name: "accentHex55a76a", hex: "#55A76A", color: UIF.Theme.accentHex55a76a },
+        { name: "accentHexBd5757", hex: "#BD5757", color: UIF.Theme.accentHexBd5757 },
+        { name: "accentHex9c4e4e", hex: "#9C4E4E", color: UIF.Theme.accentHex9c4e4e },
+        { name: "accentHex7a4343", hex: "#7A4343", color: UIF.Theme.accentHex7a4343 },
+        { name: "accentHex6f737a", hex: "#6F737A", color: UIF.Theme.accentHex6f737a },
+        { name: "accentHex6c707e", hex: "#6C707E", color: UIF.Theme.accentHex6c707e },
+        { name: "accentHex375239", hex: "#375239", color: UIF.Theme.accentHex375239 }
+    ]
 
     readonly property var runtimeSnapshot: UIF.AppState.runtimeSnapshot
     readonly property var viewStateSnapshot: UIF.AppState.viewStateSnapshot
@@ -232,7 +266,7 @@ UIF.ApplicationWindow {
 
                             UIF.LabelButton {
                                 text: "Open Alert"
-                                tone: UIF.AbstractButton.Accent
+                                tone: UIF.AbstractButton.Primary
                                 onClicked: UIF.AppState.alertOpen = true
                             }
 
@@ -344,21 +378,21 @@ UIF.ApplicationWindow {
 
                 UIF.AppCard {
                     title: "Buttons"
-                    subtitle: "Tone별 버튼 패밀리"
+                    subtitle: "Tone별 버튼 패밀리 + 상태 테마 스와치"
                     Layout.fillWidth: true
 
                     Column {
                         width: parent.width
                         spacing: UIF.Theme.gap12
 
-                        UIF.Label { text: "Accent"; style: caption; color: UIF.Theme.textTertiary }
+                        UIF.Label { text: "Primary"; style: caption; color: UIF.Theme.textTertiary }
                         Flow {
                             width: parent.width
                             spacing: UIF.Theme.gap8
-                            UIF.LabelButton { text: "Label"; tone: UIF.AbstractButton.Accent }
-                            UIF.IconButton { tone: UIF.AbstractButton.Accent }
-                            UIF.LabelMenuButton { text: "Menu"; tone: UIF.AbstractButton.Accent }
-                            UIF.IconMenuButton { tone: UIF.AbstractButton.Accent }
+                            UIF.LabelButton { text: "Label"; tone: UIF.AbstractButton.Primary }
+                            UIF.IconButton { tone: UIF.AbstractButton.Primary }
+                            UIF.LabelMenuButton { text: "Menu"; tone: UIF.AbstractButton.Primary }
+                            UIF.IconMenuButton { tone: UIF.AbstractButton.Primary }
                         }
 
                         UIF.Label { text: "Default"; style: caption; color: UIF.Theme.textTertiary }
@@ -399,6 +433,179 @@ UIF.ApplicationWindow {
                             UIF.IconButton { tone: UIF.AbstractButton.Disabled }
                             UIF.LabelMenuButton { text: "Menu"; tone: UIF.AbstractButton.Disabled }
                             UIF.IconMenuButton { tone: UIF.AbstractButton.Disabled }
+                        }
+
+                        UIF.Label { text: "State Swatches"; style: caption; color: UIF.Theme.textTertiary }
+
+                        GridLayout {
+                            width: parent.width
+                            columns: root.compactGallery ? 1 : 2
+                            rowSpacing: UIF.Theme.gap10
+                            columnSpacing: UIF.Theme.gap10
+
+                            Rectangle {
+                                Layout.fillWidth: true
+                                radius: UIF.Theme.radiusSm
+                                color: UIF.Theme.surfaceGhost
+                                implicitHeight: 74
+
+                                Column {
+                                    anchors.fill: parent
+                                    anchors.margins: UIF.Theme.gap8
+                                    spacing: UIF.Theme.gap6
+
+                                    UIF.Label { text: "Primary"; style: caption; color: UIF.Theme.textSecondary }
+                                    Row {
+                                        spacing: UIF.Theme.gap6
+                                        Rectangle { width: 58; height: 24; radius: UIF.Theme.radiusSm; color: UIF.Theme.primary; UIF.Label { anchors.centerIn: parent; style: disabled; text: "Base" } }
+                                        Rectangle { width: 58; height: 24; radius: UIF.Theme.radiusSm; color: Qt.darker(UIF.Theme.primary, 1.12); UIF.Label { anchors.centerIn: parent; style: disabled; text: "Hover" } }
+                                        Rectangle { width: 58; height: 24; radius: UIF.Theme.radiusSm; color: Qt.darker(UIF.Theme.primary, 1.2); UIF.Label { anchors.centerIn: parent; style: disabled; text: "Press" } }
+                                        Rectangle { width: 58; height: 24; radius: UIF.Theme.radiusSm; color: UIF.Theme.subSurface; UIF.Label { anchors.centerIn: parent; style: disabled; text: "Inactive" } }
+                                    }
+                                }
+                            }
+
+                            Rectangle {
+                                Layout.fillWidth: true
+                                radius: UIF.Theme.radiusSm
+                                color: UIF.Theme.surfaceGhost
+                                implicitHeight: 74
+
+                                Column {
+                                    anchors.fill: parent
+                                    anchors.margins: UIF.Theme.gap8
+                                    spacing: UIF.Theme.gap6
+
+                                    UIF.Label { text: "Default"; style: caption; color: UIF.Theme.textSecondary }
+                                    Row {
+                                        spacing: UIF.Theme.gap6
+                                        Rectangle { width: 58; height: 24; radius: UIF.Theme.radiusSm; color: UIF.Theme.surfaceSolid; UIF.Label { anchors.centerIn: parent; style: disabled; text: "Base" } }
+                                        Rectangle { width: 58; height: 24; radius: UIF.Theme.radiusSm; color: UIF.Theme.surfaceAlt; UIF.Label { anchors.centerIn: parent; style: disabled; text: "Hover" } }
+                                        Rectangle { width: 58; height: 24; radius: UIF.Theme.radiusSm; color: UIF.Theme.primary; UIF.Label { anchors.centerIn: parent; style: disabled; text: "Press" } }
+                                        Rectangle { width: 58; height: 24; radius: UIF.Theme.radiusSm; color: UIF.Theme.subSurface; UIF.Label { anchors.centerIn: parent; style: disabled; text: "Inactive" } }
+                                    }
+                                }
+                            }
+
+                            Rectangle {
+                                Layout.fillWidth: true
+                                radius: UIF.Theme.radiusSm
+                                color: UIF.Theme.surfaceGhost
+                                implicitHeight: 74
+
+                                Column {
+                                    anchors.fill: parent
+                                    anchors.margins: UIF.Theme.gap8
+                                    spacing: UIF.Theme.gap6
+
+                                    UIF.Label { text: "Borderless"; style: caption; color: UIF.Theme.textSecondary }
+                                    Row {
+                                        spacing: UIF.Theme.gap6
+                                        Rectangle {
+                                            width: 58
+                                            height: 24
+                                            radius: UIF.Theme.radiusSm
+                                            color: "transparent"
+                                            border.width: 1
+                                            border.color: UIF.Theme.surfaceAlt
+                                            UIF.Label { anchors.centerIn: parent; style: disabled; text: "Base" }
+                                        }
+                                        Rectangle { width: 58; height: 24; radius: UIF.Theme.radiusSm; color: UIF.Theme.surfaceAlt; UIF.Label { anchors.centerIn: parent; style: disabled; text: "Hover" } }
+                                        Rectangle { width: 58; height: 24; radius: UIF.Theme.radiusSm; color: UIF.Theme.primary; UIF.Label { anchors.centerIn: parent; style: disabled; text: "Press" } }
+                                        Rectangle {
+                                            width: 58
+                                            height: 24
+                                            radius: UIF.Theme.radiusSm
+                                            color: "transparent"
+                                            border.width: 1
+                                            border.color: UIF.Theme.surfaceAlt
+                                            UIF.Label { anchors.centerIn: parent; style: disabled; text: "Inactive" }
+                                        }
+                                    }
+                                }
+                            }
+
+                            Rectangle {
+                                Layout.fillWidth: true
+                                radius: UIF.Theme.radiusSm
+                                color: UIF.Theme.surfaceGhost
+                                implicitHeight: 74
+
+                                Column {
+                                    anchors.fill: parent
+                                    anchors.margins: UIF.Theme.gap8
+                                    spacing: UIF.Theme.gap6
+
+                                    UIF.Label { text: "Destructive"; style: caption; color: UIF.Theme.textSecondary }
+                                    Row {
+                                        spacing: UIF.Theme.gap6
+                                        Rectangle { width: 58; height: 24; radius: UIF.Theme.radiusSm; color: UIF.Theme.danger; UIF.Label { anchors.centerIn: parent; style: disabled; text: "Base" } }
+                                        Rectangle { width: 58; height: 24; radius: UIF.Theme.radiusSm; color: Qt.darker(UIF.Theme.danger, 1.12); UIF.Label { anchors.centerIn: parent; style: disabled; text: "Hover" } }
+                                        Rectangle { width: 58; height: 24; radius: UIF.Theme.radiusSm; color: Qt.darker(UIF.Theme.danger, 1.2); UIF.Label { anchors.centerIn: parent; style: disabled; text: "Press" } }
+                                        Rectangle { width: 58; height: 24; radius: UIF.Theme.radiusSm; color: UIF.Theme.subSurface; UIF.Label { anchors.centerIn: parent; style: disabled; text: "Inactive" } }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                UIF.AppCard {
+                    title: "Accent Palette"
+                    subtitle: "iconset 기반 전체 accent 컬러 프리뷰"
+                    Layout.fillWidth: true
+
+                    GridLayout {
+                        width: parent.width
+                        columns: root.compactGallery ? 2 : 3
+                        rowSpacing: UIF.Theme.gap8
+                        columnSpacing: UIF.Theme.gap8
+
+                        Repeater {
+                            model: root.accentPreviewTokens
+
+                            delegate: Rectangle {
+                                required property var modelData
+                                Layout.fillWidth: true
+                                implicitHeight: 66
+                                radius: UIF.Theme.radiusSm
+                                color: UIF.Theme.surfaceGhost
+
+                                RowLayout {
+                                    anchors.fill: parent
+                                    anchors.margins: UIF.Theme.gap8
+                                    spacing: UIF.Theme.gap8
+
+                                    Rectangle {
+                                        Layout.preferredWidth: 20
+                                        Layout.preferredHeight: 20
+                                        radius: UIF.Theme.radiusXs
+                                        color: modelData.color
+                                        border.width: modelData.name === "accentTransparent" ? 1 : 0
+                                        border.color: UIF.Theme.textTertiary
+                                    }
+
+                                    ColumnLayout {
+                                        Layout.fillWidth: true
+                                        spacing: UIF.Theme.gap2
+
+                                        UIF.Label {
+                                            Layout.fillWidth: true
+                                            style: caption
+                                            text: modelData.name
+                                            color: UIF.Theme.textSecondary
+                                            elide: Text.ElideRight
+                                        }
+                                        UIF.Label {
+                                            Layout.fillWidth: true
+                                            style: disabled
+                                            text: modelData.hex
+                                            color: UIF.Theme.textTertiary
+                                            elide: Text.ElideRight
+                                        }
+                                    }
+                                }
+                            }
                         }
                     }
                 }
@@ -845,7 +1052,7 @@ UIF.ApplicationWindow {
 
                                     UIF.LabelButton {
                                         text: "Action"
-                                        tone: UIF.AbstractButton.Accent
+                                        tone: UIF.AbstractButton.Primary
                                     }
 
                                     UIF.LabelButton {

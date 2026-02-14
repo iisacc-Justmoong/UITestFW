@@ -162,7 +162,7 @@ Item {
                         visible: root.primaryText.length > 0
                         width: parent.width
                         text: root.primaryText
-                        tone: AbstractButton.Accent
+                        tone: AbstractButton.Primary
                         enabled: root.primaryEnabled
                         onClicked: root.primaryClicked()
                     }
@@ -198,7 +198,7 @@ Item {
                     AlertButton {
                         width: horizontalActions.buttonWidth
                         text: root.primaryText
-                        tone: AbstractButton.Accent
+                        tone: AbstractButton.Primary
                         enabled: root.primaryEnabled
                         onClicked: root.primaryClicked()
                     }
@@ -220,7 +220,7 @@ Item {
                     y: Theme.gap24
                     width: parent.width - (Theme.gap24 * 2)
                     text: root.primaryText
-                    tone: AbstractButton.Accent
+                    tone: AbstractButton.Primary
                     enabled: root.primaryEnabled
                     onClicked: root.primaryClicked()
                 }

@@ -6,26 +6,12 @@ AbstractButton {
 
     tone: AbstractButton.Default
     horizontalPadding: Theme.gap8
-    verticalPadding: control.tone === AbstractButton.Accent ? Theme.gap2 : Theme.gap4
+    verticalPadding: control.tone === AbstractButton.Primary ? Theme.gap2 : Theme.gap4
     spacing: Theme.gapNone
     cornerRadius: Theme.radiusSm
     implicitHeight: Theme.controlHeightMd
     height: Theme.controlHeightMd
     implicitWidth: contentItem.implicitWidth + leftPadding + rightPadding
-
-    textColor: control.tone === AbstractButton.Borderless ? Theme.accent : Theme.textPrimary
-    textColorDisabled: Theme.textOctonary
-
-    backgroundColor: control.tone === AbstractButton.Accent
-        ? Theme.accent
-        : control.tone === AbstractButton.Destructive
-            ? Theme.danger
-            : control.tone === AbstractButton.Borderless
-                ? "transparent"
-                : Theme.surfaceSolid
-    backgroundColorHover: control.backgroundColor
-    backgroundColorPressed: control.backgroundColor
-    backgroundColorDisabled: Theme.subSurface
 
     contentItem: Label {
         style: body
@@ -43,4 +29,4 @@ AbstractButton {
 
 // API usage (external):
 // import LVRS 1.0 as UIF
-// UIF.AlertButton { text: "Button"; tone: UIF.AbstractButton.Accent }
+// UIF.AlertButton { text: "Button"; tone: UIF.AbstractButton.Primary }

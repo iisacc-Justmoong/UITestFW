@@ -22,7 +22,7 @@ import LVRS 1.0 as LV
 LV.HStack {
     LV.LabelButton { text: "Back"; tone: LV.AbstractButton.Default }
     LV.Spacer {}
-    LV.LabelButton { text: "Next"; tone: LV.AbstractButton.Accent }
+    LV.LabelButton { text: "Next"; tone: LV.AbstractButton.Primary }
 }
 ```
 

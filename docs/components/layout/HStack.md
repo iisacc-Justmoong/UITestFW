@@ -24,7 +24,7 @@ import LVRS 1.0 as LV
 LV.HStack {
     spacing: 12
     LV.LabelButton { text: "Cancel"; tone: LV.AbstractButton.Default }
-    LV.LabelButton { text: "Save"; tone: LV.AbstractButton.Accent }
+    LV.LabelButton { text: "Save"; tone: LV.AbstractButton.Primary }
 }
 ```
 

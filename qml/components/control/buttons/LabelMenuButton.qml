@@ -5,7 +5,7 @@ import LVRS 1.0
 AbstractButton {
     id: control
 
-    tone: AbstractButton.Accent
+    tone: AbstractButton.Primary
     readonly property string indicatorNameDefault: "panDownSymbolicDefault"
     readonly property string indicatorNameBorderless: "panDownSymbolicBorderless"
     readonly property string indicatorNameAccent: "panDownSymbolicAccent"
@@ -14,7 +14,7 @@ AbstractButton {
         ? control.indicatorNameDisabled
         : control.tone === AbstractButton.Borderless
             ? control.indicatorNameBorderless
-            : control.tone === AbstractButton.Accent || control.tone === AbstractButton.Destructive
+            : control.tone === AbstractButton.Primary || control.tone === AbstractButton.Destructive
                 ? control.indicatorNameAccent
                 : control.indicatorNameDefault
     readonly property int iconRevision: SvgManager.revision
@@ -31,20 +31,6 @@ AbstractButton {
     cornerRadius: Theme.radiusSm
     implicitHeight: contentItem.implicitHeight + topPadding + bottomPadding
     implicitWidth: contentItem.implicitWidth + leftPadding + rightPadding
-
-    textColor: control.tone === AbstractButton.Borderless ? Theme.accent : Theme.textPrimary
-    textColorDisabled: Theme.textOctonary
-
-    backgroundColor: control.tone === AbstractButton.Accent
-        ? Theme.accent
-        : control.tone === AbstractButton.Destructive
-            ? Theme.danger
-            : control.tone === AbstractButton.Borderless
-                ? "transparent"
-                : Theme.surfaceSolid
-    backgroundColorHover: control.backgroundColor
-    backgroundColorPressed: control.backgroundColor
-    backgroundColorDisabled: Theme.subSurface
 
     contentItem: RowLayout {
         spacing: Theme.gap2

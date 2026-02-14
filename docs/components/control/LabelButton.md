@@ -6,11 +6,11 @@ Text button variant aligned with the Figma Button component.
 
 ## Properties
 - `text`
-- `tone` (`Accent`, `Default`, `Borderless`, `Destructive`, `Disabled`)
+- `tone` (`Primary`, `Default`, `Borderless`, `Destructive`, `Disabled`)
 
 ## Usage
 ```qml
-LV.LabelButton { text: "Button"; tone: LV.AbstractButton.Accent }
+LV.LabelButton { text: "Button"; tone: LV.AbstractButton.Primary }
 ```
 
 ```qml
@@ -26,7 +26,7 @@ import LVRS 1.0 as LV
 
 LV.LabelButton {
     text: "Save Changes"
-    tone: LV.AbstractButton.Accent
+    tone: LV.AbstractButton.Primary
     onClicked: console.log("Saved")
 }
 ```

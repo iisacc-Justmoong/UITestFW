@@ -6,7 +6,7 @@ Controls.AbstractButton {
     id: control
 
     enum ButtonTone {
-        Accent,
+        Primary,
         Default,
         Borderless,
         Destructive,
@@ -17,13 +17,13 @@ Controls.AbstractButton {
     property bool effectiveEnabled: enabled && tone !== AbstractButton.Disabled
 
     readonly property color toneTextColor: {
-        if (tone === AbstractButton.Accent || tone === AbstractButton.Destructive)
-            return Theme.textPrimary
+        if (tone === AbstractButton.Borderless)
+            return Theme.primary
         return Theme.textPrimary
     }
     readonly property color toneBackgroundColor: {
-        if (tone === AbstractButton.Accent)
-            return Theme.accent
+        if (tone === AbstractButton.Primary)
+            return Theme.primary
         if (tone === AbstractButton.Destructive)
             return Theme.danger
         if (tone === AbstractButton.Borderless)
@@ -31,8 +31,8 @@ Controls.AbstractButton {
         return Theme.surfaceSolid
     }
     readonly property color toneBackgroundColorHover: {
-        if (tone === AbstractButton.Accent)
-            return Qt.darker(Theme.accent, 1.12)
+        if (tone === AbstractButton.Primary)
+            return Qt.darker(Theme.primary, 1.12)
         if (tone === AbstractButton.Destructive)
             return Qt.darker(Theme.danger, 1.12)
         if (tone === AbstractButton.Borderless)
@@ -40,13 +40,13 @@ Controls.AbstractButton {
         return Theme.surfaceAlt
     }
     readonly property color toneBackgroundColorPressed: {
-        if (tone === AbstractButton.Accent)
-            return Qt.darker(Theme.accent, 1.2)
+        if (tone === AbstractButton.Primary)
+            return Qt.darker(Theme.primary, 1.2)
         if (tone === AbstractButton.Destructive)
             return Qt.darker(Theme.danger, 1.2)
         if (tone === AbstractButton.Borderless)
-            return Theme.accent
-        return Theme.accent
+            return Theme.primary
+        return Theme.primary
     }
     horizontalPadding: Theme.gap14
     verticalPadding: Theme.gap10
@@ -115,4 +115,4 @@ Controls.AbstractButton {
 
 // API usage (external):
 // import LVRS 1.0 as UIF
-// UIF.AbstractButton { text: "Action"; tone: UIF.AbstractButton.Accent }
+// UIF.AbstractButton { text: "Action"; tone: UIF.AbstractButton.Primary }

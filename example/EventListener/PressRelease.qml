@@ -13,7 +13,7 @@ Item {
     UIF.LabelButton {
         id: holdButton
         text: "Hold"
-        tone: root.pressedNow ? UIF.AbstractButton.Accent : UIF.AbstractButton.Default
+        tone: root.pressedNow ? UIF.AbstractButton.Primary : UIF.AbstractButton.Default
     }
 
     UIF.EventListener {

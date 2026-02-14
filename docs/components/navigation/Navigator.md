@@ -32,7 +32,7 @@ import LVRS 1.0 as LV
 
 LV.LabelButton {
     text: "Open Reports"
-    tone: LV.AbstractButton.Accent
+    tone: LV.AbstractButton.Primary
     onClicked: LV.Navigator.go("/reports")
 }
 ```

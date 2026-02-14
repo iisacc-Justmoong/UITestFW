@@ -45,7 +45,7 @@ UIF.ApplicationWindow {
                     width: parent.width
                     text: "Toggle Status (ownership write)"
                     enabled: root.vm !== null && root.writeEnabled
-                    tone: enabled ? UIF.AbstractButton.Accent : UIF.AbstractButton.Disabled
+                    tone: enabled ? UIF.AbstractButton.Primary : UIF.AbstractButton.Disabled
                     onClicked: {
                         const nextStatus = root.vm.status === "Idle" ? "Working" : "Idle"
                         UIF.ViewModels.updateProperty(root.viewId, "status", nextStatus)

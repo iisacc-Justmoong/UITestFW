@@ -5,7 +5,7 @@ Location: `qml/components/control/buttons/IconButton.qml`
 Icon-first button variant aligned with the Figma Button component.
 
 ## Properties
-- `tone` (`Accent`, `Default`, `Borderless`, `Destructive`, `Disabled`)
+- `tone` (`Primary`, `Default`, `Borderless`, `Destructive`, `Disabled`)
 - `iconName` (optional icon set name, e.g. `viewMoreSymbolicDefault`)
 - `icon.name` (Qt grouped property, optional icon set name)
 - `iconSource` (optional explicit URL override)
@@ -13,7 +13,7 @@ Icon-first button variant aligned with the Figma Button component.
 
 ## Usage
 ```qml
-LV.IconButton { tone: LV.AbstractButton.Accent }
+LV.IconButton { tone: LV.AbstractButton.Primary }
 ```
 
 ```qml
@@ -25,13 +25,13 @@ LV.IconButton {
 
 ## Practical Examples
 
-### Example 1: Accent icon action
+### Example 1: Primary icon action
 ```qml
 import QtQuick
 import LVRS 1.0 as LV
 
 LV.IconButton {
-    tone: LV.AbstractButton.Accent
+    tone: LV.AbstractButton.Primary
     iconName: "viewMoreSymbolicDefault"
     onClicked: console.log("Open actions")
 }

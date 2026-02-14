@@ -5,7 +5,7 @@ Location: `qml/components/control/buttons/IconMenuButton.qml`
 Icon + chevron menu button variant aligned with the Figma Button component.
 
 ## Properties
-- `tone` (`Accent`, `Default`, `Borderless`, `Destructive`, `Disabled`)
+- `tone` (`Primary`, `Default`, `Borderless`, `Destructive`, `Disabled`)
 - `iconName` (optional icon set name, e.g. `viewMoreSymbolicDefault`)
 - `icon.name` (Qt grouped property, optional icon set name)
 - `iconSource` (optional explicit URL override)

@@ -174,7 +174,7 @@ UIF.ApplicationWindow {
 
                         UIF.LabelButton {
                             text: root.running ? "Running" : "Start"
-                            tone: UIF.AbstractButton.Accent
+                            tone: UIF.AbstractButton.Primary
                             enabled: !root.running
                             onClicked: root.startRound()
                         }

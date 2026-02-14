@@ -181,9 +181,15 @@ if(LVRS_BUILD_DEMO)
             LVRS
     )
 
+    set(_uifw_demo_macos_bundle OFF)
+    if(IOS)
+        set(_uifw_demo_macos_bundle ON)
+    endif()
+
     set_target_properties(LVRSDemo PROPERTIES
-        MACOSX_BUNDLE TRUE
+        MACOSX_BUNDLE ${_uifw_demo_macos_bundle}
         WIN32_EXECUTABLE TRUE
+        RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
         OUTPUT_NAME "LVRS"
     )
 

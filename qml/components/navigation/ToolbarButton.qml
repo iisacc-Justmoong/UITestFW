@@ -10,9 +10,7 @@ IconButton {
 
     readonly property bool active: toolbar && toolbar.activeButton === control
 
-    tone: active ? AbstractButton.Accent : AbstractButton.Borderless
-    backgroundColorHover: active ? backgroundColor : Theme.surfaceAlt
-    backgroundColorPressed: active ? backgroundColor : Theme.surfaceAlt
+    tone: active ? AbstractButton.Primary : AbstractButton.Borderless
 
     onClicked: {
         if (toolbar && toolbar.requestActivate)

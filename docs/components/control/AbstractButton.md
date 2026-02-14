@@ -13,7 +13,7 @@ Base button for all custom controls. Provides theme-driven colors and padding.
 
 ## Tone
 `AbstractButton.ButtonTone` supports:
-- `Accent`
+- `Primary`
 - `Default`
 - `Borderless`
 - `Destructive`
@@ -23,7 +23,7 @@ Base button for all custom controls. Provides theme-driven colors and padding.
 
 ## Usage
 ```qml
-LV.AbstractButton { text: "Action"; tone: LV.AbstractButton.Accent }
+LV.AbstractButton { text: "Action"; tone: LV.AbstractButton.Primary }
 ```
 
 ## Practical Examples
@@ -35,7 +35,7 @@ import LVRS 1.0 as LV
 
 LV.AbstractButton {
     text: "Create Run"
-    tone: LV.AbstractButton.Accent
+    tone: LV.AbstractButton.Primary
     onClicked: console.log("Run created")
 }
 ```

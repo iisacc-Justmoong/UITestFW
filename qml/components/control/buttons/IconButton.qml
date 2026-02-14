@@ -5,7 +5,7 @@ import LVRS 1.0
 AbstractButton {
     id: control
 
-    tone: AbstractButton.Accent
+    tone: AbstractButton.Primary
     readonly property string iconNameDefault: "viewMoreSymbolicDefault"
     readonly property string iconNameBorderless: "viewMoreSymbolicBorderless"
     readonly property string iconNameDisabled: "viewMoreSymbolicDisabled"
@@ -55,19 +55,6 @@ AbstractButton {
     cornerRadius: Theme.radiusSm
     implicitHeight: contentItem.implicitHeight + topPadding + bottomPadding
     implicitWidth: contentItem.implicitWidth + leftPadding + rightPadding
-
-    textColor: control.tone === AbstractButton.Borderless ? Theme.accent : Theme.textPrimary
-    textColorDisabled: Theme.textOctonary
-    backgroundColor: control.tone === AbstractButton.Accent
-        ? Theme.accent
-        : control.tone === AbstractButton.Destructive
-            ? Theme.danger
-            : control.tone === AbstractButton.Borderless
-                ? "transparent"
-                : Theme.surfaceSolid
-    backgroundColorHover: control.backgroundColor
-    backgroundColorPressed: control.backgroundColor
-    backgroundColorDisabled: Theme.subSurface
 
     contentItem: RowLayout {
         spacing: control.text.length > 0 ? Theme.gap4 : Theme.gapNone
@@ -120,4 +107,4 @@ AbstractButton {
 
 // API usage (external):
 // import LVRS 1.0 as UIF
-// UIF.IconButton { tone: UIF.AbstractButton.Accent; iconName: "viewMoreSymbolicDefault" }
+// UIF.IconButton { tone: UIF.AbstractButton.Primary; iconName: "viewMoreSymbolicDefault" }

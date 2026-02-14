@@ -71,7 +71,7 @@ QtObject {
 
     //Primary
 
-    readonly property color accent: "#0a84ff"
+    readonly property color primary: "#0a84ff"
     readonly property color success: "#32d74b"
     readonly property color warning: "#ffd60a"
     readonly property color danger: "#ff453a"
@@ -84,12 +84,22 @@ QtObject {
     readonly property color overlayBackdrop: "#59000000"
     readonly property color shadowStrong: "#40000000"
     readonly property color strokeSoft: "#D0D7E2"
+    // Common accent palette (top colors by fill/stroke usage in resources/iconset)
+    readonly property color accentNeutral: "#CED0D6"
+    readonly property color accentBlue: "#548AF7"
+    readonly property color accentRed: "#DB5C5C"
+    readonly property color accentSlate: "#43454A"
+    readonly property color accentGreen: "#57965C"
+    readonly property color accentBlueMuted: "#25324D"
+    readonly property color accentOrange: "#C77D55"
+    readonly property color accentGreenMuted: "#253627"
+    readonly property color accentYellow: "#F2C55C"
 
     //ContextMenu
 
     readonly property color contextMenuSurface: surface
     readonly property color contextMenuDivider: surface
-    readonly property color contextMenuItemSelectedBackground: accent
+    readonly property color contextMenuItemSelectedBackground: primary
     readonly property color contextMenuItemInactiveBackground: surface
 
     //Radius

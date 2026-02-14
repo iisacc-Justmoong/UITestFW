@@ -147,6 +147,10 @@ Controls.ApplicationWindow {
                 SvgManager.minimumScale = root.effectiveSupersampleScale
             RuntimeEvents.start()
             RuntimeEvents.attachWindow(root)
+            if (!Backend.hookUserEvents())
+                Debug.log("ApplicationWindow", "io-event-hook-failed", Backend.lastError)
+            else
+                Debug.log("ApplicationWindow", "io-event-hooked", Backend.hookedEventCount)
             Debug.log("ApplicationWindow", "created")
             Debug.log("ApplicationWindow", "supersample-scale", root.effectiveSupersampleScale)
             root.applyNativeWindowStyle()

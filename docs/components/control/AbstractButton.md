@@ -2,64 +2,41 @@
 
 Location: `qml/components/control/buttons/AbstractButton.qml`
 
-Base button for all custom controls. Provides theme-driven colors and padding.
+`AbstractButton` is the base control for LVRS button family variants.
 
-## Key Properties
-- `tone` (`AbstractButton.ButtonTone`)
-- `effectiveEnabled` (derived: `enabled && tone !== Disabled`)
-- `textColor`, `textColorDisabled`
-- `backgroundColor`, `backgroundColorHover`, `backgroundColorPressed`, `backgroundColorDisabled`
-- `horizontalPadding`, `verticalPadding`, `cornerRadius`
+## Tone Enum
 
-## Tone
-`AbstractButton.ButtonTone` supports:
+`AbstractButton.ButtonTone`
 - `Primary`
 - `Default`
 - `Borderless`
 - `Destructive`
 - `Disabled`
 
-`enabled` remains consumer-controlled. Use `tone: AbstractButton.Disabled` for a disabled visual style while still being able to override `enabled` as needed.
+## Interaction Color Policy
+
+- `Primary`: `Theme.primary` family
+- `Destructive`: `Theme.danger` family
+- `Default`: `Theme.surfaceSolid` with `Theme.surfaceAlt` hover
+- `Borderless`: transparent idle, subtle surface hover
+- `Default` and `Borderless` pressed state uses `Theme.accentBlueMuted` (not primary blue)
+
+## Sizing and Layout
+
+`AbstractButton` defines generic layout primitives (`horizontalPadding`, `verticalPadding`, `cornerRadius`, `implicitHeight`).
+Concrete button components override these values to match Figma-specific size contracts such as fixed height and per-variant vertical padding.
+
+## Effective Enabled State
+
+`effectiveEnabled = enabled && tone !== AbstractButton.Disabled`
+
+The control disables focus/hover behavior when not effectively enabled, and installs a blocking mouse layer to prevent accidental input propagation.
 
 ## Usage
+
 ```qml
-LV.AbstractButton { text: "Action"; tone: LV.AbstractButton.Primary }
-```
-
-## Practical Examples
-
-### Example 1: Primary action button
-```qml
-import QtQuick
-import LVRS 1.0 as LV
-
 LV.AbstractButton {
-    text: "Create Run"
-    tone: LV.AbstractButton.Primary
-    onClicked: console.log("Run created")
-}
-```
-
-### Example 2: Destructive action with explicit state
-```qml
-import QtQuick
-import LVRS 1.0 as LV
-
-LV.AbstractButton {
-    text: "Delete Project"
-    tone: LV.AbstractButton.Destructive
-    enabled: canDelete
-}
-```
-
-### Example 3: Disabled style for read-only screens
-```qml
-import QtQuick
-import LVRS 1.0 as LV
-
-LV.AbstractButton {
-    text: "Sync"
-    tone: LV.AbstractButton.Disabled
-    enabled: false
+    text: "Action"
+    tone: LV.AbstractButton.Default
 }
 ```

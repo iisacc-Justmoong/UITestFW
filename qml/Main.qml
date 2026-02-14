@@ -306,6 +306,9 @@ LV.ApplicationWindow {
         const type = String(eventType || "")
         if (type.indexOf("key-") === 0
             || type.indexOf("mouse-") === 0
+            || type.indexOf("touch-") === 0
+            || type.indexOf("tablet-") === 0
+            || type.indexOf("native-gesture") === 0
             || type.indexOf("hover-") === 0
             || type.indexOf("context-") === 0
             || type.indexOf("global-") === 0)
@@ -500,6 +503,17 @@ LV.ApplicationWindow {
             eventData.uptimeMs)
     }
 
+    function runtimeConsoleIngestFromBackend(limit) {
+        if (!LV.Backend || !LV.Backend.hookedUserEvents)
+            return
+        const maxRows = limit !== undefined ? Number(limit) : runtimeConsoleMaxRows
+        const rows = LV.Backend.hookedUserEvents(maxRows)
+        if (!rows || rows.length === undefined)
+            return
+        for (let i = 0; i < rows.length; i++)
+            runtimeConsoleIngestRuntimeEvent(rows[i])
+    }
+
     function runtimeConsoleIngestPointerEvent(type, eventData) {
         if (!eventData)
             return
@@ -591,13 +605,34 @@ LV.ApplicationWindow {
         return Number(value).toFixed(0) + "ms"
     }
 
+    function runtimeConsoleMapHasEntries(mapValue) {
+        if (!mapValue)
+            return false
+        for (const key in mapValue)
+            return true
+        return false
+    }
+
     function runtimeConsoleRefreshHealth() {
-        runtimeConsoleHealth = LV.RuntimeEvents.daemonHealth()
+        if (LV.Backend && LV.Backend.hookUserEvents && !LV.Backend.userEventHooked)
+            LV.Backend.hookUserEvents()
+        const daemonHealth = LV.RuntimeEvents.daemonHealth()
+        if (LV.Backend && LV.Backend.hookedUserEventSummary) {
+            const backendSummary = LV.Backend.hookedUserEventSummary()
+            daemonHealth.backend = backendSummary
+            if (!runtimeConsoleMapHasEntries(daemonHealth.input) && runtimeConsoleMapHasEntries(backendSummary.input))
+                daemonHealth.input = backendSummary.input
+        }
+        runtimeConsoleHealth = daemonHealth
     }
 
     function runtimeConsoleBootstrapFromDaemon() {
         runtimeConsoleRefreshHealth()
-        const cached = LV.RuntimeEvents.recentEvents()
+        if (LV.Backend && LV.Backend.hookUserEvents && !LV.Backend.userEventHooked)
+            LV.Backend.hookUserEvents()
+        const cached = LV.Backend && LV.Backend.hookedUserEvents
+            ? LV.Backend.hookedUserEvents(runtimeConsoleMaxRows)
+            : LV.RuntimeEvents.recentEvents()
         if (cached && cached.length !== undefined) {
             for (let i = 0; i < cached.length; i++)
                 runtimeConsoleIngestRuntimeEvent(cached[i])
@@ -616,14 +651,20 @@ LV.ApplicationWindow {
         runtimeConsoleLastIngestedSequence = LV.RuntimeEvents.eventSequence
         runtimeConsoleLastHeartbeatSequence = LV.RuntimeEvents.eventSequence
         LV.RuntimeEvents.clearRecentEvents()
+        if (LV.Backend && LV.Backend.clearHookedUserEvents)
+            LV.Backend.clearHookedUserEvents()
         runtimeConsoleRefreshHealth()
     }
 
     onGlobalPressedEvent: function(eventData) {
+        if (demoContextMenu && demoContextMenu.opened && demoContextMenu.dismissIfOutsideGlobalEvent)
+            demoContextMenu.dismissIfOutsideGlobalEvent(eventData)
         runtimeConsoleIngestPointerEvent("global-pressed", eventData)
     }
 
     onGlobalContextEvent: function(eventData) {
+        if (demoContextMenu && demoContextMenu.opened && demoContextMenu.dismissIfOutsideGlobalEvent)
+            demoContextMenu.dismissIfOutsideGlobalEvent(eventData)
         runtimeConsoleIngestPointerEvent("global-context", eventData)
         if (!eventData)
             return
@@ -651,6 +692,8 @@ LV.ApplicationWindow {
         LV.AppState.syncPageHistory(LV.PageMonitor.history)
         LV.AppState.syncRuntimeSnapshot(LV.RuntimeEvents.snapshot())
         LV.AppState.syncViewStateSnapshot(LV.ViewStateTracker.snapshot())
+        if (LV.Backend && LV.Backend.hookUserEvents)
+            LV.Backend.hookUserEvents()
         LV.Debug.enabled = true
         LV.Debug.log("Main", "visual-catalog-opened")
         runtimeConsoleBootstrapFromDaemon()
@@ -681,6 +724,18 @@ LV.ApplicationWindow {
                 eventSequence: eventSequence
             }
             root.runtimeConsoleLastHeartbeatSequence = eventSequence
+            root.runtimeConsoleRefreshHealth()
+        }
+    }
+
+    Connections {
+        target: LV.Backend
+        ignoreUnknownSignals: true
+        function onUserEventHookedChanged() {
+            root.runtimeConsoleRefreshHealth()
+        }
+        function onHookedEventsChanged() {
+            root.runtimeConsoleIngestFromBackend(96)
             root.runtimeConsoleRefreshHealth()
         }
     }
@@ -754,7 +809,10 @@ LV.ApplicationWindow {
         interval: 120
         running: true
         repeat: true
-        onTriggered: root.runtimeConsoleRefreshHealth()
+        onTriggered: {
+            root.runtimeConsoleIngestFromBackend(64)
+            root.runtimeConsoleRefreshHealth()
+        }
     }
 
     LV.Alert {

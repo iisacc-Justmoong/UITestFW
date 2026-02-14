@@ -138,12 +138,18 @@ FocusScope {
         font.family: Theme.fontBody
         font.pixelSize: Theme.textBody
         font.weight: Theme.textBodyWeight
+        font.preferShaping: true
         activeFocusOnTab: true
         clip: true
         selectByMouse: true
         onTextEdited: control.textEdited(text)
         Keys.onReturnPressed: control.accepted(text)
         Keys.onEnterPressed: control.accepted(text)
+    }
+
+    InputMethodGuard {
+        target: inputField
+        guardEnabled: control.enabled && !control.readOnly
     }
 
     Label {

@@ -1,33 +1,41 @@
 # LVRS
 
-LVRS is a Qt 6 QML UI framework and app-shell library. It provides reusable controls, layout primitives, routing, runtime singletons, and an MVVM registry with view-level ownership and write permissions.
+LVRS is a Qt 6.5+ UI framework and reference application focused on deterministic rendering, event observability, and reusable QML components.
 
-## 1) Requirements
+The repository ships three layers together:
+- A reusable static QML module (`LVRS`) with components and C++ singletons.
+- A demo executable (`LVRS`) that acts as a visual catalog and runtime console.
+- Tests covering event flow, text editing behavior, import API, and backend wiring.
+
+## Requirements
 
 - CMake 3.21+
 - C++20 compiler
 - Qt 6.5+
 - Qt modules: `Quick`, `QuickControls2`, `Qml`, `Svg`, `Network`, `Test`
+- Vulkan SDK/runtime available to CMake when `LVRS_ENFORCE_VULKAN=ON` (default)
 
-## 2) Build and Run from Source
+## Build and Run
 
-Build demo, examples, and tests:
+Configure:
 
 ```bash
 cmake -S . -B build \
   -DLVRS_BUILD_DEMO=ON \
   -DLVRS_BUILD_EXAMPLES=ON \
   -DLVRS_BUILD_TESTS=ON
+```
 
+Build:
+
+```bash
 cmake --build build -j
 ```
 
-Run the demo app:
+Run demo executable:
 
 ```bash
-./build/LVRS
-# On macOS bundles:
-open ./build/LVRS.app
+./build/bin/LVRS
 ```
 
 Run tests:
@@ -36,168 +44,69 @@ Run tests:
 ctest --test-dir build --output-on-failure
 ```
 
-## 3) Install
+## Rendering Backend Policy
 
-### 3-1. Install Script (recommended)
+At runtime, graphics backend selection is bootstrapped in `main.cpp` via `bootstrapPreferredGraphicsBackend()`.
 
-```bash
-./install.sh
-```
+- Windows/Linux: Vulkan is selected and loader availability is validated.
+- macOS: Metal is selected first when Qt Metal support exists; Vulkan (MoltenVK) is fallback.
+- If no usable backend is available, app startup fails fast with a clear error message.
 
-Default install outputs:
+Build-time Vulkan enforcement is controlled by:
+- `LVRS_ENFORCE_VULKAN` (default `ON`)
 
-- CMake package prefix: `~/.local/LVRS`
-- Source snapshot: `~/.local/LVRS/src/LVRS`
+When enabled, configure fails if:
+- A linkable Vulkan runtime target is unavailable.
+- Qt was built without Vulkan support (`QT_FEATURE_vulkan < 0`).
 
-### 3-2. Manual Install
+## Project Layout
 
-```bash
-cmake -S . -B build-install \
-  -DCMAKE_BUILD_TYPE=Release \
-  -DCMAKE_INSTALL_PREFIX="$HOME/.local/LVRS" \
-  -DLVRS_BUILD_DEMO=OFF \
-  -DLVRS_BUILD_EXAMPLES=OFF \
-  -DLVRS_BUILD_TESTS=OFF
+- `main.cpp`: app entrypoint, backend bootstrap, font loading.
+- `backend/`: C++ singletons (`RuntimeEvents`, `Backend`, `RenderMonitor`, `RenderQuality`, etc.).
+- `qml/`: QML module entry files and components.
+- `qml/Main.qml`: visual catalog with tab pages and EventListener runtime console.
+- `resources/iconset/`: SVG icon source set used for theme accent extraction.
+- `tests/`: Qt tests for components and runtime services.
+- `docs/`: full technical documentation index.
 
-cmake --build build-install -j
-cmake --install build-install
-```
+## Event and Input Architecture
 
-## 4) Start a New App Project
+The event system now centers on a daemon-style flow:
 
-The most reliable integration path is to include LVRS as a subdirectory, so static plugin targets are linked automatically.
+1. `RuntimeEvents` installs a global event filter and records input/UI lifecycle events.
+2. `Backend.hookUserEvents()` subscribes to the runtime stream and keeps a bounded cache.
+3. `EventListener` consumes backend state first (`currentUserInputState()`), then runtime fallback.
+4. `ApplicationWindow` emits `globalPressedEvent` and `globalContextEvent`.
+5. UI features such as `ContextMenu`, runtime console, and hierarchy scroll guards are driven from this unified stream.
 
-### 4-1. `CMakeLists.txt`
+## Main Visual Catalog
 
-```cmake
-cmake_minimum_required(VERSION 3.21)
-project(MyLvrsApp LANGUAGES CXX)
+`qml/Main.qml` is no longer a single long preview page. It is a tab-oriented design-system console with dedicated pages for:
+- Overview
+- Typography
+- EventListener console
+- Buttons
+- Accent tokens
+- Inputs / Editors
+- Checks
+- Navigation
+- Layout
+- Hierarchy
+- Scaffold
 
-set(CMAKE_CXX_STANDARD 20)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
+The runtime console section exposes daemon health, event sequence, pointer target, pressed keys/buttons, and recent route/render events.
 
-find_package(Qt6 6.5 REQUIRED COMPONENTS Quick QuickControls2 Svg Network)
-qt_standard_project_setup()
+## Documentation
 
-# Example: LVRS vendored under external/LVRS
-add_subdirectory(external/LVRS lvrs_build)
+Start at:
+- `docs/README.md`
 
-qt_add_executable(MyLvrsApp
-    main.cpp
-)
-
-qt_add_qml_module(MyLvrsApp
-    URI MyLvrsApp
-    VERSION 1.0
-    QML_FILES
-        qml/Main.qml
-)
-
-target_link_libraries(MyLvrsApp
-    PRIVATE
-        Qt6::Quick
-        Qt6::QuickControls2
-        LVRS
-        LVRSplugin
-        LVRSplugin_init
-)
-```
-
-### 4-2. `main.cpp`
-
-```cpp
-#include <QCoreApplication>
-#include <QGuiApplication>
-#include <QQmlApplicationEngine>
-#include <QtPlugin>
-
-Q_IMPORT_PLUGIN(LVRSPlugin)
-
-int main(int argc, char *argv[])
-{
-    QGuiApplication app(argc, argv);
-    QQmlApplicationEngine engine;
-
-    QObject::connect(
-        &engine,
-        &QQmlApplicationEngine::objectCreationFailed,
-        &app,
-        []() { QCoreApplication::exit(-1); },
-        Qt::QueuedConnection);
-
-    engine.loadFromModule(QStringLiteral("MyLvrsApp"), QStringLiteral("Main"));
-    return app.exec();
-}
-```
-
-### 4-3. `qml/Main.qml`
-
-```qml
-import QtQuick
-import LVRS 1.0 as LV
-
-LV.ApplicationWindow {
-    id: root
-    visible: true
-    width: 1200
-    height: 760
-    title: "My LVRS App"
-    subtitle: "Starter"
-
-    Component {
-        id: homePage
-        Rectangle { color: LV.Theme.surfaceAlt }
-    }
-
-    Component {
-        id: reportsPage
-        Rectangle { color: LV.Theme.surfaceGhost }
-    }
-
-    LV.PageRouter {
-        id: router
-        anchors.fill: parent
-        initialPath: "/"
-        routes: [
-            { path: "/", component: homePage, viewModelKey: "HomeVM", writable: true },
-            { path: "/reports", component: reportsPage, viewModelKey: "ReportsVM" }
-        ]
-    }
-
-    Component.onCompleted: {
-        // Global one-line navigation delegation
-        LV.Navigator.go("/reports")
-    }
-}
-```
-
-## 5) MVVM Starter API
-
-`ViewModels` manages view-to-viewmodel bindings, ownership, and write authorization.
-
-- `LV.ViewModels.bindView(viewId, key, writable)`
-- `LV.ViewModels.getForView(viewId)`
-- `LV.ViewModels.canWrite(viewId, key?)`
-- `LV.ViewModels.updateProperty(viewId, property, value)`
-- `LV.ViewModels.ownerOf(key)`
-
-QML example:
-
-```qml
-property string viewId: "/overview"
-property var vm: LV.ViewModels.getForView(viewId)
-
-Component.onCompleted: LV.ViewModels.bindView(viewId, "OverviewVM", true)
-
-function renameStatus() {
-    LV.ViewModels.updateProperty(viewId, "status", "Working")
-}
-```
-
-## 6) Repository Layout
-
-- Backend runtime and singletons: `backend/`
-- QML module: `qml/`
-- Runnable examples: `example/`
-- Test suite: `tests/`
-- Detailed docs index: `docs/README.md`
+Key references:
+- `docs/architecture/event-pipeline.md`
+- `docs/architecture/rendering-backend.md`
+- `docs/backend/RuntimeEvents.md`
+- `docs/backend/Backend.md`
+- `docs/components/control/EventListener.md`
+- `docs/components/navigation/ContextMenu.md`
+- `docs/components/navigation/Hierarchy.md`
+- `docs/components/control/InputMethodGuard.md`

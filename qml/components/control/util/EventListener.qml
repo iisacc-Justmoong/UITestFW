@@ -14,6 +14,8 @@ Item {
     property int contextDedupMs: 180
     property real contextDedupTolerancePx: 2.0
     property bool includeUiHit: true
+    property bool preferBackendState: true
+    property bool includeBackendSummary: false
     property double lastContextTimestamp: -1
     property real lastContextX: -1
     property real lastContextY: -1
@@ -49,6 +51,31 @@ Item {
         return isRightButton || isMacControlClick
     }
 
+    function mapHasEntries(mapValue) {
+        if (!mapValue)
+            return false
+        for (const key in mapValue)
+            return true
+        return false
+    }
+
+    function ensureBackendHooked() {
+        if (!root.preferBackendState || !Backend || !Backend.hookUserEvents)
+            return false
+        if (Backend.userEventHooked === undefined)
+            return true
+        if (!Backend.userEventHooked)
+            Backend.hookUserEvents()
+        return !!Backend.userEventHooked
+    }
+
+    function resolveBackendSummary() {
+        if (!root.includeBackendSummary || !root.preferBackendState || !Backend || !Backend.hookedUserEventSummary)
+            return ({})
+        root.ensureBackendHooked()
+        return Backend.hookedUserEventSummary()
+    }
+
     function globalMousePayload(x, y, buttons, modifiers) {
         const data = {
             x: x,
@@ -62,19 +89,37 @@ Item {
         if (root.includeUiHit)
             data.ui = root.resolveUiAt(x, y)
         data.input = root.resolveInputState()
+        if (root.includeBackendSummary)
+            data.backend = root.resolveBackendSummary()
         return data
     }
 
     function resolveUiAt(globalX, globalY) {
-        if (!root.includeUiHit || !RuntimeEvents || !RuntimeEvents.hitTestUiAt)
+        if (!root.includeUiHit)
             return ({})
-        return RuntimeEvents.hitTestUiAt(globalX, globalY)
+        if (RuntimeEvents && RuntimeEvents.hitTestUiAt) {
+            const resolved = RuntimeEvents.hitTestUiAt(globalX, globalY)
+            if (root.mapHasEntries(resolved))
+                return resolved
+        }
+        const inputState = root.resolveInputState()
+        const pointerUi = inputState && inputState.pointerUi ? inputState.pointerUi : ({})
+        return root.mapHasEntries(pointerUi) ? pointerUi : ({})
     }
 
     function resolveInputState() {
-        if (!RuntimeEvents || !RuntimeEvents.inputState)
-            return ({})
-        return RuntimeEvents.inputState()
+        if (root.preferBackendState && Backend && Backend.currentUserInputState) {
+            root.ensureBackendHooked()
+            const backendState = Backend.currentUserInputState()
+            if (root.mapHasEntries(backendState))
+                return backendState
+        }
+        if (RuntimeEvents && RuntimeEvents.inputState) {
+            const runtimeState = RuntimeEvents.inputState()
+            if (root.mapHasEntries(runtimeState))
+                return runtimeState
+        }
+        return ({})
     }
 
     function pointerGlobalPosition(mouse) {
@@ -102,6 +147,8 @@ Item {
         if (root.includeUiHit)
             data.ui = root.resolveUiAt(globalPoint.x, globalPoint.y)
         data.input = root.resolveInputState()
+        if (root.includeBackendSummary)
+            data.backend = root.resolveBackendSummary()
         return data
     }
 
@@ -140,7 +187,10 @@ Item {
 
     onTriggerChanged: root.ensureKeyFocus()
     onEnabledChanged: root.ensureKeyFocus()
-    Component.onCompleted: root.ensureKeyFocus()
+    Component.onCompleted: {
+        root.ensureKeyFocus()
+        root.ensureBackendHooked()
+    }
 
     Connections {
         target: RuntimeEvents

@@ -12,8 +12,12 @@
 #include <QKeyEvent>
 #include <QKeySequence>
 #include <QMouseEvent>
+#include <QNativeGestureEvent>
 #include <QQuickItem>
 #include <QQuickWindow>
+#include <QTabletEvent>
+#include <QTouchEvent>
+#include <QWheelEvent>
 #include <QStringList>
 #include <QSysInfo>
 
@@ -25,9 +29,12 @@
 #include <unistd.h>
 #endif
 
+RuntimeEvents *RuntimeEvents::s_instance = nullptr;
+
 RuntimeEvents::RuntimeEvents(QObject *parent)
     : QObject(parent)
 {
+    s_instance = this;
     m_idleTimer.setInterval(250);
     m_idleTimer.setTimerType(Qt::CoarseTimer);
     connect(&m_idleTimer, &QTimer::timeout, this, &RuntimeEvents::handleIdleTick);
@@ -60,6 +67,13 @@ RuntimeEvents::RuntimeEvents(QObject *parent)
 RuntimeEvents::~RuntimeEvents()
 {
     stop();
+    if (s_instance == this)
+        s_instance = nullptr;
+}
+
+RuntimeEvents *RuntimeEvents::instance()
+{
+    return s_instance;
 }
 
 bool RuntimeEvents::running() const
@@ -739,6 +753,206 @@ bool RuntimeEvents::eventFilter(QObject *watched, QEvent *event)
             payload.insert(QStringLiteral("pointerClassName"), pointer.value(QStringLiteral("className")));
             payload.insert(QStringLiteral("pointerPath"), pointer.value(QStringLiteral("path")));
             recordRuntimeEvent(QStringLiteral("mouse-release"), payload);
+        }
+        markActivity();
+        break;
+    }
+    case QEvent::MouseButtonDblClick: {
+        auto *mouseEvent = static_cast<QMouseEvent *>(event);
+        m_lastMousePressEpochMs = nowEpochMs();
+        m_mouseButtonPressed = true;
+        updateMouseFromEvent(mouseEvent->globalPosition().x(),
+                             mouseEvent->globalPosition().y(),
+                             static_cast<int>(mouseEvent->buttons()),
+                             static_cast<int>(mouseEvent->modifiers()));
+        emit mouseChanged();
+        emit mousePressed(m_lastMouseX, m_lastMouseY, m_lastMouseButtons, m_lastMouseModifiers);
+        {
+            QVariantMap payload;
+            payload.insert(QStringLiteral("x"), m_lastMouseX);
+            payload.insert(QStringLiteral("y"), m_lastMouseY);
+            payload.insert(QStringLiteral("buttons"), m_lastMouseButtons);
+            payload.insert(QStringLiteral("pressedMouseButtons"), pressedMouseButtonNames());
+            payload.insert(QStringLiteral("modifiers"), m_lastMouseModifiers);
+            payload.insert(QStringLiteral("button"), static_cast<int>(mouseEvent->button()));
+            payload.insert(QStringLiteral("mouseButtonPressed"), m_mouseButtonPressed);
+            payload.insert(QStringLiteral("doubleClick"), true);
+            payload.insert(QStringLiteral("lastMousePressEpochMs"), QVariant::fromValue(m_lastMousePressEpochMs));
+            payload.insert(QStringLiteral("mousePressElapsedMs"), QVariant::fromValue(mousePressElapsedMs()));
+            payload.insert(QStringLiteral("activePressDurationMs"), QVariant::fromValue(activePressDurationMs()));
+            const QVariantMap pointer = pointerUi();
+            payload.insert(QStringLiteral("pointerUi"), pointer);
+            payload.insert(QStringLiteral("pointerObjectName"), pointer.value(QStringLiteral("objectName")));
+            payload.insert(QStringLiteral("pointerClassName"), pointer.value(QStringLiteral("className")));
+            payload.insert(QStringLiteral("pointerPath"), pointer.value(QStringLiteral("path")));
+            recordRuntimeEvent(QStringLiteral("mouse-double-click"), payload);
+        }
+        markActivity();
+        break;
+    }
+    case QEvent::Wheel: {
+        auto *wheelEvent = static_cast<QWheelEvent *>(event);
+        updateMouseFromEvent(wheelEvent->globalPosition().x(),
+                             wheelEvent->globalPosition().y(),
+                             m_lastMouseButtons,
+                             static_cast<int>(wheelEvent->modifiers()));
+        emit mouseChanged();
+        {
+            QVariantMap payload;
+            payload.insert(QStringLiteral("x"), m_lastMouseX);
+            payload.insert(QStringLiteral("y"), m_lastMouseY);
+            payload.insert(QStringLiteral("buttons"), m_lastMouseButtons);
+            payload.insert(QStringLiteral("pressedMouseButtons"), pressedMouseButtonNames());
+            payload.insert(QStringLiteral("modifiers"), m_lastMouseModifiers);
+            payload.insert(QStringLiteral("angleDeltaX"), wheelEvent->angleDelta().x());
+            payload.insert(QStringLiteral("angleDeltaY"), wheelEvent->angleDelta().y());
+            payload.insert(QStringLiteral("pixelDeltaX"), wheelEvent->pixelDelta().x());
+            payload.insert(QStringLiteral("pixelDeltaY"), wheelEvent->pixelDelta().y());
+            payload.insert(QStringLiteral("phase"), static_cast<int>(wheelEvent->phase()));
+            payload.insert(QStringLiteral("inverted"), wheelEvent->inverted());
+            payload.insert(QStringLiteral("mouseButtonPressed"), m_mouseButtonPressed);
+            const QVariantMap pointer = pointerUi();
+            payload.insert(QStringLiteral("pointerUi"), pointer);
+            payload.insert(QStringLiteral("pointerObjectName"), pointer.value(QStringLiteral("objectName")));
+            payload.insert(QStringLiteral("pointerClassName"), pointer.value(QStringLiteral("className")));
+            payload.insert(QStringLiteral("pointerPath"), pointer.value(QStringLiteral("path")));
+            recordRuntimeEvent(QStringLiteral("mouse-wheel"), payload);
+        }
+        markActivity();
+        break;
+    }
+    case QEvent::TouchBegin:
+    case QEvent::TouchUpdate:
+    case QEvent::TouchEnd:
+    case QEvent::TouchCancel: {
+        auto *touchEvent = static_cast<QTouchEvent *>(event);
+        QVariantList points;
+        points.reserve(touchEvent->points().size());
+        for (const QEventPoint &point : touchEvent->points()) {
+            QVariantMap pointMap;
+            pointMap.insert(QStringLiteral("id"), point.id());
+            pointMap.insert(QStringLiteral("state"), static_cast<int>(point.state()));
+            pointMap.insert(QStringLiteral("positionX"), point.position().x());
+            pointMap.insert(QStringLiteral("positionY"), point.position().y());
+            pointMap.insert(QStringLiteral("globalX"), point.globalPosition().x());
+            pointMap.insert(QStringLiteral("globalY"), point.globalPosition().y());
+            pointMap.insert(QStringLiteral("pressure"), point.pressure());
+            points.append(pointMap);
+        }
+        if (!touchEvent->points().isEmpty()) {
+            const QEventPoint &latest = touchEvent->points().constFirst();
+            updateMouseFromEvent(latest.globalPosition().x(),
+                                 latest.globalPosition().y(),
+                                 m_lastMouseButtons,
+                                 static_cast<int>(touchEvent->modifiers()));
+            emit mouseChanged();
+        }
+        {
+            QString phase = QStringLiteral("update");
+            switch (event->type()) {
+            case QEvent::TouchBegin:
+                phase = QStringLiteral("begin");
+                break;
+            case QEvent::TouchEnd:
+                phase = QStringLiteral("end");
+                break;
+            case QEvent::TouchCancel:
+                phase = QStringLiteral("cancel");
+                break;
+            default:
+                break;
+            }
+            QVariantMap payload;
+            payload.insert(QStringLiteral("phase"), phase);
+            payload.insert(QStringLiteral("pointCount"), touchEvent->points().size());
+            payload.insert(QStringLiteral("modifiers"), static_cast<int>(touchEvent->modifiers()));
+            payload.insert(QStringLiteral("points"), points);
+            payload.insert(QStringLiteral("pointerUi"), pointerUi());
+            recordRuntimeEvent(QStringLiteral("touch-event"), payload);
+        }
+        markActivity();
+        break;
+    }
+    case QEvent::TabletPress:
+    case QEvent::TabletMove:
+    case QEvent::TabletRelease: {
+        auto *tabletEvent = static_cast<QTabletEvent *>(event);
+        if (event->type() == QEvent::TabletPress) {
+            m_lastMousePressEpochMs = nowEpochMs();
+            m_mouseButtonPressed = true;
+        } else if (event->type() == QEvent::TabletRelease) {
+            m_lastMouseReleaseEpochMs = nowEpochMs();
+            m_mouseButtonPressed = false;
+        }
+        updateMouseFromEvent(tabletEvent->globalPosition().x(),
+                             tabletEvent->globalPosition().y(),
+                             static_cast<int>(tabletEvent->buttons()),
+                             static_cast<int>(tabletEvent->modifiers()));
+        emit mouseChanged();
+        {
+            QString phase = QStringLiteral("move");
+            if (event->type() == QEvent::TabletPress)
+                phase = QStringLiteral("press");
+            else if (event->type() == QEvent::TabletRelease)
+                phase = QStringLiteral("release");
+
+            QVariantMap payload;
+            payload.insert(QStringLiteral("phase"), phase);
+            payload.insert(QStringLiteral("x"), m_lastMouseX);
+            payload.insert(QStringLiteral("y"), m_lastMouseY);
+            payload.insert(QStringLiteral("buttons"), m_lastMouseButtons);
+            payload.insert(QStringLiteral("pressedMouseButtons"), pressedMouseButtonNames());
+            payload.insert(QStringLiteral("modifiers"), m_lastMouseModifiers);
+            payload.insert(QStringLiteral("button"), static_cast<int>(tabletEvent->button()));
+            payload.insert(QStringLiteral("pressure"), tabletEvent->pressure());
+            payload.insert(QStringLiteral("tangentialPressure"), tabletEvent->tangentialPressure());
+            payload.insert(QStringLiteral("rotation"), tabletEvent->rotation());
+            payload.insert(QStringLiteral("xTilt"), tabletEvent->xTilt());
+            payload.insert(QStringLiteral("yTilt"), tabletEvent->yTilt());
+            payload.insert(QStringLiteral("z"), tabletEvent->z());
+            payload.insert(QStringLiteral("pointerType"), static_cast<int>(tabletEvent->pointerType()));
+            payload.insert(QStringLiteral("mouseButtonPressed"), m_mouseButtonPressed);
+            payload.insert(QStringLiteral("lastMousePressEpochMs"), QVariant::fromValue(m_lastMousePressEpochMs));
+            payload.insert(QStringLiteral("lastMouseReleaseEpochMs"), QVariant::fromValue(m_lastMouseReleaseEpochMs));
+            const QVariantMap pointer = pointerUi();
+            payload.insert(QStringLiteral("pointerUi"), pointer);
+            payload.insert(QStringLiteral("pointerObjectName"), pointer.value(QStringLiteral("objectName")));
+            payload.insert(QStringLiteral("pointerClassName"), pointer.value(QStringLiteral("className")));
+            payload.insert(QStringLiteral("pointerPath"), pointer.value(QStringLiteral("path")));
+            recordRuntimeEvent(QStringLiteral("tablet-event"), payload);
+        }
+        markActivity();
+        break;
+    }
+    case QEvent::TabletEnterProximity:
+    case QEvent::TabletLeaveProximity: {
+        QVariantMap payload;
+        payload.insert(QStringLiteral("phase"),
+                       event->type() == QEvent::TabletEnterProximity
+                       ? QStringLiteral("enter-proximity")
+                       : QStringLiteral("leave-proximity"));
+        recordRuntimeEvent(QStringLiteral("tablet-proximity"), payload);
+        markActivity();
+        break;
+    }
+    case QEvent::NativeGesture: {
+        auto *gestureEvent = static_cast<QNativeGestureEvent *>(event);
+        updateMouseFromEvent(gestureEvent->globalPosition().x(),
+                             gestureEvent->globalPosition().y(),
+                             m_lastMouseButtons,
+                             static_cast<int>(gestureEvent->modifiers()));
+        emit mouseChanged();
+        {
+            QVariantMap payload;
+            payload.insert(QStringLiteral("x"), m_lastMouseX);
+            payload.insert(QStringLiteral("y"), m_lastMouseY);
+            payload.insert(QStringLiteral("buttons"), m_lastMouseButtons);
+            payload.insert(QStringLiteral("pressedMouseButtons"), pressedMouseButtonNames());
+            payload.insert(QStringLiteral("modifiers"), m_lastMouseModifiers);
+            payload.insert(QStringLiteral("gestureType"), static_cast<int>(gestureEvent->gestureType()));
+            payload.insert(QStringLiteral("value"), gestureEvent->value());
+            payload.insert(QStringLiteral("pointerUi"), pointerUi());
+            recordRuntimeEvent(QStringLiteral("native-gesture"), payload);
         }
         markActivity();
         break;

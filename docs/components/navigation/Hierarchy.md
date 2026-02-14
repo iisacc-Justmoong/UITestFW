@@ -2,59 +2,55 @@
 
 Location: `qml/components/navigation/Hierarchy.qml`
 
-Hierarchical outliner panel with toolbar + tree list.
+`Hierarchy` is a tree-panel component for array/list-like hierarchical models with explicit expand/collapse affordance.
 
-## Developer-first API
-- `model`: nested array/object/list-model tree input.
-- `activeListItem`, `activeListItemId`, `activeListItemKey`: current selection.
-- `expandAll()`, `collapseAll(keepRootExpanded)`: expansion controls.
-- `activateListItemById(itemId)`, `activateListItemByKey(itemKey)`: programmatic activation.
-- `treeModel`: compatibility alias of `model`.
+## High-Level API
 
-## Tree Node Shape
-```qml
-{
-    key: "camera",          // optional, stable key
-    itemId: 42,              // optional numeric id
-    label: "Camera",        // text
-    iconName: "camera",     // optional icon name
-    iconGlyph: "□",         // optional glyph
-    enabled: true,           // optional (default true)
-    expanded: false,         // optional (default by autoExpandDepth)
-    selected: false,         // optional initial selection
-    showChevron: true,       // optional, auto from children when omitted
-    children: [ ... ]        // nested nodes
-}
-```
+- `model` (or `treeModel` alias): array/list-model based hierarchical input.
+- `activeListItem`, `activeListItemId`, `activeListItemKey`.
+- `expandAll()`, `collapseAll(keepRootExpanded)`.
+- `activateListItemById(id)`, `activateListItemByKey(key)`.
 
-`model` entries can also be plain strings. For example, `model: ["Overview", "Reports"]`.
+## Model Roles
 
-## End-user Behavior
-- Row click: selection only (does not expand/collapse).
-- Chevron click: toggles expand/collapse.
-- Up/Down: move selection across visible rows.
-- Left: collapse current node or move to parent.
-- Right: expand current node or move to first child.
-- Active row is auto-scrolled into view.
+`HierarchyList` consumes role-configurable fields:
+- `itemIdRole` (default: `itemId`)
+- `itemKeyRole` (default: `key`)
+- `labelRole`, `iconNameRole`, `iconSourceRole`, `iconGlyphRole`
+- `enabledRole`, `expandedRole`, `selectedRole`, `showChevronRole`
+- `childrenRole` (default: `children`)
+
+## Interaction Contract
+
+- Row click: activation only.
+- Chevron click area: expand/collapse toggle only.
+- Keyboard navigation: optional and visibility-aware.
+
+This separation is intentional so parent-item activation never implicitly mutates expansion state.
+
+## Scroll Behavior
+
+The list viewport uses `WheelScrollGuard` with `consumeInside: true`.
+This avoids dual scrolling when hierarchy is nested inside another scrollable page.
+
+## Signals
+
+- `toolbarActivated(button, buttonId, index)`
+- `listItemActivated(item, itemId, index)`
+- `listItemExpanded(item, itemId, index, expanded)`
 
 ## Usage
+
 ```qml
-import QtQuick
-import LVRS 1.0 as LV
-
 LV.Hierarchy {
-    width: 260
-    height: 420
-
     model: [
         {
             key: "world",
-            text: "World",
-            icon: "viewMoreSymbolicDefault",
+            label: "World",
             expanded: true,
             children: [
-                { key: "environment", text: "Environment", icon: "viewMoreSymbolicDefault" },
-                { key: "characters", text: "Characters", icon: "viewMoreSymbolicBorderless" }
+                { key: "camera", label: "Main Camera" },
+                { key: "lights", label: "Lights" }
             ]
         }
     ]

@@ -2,62 +2,37 @@
 
 Location: `qml/components/control/buttons/IconButton.qml`
 
-Icon-first button variant aligned with the Figma Button component.
+`IconButton` is the icon-first button variant with optional text.
 
-## Properties
-- `tone` (`Primary`, `Default`, `Borderless`, `Destructive`, `Disabled`)
-- `iconName` (optional icon set name, e.g. `viewMoreSymbolicDefault`)
-- `icon.name` (Qt grouped property, optional icon set name)
-- `iconSource` (optional explicit URL override)
-- `iconGlyph` (optional text fallback)
+## Layout Contract
+
+- Fixed visual height: `20px`
+- Horizontal padding: `2`
+- Vertical padding: `2`
+- Corner radius: `Theme.radiusSm`
+
+## Icon Resolution
+
+Priority order:
+1. explicit `iconSource` (`url`)
+2. explicit `iconName`
+3. grouped icon name (`icon.name`)
+4. tone-based fallback icon
+
+Rendered icon source is processed through `SvgManager.icon(...)` to match current icon-size scaling policy.
+
+## Tone-Aware Defaults
+
+When no explicit icon is provided:
+- Borderless uses borderless symbolic icon.
+- Disabled uses disabled symbolic icon.
+- Others use default symbolic icon.
 
 ## Usage
-```qml
-LV.IconButton { tone: LV.AbstractButton.Primary }
-```
 
 ```qml
 LV.IconButton {
     tone: LV.AbstractButton.Default
-    iconName: "panDownSymbolicDefault"
-}
-```
-
-## Practical Examples
-
-### Example 1: Primary icon action
-```qml
-import QtQuick
-import LVRS 1.0 as LV
-
-LV.IconButton {
-    tone: LV.AbstractButton.Primary
     iconName: "viewMoreSymbolicDefault"
-    onClicked: console.log("Open actions")
-}
-```
-
-### Example 2: Borderless row action
-```qml
-import QtQuick
-import LVRS 1.0 as LV
-
-LV.IconButton {
-    tone: LV.AbstractButton.Borderless
-    iconName: "panDownSymbolicBorderless"
-    onClicked: console.log("Expand row")
-}
-```
-
-### Example 3: Glyph fallback when icon set is unavailable
-```qml
-import QtQuick
-import LVRS 1.0 as LV
-
-LV.IconButton {
-    tone: LV.AbstractButton.Default
-    iconName: ""
-    iconGlyph: "+"
-    onClicked: console.log("Create item")
 }
 ```

@@ -49,7 +49,7 @@ class RuntimeEvents : public QObject
     Q_PROPERTY(QStringList pressedMouseButtonNames READ pressedMouseButtonNames NOTIFY mouseChanged)
     Q_PROPERTY(int activeModifiers READ activeModifiers NOTIFY daemonStateChanged)
     Q_PROPERTY(QStringList activeModifierNames READ activeModifierNames NOTIFY daemonStateChanged)
-    Q_PROPERTY(QVariantMap inputState READ inputState NOTIFY daemonStateChanged)
+    Q_PROPERTY(QVariantMap inputStateMap READ inputState NOTIFY daemonStateChanged)
 
     Q_PROPERTY(quint64 uiCreatedCount READ uiCreatedCount NOTIFY uiChanged)
     Q_PROPERTY(quint64 uiShownCount READ uiShownCount NOTIFY uiChanged)
@@ -80,6 +80,7 @@ class RuntimeEvents : public QObject
 public:
     explicit RuntimeEvents(QObject *parent = nullptr);
     ~RuntimeEvents() override;
+    static RuntimeEvents *instance();
 
     bool running() const;
 
@@ -264,4 +265,6 @@ private:
     QVariantMap m_lastEvent;
     QVariantList m_recentEvents;
     int m_recentEventCapacity = 256;
+
+    static RuntimeEvents *s_instance;
 };

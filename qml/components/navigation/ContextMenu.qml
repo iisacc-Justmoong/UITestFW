@@ -11,6 +11,8 @@ Controls.Popup {
     property int itemSpacing: 0
     property int selectedIndex: -1
     property bool autoCloseOnTrigger: true
+    property bool dismissOnGlobalPress: true
+    property bool dismissOnGlobalContextRequest: true
     property color menuColor: Theme.contextMenuSurface
     property color dividerColor: Theme.contextMenuDivider
     property real menuOpacity: 0.5
@@ -61,6 +63,33 @@ Controls.Popup {
 
     implicitWidth: itemWidth + leftPadding + rightPadding
     implicitHeight: contentItem.implicitHeight + topPadding + bottomPadding
+
+    function pointInsidePopupAtLocal(localX, localY) {
+        return localX >= control.x
+            && localX <= control.x + control.width
+            && localY >= control.y
+            && localY <= control.y + control.height
+    }
+
+    function overlayPointFromGlobal(globalX, globalY) {
+        if (control.parent && control.parent.mapFromGlobal)
+            return control.parent.mapFromGlobal(globalX, globalY)
+        return Qt.point(globalX, globalY)
+    }
+
+    function dismissIfOutsideGlobalEvent(eventData) {
+        if (!control.opened || !eventData)
+            return false
+        const globalX = eventData.globalX !== undefined ? Number(eventData.globalX) : Number(eventData.x)
+        const globalY = eventData.globalY !== undefined ? Number(eventData.globalY) : Number(eventData.y)
+        if (isNaN(globalX) || isNaN(globalY))
+            return false
+        const overlayPoint = control.overlayPointFromGlobal(globalX, globalY)
+        if (control.pointInsidePopupAtLocal(overlayPoint.x, overlayPoint.y))
+            return false
+        control.close()
+        return true
+    }
 
     function entryAt(index) {
         if (!items)
@@ -160,6 +189,31 @@ Controls.Popup {
         }
         const mapped = item.mapToItem(parent, xPos, yPos)
         openAt(mapped.x, mapped.y)
+    }
+
+    Item {
+        id: globalDismissBridge
+        width: 0
+        height: 0
+        visible: false
+
+        EventListener {
+            trigger: "globalPressed"
+            enabled: control.dismissOnGlobalPress && control.opened
+            includeUiHit: false
+            action: function(eventData) {
+                control.dismissIfOutsideGlobalEvent(eventData)
+            }
+        }
+
+        EventListener {
+            trigger: "globalContextRequested"
+            enabled: control.dismissOnGlobalContextRequest && control.opened
+            includeUiHit: false
+            action: function(eventData) {
+                control.dismissIfOutsideGlobalEvent(eventData)
+            }
+        }
     }
 
     background: Rectangle {

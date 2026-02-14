@@ -2,63 +2,52 @@
 
 Location: `qml/components/surfaces/Alert.qml`
 
-Centered overlay alert (not a popup). Apple-like layout.
+`Alert` is a centered overlay surface with explicit frame, inner surface, and action layout variants.
+
+## Visual Structure
+
+- Backdrop layer (`backdropColor`, optional background dismiss).
+- Framed outer card (`cardFrameColor`, `cardFrameWidth`).
+- Inner alert surface (`cardBackgroundColor`).
+- App icon block + title/message + action zone.
+
+This framed structure avoids floating-text appearance and matches the current design specification.
 
 ## Properties
+
+State and text:
 - `open`, `title`, `message`
-- `primaryText`, `secondaryText`
-- `primaryEnabled`, `secondaryEnabled`
+- `primaryText`, `secondaryText`, `tertiaryText`
+- `primaryEnabled`, `secondaryEnabled`, `tertiaryEnabled`
+
+Behavior and layout:
 - `dismissOnBackground`
+- `useOverlayLayer`
+- `minWidth`, `maxWidth`
+- `useVerticalActionLayout` (derived when tertiary action exists)
+
+Visual tokens:
+- `backdropColor`
+- `cardBackgroundColor`
+- `cardFrameColor`, `cardFrameWidth`
+
+## Signals
+
+- `primaryClicked()`
+- `secondaryClicked()`
+- `tertiaryClicked()`
+- `dismissed()`
 
 ## Usage
+
 ```qml
-LV.Alert { open: true; title: "Delete?"; message: "This cannot be undone." }
-```
-
-## Practical Examples
-
-### Example 1: Two-button confirm dialog
-```qml
-import QtQuick
-import LVRS 1.0 as LV
-
 LV.Alert {
-    open: showDeleteDialog
-    title: "Delete this run?"
+    open: appState.alertOpen
+    title: "Delete Scene?"
     message: "This action cannot be undone."
     primaryText: "Delete"
     secondaryText: "Cancel"
-    onPrimaryClicked: console.log("Deleted")
-    onSecondaryClicked: showDeleteDialog = false
-}
-```
-
-### Example 2: Three-action flow (vertical buttons)
-```qml
-import QtQuick
-import LVRS 1.0 as LV
-
-LV.Alert {
-    open: true
-    title: "Choose next step"
-    message: "You can save, discard, or continue editing."
-    primaryText: "Save"
-    secondaryText: "Discard"
-    tertiaryText: "Keep Editing"
-}
-```
-
-### Example 3: Background dismiss behavior
-```qml
-import QtQuick
-import LVRS 1.0 as LV
-
-LV.Alert {
-    open: isVisible
-    title: "Session Timeout"
-    message: "Click outside to close this notice."
-    primaryText: "OK"
-    dismissOnBackground: true
-    onDismissed: isVisible = false
+    onPrimaryClicked: appState.confirmDelete()
+    onSecondaryClicked: appState.alertOpen = false
 }
 ```

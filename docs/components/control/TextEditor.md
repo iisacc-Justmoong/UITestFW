@@ -2,86 +2,47 @@
 
 Location: `qml/components/control/input/TextEditor.qml`
 
-Multi-line input component. It keeps output behavior consistent by processing content through the same parser/renderer (`TextMarkup`) across input modes.
+`TextEditor` is the multi-line editor component for plain text, markdown, and rich-text preview workflows.
 
 ## Core API
+
 - `text`, `placeholderText`, `readOnly`
 - `mode`: `plainTextMode`, `markdownMode`, `richTextMode`
-- `enforceModeDefaults`, `wrapMode`, `textFormat`, `tabStopDistance`
-- `fontFamily`, `fontPixelSize`, `fontWeight`, `fontStyleName`
-- `selectionStart`, `selectionEnd`, `cursorPosition`
-- `normalizedInput`, `renderedOutput`, `renderedPlainText`
+- `editorHeight` (fixed editor viewport height input)
+- `fieldMinHeight` (minimum floor)
+- `showRenderedOutput`, `outputMinHeight`
+- `enforceModeDefaults`, `wrapMode`, `textFormat`
 
-When `enforceModeDefaults: true`, input `textFormat` is fixed to `PlainText` regardless of mode, while styled rendering remains available through `renderedOutput`.
+## Layout Contract
 
-## Signals
+The edit area uses a fixed-height viewport (`resolvedEditorHeight`) while preserving responsive width.
+Content scrolls internally through `Flickable`, preventing parent layout drift during heavy text input.
+
+## IME and Composition Handling
+
+`TextEditor` integrates `InputMethodGuard` and sets `font.preferShaping: true`.
+This combination reduces composition breakage when input method/locale state changes mid-entry.
+
+## Nested Scroll Isolation
+
+`WheelScrollGuard` is attached to the editor viewport so wheel events inside editor area do not leak into outer scroll pages.
+
+## Signals and Methods
+
+Signals:
 - `textEdited(text)`
-- `submitted(text)` (`Ctrl+Enter` or `Cmd+Enter`)
+- `submitted(text)` (`Ctrl+Enter` / `Cmd+Enter`)
 
-## Utility Methods
-- `forceEditorFocus()`
-- `insertText(value)`
-- `clear()`
-- `clearSelection()`
-- `undo()`, `redo()`
+Methods:
+- `forceEditorFocus()`, `insertText(value)`, `clear()`, `undo()`, `redo()`
 
 ## Usage
+
 ```qml
 LV.TextEditor {
     mode: markdownMode
-    text: "Hello **bold**"
+    editorHeight: 220
+    showRenderedOutput: true
     onSubmitted: save(text)
-}
-```
-
-## Practical Examples
-
-### Example 1: Markdown note editor
-```qml
-import QtQuick
-import LVRS 1.0 as LV
-
-LV.TextEditor {
-    mode: markdownMode
-    placeholderText: "Write release notes..."
-    text: "## v1.2.0\n- Added route state tracking"
-    onSubmitted: console.log("Saved note:", text)
-}
-```
-
-### Example 2: Plain text input without preview
-```qml
-import QtQuick
-import LVRS 1.0 as LV
-
-LV.TextEditor {
-    mode: plainTextMode
-    showRenderedOutput: false
-    enforceModeDefaults: true
-    placeholderText: "Paste raw logs"
-}
-```
-
-### Example 3: Editor command buttons
-```qml
-import QtQuick
-import LVRS 1.0 as LV
-
-Column {
-    spacing: 8
-
-    LV.TextEditor {
-        id: editor
-        mode: richTextMode
-        text: "Initial content"
-    }
-
-    Row {
-        spacing: 8
-        LV.LabelButton { text: "Insert Date"; onClicked: editor.insertText("\nDate: 2026-02-11") }
-        LV.LabelButton { text: "Undo"; onClicked: editor.undo() }
-        LV.LabelButton { text: "Redo"; onClicked: editor.redo() }
-        LV.LabelButton { text: "Clear"; onClicked: editor.clear() }
-    }
 }
 ```

@@ -162,6 +162,7 @@ FocusScope {
                 font.weight: control.fontWeight
                 font.styleName: control.fontStyleName
                 font.letterSpacing: control.fontLetterSpacing
+                font.preferShaping: true
                 cursorVisible: control.enabled && activeFocus && !readOnly
                 selectByMouse: true
                 persistentSelection: true
@@ -182,6 +183,11 @@ FocusScope {
                     }
                 }
             }
+        }
+
+        InputMethodGuard {
+            target: editor
+            guardEnabled: control.enabled && !control.readOnly
         }
 
         WheelScrollGuard {

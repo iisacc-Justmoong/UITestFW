@@ -1,19 +1,31 @@
 # Event Policy
 
-**Goal:** Attach behavior without modifying component internals.
+Goal: keep interaction behavior deterministic by routing all high-level UI reactions through unified runtime event sources.
 
-## Rule 1 — Use EventListener for ad‑hoc behaviors
-- Place `EventListener { ... }` inside any component to bind triggers to actions.
-- Avoid adding custom `onClicked` logic to base components unless it is core behavior.
+## Rule 1: Prefer EventListener over ad-hoc local handlers
 
-## Rule 2 — Triggers
-Supported triggers:
-- `clicked`, `pressed`, `released`
-- `entered`, `exited`, `hoverChanged`
-- `keyPressed`, `keyReleased`
+Attach `EventListener` where possible instead of scattering custom event plumbing across components.
 
-## Rule 3 — Keyboard events
-- Parent must be focusable for key triggers to fire.
+## Rule 2: Use global triggers for cross-surface behaviors
 
-## Rule 4 — No global side effects by default
-- Events should not mutate unrelated state unless explicitly coded in `action`.
+For overlays, context menus, and app-wide shortcuts, use:
+- `globalPressed`
+- `globalContextRequested`
+
+This ensures behavior remains valid regardless of local mouse area nesting.
+
+## Rule 3: Backend-first input state
+
+When consuming event payloads, prefer `Backend.currentUserInputState()` path (default in `EventListener`) to avoid state skew under rapid event bursts.
+
+## Rule 4: Outside-dismiss behaviors must be coordinate-based
+
+Dismiss logic for menus/dialog-like surfaces must be based on global coordinates mapped to overlay-local geometry, not local-only click assumptions.
+
+## Rule 5: Nested scroll isolation is mandatory
+
+Components with internal `Flickable` regions must install wheel guards to prevent parent and child scroll surfaces from reacting simultaneously.
+
+## Rule 6: Text input composition safety
+
+Text-entry controls must include IME composition guards (`InputMethodGuard`) so locale/input-method transitions commit composition safely.

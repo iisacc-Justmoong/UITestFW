@@ -18,6 +18,7 @@ private slots:
     void click_trigger();
     void global_context_requested_trigger();
     void application_window_global_context_signal();
+    void context_menu_dismisses_on_global_press_outside();
 };
 
 void EventListenerTests::click_trigger()
@@ -190,6 +191,61 @@ LV.ApplicationWindow {
     QVERIFY(object->property("hasUiPayload").toBool());
     QVERIFY(object->property("lastGlobalX").toReal() >= 0.0);
     QVERIFY(object->property("lastGlobalY").toReal() >= 0.0);
+}
+
+void EventListenerTests::context_menu_dismisses_on_global_press_outside()
+{
+    QQmlEngine engine;
+    const QString importBase = QDir::cleanPath(QCoreApplication::applicationDirPath() + "/..");
+    engine.addImportPath(importBase);
+    const QByteArray qml = R"(
+import QtQuick
+import LVRS 1.0 as LV
+
+LV.ApplicationWindow {
+    id: root
+    width: 260
+    height: 170
+    visible: true
+    title: "ContextMenuDismissTest"
+
+    property bool menuOpened: demoMenu.opened
+    property int closeCount: 0
+
+    LV.ContextMenu {
+        id: demoMenu
+        objectName: "demoMenu"
+        items: [{ label: "Inspect", showChevron: false }]
+        onClosed: root.closeCount += 1
+    }
+
+    Component.onCompleted: Qt.callLater(function() {
+        demoMenu.openAt(24, 20)
+    })
+}
+)";
+
+    QQmlComponent component(&engine);
+    component.setData(qml, QUrl());
+    QScopedPointer<QObject> object(component.create());
+    QVERIFY(object);
+
+    auto *window = qobject_cast<QQuickWindow *>(object.data());
+    QVERIFY(window);
+    QTRY_VERIFY(object->property("menuOpened").toBool());
+
+    const QPointF outsidePoint(230.0, 150.0);
+    QMouseEvent outsidePress(QEvent::MouseButtonPress,
+                             outsidePoint,
+                             outsidePoint,
+                             outsidePoint,
+                             Qt::LeftButton,
+                             Qt::LeftButton,
+                             Qt::NoModifier);
+    QCoreApplication::sendEvent(window, &outsidePress);
+
+    QTRY_VERIFY(!object->property("menuOpened").toBool());
+    QVERIFY(object->property("closeCount").toInt() >= 1);
 }
 
 QTEST_MAIN(EventListenerTests)

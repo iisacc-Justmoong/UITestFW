@@ -2,32 +2,50 @@
 
 Location: `backend/runtime/runtimeevents.h` / `backend/runtime/runtimeevents.cpp`
 
-Unified runtime listener singleton for global input, UI state, idle tracking, and OS/runtime metrics.
+`RuntimeEvents` is the runtime daemon singleton that records input, UI lifecycle, and process telemetry.
 
-## Covered domains
-- Keyboard event listener: key press/release counters and signals
-- Mouse cursor event listener: move/press/release tracking and signals
-- UI state event listener: created/shown/hidden/destroyed event stream
-- Idle tracker: inactivity timing, idle enter/exit signaling
-- OS event listener: PID, OS label, app active state, uptime, RSS memory
+## Event Domains
 
-## Key properties
-- Keyboard: `keyPressCount`, `keyReleaseCount`, `lastKey`, `lastKeyText`
-- Mouse: `mouseMoveCount`, `mousePressCount`, `mouseReleaseCount`, `lastMouseX`, `lastMouseY`
-- UI state: `uiCreatedCount`, `uiShownCount`, `uiHiddenCount`, `uiDestroyedCount`, `lastUiEvent`
-- Idle: `idle`, `idleTimeoutMs`, `idleForMs`, `lastActivityEpochMs`
-- OS/runtime: `pid`, `osName`, `applicationActive`, `uptimeMs`, `rssBytes`
+- Keyboard: key press/release, pressed key set, active modifier names.
+- Pointer: move/press/release/double-click, wheel, hover.
+- Context requests: explicit `QEvent::ContextMenu` with reason code.
+- Extended pointer families: touch, tablet, native gesture.
+- UI lifecycle: child-added, show/hide, destroy tracking.
+- Daemon/process: heartbeat, uptime, memory RSS, application active state.
 
-## Methods
-- `start()`, `stop()`
-- `attachWindow(window)` for window-scoped UI object lifecycle tracking
-- `markActivity()` for explicit user-activity touchpoint
-- `resetCounters()`
-- `snapshot()`
+## Health and Event Log APIs
 
-## Signals
-- Keyboard: `keyPressed(...)`, `keyReleased(...)`
-- Mouse: `mouseMoved(...)`, `mousePressed(...)`, `mouseReleased(...)`
-- UI: `uiEvent(eventType, objectName, className, visible)`
-- Idle: `idleEntered()`, `idleExited()`
-- OS: `osApplicationStateChanged(state)`, `osStatsChanged()`
+- `snapshot()` returns aggregate runtime state.
+- `daemonHealth()` returns daemon status + input snapshot + last event.
+- `recentEvents()` returns bounded event history.
+- `clearRecentEvents()` resets runtime event buffer.
+- `hitTestUiAt(globalX, globalY)` returns object/class/path at pointer coordinate.
+
+## Input State API
+
+- `inputState()` returns:
+  - pointer globals
+  - pressed mouse button names
+  - key state and key codes
+  - active modifiers
+  - press/release elapsed timings
+  - pointer UI hit information (`pointerUi`)
+
+## Signals of Interest
+
+- `eventRecorded(eventData)`
+- `daemonHeartbeat(epochMs, uptimeMs, eventSequence)`
+- `mousePressed(...)`, `mouseReleased(...)`
+- `contextRequested(x, y, modifiers, reason)`
+- `uiEvent(eventType, objectName, className, visible)`
+
+## Typical Integration
+
+- `ApplicationWindow` calls `RuntimeEvents.start()` and `RuntimeEvents.attachWindow(window)`.
+- `EventListener` listens to `mousePressed` and `contextRequested` for global triggers.
+- `Backend` mirrors runtime events into its own cache for backend-first QML reads.
+
+## Notes
+
+- Runtime event names include prefixes such as `key-`, `mouse-`, `touch-`, `tablet-`, `native-gesture`, `context-`, `ui-event`, and `daemon-*`.
+- Pointer hit-testing falls back gracefully when a direct Quick-item hit is unavailable.

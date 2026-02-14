@@ -2,59 +2,33 @@
 
 Location: `qml/components/control/buttons/LabelButton.qml`
 
-Text button variant aligned with the Figma Button component.
+`LabelButton` is the text-only button variant built on `AbstractButton`.
 
-## Properties
-- `text`
-- `tone` (`Primary`, `Default`, `Borderless`, `Destructive`, `Disabled`)
+## Layout Contract
+
+- Fixed visual height: `20px` (`Theme.gap20`)
+- Horizontal padding: `8`
+- Vertical padding: `4`
+- Corner radius: `Theme.radiusSm`
+
+This contract is intentionally fixed to maintain equal row height across button family previews.
+
+## Tone
+
+Supports `AbstractButton` tones:
+- `Primary`
+- `Default`
+- `Borderless`
+- `Destructive`
+- `Disabled`
+
+Pressed behavior for `Default` and `Borderless` follows shared base policy (`Theme.accentBlueMuted`).
 
 ## Usage
-```qml
-LV.LabelButton { text: "Button"; tone: LV.AbstractButton.Primary }
-```
 
 ```qml
-LV.LabelButton { text: "Button"; tone: LV.AbstractButton.Borderless }
-```
-
-## Practical Examples
-
-### Example 1: Primary form submit
-```qml
-import QtQuick
-import LVRS 1.0 as LV
-
 LV.LabelButton {
-    text: "Save Changes"
+    text: "Label"
     tone: LV.AbstractButton.Primary
-    onClicked: console.log("Saved")
-}
-```
-
-### Example 2: Secondary borderless action
-```qml
-import QtQuick
-import LVRS 1.0 as LV
-
-LV.LabelButton {
-    text: "Learn More"
-    tone: LV.AbstractButton.Borderless
-    onClicked: LV.Navigator.go("/docs")
-}
-```
-
-### Example 3: Destructive operation with safety flag
-```qml
-import QtQuick
-import LVRS 1.0 as LV
-
-Item {
-    property bool canDelete: false
-
-    LV.LabelButton {
-        text: "Delete Resource"
-        tone: LV.AbstractButton.Destructive
-        enabled: canDelete
-    }
 }
 ```

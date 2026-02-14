@@ -30,6 +30,8 @@ Hierarchical outliner panel with toolbar + tree list.
 `model` entries can also be plain strings. For example, `model: ["Overview", "Reports"]`.
 
 ## End-user Behavior
+- Row click: selection only (does not expand/collapse).
+- Chevron click: toggles expand/collapse.
 - Up/Down: move selection across visible rows.
 - Left: collapse current node or move to parent.
 - Right: expand current node or move to first child.

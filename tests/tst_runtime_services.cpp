@@ -25,6 +25,7 @@ class RuntimeServicesTests : public QObject
 
 private slots:
     void runtime_events_measurement_boundaries();
+    void runtime_events_daemon_health_and_recent_log();
     void runtime_events_idle_and_reset_signal_contract();
     void runtime_events_context_menu_signal_contract();
     void runtime_events_single_input_event_is_counted_once();
@@ -106,10 +107,48 @@ void RuntimeServicesTests::runtime_events_measurement_boundaries()
     QVERIFY(snapshot.contains(QStringLiteral("pid")));
     QVERIFY(snapshot.contains(QStringLiteral("rssBytes")));
     QVERIFY(snapshot.contains(QStringLiteral("uptimeMs")));
+    QVERIFY(snapshot.contains(QStringLiteral("daemonBootEpochMs")));
+    QVERIFY(snapshot.contains(QStringLiteral("eventSequence")));
+    QVERIFY(snapshot.contains(QStringLiteral("recentEventCount")));
     QVERIFY(snapshot.value(QStringLiteral("pid")).toLongLong() > 0);
 
     events.stop();
     QVERIFY(!events.running());
+}
+
+void RuntimeServicesTests::runtime_events_daemon_health_and_recent_log()
+{
+    RuntimeEvents events;
+    QQuickWindow window;
+    window.setWidth(640);
+    window.setHeight(360);
+    events.attachWindow(&window);
+    QTRY_VERIFY(events.running());
+
+    QVERIFY(events.daemonBootEpochMs() > 0);
+    const QVariantMap health = events.daemonHealth();
+    QVERIFY(health.value(QStringLiteral("running")).toBool());
+    QVERIFY(health.value(QStringLiteral("attachedWindow")).toBool());
+    QVERIFY(health.contains(QStringLiteral("eventSequence")));
+    QVERIFY(health.contains(QStringLiteral("recentEventCount")));
+
+    const quint64 seqBefore = events.eventSequence();
+
+    QKeyEvent keyPress(QEvent::KeyPress, Qt::Key_D, Qt::NoModifier, QStringLiteral("d"));
+    QCoreApplication::sendEvent(&window, &keyPress);
+    QTRY_VERIFY(events.eventSequence() > seqBefore);
+
+    const QVariantMap lastEvent = events.lastEvent();
+    QVERIFY(!lastEvent.isEmpty());
+    QVERIFY(lastEvent.contains(QStringLiteral("type")));
+    QVERIFY(lastEvent.contains(QStringLiteral("sequence")));
+    QVERIFY(events.recentEventCount() > 0);
+    QVERIFY(!events.recentEvents().isEmpty());
+
+    events.setRecentEventCapacity(16);
+    QCOMPARE(events.recentEventCapacity(), 16);
+    events.clearRecentEvents();
+    QCOMPARE(events.recentEventCount(), 0);
 }
 
 void RuntimeServicesTests::runtime_events_idle_and_reset_signal_contract()

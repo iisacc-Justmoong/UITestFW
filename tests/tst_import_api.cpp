@@ -18,6 +18,7 @@ private slots:
     void icon_name_mapping_loads();
     void hierarchy_tree_model_api_loads();
     void hierarchy_string_array_model_loads();
+    void hierarchy_row_click_only_activates_not_toggles();
     void button_padding_matches_figma_spec();
 };
 
@@ -342,6 +343,55 @@ Item {
     QScopedPointer<QObject> root(createFromQml(engine, qml));
     QVERIFY(root);
     QTRY_VERIFY(root->property("stringModelReady").toBool());
+}
+
+void ImportApiTests::hierarchy_row_click_only_activates_not_toggles()
+{
+    QQmlEngine engine;
+    const QString importBase = QDir::cleanPath(QCoreApplication::applicationDirPath() + "/..");
+    engine.addImportPath(importBase);
+    const QByteArray qml = R"(
+import QtQuick
+import LVRS as LV
+
+Item {
+    LV.Hierarchy {
+        id: hierarchy
+        width: 260
+        height: 220
+        model: [
+            {
+                key: "root",
+                label: "Root",
+                expanded: true,
+                selected: true,
+                children: [
+                    { key: "child", label: "Child" }
+                ]
+            }
+        ]
+    }
+
+    property bool rowClickToggleBlocked: false
+
+    Component.onCompleted: {
+        Qt.callLater(function() {
+            const row = hierarchy.activeListItem
+            if (!row || !row.clicked) {
+                rowClickToggleBlocked = false
+                return
+            }
+            const wasExpanded = !!row.expanded
+            row.clicked()
+            rowClickToggleBlocked = (row.expanded === wasExpanded)
+        })
+    }
+}
+)";
+
+    QScopedPointer<QObject> root(createFromQml(engine, qml));
+    QVERIFY(root);
+    QTRY_VERIFY(root->property("rowClickToggleBlocked").toBool());
 }
 
 void ImportApiTests::button_padding_matches_figma_spec()

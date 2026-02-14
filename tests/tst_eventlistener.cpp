@@ -17,6 +17,7 @@ class EventListenerTests : public QObject
 private slots:
     void click_trigger();
     void global_context_requested_trigger();
+    void application_window_global_context_signal();
 };
 
 void EventListenerTests::click_trigger()
@@ -127,6 +128,60 @@ LV.ApplicationWindow {
     QTRY_VERIFY(object->property("contextCount").toInt() >= 2);
     QCOMPARE(object->property("lastSource").toString(), QStringLiteral("context"));
     QCOMPARE(object->property("lastReason").toInt(), static_cast<int>(QContextMenuEvent::Keyboard));
+}
+
+void EventListenerTests::application_window_global_context_signal()
+{
+    QQmlEngine engine;
+    const QString importBase = QDir::cleanPath(QCoreApplication::applicationDirPath() + "/..");
+    engine.addImportPath(importBase);
+    const QByteArray qml = R"(
+import QtQuick
+import LVRS 1.0 as LV
+
+LV.ApplicationWindow {
+    id: root
+    width: 240
+    height: 140
+    visible: false
+    title: "ApplicationWindowGlobalSignalTest"
+
+    property int contextCount: 0
+    property bool hasUiPayload: false
+    property real lastGlobalX: -1
+    property real lastGlobalY: -1
+
+    onGlobalContextEvent: function(eventData) {
+        contextCount += 1
+        hasUiPayload = !!(eventData && eventData.ui && eventData.ui.objectName !== undefined)
+        lastGlobalX = eventData && eventData.globalX !== undefined ? eventData.globalX : -1
+        lastGlobalY = eventData && eventData.globalY !== undefined ? eventData.globalY : -1
+    }
+}
+)";
+
+    QQmlComponent component(&engine);
+    component.setData(qml, QUrl());
+    QScopedPointer<QObject> object(component.create());
+    QVERIFY(object);
+
+    auto *window = qobject_cast<QQuickWindow *>(object.data());
+    QVERIFY(window);
+
+    const QPointF p(26.0, 19.0);
+    QMouseEvent mousePress(QEvent::MouseButtonPress,
+                           p,
+                           p,
+                           p,
+                           Qt::RightButton,
+                           Qt::RightButton,
+                           Qt::NoModifier);
+    QCoreApplication::sendEvent(window, &mousePress);
+
+    QTRY_VERIFY(object->property("contextCount").toInt() >= 1);
+    QVERIFY(object->property("hasUiPayload").toBool());
+    QVERIFY(object->property("lastGlobalX").toReal() >= 0.0);
+    QVERIFY(object->property("lastGlobalY").toReal() >= 0.0);
 }
 
 QTEST_MAIN(EventListenerTests)

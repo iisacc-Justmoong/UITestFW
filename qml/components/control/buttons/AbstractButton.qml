@@ -45,8 +45,8 @@ Controls.AbstractButton {
         if (tone === AbstractButton.Destructive)
             return Qt.darker(Theme.danger, 1.2)
         if (tone === AbstractButton.Borderless)
-            return Theme.primary
-        return Theme.primary
+            return Theme.accentBlueMuted
+        return Theme.accentBlueMuted
     }
     horizontalPadding: Theme.gap14
     verticalPadding: Theme.gap10

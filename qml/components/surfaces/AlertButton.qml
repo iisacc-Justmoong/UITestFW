@@ -6,11 +6,11 @@ AbstractButton {
 
     tone: AbstractButton.Default
     horizontalPadding: Theme.gap8
-    verticalPadding: control.tone === AbstractButton.Primary ? Theme.gap2 : Theme.gap4
+    verticalPadding: Theme.gap4
     spacing: Theme.gapNone
     cornerRadius: Theme.radiusSm
-    implicitHeight: Theme.controlHeightMd
-    height: Theme.controlHeightMd
+    implicitHeight: Theme.gap20
+    height: Theme.gap20
     implicitWidth: contentItem.implicitWidth + leftPadding + rightPadding
 
     contentItem: Label {

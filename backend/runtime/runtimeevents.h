@@ -4,12 +4,15 @@
 #include <QHash>
 #include <QObject>
 #include <QPointer>
+#include <QPointF>
 #include <QSet>
 #include <QTimer>
+#include <QVariantList>
 #include <QVariantMap>
 #include <QtQml/qqml.h>
 
 class QQuickWindow;
+class QQuickItem;
 
 class RuntimeEvents : public QObject
 {
@@ -51,6 +54,11 @@ class RuntimeEvents : public QObject
     Q_PROPERTY(qint64 pid READ pid CONSTANT)
     Q_PROPERTY(QString processName READ processName CONSTANT)
     Q_PROPERTY(QString osName READ osName CONSTANT)
+    Q_PROPERTY(qint64 daemonBootEpochMs READ daemonBootEpochMs CONSTANT)
+    Q_PROPERTY(quint64 eventSequence READ eventSequence NOTIFY daemonStateChanged)
+    Q_PROPERTY(QVariantMap lastEvent READ lastEvent NOTIFY daemonStateChanged)
+    Q_PROPERTY(int recentEventCapacity READ recentEventCapacity WRITE setRecentEventCapacity NOTIFY recentEventCapacityChanged)
+    Q_PROPERTY(int recentEventCount READ recentEventCount NOTIFY eventLogChanged)
     Q_PROPERTY(bool applicationActive READ applicationActive NOTIFY osChanged)
     Q_PROPERTY(int osSampleIntervalMs READ osSampleIntervalMs WRITE setOsSampleIntervalMs NOTIFY osSampleIntervalMsChanged)
     Q_PROPERTY(qint64 uptimeMs READ uptimeMs NOTIFY osStatsChanged)
@@ -96,6 +104,12 @@ public:
     qint64 pid() const;
     QString processName() const;
     QString osName() const;
+    qint64 daemonBootEpochMs() const;
+    quint64 eventSequence() const;
+    QVariantMap lastEvent() const;
+    int recentEventCapacity() const;
+    void setRecentEventCapacity(int value);
+    int recentEventCount() const;
     bool applicationActive() const;
     int osSampleIntervalMs() const;
     void setOsSampleIntervalMs(int value);
@@ -108,8 +122,13 @@ public:
     Q_INVOKABLE void markActivity();
     Q_INVOKABLE void resetCounters();
     Q_INVOKABLE QVariantMap snapshot() const;
+    Q_INVOKABLE QVariantMap daemonHealth() const;
+    Q_INVOKABLE QVariantList recentEvents() const;
+    Q_INVOKABLE void clearRecentEvents();
+    Q_INVOKABLE QVariantMap hitTestUiAt(qreal globalX, qreal globalY) const;
 
 signals:
+    void daemonStateChanged();
     void runningChanged();
     void keyboardChanged();
     void keyPressed(int key, int modifiers, bool autoRepeat, const QString &text);
@@ -131,6 +150,10 @@ signals:
     void osSampleIntervalMsChanged();
     void osStatsChanged();
     void osApplicationStateChanged(int state);
+    void eventRecorded(const QVariantMap &eventData);
+    void eventLogChanged();
+    void recentEventCapacityChanged();
+    void daemonHeartbeat(qint64 epochMs, qint64 uptimeMs, quint64 eventSequence);
 
 protected:
     bool eventFilter(QObject *watched, QEvent *event) override;
@@ -152,6 +175,11 @@ private:
     void updateIdleState(bool nextIdle);
     qint64 nowEpochMs() const;
     qint64 sampleResidentSetBytes() const;
+    void recordRuntimeEvent(const QString &eventType, const QVariantMap &payload = QVariantMap());
+    void pushRecentEvent(const QVariantMap &eventData);
+    QVariantMap describeQuickItemAtGlobal(qreal globalX, qreal globalY) const;
+    QQuickItem *deepestVisibleChildAt(QQuickItem *item, const QPointF &scenePos) const;
+    QString quickItemPath(const QQuickItem *item, const QQuickItem *rootItem) const;
 
     QPointer<QQuickWindow> m_window;
     QSet<QObject *> m_trackedObjects;
@@ -197,4 +225,9 @@ private:
     int m_osSampleIntervalMs = 1000;
     qint64 m_uptimeMs = 0;
     qint64 m_rssBytes = -1;
+    qint64 m_daemonBootEpochMs = 0;
+    quint64 m_eventSequence = 0;
+    QVariantMap m_lastEvent;
+    QVariantList m_recentEvents;
+    int m_recentEventCapacity = 256;
 };

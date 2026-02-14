@@ -172,6 +172,12 @@ FocusScope {
             }
         }
 
+        WheelScrollGuard {
+            anchors.fill: parent
+            targetFlickable: flickable
+            consumeInside: true
+        }
+
         Label {
             style: description
             anchors.left: parent.left

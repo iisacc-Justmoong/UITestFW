@@ -32,12 +32,19 @@ Controls.Popup {
     Controls.Overlay.modal: Item {
         anchors.fill: parent
 
-        MouseArea {
+        EventListener {
             anchors.fill: parent
+            trigger: "pressed"
             acceptedButtons: Qt.AllButtons
-            onPressed: function(mouse) {
-                mouse.accepted = true
-                control.close()
+            action: function(mouse) {
+                if (!control.opened)
+                    return
+                const insidePopup = mouse.x >= control.x
+                    && mouse.x <= control.x + control.width
+                    && mouse.y >= control.y
+                    && mouse.y <= control.y + control.height
+                if (!insidePopup)
+                    control.close()
             }
         }
     }

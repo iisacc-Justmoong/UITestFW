@@ -48,8 +48,12 @@ Controls.ApplicationWindow {
     property alias pageRouter: scaffold.pageRouter
     property alias headerActions: scaffold.headerActions
     default property alias content: scaffold.content
+    property var lastGlobalPressedEventData: ({})
+    property var lastGlobalContextEventData: ({})
 
     signal navActivated(int index, var item)
+    signal globalPressedEvent(var eventData)
+    signal globalContextEvent(var eventData)
 
     minimumWidth: isMobilePlatform ? mobileMinWidth : desktopMinWidth
     minimumHeight: isMobilePlatform ? mobileMinHeight : desktopMinHeight
@@ -115,12 +119,33 @@ Controls.ApplicationWindow {
         }
     }
 
+    EventListener {
+        id: globalPressedListener
+        anchors.fill: parent
+        trigger: "globalPressed"
+        action: function(eventData) {
+            root.lastGlobalPressedEventData = eventData || ({})
+            root.globalPressedEvent(eventData)
+        }
+    }
+
+    EventListener {
+        id: globalContextListener
+        anchors.fill: parent
+        trigger: "globalContextRequested"
+        action: function(eventData) {
+            root.lastGlobalContextEventData = eventData || ({})
+            root.globalContextEvent(eventData)
+        }
+    }
+
     QtObject {
         Component.onCompleted: {
             FontPolicy.enforceApplicationFallback()
             RenderQuality.applyWindow(root)
             if (SvgManager.minimumScale < root.effectiveSupersampleScale)
                 SvgManager.minimumScale = root.effectiveSupersampleScale
+            RuntimeEvents.start()
             RuntimeEvents.attachWindow(root)
             Debug.log("ApplicationWindow", "created")
             Debug.log("ApplicationWindow", "supersample-scale", root.effectiveSupersampleScale)

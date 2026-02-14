@@ -10,7 +10,9 @@
 #include <QHoverEvent>
 #include <QKeyEvent>
 #include <QMouseEvent>
+#include <QQuickItem>
 #include <QQuickWindow>
+#include <QStringList>
 #include <QSysInfo>
 
 #ifdef Q_OS_MAC
@@ -33,8 +35,9 @@ RuntimeEvents::RuntimeEvents(QObject *parent)
     connect(&m_osTimer, &QTimer::timeout, this, &RuntimeEvents::handleOsTick);
 
     m_uptimeTimer.start();
+    m_daemonBootEpochMs = nowEpochMs();
     m_lastActivityMonotonicMs = 0;
-    m_lastActivityEpochMs = nowEpochMs();
+    m_lastActivityEpochMs = m_daemonBootEpochMs;
 
     if (qGuiApp) {
         m_applicationActive = qGuiApp->applicationState() == Qt::ApplicationActive;
@@ -219,6 +222,43 @@ QString RuntimeEvents::osName() const
     return QSysInfo::prettyProductName();
 }
 
+qint64 RuntimeEvents::daemonBootEpochMs() const
+{
+    return m_daemonBootEpochMs;
+}
+
+quint64 RuntimeEvents::eventSequence() const
+{
+    return m_eventSequence;
+}
+
+QVariantMap RuntimeEvents::lastEvent() const
+{
+    return m_lastEvent;
+}
+
+int RuntimeEvents::recentEventCapacity() const
+{
+    return m_recentEventCapacity;
+}
+
+void RuntimeEvents::setRecentEventCapacity(int value)
+{
+    const int next = qBound(16, value, 4096);
+    if (m_recentEventCapacity == next)
+        return;
+    m_recentEventCapacity = next;
+    emit recentEventCapacityChanged();
+    while (m_recentEvents.size() > m_recentEventCapacity)
+        m_recentEvents.removeFirst();
+    emit eventLogChanged();
+}
+
+int RuntimeEvents::recentEventCount() const
+{
+    return m_recentEvents.size();
+}
+
 bool RuntimeEvents::applicationActive() const
 {
     return m_applicationActive;
@@ -262,6 +302,8 @@ void RuntimeEvents::start()
     m_osTimer.start();
     m_running = true;
     handleOsTick();
+    recordRuntimeEvent(QStringLiteral("daemon-started"));
+    emit daemonStateChanged();
     emit runningChanged();
 }
 
@@ -280,6 +322,8 @@ void RuntimeEvents::stop()
     m_idleTimer.stop();
     m_osTimer.stop();
     m_running = false;
+    recordRuntimeEvent(QStringLiteral("daemon-stopped"));
+    emit daemonStateChanged();
     emit runningChanged();
 }
 
@@ -297,12 +341,22 @@ void RuntimeEvents::attachWindow(QObject *window)
     detachTrackedObjects();
 
     m_window = quickWindow;
+    {
+        QVariantMap payload;
+        payload.insert(QStringLiteral("width"), quickWindow->width());
+        payload.insert(QStringLiteral("height"), quickWindow->height());
+        payload.insert(QStringLiteral("title"), quickWindow->title());
+        recordRuntimeEvent(QStringLiteral("window-attached"), payload);
+    }
+    emit daemonStateChanged();
     connect(m_window,
             &QObject::destroyed,
             this,
             [this]() {
                 m_window.clear();
                 detachTrackedObjects();
+                recordRuntimeEvent(QStringLiteral("window-detached"));
+                emit daemonStateChanged();
             });
 
     trackUiObjectRecursive(m_window);
@@ -351,6 +405,7 @@ void RuntimeEvents::resetCounters()
     m_idleForMs = 0;
     emit idleForMsChanged();
     markActivity();
+    recordRuntimeEvent(QStringLiteral("counters-reset"));
 }
 
 QVariantMap RuntimeEvents::snapshot() const
@@ -371,7 +426,56 @@ QVariantMap RuntimeEvents::snapshot() const
     map.insert(QStringLiteral("pid"), pid());
     map.insert(QStringLiteral("rssBytes"), QVariant::fromValue(m_rssBytes));
     map.insert(QStringLiteral("uptimeMs"), QVariant::fromValue(m_uptimeMs));
+    map.insert(QStringLiteral("daemonBootEpochMs"), QVariant::fromValue(m_daemonBootEpochMs));
+    map.insert(QStringLiteral("eventSequence"), QVariant::fromValue(m_eventSequence));
+    map.insert(QStringLiteral("recentEventCount"), QVariant::fromValue(m_recentEvents.size()));
+    map.insert(QStringLiteral("lastEvent"), m_lastEvent);
     return map;
+}
+
+QVariantMap RuntimeEvents::daemonHealth() const
+{
+    QVariantMap map;
+    map.insert(QStringLiteral("running"), m_running);
+    map.insert(QStringLiteral("attachedWindow"), !m_window.isNull());
+    map.insert(QStringLiteral("bootEpochMs"), QVariant::fromValue(m_daemonBootEpochMs));
+    map.insert(QStringLiteral("eventSequence"), QVariant::fromValue(m_eventSequence));
+    map.insert(QStringLiteral("recentEventCount"), QVariant::fromValue(m_recentEvents.size()));
+    map.insert(QStringLiteral("recentEventCapacity"), QVariant::fromValue(m_recentEventCapacity));
+    map.insert(QStringLiteral("idle"), m_idle);
+    map.insert(QStringLiteral("idleForMs"), QVariant::fromValue(m_idleForMs));
+    map.insert(QStringLiteral("pid"), pid());
+    map.insert(QStringLiteral("lastEvent"), m_lastEvent);
+    return map;
+}
+
+QVariantList RuntimeEvents::recentEvents() const
+{
+    return m_recentEvents;
+}
+
+void RuntimeEvents::clearRecentEvents()
+{
+    if (m_recentEvents.isEmpty())
+        return;
+    m_recentEvents.clear();
+    emit eventLogChanged();
+}
+
+QVariantMap RuntimeEvents::hitTestUiAt(qreal globalX, qreal globalY) const
+{
+    QVariantMap hit = describeQuickItemAtGlobal(globalX, globalY);
+    if (!hit.isEmpty())
+        return hit;
+
+    QVariantMap fallback;
+    fallback.insert(QStringLiteral("globalX"), globalX);
+    fallback.insert(QStringLiteral("globalY"), globalY);
+    fallback.insert(QStringLiteral("insideWindow"), false);
+    fallback.insert(QStringLiteral("objectName"), QStringLiteral("unknown"));
+    fallback.insert(QStringLiteral("className"), QStringLiteral("unknown"));
+    fallback.insert(QStringLiteral("path"), QStringLiteral("unknown"));
+    return fallback;
 }
 
 bool RuntimeEvents::eventFilter(QObject *watched, QEvent *event)
@@ -392,6 +496,14 @@ bool RuntimeEvents::eventFilter(QObject *watched, QEvent *event)
                         static_cast<int>(keyEvent->modifiers()),
                         keyEvent->isAutoRepeat(),
                         keyEvent->text());
+        {
+            QVariantMap payload;
+            payload.insert(QStringLiteral("key"), keyEvent->key());
+            payload.insert(QStringLiteral("modifiers"), static_cast<int>(keyEvent->modifiers()));
+            payload.insert(QStringLiteral("autoRepeat"), keyEvent->isAutoRepeat());
+            payload.insert(QStringLiteral("text"), keyEvent->text());
+            recordRuntimeEvent(QStringLiteral("key-press"), payload);
+        }
         markActivity();
         break;
     }
@@ -407,6 +519,14 @@ bool RuntimeEvents::eventFilter(QObject *watched, QEvent *event)
                          static_cast<int>(keyEvent->modifiers()),
                          keyEvent->isAutoRepeat(),
                          keyEvent->text());
+        {
+            QVariantMap payload;
+            payload.insert(QStringLiteral("key"), keyEvent->key());
+            payload.insert(QStringLiteral("modifiers"), static_cast<int>(keyEvent->modifiers()));
+            payload.insert(QStringLiteral("autoRepeat"), keyEvent->isAutoRepeat());
+            payload.insert(QStringLiteral("text"), keyEvent->text());
+            recordRuntimeEvent(QStringLiteral("key-release"), payload);
+        }
         markActivity();
         break;
     }
@@ -419,6 +539,14 @@ bool RuntimeEvents::eventFilter(QObject *watched, QEvent *event)
                              static_cast<int>(mouseEvent->modifiers()));
         emit mouseChanged();
         emit mouseMoved(m_lastMouseX, m_lastMouseY, m_lastMouseButtons, m_lastMouseModifiers);
+        {
+            QVariantMap payload;
+            payload.insert(QStringLiteral("x"), m_lastMouseX);
+            payload.insert(QStringLiteral("y"), m_lastMouseY);
+            payload.insert(QStringLiteral("buttons"), m_lastMouseButtons);
+            payload.insert(QStringLiteral("modifiers"), m_lastMouseModifiers);
+            recordRuntimeEvent(QStringLiteral("mouse-move"), payload);
+        }
         markActivity();
         break;
     }
@@ -432,6 +560,15 @@ bool RuntimeEvents::eventFilter(QObject *watched, QEvent *event)
                              static_cast<int>(mouseEvent->modifiers()));
         emit mouseChanged();
         emit mousePressed(m_lastMouseX, m_lastMouseY, m_lastMouseButtons, m_lastMouseModifiers);
+        {
+            QVariantMap payload;
+            payload.insert(QStringLiteral("x"), m_lastMouseX);
+            payload.insert(QStringLiteral("y"), m_lastMouseY);
+            payload.insert(QStringLiteral("buttons"), m_lastMouseButtons);
+            payload.insert(QStringLiteral("modifiers"), m_lastMouseModifiers);
+            payload.insert(QStringLiteral("button"), static_cast<int>(mouseEvent->button()));
+            recordRuntimeEvent(QStringLiteral("mouse-press"), payload);
+        }
         markActivity();
         break;
     }
@@ -445,6 +582,15 @@ bool RuntimeEvents::eventFilter(QObject *watched, QEvent *event)
                              static_cast<int>(mouseEvent->modifiers()));
         emit mouseChanged();
         emit mouseReleased(m_lastMouseX, m_lastMouseY, m_lastMouseButtons, m_lastMouseModifiers);
+        {
+            QVariantMap payload;
+            payload.insert(QStringLiteral("x"), m_lastMouseX);
+            payload.insert(QStringLiteral("y"), m_lastMouseY);
+            payload.insert(QStringLiteral("buttons"), m_lastMouseButtons);
+            payload.insert(QStringLiteral("modifiers"), m_lastMouseModifiers);
+            payload.insert(QStringLiteral("button"), static_cast<int>(mouseEvent->button()));
+            recordRuntimeEvent(QStringLiteral("mouse-release"), payload);
+        }
         markActivity();
         break;
     }
@@ -463,6 +609,15 @@ bool RuntimeEvents::eventFilter(QObject *watched, QEvent *event)
                               m_lastMouseY,
                               m_lastMouseModifiers,
                               static_cast<int>(contextEvent->reason()));
+        {
+            QVariantMap payload;
+            payload.insert(QStringLiteral("x"), m_lastMouseX);
+            payload.insert(QStringLiteral("y"), m_lastMouseY);
+            payload.insert(QStringLiteral("modifiers"), m_lastMouseModifiers);
+            payload.insert(QStringLiteral("buttons"), buttons);
+            payload.insert(QStringLiteral("reason"), static_cast<int>(contextEvent->reason()));
+            recordRuntimeEvent(QStringLiteral("context-requested"), payload);
+        }
         markActivity();
         break;
     }
@@ -475,6 +630,14 @@ bool RuntimeEvents::eventFilter(QObject *watched, QEvent *event)
                              m_lastMouseModifiers);
         emit mouseChanged();
         emit mouseMoved(m_lastMouseX, m_lastMouseY, m_lastMouseButtons, m_lastMouseModifiers);
+        {
+            QVariantMap payload;
+            payload.insert(QStringLiteral("x"), m_lastMouseX);
+            payload.insert(QStringLiteral("y"), m_lastMouseY);
+            payload.insert(QStringLiteral("buttons"), m_lastMouseButtons);
+            payload.insert(QStringLiteral("modifiers"), m_lastMouseModifiers);
+            recordRuntimeEvent(QStringLiteral("hover-move"), payload);
+        }
         markActivity();
         break;
     }
@@ -549,6 +712,13 @@ void RuntimeEvents::handleTrackedDestroyed(const QObject *object)
     m_lastUiClassName = info.className;
     emit uiChanged();
     emit uiEvent(m_lastUiEvent, m_lastUiObjectName, m_lastUiClassName, false);
+
+    QVariantMap payload;
+    payload.insert(QStringLiteral("eventType"), m_lastUiEvent);
+    payload.insert(QStringLiteral("objectName"), m_lastUiObjectName);
+    payload.insert(QStringLiteral("className"), m_lastUiClassName);
+    payload.insert(QStringLiteral("visible"), false);
+    recordRuntimeEvent(QStringLiteral("ui-event"), payload);
 }
 
 void RuntimeEvents::recordUiEvent(const QString &eventType, const QObject *object, bool visible)
@@ -571,6 +741,13 @@ void RuntimeEvents::recordUiEvent(const QString &eventType, const QObject *objec
     m_lastUiClassName = info.className;
     emit uiChanged();
     emit uiEvent(eventType, info.objectName, info.className, visible);
+
+    QVariantMap payload;
+    payload.insert(QStringLiteral("eventType"), eventType);
+    payload.insert(QStringLiteral("objectName"), info.objectName);
+    payload.insert(QStringLiteral("className"), info.className);
+    payload.insert(QStringLiteral("visible"), visible);
+    recordRuntimeEvent(QStringLiteral("ui-event"), payload);
 }
 
 void RuntimeEvents::updateMouseFromEvent(qreal x, qreal y, int buttons, int modifiers)
@@ -619,6 +796,8 @@ void RuntimeEvents::handleOsTick()
 
     if (changed)
         emit osStatsChanged();
+
+    emit daemonHeartbeat(nowEpochMs(), m_uptimeMs, m_eventSequence);
 }
 
 void RuntimeEvents::updateIdleState(bool nextIdle)
@@ -665,4 +844,126 @@ qint64 RuntimeEvents::sampleResidentSetBytes() const
 #else
     return -1;
 #endif
+}
+
+void RuntimeEvents::recordRuntimeEvent(const QString &eventType, const QVariantMap &payload)
+{
+    QVariantMap eventData;
+    m_eventSequence += 1;
+    eventData.insert(QStringLiteral("sequence"), QVariant::fromValue(m_eventSequence));
+    eventData.insert(QStringLiteral("type"), eventType);
+    eventData.insert(QStringLiteral("timestampEpochMs"), QVariant::fromValue(nowEpochMs()));
+    eventData.insert(QStringLiteral("uptimeMs"),
+                     QVariant::fromValue(m_uptimeTimer.isValid() ? m_uptimeTimer.elapsed() : 0));
+    if (!payload.isEmpty())
+        eventData.insert(QStringLiteral("payload"), payload);
+
+    m_lastEvent = eventData;
+    pushRecentEvent(eventData);
+
+    emit daemonStateChanged();
+    emit eventRecorded(eventData);
+    emit eventLogChanged();
+}
+
+void RuntimeEvents::pushRecentEvent(const QVariantMap &eventData)
+{
+    if (m_recentEventCapacity <= 0)
+        return;
+    while (m_recentEvents.size() >= m_recentEventCapacity)
+        m_recentEvents.removeFirst();
+    m_recentEvents.append(eventData);
+}
+
+QVariantMap RuntimeEvents::describeQuickItemAtGlobal(qreal globalX, qreal globalY) const
+{
+    QVariantMap map;
+    if (!m_window)
+        return map;
+
+    QQuickWindow *window = m_window.data();
+    if (!window)
+        return map;
+
+    QQuickItem *content = window->contentItem();
+    if (!content)
+        return map;
+
+    const QPoint windowPoint = window->mapFromGlobal(QPoint(qRound(globalX), qRound(globalY)));
+    const QPointF scenePos(windowPoint.x(), windowPoint.y());
+    const bool insideWindow = scenePos.x() >= 0.0
+        && scenePos.y() >= 0.0
+        && scenePos.x() <= static_cast<qreal>(window->width())
+        && scenePos.y() <= static_cast<qreal>(window->height());
+
+    map.insert(QStringLiteral("globalX"), globalX);
+    map.insert(QStringLiteral("globalY"), globalY);
+    map.insert(QStringLiteral("windowX"), scenePos.x());
+    map.insert(QStringLiteral("windowY"), scenePos.y());
+    map.insert(QStringLiteral("insideWindow"), insideWindow);
+
+    if (!insideWindow)
+        return map;
+
+    QQuickItem *hitItem = deepestVisibleChildAt(content, scenePos);
+    if (!hitItem)
+        hitItem = content;
+
+    const QPointF localPos = hitItem->mapFromScene(scenePos);
+    map.insert(QStringLiteral("localX"), localPos.x());
+    map.insert(QStringLiteral("localY"), localPos.y());
+
+    QString objectName = hitItem->objectName().trimmed();
+    if (objectName.isEmpty())
+        objectName = QStringLiteral("unnamed");
+    map.insert(QStringLiteral("objectName"), objectName);
+    map.insert(QStringLiteral("className"), QString::fromLatin1(hitItem->metaObject()->className()));
+    map.insert(QStringLiteral("path"), quickItemPath(hitItem, content));
+    map.insert(QStringLiteral("enabled"), hitItem->isEnabled());
+    map.insert(QStringLiteral("visible"), hitItem->isVisible());
+
+    const QVariant textProp = hitItem->property("text");
+    if (textProp.isValid())
+        map.insert(QStringLiteral("text"), textProp.toString());
+    const QVariant labelProp = hitItem->property("label");
+    if (labelProp.isValid())
+        map.insert(QStringLiteral("label"), labelProp.toString());
+    const QVariant titleProp = hitItem->property("title");
+    if (titleProp.isValid())
+        map.insert(QStringLiteral("title"), titleProp.toString());
+
+    return map;
+}
+
+QQuickItem *RuntimeEvents::deepestVisibleChildAt(QQuickItem *item, const QPointF &scenePos) const
+{
+    if (!item || !item->isVisible())
+        return nullptr;
+
+    const QPointF itemPos = item->mapFromScene(scenePos);
+    QQuickItem *child = item->childAt(itemPos.x(), itemPos.y());
+    if (!child)
+        return item;
+
+    QQuickItem *deepest = deepestVisibleChildAt(child, scenePos);
+    return deepest ? deepest : child;
+}
+
+QString RuntimeEvents::quickItemPath(const QQuickItem *item, const QQuickItem *rootItem) const
+{
+    if (!item)
+        return QStringLiteral("unknown");
+
+    QStringList parts;
+    const QQuickItem *cursor = item;
+    while (cursor) {
+        QString name = cursor->objectName().trimmed();
+        const QString className = QString::fromLatin1(cursor->metaObject()->className());
+        parts.prepend(name.isEmpty() ? className : className + QLatin1Char(':') + name);
+        if (cursor == rootItem)
+            break;
+        cursor = cursor->parentItem();
+    }
+
+    return parts.join(QStringLiteral(" > "));
 }

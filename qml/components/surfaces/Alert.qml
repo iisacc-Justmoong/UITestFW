@@ -19,9 +19,12 @@ Item {
     property int maxWidth: Theme.dialogMaxWidth
     property int minWidth: Theme.dialogMinWidth
     property color backdropColor: Theme.overlayBackdrop
-    property color cardBackgroundColor: "#2C2D30"
-    property color cardFrameColor: "#5A5D63"
+    property color cardBackgroundColor: Theme.subSurface
+    property color cardFrameColor: Theme.accentSlateMuted
     property real cardFrameWidth: Theme.strokeThin
+    property color appIconBackgroundColor: "#C9D4DB"
+    property color appIconFrameColor: "#E8F0F5"
+    property color appIconInnerColor: "#D8E0E6"
 
     readonly property int preferredWidth: 328
     readonly property int sidePadding: Theme.gap24
@@ -80,156 +83,164 @@ Item {
                                  Math.min(root.preferredWidth,
                                           root.width - (root.sidePadding * 2))))
         radius: Theme.radiusLg
-        color: root.cardBackgroundColor
-        border.width: root.cardFrameWidth
-        border.color: root.cardFrameColor
+        color: root.cardFrameColor
+        border.width: 0
         antialiasing: true
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.verticalCenter: parent.verticalCenter
 
-        Column {
-            id: contentColumn
-            width: parent.width
-            spacing: Theme.gap8
-            topPadding: 32
+        Rectangle {
+            id: alertSurface
+            anchors.fill: parent
+            anchors.margins: root.cardFrameWidth
+            radius: Math.max(0, alertCard.radius - root.cardFrameWidth)
+            color: root.cardBackgroundColor
+            antialiasing: true
 
-            Item {
-                width: parent.width
-                height: 64
+            Column {
+                id: contentColumn
+                anchors.fill: parent
+                spacing: Theme.gap8
+                topPadding: 32
 
-                Rectangle {
-                    width: 48
-                    height: 48
-                    radius: 10
-                    anchors.centerIn: parent
-                    color: "#C9D4DB"
-                    border.width: 4
-                    border.color: "#E8F0F5"
+                Item {
+                    width: parent.width
+                    height: 64
 
                     Rectangle {
-                        anchors.fill: parent
-                        anchors.margins: 2
-                        radius: 8
-                        color: "#D8E0E6"
-                        opacity: 0.42
+                        width: 48
+                        height: 48
+                        radius: 10
+                        anchors.centerIn: parent
+                        color: root.appIconBackgroundColor
+                        border.width: 4
+                        border.color: root.appIconFrameColor
+
+                        Rectangle {
+                            anchors.fill: parent
+                            anchors.margins: 2
+                            radius: 8
+                            color: root.appIconInnerColor
+                            opacity: 0.42
+                        }
                     }
                 }
-            }
 
-            Item {
-                width: parent.width
-                implicitHeight: textColumn.implicitHeight
+                Item {
+                    width: parent.width
+                    implicitHeight: textColumn.implicitHeight
 
-                Column {
-                    id: textColumn
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    width: parent.width - (Theme.gap24 * 2)
-                    spacing: Theme.gap12
+                    Column {
+                        id: textColumn
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        width: parent.width - (Theme.gap24 * 2)
+                        spacing: Theme.gap12
 
-                    Label {
-                        style: title2
-                        text: root.title
-                        visible: root.title.length > 0
-                        color: Theme.textPrimary
-                        wrapMode: Text.WordWrap
-                        width: parent.width
-                        horizontalAlignment: Text.AlignHCenter
-                    }
+                        Label {
+                            style: title2
+                            text: root.title
+                            visible: root.title.length > 0
+                            color: Theme.textPrimary
+                            wrapMode: Text.WordWrap
+                            width: parent.width
+                            horizontalAlignment: Text.AlignHCenter
+                        }
 
-                    Label {
-                        style: body
-                        text: root.message
-                        visible: root.message.length > 0
-                        color: Theme.textSecondary
-                        wrapMode: Text.WordWrap
-                        width: parent.width
-                        horizontalAlignment: Text.AlignHCenter
+                        Label {
+                            style: body
+                            text: root.message
+                            visible: root.message.length > 0
+                            color: Theme.textSecondary
+                            wrapMode: Text.WordWrap
+                            width: parent.width
+                            horizontalAlignment: Text.AlignHCenter
+                        }
                     }
                 }
-            }
 
-            Item {
-                width: parent.width
-                readonly property real actionContentHeight: root.useVerticalActionLayout
-                    ? verticalActions.implicitHeight
-                    : root.hasSecondaryAction
-                        ? horizontalActions.implicitHeight
-                        : singleActionButton.implicitHeight
-                implicitHeight: actionContentHeight + (Theme.gap24 * 2)
+                Item {
+                    width: parent.width
+                    readonly property real actionContentHeight: root.useVerticalActionLayout
+                        ? verticalActions.implicitHeight
+                        : root.hasSecondaryAction
+                            ? horizontalActions.implicitHeight
+                            : singleActionButton.implicitHeight
+                    implicitHeight: actionContentHeight + (Theme.gap24 * 2)
 
-                Column {
-                    id: verticalActions
-                    visible: root.useVerticalActionLayout
-                    x: Theme.gap24
-                    y: Theme.gap24
-                    width: parent.width - (Theme.gap24 * 2)
-                    spacing: Theme.gap12
+                    Column {
+                        id: verticalActions
+                        visible: root.useVerticalActionLayout
+                        x: Theme.gap24
+                        y: Theme.gap24
+                        width: parent.width - (Theme.gap24 * 2)
+                        spacing: Theme.gap12
+
+                        AlertButton {
+                            visible: root.primaryText.length > 0
+                            width: parent.width
+                            text: root.primaryText
+                            tone: AbstractButton.Primary
+                            enabled: root.primaryEnabled
+                            onClicked: root.primaryClicked()
+                        }
+
+                        AlertButton {
+                            visible: root.hasSecondaryAction
+                            width: parent.width
+                            text: root.secondaryText
+                            tone: AbstractButton.Default
+                            enabled: root.secondaryEnabled
+                            onClicked: root.secondaryClicked()
+                        }
+
+                        AlertButton {
+                            visible: root.hasTertiaryAction
+                            width: parent.width
+                            text: root.tertiaryText
+                            tone: AbstractButton.Default
+                            enabled: root.tertiaryEnabled
+                            onClicked: root.tertiaryClicked()
+                        }
+                    }
+
+                    Row {
+                        id: horizontalActions
+                        visible: !root.useVerticalActionLayout && root.hasSecondaryAction
+                        x: Theme.gap24
+                        y: Theme.gap24
+                        width: parent.width - (Theme.gap24 * 2)
+                        spacing: Theme.gap12
+                        readonly property real buttonWidth: (width - spacing) / 2
+
+                        AlertButton {
+                            width: horizontalActions.buttonWidth
+                            text: root.primaryText
+                            tone: AbstractButton.Primary
+                            enabled: root.primaryEnabled
+                            onClicked: root.primaryClicked()
+                        }
+
+                        AlertButton {
+                            width: horizontalActions.buttonWidth
+                            visible: root.hasSecondaryAction
+                            text: root.secondaryText
+                            tone: AbstractButton.Default
+                            enabled: root.secondaryEnabled
+                            onClicked: root.secondaryClicked()
+                        }
+                    }
 
                     AlertButton {
-                        visible: root.primaryText.length > 0
-                        width: parent.width
+                        id: singleActionButton
+                        visible: !root.useVerticalActionLayout && !root.hasSecondaryAction && root.primaryText.length > 0
+                        x: Theme.gap24
+                        y: Theme.gap24
+                        width: parent.width - (Theme.gap24 * 2)
                         text: root.primaryText
                         tone: AbstractButton.Primary
                         enabled: root.primaryEnabled
                         onClicked: root.primaryClicked()
                     }
-
-                    AlertButton {
-                        visible: root.hasSecondaryAction
-                        width: parent.width
-                        text: root.secondaryText
-                        tone: AbstractButton.Default
-                        enabled: root.secondaryEnabled
-                        onClicked: root.secondaryClicked()
-                    }
-
-                    AlertButton {
-                        visible: root.hasTertiaryAction
-                        width: parent.width
-                        text: root.tertiaryText
-                        tone: AbstractButton.Default
-                        enabled: root.tertiaryEnabled
-                        onClicked: root.tertiaryClicked()
-                    }
-                }
-
-                Row {
-                    id: horizontalActions
-                    visible: !root.useVerticalActionLayout && root.hasSecondaryAction
-                    x: Theme.gap24
-                    y: Theme.gap24
-                    width: parent.width - (Theme.gap24 * 2)
-                    spacing: Theme.gap12
-                    readonly property real buttonWidth: (width - spacing) / 2
-
-                    AlertButton {
-                        width: horizontalActions.buttonWidth
-                        text: root.primaryText
-                        tone: AbstractButton.Primary
-                        enabled: root.primaryEnabled
-                        onClicked: root.primaryClicked()
-                    }
-
-                    AlertButton {
-                        width: horizontalActions.buttonWidth
-                        visible: root.hasSecondaryAction
-                        text: root.secondaryText
-                        tone: AbstractButton.Default
-                        enabled: root.secondaryEnabled
-                        onClicked: root.secondaryClicked()
-                    }
-                }
-
-                AlertButton {
-                    id: singleActionButton
-                    visible: !root.useVerticalActionLayout && !root.hasSecondaryAction && root.primaryText.length > 0
-                    x: Theme.gap24
-                    y: Theme.gap24
-                    width: parent.width - (Theme.gap24 * 2)
-                    text: root.primaryText
-                    tone: AbstractButton.Primary
-                    enabled: root.primaryEnabled
-                    onClicked: root.primaryClicked()
                 }
             }
         }

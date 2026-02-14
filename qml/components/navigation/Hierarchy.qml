@@ -100,6 +100,12 @@ Rectangle {
         }
     }
 
+    WheelScrollGuard {
+        anchors.fill: parent
+        targetFlickable: listViewport
+        consumeInside: true
+    }
+
     Connections {
         target: hierarchyList
         function onEnsureVisibleRequested(y, height) {

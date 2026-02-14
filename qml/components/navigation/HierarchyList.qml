@@ -33,7 +33,6 @@ Item {
     property int generatedItemWidth: 200
     property int generatedIconSize: 16
     property int generatedChevronSize: 16
-    property bool treeExpandOnRowClick: true
     property bool autoExpandAncestorsOnActivate: true
 
     readonly property bool usingTreeModel: modelCount(model) > 0
@@ -535,8 +534,7 @@ Item {
                                                                  rowHeight: control.generatedRowHeight,
                                                                  itemWidth: control.generatedItemWidth,
                                                                  iconSize: control.generatedIconSize,
-                                                                 chevronSize: control.generatedChevronSize,
-                                                                 expandOnRowClick: control.treeExpandOnRowClick
+                                                                 chevronSize: control.generatedChevronSize
                                                              })
             if (item)
                 _generatedItems.push(item)
@@ -673,7 +671,6 @@ Item {
     onGeneratedItemWidthChanged: Qt.callLater(rebuildTreeItems)
     onGeneratedIconSizeChanged: Qt.callLater(rebuildTreeItems)
     onGeneratedChevronSizeChanged: Qt.callLater(rebuildTreeItems)
-    onTreeExpandOnRowClickChanged: Qt.callLater(rebuildTreeItems)
     onActiveItemIdChanged: Qt.callLater(normalizeActiveItem)
     onActiveItemKeyChanged: Qt.callLater(normalizeActiveItem)
 

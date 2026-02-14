@@ -4,7 +4,7 @@ import LVRS 1.0
 Item {
     id: root
 
-    // Supported triggers: clicked, pressed, released, entered, exited, hoverChanged, keyPressed, keyReleased, globalPressed, globalContextRequested
+    // Supported triggers: clicked, pressed, released, entered, exited, hoverChanged, wheel, keyPressed, keyReleased, globalPressed, globalContextRequested
     property string trigger: "clicked"
     property var action: null
     property var payload: ({})
@@ -13,6 +13,7 @@ Item {
     property bool macControlClickAsRight: true
     property int contextDedupMs: 180
     property real contextDedupTolerancePx: 2.0
+    property bool includeUiHit: true
     property double lastContextTimestamp: -1
     property real lastContextX: -1
     property real lastContextY: -1
@@ -26,6 +27,10 @@ Item {
     function isPointerTrigger(name) {
         return name === "clicked" || name === "pressed" || name === "released"
             || name === "entered" || name === "exited" || name === "hoverChanged"
+    }
+
+    function isWheelTrigger(name) {
+        return name === "wheel"
     }
 
     function isKeyTrigger(name) {
@@ -45,7 +50,7 @@ Item {
     }
 
     function globalMousePayload(x, y, buttons, modifiers) {
-        return {
+        const data = {
             x: x,
             y: y,
             globalX: x,
@@ -54,6 +59,42 @@ Item {
             modifiers: modifiers,
             isGlobal: true
         }
+        if (root.includeUiHit)
+            data.ui = root.resolveUiAt(x, y)
+        return data
+    }
+
+    function resolveUiAt(globalX, globalY) {
+        if (!root.includeUiHit || !RuntimeEvents || !RuntimeEvents.hitTestUiAt)
+            return ({})
+        return RuntimeEvents.hitTestUiAt(globalX, globalY)
+    }
+
+    function pointerGlobalPosition(mouse) {
+        if (mouse && mouse.globalX !== undefined && mouse.globalY !== undefined)
+            return Qt.point(mouse.globalX, mouse.globalY)
+        const localX = mouse && mouse.x !== undefined ? mouse.x : 0
+        const localY = mouse && mouse.y !== undefined ? mouse.y : 0
+        if (root.mapToGlobal)
+            return root.mapToGlobal(Qt.point(localX, localY))
+        return Qt.point(localX, localY)
+    }
+
+    function pointerPayload(mouse) {
+        const globalPoint = pointerGlobalPosition(mouse)
+        const data = {
+            x: mouse && mouse.x !== undefined ? mouse.x : globalPoint.x,
+            y: mouse && mouse.y !== undefined ? mouse.y : globalPoint.y,
+            globalX: globalPoint.x,
+            globalY: globalPoint.y,
+            button: mouse && mouse.button !== undefined ? mouse.button : Qt.NoButton,
+            buttons: mouse && mouse.buttons !== undefined ? mouse.buttons : Qt.NoButton,
+            modifiers: mouse && mouse.modifiers !== undefined ? mouse.modifiers : Qt.NoModifier,
+            isGlobal: false
+        }
+        if (root.includeUiHit)
+            data.ui = root.resolveUiAt(globalPoint.x, globalPoint.y)
+        return data
     }
 
     function isDuplicateContextEvent(x, y, nowMs) {
@@ -125,15 +166,15 @@ Item {
 
         onClicked: {
             if (root.trigger === "clicked")
-                root.fire(mouse)
+                root.fire(root.pointerPayload(mouse))
         }
         onPressed: {
             if (root.trigger === "pressed")
-                root.fire(mouse)
+                root.fire(root.pointerPayload(mouse))
         }
         onReleased: {
             if (root.trigger === "released")
-                root.fire(mouse)
+                root.fire(root.pointerPayload(mouse))
         }
         onEntered: {
             if (root.trigger === "entered")
@@ -146,6 +187,14 @@ Item {
         onContainsMouseChanged: {
             if (root.trigger === "hoverChanged")
                 root.fire({ containsMouse: containsMouse })
+        }
+    }
+
+    WheelHandler {
+        enabled: root.enabled && root.isWheelTrigger(root.trigger)
+        acceptedDevices: PointerDevice.Mouse | PointerDevice.TouchPad
+        onWheel: function(event) {
+            root.fire(event)
         }
     }
 

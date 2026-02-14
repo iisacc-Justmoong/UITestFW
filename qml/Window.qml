@@ -78,6 +78,7 @@ Window {
             RenderQuality.applyWindow(root)
     }
     onAutoAttachRuntimeEventsChanged: {
+        RuntimeEvents.start()
         if (autoAttachRuntimeEvents)
             RuntimeEvents.attachWindow(root)
     }
@@ -106,6 +107,7 @@ Window {
                 if (SvgManager.minimumScale < root.effectiveSupersampleScale)
                     SvgManager.minimumScale = root.effectiveSupersampleScale
             }
+            RuntimeEvents.start()
             if (root.autoAttachRuntimeEvents)
                 RuntimeEvents.attachWindow(root)
             Debug.log("Window", "created")

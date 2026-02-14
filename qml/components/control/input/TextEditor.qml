@@ -184,6 +184,12 @@ FocusScope {
             }
         }
 
+        WheelScrollGuard {
+            anchors.fill: parent
+            targetFlickable: flickable
+            consumeInside: true
+        }
+
         Label {
             style: body
             anchors.left: parent.left
@@ -251,6 +257,12 @@ FocusScope {
             ScrollBar.vertical: ScrollBar {
                 policy: control.showScrollBar ? ScrollBar.AsNeeded : ScrollBar.AlwaysOff
             }
+        }
+
+        WheelScrollGuard {
+            anchors.fill: parent
+            targetFlickable: previewFlick
+            consumeInside: true
         }
     }
 

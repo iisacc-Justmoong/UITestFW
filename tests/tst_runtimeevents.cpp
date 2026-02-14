@@ -18,6 +18,7 @@ class RuntimeEventsTests : public QObject
 private slots:
     void runtime_events_are_exposed_and_idle_transitions();
     void keyboard_and_mouse_events_are_captured();
+    void daemon_contract_is_exposed_to_qml();
 };
 
 static QObject *createFromQml(QQmlEngine &engine, const QByteArray &qml)
@@ -60,6 +61,9 @@ LV.ApplicationWindow {
     property int uiHiddenCount: LV.RuntimeEvents.uiHiddenCount
     property double uptimeMs: LV.RuntimeEvents.uptimeMs
     property double rssBytes: LV.RuntimeEvents.rssBytes
+    property double daemonBootEpochMs: LV.RuntimeEvents.daemonBootEpochMs
+    property int eventSequence: LV.RuntimeEvents.eventSequence
+    property int recentEventCount: LV.RuntimeEvents.recentEventCount
 
     function resetMonitor() {
         LV.RuntimeEvents.resetCounters()
@@ -69,6 +73,15 @@ LV.ApplicationWindow {
 
     function pokeActivity() {
         LV.RuntimeEvents.markActivity()
+    }
+
+    function clearEventLog() {
+        LV.RuntimeEvents.clearRecentEvents()
+    }
+
+    function daemonHealthRunning() {
+        const health = LV.RuntimeEvents.daemonHealth()
+        return !!health.running
     }
 }
 )";
@@ -88,6 +101,12 @@ void RuntimeEventsTests::runtime_events_are_exposed_and_idle_transitions()
     QVERIFY(root->property("pid").toInt() > 0);
     QVERIFY(!root->property("osLabel").toString().isEmpty());
     QVERIFY(root->property("uiCreatedCount").toInt() > 0);
+    QVERIFY(root->property("daemonBootEpochMs").toDouble() > 0.0);
+    QVariant runningFromHealth;
+    QVERIFY(QMetaObject::invokeMethod(root.data(),
+                                      "daemonHealthRunning",
+                                      Q_RETURN_ARG(QVariant, runningFromHealth)));
+    QVERIFY(runningFromHealth.toBool());
 
     QVERIFY(QMetaObject::invokeMethod(root.data(), "resetMonitor"));
     QTRY_VERIFY(root->property("uptimeMs").toDouble() >= 0.0);
@@ -116,6 +135,7 @@ void RuntimeEventsTests::keyboard_and_mouse_events_are_captured()
     const int mouseMoveBefore = root->property("mouseMoveCount").toInt();
     const int mousePressBefore = root->property("mousePressCount").toInt();
     const int mouseReleaseBefore = root->property("mouseReleaseCount").toInt();
+    const int seqBefore = root->property("eventSequence").toInt();
 
     QKeyEvent keyPress(QEvent::KeyPress, Qt::Key_A, Qt::NoModifier, QStringLiteral("a"));
     QKeyEvent keyRelease(QEvent::KeyRelease, Qt::Key_A, Qt::NoModifier, QStringLiteral("a"));
@@ -152,6 +172,29 @@ void RuntimeEventsTests::keyboard_and_mouse_events_are_captured()
     QTRY_VERIFY(root->property("mouseMoveCount").toInt() > mouseMoveBefore);
     QTRY_VERIFY(root->property("mousePressCount").toInt() > mousePressBefore);
     QTRY_VERIFY(root->property("mouseReleaseCount").toInt() > mouseReleaseBefore);
+    QTRY_VERIFY(root->property("eventSequence").toInt() > seqBefore);
+    QTRY_VERIFY(root->property("recentEventCount").toInt() > 0);
+}
+
+void RuntimeEventsTests::daemon_contract_is_exposed_to_qml()
+{
+    QQmlEngine engine;
+    const QString importBase = QDir::cleanPath(QCoreApplication::applicationDirPath() + "/..");
+    engine.addImportPath(importBase);
+
+    QScopedPointer<QObject> root = createRuntimeWindow(engine);
+    QVERIFY(root);
+
+    QTRY_VERIFY(root->property("running").toBool());
+    QVERIFY(root->property("daemonBootEpochMs").toDouble() > 0.0);
+    QVariant runningFromHealth;
+    QVERIFY(QMetaObject::invokeMethod(root.data(),
+                                      "daemonHealthRunning",
+                                      Q_RETURN_ARG(QVariant, runningFromHealth)));
+    QVERIFY(runningFromHealth.toBool());
+
+    QVERIFY(QMetaObject::invokeMethod(root.data(), "clearEventLog"));
+    QTRY_COMPARE(root->property("recentEventCount").toInt(), 0);
 }
 
 QTEST_MAIN(RuntimeEventsTests)

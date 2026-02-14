@@ -22,7 +22,6 @@ AbstractButton {
     property bool showChevron: true
     property bool expanded: false
     property bool selected: false
-    property bool expandOnRowClick: false
 
     property int indentLevel: 0
     property int indentStep: 13
@@ -72,8 +71,6 @@ AbstractButton {
     backgroundColorDisabled: rowBackgroundColor
 
     onClicked: {
-        if (control.expandOnRowClick && control.showChevron && control.enabled)
-            control.expanded = !control.expanded
         if (hierarchyList && hierarchyList.requestActivate)
             hierarchyList.requestActivate(control)
     }

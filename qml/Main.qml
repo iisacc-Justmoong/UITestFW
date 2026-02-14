@@ -116,11 +116,14 @@ LV.ApplicationWindow {
     readonly property int runtimeConsoleNavigationCount: runtimeConsoleCountByCategory("navigation")
     readonly property int runtimeConsoleSystemCount: runtimeConsoleCountByCategory("system")
     property var eventMonitorLastSample: ({ trigger: "boot", source: "system", timestampEpochMs: 0, payload: ({}) })
-    property var eventMonitorSamples: []
     property int eventMonitorMaxSamples: 48
     property bool eventMonitorPaused: false
     property bool eventMonitorAutoScroll: true
-    readonly property int eventMonitorSampleCount: eventMonitorSamples.length
+    readonly property int eventMonitorSampleCount: eventMonitorSamplesModel.count
+
+    ListModel {
+        id: eventMonitorSamplesModel
+    }
     property int demoPageIndex: 2
     readonly property var demoPages: [
         {
@@ -314,18 +317,26 @@ LV.ApplicationWindow {
         if (eventMonitorPaused)
             return
 
-        const samples = eventMonitorSamples.slice()
-        samples.push(entry)
-        if (samples.length > eventMonitorMaxSamples) {
-            const overflow = samples.length - eventMonitorMaxSamples
-            samples.splice(0, overflow)
+        eventMonitorSamplesModel.append(entry)
+        if (eventMonitorSamplesModel.count > eventMonitorMaxSamples) {
+            const overflow = eventMonitorSamplesModel.count - eventMonitorMaxSamples
+            eventMonitorSamplesModel.remove(0, overflow)
         }
-        eventMonitorSamples = samples
+        eventMonitorScrollToBottomIfNeeded()
     }
 
     function eventMonitorClear() {
-        eventMonitorSamples = []
+        eventMonitorSamplesModel.clear()
         eventMonitorLastSample = ({ trigger: "cleared", source: "system", timestampEpochMs: Date.now(), payload: ({}) })
+        eventMonitorScrollToBottomIfNeeded()
+    }
+
+    function eventMonitorScrollToBottomIfNeeded() {
+        if (!eventMonitorAutoScroll)
+            return
+        if (!eventMonitorViewport)
+            return
+        eventMonitorViewport.contentY = Math.max(0, eventMonitorViewport.contentHeight - eventMonitorViewport.height)
     }
 
     function openDemoContextMenuAtGlobal(globalX, globalY) {
@@ -766,14 +777,6 @@ LV.ApplicationWindow {
             return
         root.activeContextMenuItems = root.contextMenuItemsForEvent(eventData)
         root.openDemoContextMenuAtGlobal(x, y)
-    }
-
-    onEventMonitorSamplesChanged: {
-        if (!eventMonitorAutoScroll)
-            return
-        if (!eventMonitorViewport)
-            return
-        eventMonitorViewport.contentY = Math.max(0, eventMonitorViewport.contentHeight - eventMonitorViewport.height)
     }
 
     Component.onCompleted: {
@@ -1618,10 +1621,13 @@ LV.ApplicationWindow {
                                     spacing: LV.Theme.gap6
 
                                     Repeater {
-                                        model: root.eventMonitorSamples
+                                        model: eventMonitorSamplesModel
 
                                         delegate: Rectangle {
-                                            required property var modelData
+                                            required property string trigger
+                                            required property string source
+                                            required property double timestampEpochMs
+                                            required property var payload
                                             width: parent.width
                                             radius: LV.Theme.radiusSm
                                             color: LV.Theme.surfaceAlt
@@ -1639,8 +1645,8 @@ LV.ApplicationWindow {
                                                     width: parent.width
                                                     style: description
                                                     color: LV.Theme.textPrimary
-                                                    text: "[" + root.runtimeConsoleTimestamp(modelData.timestampEpochMs) + "] "
-                                                        + modelData.trigger + " @ " + modelData.source
+                                                    text: "[" + root.runtimeConsoleTimestamp(timestampEpochMs) + "] "
+                                                        + trigger + " @ " + source
                                                     elide: Text.ElideRight
                                                 }
 
@@ -1648,7 +1654,7 @@ LV.ApplicationWindow {
                                                     width: parent.width
                                                     style: disabled
                                                     color: LV.Theme.textTertiary
-                                                    text: "target=" + root.eventMonitorUiTargetText(modelData.payload)
+                                                    text: "target=" + root.eventMonitorUiTargetText(payload)
                                                     wrapMode: Text.WordWrap
                                                 }
 
@@ -1656,7 +1662,7 @@ LV.ApplicationWindow {
                                                     width: parent.width
                                                     style: disabled
                                                     color: LV.Theme.textTertiary
-                                                    text: root.eventMonitorJson(modelData.payload || ({}))
+                                                    text: root.eventMonitorJson(payload || ({}))
                                                     wrapMode: Text.WordWrap
                                                 }
                                             }

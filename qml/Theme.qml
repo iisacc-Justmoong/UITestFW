@@ -88,48 +88,37 @@ QtObject {
     readonly property color strokeSoft: "#D0D7E2"
     // Accent palette (all fill/stroke colors found in resources/iconset)
     readonly property color accentTransparent: "transparent" // none
-    readonly property color accentWhite: "#FFFFFF" // white
-    readonly property color accentHexCed0d6: "#CED0D6"
-    readonly property color accentHex548af7: "#548AF7"
-    readonly property color accentHexDb5c5c: "#DB5C5C"
-    readonly property color accentHex43454a: "#43454A"
-    readonly property color accentHex57965c: "#57965C"
-    readonly property color accentHex25324d: "#25324D"
-    readonly property color accentHexC77d55: "#C77D55"
-    readonly property color accentHex253627: "#253627"
-    readonly property color accentHexF2c55c: "#F2C55C"
-    readonly property color accentHex402929: "#402929"
-    readonly property color accentHex868a91: "#868A91"
-    readonly property color accentHexD6ae58: "#D6AE58"
-    readonly property color accentHex45322b: "#45322B"
-    readonly property color accentHexA571e6: "#A571E6"
-    readonly property color accentHex3d3223: "#3D3223"
-    readonly property color accentHex1e1f22: "#1E1F22"
-    readonly property color accentHexB4b8bf: "#B4B8BF"
-    readonly property color accentHex3574f0: "#3574F0"
-    readonly property color accentHex2f2936: "#2F2936"
-    readonly property color accentHexF0f1f2: "#F0F1F2"
-    readonly property color accentHexE55765: "#E55765"
-    readonly property color accentHex5e3838: "#5E3838"
-    readonly property color accentHex5a5d63: "#5A5D63"
-    readonly property color accentHex55a76a: "#55A76A"
-    readonly property color accentHexBd5757: "#BD5757"
-    readonly property color accentHex9c4e4e: "#9C4E4E"
-    readonly property color accentHex7a4343: "#7A4343"
-    readonly property color accentHex6f737a: "#6F737A"
-    readonly property color accentHex6c707e: "#6C707E"
-    readonly property color accentHex375239: "#375239"
-
-    // Common aliases for frequently used accent colors
-    readonly property color accentNeutral: accentHexCed0d6
-    readonly property color accentBlue: accentHex548af7
-    readonly property color accentRed: accentHexDb5c5c
-    readonly property color accentSlate: accentHex43454a
-    readonly property color accentGreen: accentHex57965c
-    readonly property color accentBlueMuted: accentHex25324d
-    readonly property color accentOrange: accentHexC77d55
-    readonly property color accentGreenMuted: accentHex253627
-    readonly property color accentYellow: accentHexF2c55c
+    readonly property color accentWhite: "#FFFFFF"
+    readonly property color accentGrayLight: "#CED0D6"
+    readonly property color accentBlue: "#548AF7"
+    readonly property color accentRed: "#DB5C5C"
+    readonly property color accentSlate: "#43454A"
+    readonly property color accentGreen: "#57965C"
+    readonly property color accentBlueMuted: "#25324D"
+    readonly property color accentOrangeMuted: "#C77D55"
+    readonly property color accentGreenMuted: "#253627"
+    readonly property color accentYellow: "#F2C55C"
+    readonly property color accentRedBrownDark: "#402929"
+    readonly property color accentGray: "#868A91"
+    readonly property color accentYellowMuted: "#D6AE58"
+    readonly property color accentBrownMuted: "#45322B"
+    readonly property color accentPurple: "#A571E6"
+    readonly property color accentBrownDarker: "#3D3223"
+    readonly property color accentCharcoal: "#1E1F22"
+    readonly property color accentGrayPale: "#B4B8BF"
+    readonly property color accentBlueBright: "#3574F0"
+    readonly property color accentPurpleDarker: "#2F2936"
+    readonly property color accentGrayBright: "#F0F1F2"
+    readonly property color accentRose: "#E55765"
+    readonly property color accentRoseDarker: "#5E3838"
+    readonly property color accentGrayMuted: "#5A5D63"
+    readonly property color accentGreenBright: "#55A76A"
+    readonly property color accentRedMuted: "#BD5757"
+    readonly property color accentRedDark: "#9C4E4E"
+    readonly property color accentRedDarker: "#7A4343"
+    readonly property color accentSlateMuted: "#6F737A"
+    readonly property color accentSlateDarker: "#6C707E"
+    readonly property color accentGreenDarker: "#375239"
 
     //ContextMenu
 

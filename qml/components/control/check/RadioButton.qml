@@ -93,10 +93,6 @@ AbstractButton {
         }
     }
 
-    QtObject {
-        Component.onCompleted: Debug.log("RadioButton", "created")
-    }
-
 }
 
 // API usage (external):

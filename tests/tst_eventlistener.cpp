@@ -74,6 +74,7 @@ LV.ApplicationWindow {
     id: root
     width: 240
     height: 140
+    autoAttachRuntimeEvents: true
     visible: false
     title: "EventListenerGlobalContextTest"
 
@@ -154,6 +155,7 @@ LV.ApplicationWindow {
     id: root
     width: 240
     height: 140
+    autoAttachRuntimeEvents: true
     visible: false
     title: "ApplicationWindowGlobalSignalTest"
 
@@ -208,6 +210,7 @@ LV.ApplicationWindow {
     id: root
     width: 260
     height: 170
+    autoAttachRuntimeEvents: true
     visible: true
     title: "ContextMenuDismissTest"
 

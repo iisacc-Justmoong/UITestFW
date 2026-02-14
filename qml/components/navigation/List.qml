@@ -132,10 +132,6 @@ Item {
             }
         }
     }
-
-    QtObject {
-        Component.onCompleted: Debug.log("List", "created")
-    }
 }
 
 // API usage (external):

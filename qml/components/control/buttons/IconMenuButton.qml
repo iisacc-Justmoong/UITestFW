@@ -127,10 +127,6 @@ AbstractButton {
         }
     }
 
-    QtObject {
-        Component.onCompleted: Debug.log("IconMenuButton", "created")
-    }
-
 }
 
 // API usage (external):

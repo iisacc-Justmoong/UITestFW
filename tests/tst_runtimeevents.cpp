@@ -46,6 +46,7 @@ LV.ApplicationWindow {
     id: root
     width: 640
     height: 420
+    autoAttachRuntimeEvents: true
     visible: false
     title: "RuntimeEventsTest"
 

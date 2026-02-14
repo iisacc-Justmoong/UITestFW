@@ -65,10 +65,6 @@ AbstractButton {
         }
     }
 
-    QtObject {
-        Component.onCompleted: Debug.log("LabelMenuButton", "created")
-    }
-
 }
 
 // API usage (external):

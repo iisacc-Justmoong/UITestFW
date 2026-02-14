@@ -75,9 +75,6 @@ Item {
             _minHeight = minLength
         }
     }
-    QtObject {
-        Component.onCompleted: Debug.log("Spacer", "created")
-    }
 
 }
 

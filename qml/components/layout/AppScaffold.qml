@@ -437,7 +437,6 @@ Item {
     }
     QtObject {
         Component.onCompleted: {
-            Debug.log("AppScaffold", "created")
             root.syncNavIndexToCurrentPath()
         }
     }

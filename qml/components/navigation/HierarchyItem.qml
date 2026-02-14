@@ -206,7 +206,6 @@ AbstractButton {
         Component.onCompleted: {
             if (control.hierarchyList && control.hierarchyList.registerItem)
                 control.hierarchyList.registerItem(control)
-            Debug.log("HierarchyItem", "created")
         }
     }
 }

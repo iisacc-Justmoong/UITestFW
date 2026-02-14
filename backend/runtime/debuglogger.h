@@ -105,7 +105,7 @@ private:
     RuntimeEvents *resolveRuntimeEvents() const;
     static QString normalizedToken(const QString &value);
     static int levelPriority(const QString &level);
-    QVariantMap appendEntry(const QVariantMap &entry);
+    QVariantMap appendEntry(const QVariantMap &entry, bool forceAppend = false);
     QVariantMap makeLogEntry(const QString &level,
                              const QString &component,
                              const QString &event,

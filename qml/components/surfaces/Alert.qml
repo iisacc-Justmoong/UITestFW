@@ -251,7 +251,6 @@ Item {
             root._fallbackParent = root.parent
             root.refreshLayerParent()
             Qt.callLater(root.refreshLayerParent)
-            Debug.log("Alert", "created")
         }
     }
 }

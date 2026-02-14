@@ -82,9 +82,6 @@ AbstractButton {
     onEnabledChanged: checkmarkCanvas.requestPaint()
     onCheckColorChanged: checkmarkCanvas.requestPaint()
     onCheckMarkColorDisabledChanged: checkmarkCanvas.requestPaint()
-    QtObject {
-        Component.onCompleted: Debug.log("CheckBox", "created")
-    }
 
 }
 

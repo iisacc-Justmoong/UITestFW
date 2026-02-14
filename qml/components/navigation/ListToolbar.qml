@@ -100,10 +100,6 @@ Item {
             }
         }
     }
-
-    QtObject {
-        Component.onCompleted: Debug.log("ListToolbar", "created")
-    }
 }
 
 // API usage (external):

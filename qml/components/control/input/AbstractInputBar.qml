@@ -180,10 +180,6 @@ FocusScope {
             mouse.accepted = false
         }
     }
-
-    QtObject {
-        Component.onCompleted: Debug.log("AbstractInputBar", "created")
-    }
 }
 
 // API usage (external):

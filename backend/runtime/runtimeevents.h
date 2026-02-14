@@ -203,6 +203,9 @@ private:
     qint64 nowEpochMs() const;
     qint64 elapsedSinceEpoch(qint64 epochMs) const;
     qint64 sampleResidentSetBytes() const;
+    bool isHighFrequencyEventType(const QString &eventType) const;
+    bool shouldSkipHighFrequencyRecord(const QString &eventType, qint64 epochMs);
+    void scheduleRuntimeStateSignals();
     void recordRuntimeEvent(const QString &eventType, const QVariantMap &payload = QVariantMap());
     void pushRecentEvent(const QVariantMap &eventData);
     QVariantMap describeQuickItemAtGlobal(qreal globalX, qreal globalY) const;
@@ -220,6 +223,7 @@ private:
 
     QTimer m_idleTimer;
     QTimer m_osTimer;
+    QTimer m_stateSignalTimer;
     QElapsedTimer m_uptimeTimer;
     qint64 m_lastActivityMonotonicMs = 0;
 
@@ -265,6 +269,10 @@ private:
     QVariantMap m_lastEvent;
     QVariantList m_recentEvents;
     int m_recentEventCapacity = 256;
+    int m_highFrequencyEventMinIntervalMs = 16;
+    int m_runtimeStateSignalMinIntervalMs = 16;
+    QHash<QString, qint64> m_lastEventRecordedEpochByType;
+    bool m_runtimeStateSignalDirty = false;
 
     static RuntimeEvents *s_instance;
 };

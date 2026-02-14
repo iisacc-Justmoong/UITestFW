@@ -161,10 +161,6 @@ AbstractInputBar {
     onSearchIconVisibleChanged: searchIcon.requestPaint()
     onSearchIconColorChanged: searchIcon.requestPaint()
     onSearchIconStrokeWidthChanged: searchIcon.requestPaint()
-
-    QtObject {
-        Component.onCompleted: Debug.log("InputField", "created")
-    }
 }
 
 // API usage (external):

@@ -28,6 +28,7 @@ FocusScope {
     property bool autoFocusOnPress: true
 
     property int fieldMinHeight: Theme.controlHeightMd * 4
+    property int editorHeight: fieldMinHeight
     property int headerHeight: Theme.controlHeightSm
     property int insetHorizontal: Theme.gap10
     property int insetVertical: Theme.gap8
@@ -56,6 +57,7 @@ FocusScope {
     readonly property bool empty: editor.text.length === 0 && editor.preeditText.length === 0
     readonly property int headerBlockHeight: showSnippetHeader ? (headerHeight + headerSpacing) : 0
     readonly property int topInset: insetVertical + headerBlockHeight
+    readonly property int resolvedEditorHeight: Math.max(fieldMinHeight, editorHeight)
 
     signal textEdited(string text)
     signal submitted(string text)
@@ -92,7 +94,7 @@ FocusScope {
                        Theme.inputMinWidth,
                        editor.implicitWidth + insetHorizontal * 2
                    )
-    implicitHeight: Math.max(fieldMinHeight, editor.paintedHeight + topInset + insetVertical)
+    implicitHeight: resolvedEditorHeight
     activeFocusOnTab: true
 
     Rectangle {
@@ -210,10 +212,6 @@ FocusScope {
                 mouse.accepted = false
             }
         }
-    }
-
-    QtObject {
-        Component.onCompleted: Debug.log("CodeEditor", "created")
     }
 }
 

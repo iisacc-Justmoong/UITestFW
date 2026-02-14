@@ -11,8 +11,6 @@
 #include <QSignalSpy>
 #include <QtPlugin>
 
-#include <utility>
-
 #include "backend/runtime/debuglogger.h"
 #include "backend/runtime/renderingmonitor.h"
 #include "backend/runtime/runtimeevents.h"
@@ -35,16 +33,6 @@ private slots:
     void render_monitor_active_signal_and_destroy_path();
     void debug_logger_enabled_signal_and_message_format();
 };
-
-namespace {
-QStringList *g_capturedLogs = nullptr;
-
-void messageCaptureHandler(QtMsgType type, const QMessageLogContext &, const QString &msg)
-{
-    if (type == QtInfoMsg && g_capturedLogs)
-        g_capturedLogs->append(msg);
-}
-}
 
 void RuntimeServicesTests::runtime_events_measurement_boundaries()
 {
@@ -344,32 +332,34 @@ void RuntimeServicesTests::debug_logger_enabled_signal_and_message_format()
     QCOMPARE(enabledSpy.count(), 1);
     logger.setEnabled(true);
     QCOMPARE(enabledSpy.count(), 1);
-    logger.setStdoutMinimumLevel(QStringLiteral("LOG"));
-
-    QStringList captured;
-    g_capturedLogs = &captured;
-    const auto previousHandler = qInstallMessageHandler(messageCaptureHandler);
 
     logger.log(QString(), QString(), 42);
     logger.warn(QStringLiteral("Runtime"), QStringLiteral("warning"));
     logger.error(QString(), QStringLiteral("failure"));
 
-    qInstallMessageHandler(previousHandler);
-    g_capturedLogs = nullptr;
+    const QVariantList entries = logger.entries();
+    QCOMPARE(entries.size(), 3);
+
+    const QVariantMap logEntry = entries.at(0).toMap();
+    QCOMPARE(logEntry.value(QStringLiteral("level")).toString(), QStringLiteral("LOG"));
+    QCOMPARE(logEntry.value(QStringLiteral("component")).toString(), QStringLiteral("Unknown"));
+    QCOMPARE(logEntry.value(QStringLiteral("event")).toString(), QStringLiteral("event"));
+    QVERIFY(logEntry.value(QStringLiteral("message")).toString().contains(QStringLiteral("Unknown.event")));
+
+    const QVariantMap warnEntry = entries.at(1).toMap();
+    QCOMPARE(warnEntry.value(QStringLiteral("level")).toString(), QStringLiteral("WARN"));
+    QCOMPARE(warnEntry.value(QStringLiteral("component")).toString(), QStringLiteral("Runtime"));
+    QCOMPARE(warnEntry.value(QStringLiteral("event")).toString(), QStringLiteral("warning"));
+
+    const QVariantMap errorEntry = entries.at(2).toMap();
+    QCOMPARE(errorEntry.value(QStringLiteral("level")).toString(), QStringLiteral("ERROR"));
+    QCOMPARE(errorEntry.value(QStringLiteral("component")).toString(), QStringLiteral("Unknown"));
+    QCOMPARE(errorEntry.value(QStringLiteral("event")).toString(), QStringLiteral("failure"));
+
     logger.setEnabled(false);
     QCOMPARE(enabledSpy.count(), 2);
-
-    bool sawLog = false;
-    bool sawWarn = false;
-    bool sawError = false;
-    for (const QString &line : std::as_const(captured)) {
-        sawLog = sawLog || (line.contains(QStringLiteral("[LOG]")) && line.contains(QStringLiteral("Unknown.event")));
-        sawWarn = sawWarn || (line.contains(QStringLiteral("[WARN]")) && line.contains(QStringLiteral("Runtime.warning")));
-        sawError = sawError || (line.contains(QStringLiteral("[ERROR]")) && line.contains(QStringLiteral("Unknown.failure")));
-    }
-    QVERIFY(sawLog);
-    QVERIFY(sawWarn);
-    QVERIFY(sawError);
+    logger.log(QStringLiteral("PostDisable"), QStringLiteral("ignored"));
+    QCOMPARE(logger.entries().size(), 3);
 }
 
 QTEST_MAIN(RuntimeServicesTests)

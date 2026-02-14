@@ -18,10 +18,6 @@ Item {
         height: control.thickness
         color: control.dividerColor
     }
-
-    QtObject {
-        Component.onCompleted: Debug.log("MenuDivider", "created")
-    }
 }
 
 // API usage (external):

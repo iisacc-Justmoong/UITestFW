@@ -744,7 +744,6 @@ Item {
                 control.rebuildTreeItems()
             else
                 control.normalizeActiveItem()
-            Debug.log("HierarchyList", "created")
         }
     }
 }

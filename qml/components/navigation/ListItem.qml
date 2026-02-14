@@ -109,10 +109,6 @@ AbstractButton {
 
     onShowChevronChanged: chevronNode.requestPaint()
     onEnabledChanged: chevronNode.requestPaint()
-
-    QtObject {
-        Component.onCompleted: Debug.log("ListItem", "created")
-    }
 }
 
 // API usage (external):

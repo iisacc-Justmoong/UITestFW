@@ -119,9 +119,6 @@ Item {
             root.updateAlignment()
         }
     }
-    QtObject {
-        Component.onCompleted: Debug.log("ZStack", "created")
-    }
 
 }
 

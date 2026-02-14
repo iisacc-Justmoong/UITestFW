@@ -56,6 +56,7 @@ LV.ApplicationWindow {
     id: root
     width: 520
     height: 560
+    autoAttachRuntimeEvents: true
     desktopMinWidth: 0
     desktopMinHeight: 0
     mobileMinWidth: 0

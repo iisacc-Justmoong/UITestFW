@@ -158,10 +158,6 @@ Item {
             })
     }
 
-    QtObject {
-        Component.onCompleted: Debug.log("Label", "created")
-    }
-
 }
 
 // API usage (external):

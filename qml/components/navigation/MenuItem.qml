@@ -179,9 +179,6 @@ AbstractButton {
     onChevronColorChanged: chevronCanvas.requestPaint()
     onShowChevronChanged: chevronCanvas.requestPaint()
     onEnabledChanged: chevronCanvas.requestPaint()
-    QtObject {
-        Component.onCompleted: Debug.log("MenuItem", "created")
-    }
 }
 
 // API usage (external):

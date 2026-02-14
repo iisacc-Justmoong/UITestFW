@@ -142,7 +142,6 @@ Item {
     QtObject {
         Component.onCompleted: {
             control.normalizeActiveButton()
-            Debug.log("HierarchyToolbar", "created")
         }
     }
 }

@@ -71,9 +71,6 @@ Rectangle {
             implicitHeight: Math.max(1, childrenRect.height)
         }
     }
-    QtObject {
-        Component.onCompleted: Debug.log("AppCard", "created")
-    }
 
 }
 

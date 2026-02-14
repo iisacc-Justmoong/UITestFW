@@ -28,7 +28,7 @@ Window {
     property bool forceNativeDarkTitleBar: Theme.dark
     property bool solidChrome: true
     property bool autoApplyRenderQuality: true
-    property bool autoAttachRuntimeEvents: true
+    property bool autoAttachRuntimeEvents: false
 
     readonly property real effectiveSupersampleScale: autoApplyRenderQuality && RenderQuality.enabled
         ? Math.max(RenderQuality.minimumSupersampleScale,
@@ -78,9 +78,10 @@ Window {
             RenderQuality.applyWindow(root)
     }
     onAutoAttachRuntimeEventsChanged: {
+        if (!autoAttachRuntimeEvents)
+            return
         RuntimeEvents.start()
-        if (autoAttachRuntimeEvents)
-            RuntimeEvents.attachWindow(root)
+        RuntimeEvents.attachWindow(root)
     }
 
     Item {
@@ -107,10 +108,10 @@ Window {
                 if (SvgManager.minimumScale < root.effectiveSupersampleScale)
                     SvgManager.minimumScale = root.effectiveSupersampleScale
             }
-            RuntimeEvents.start()
-            if (root.autoAttachRuntimeEvents)
+            if (root.autoAttachRuntimeEvents) {
+                RuntimeEvents.start()
                 RuntimeEvents.attachWindow(root)
-            Debug.log("Window", "created")
+            }
             Debug.log("Window", "supersample-scale", root.effectiveSupersampleScale)
             root.applyNativeWindowStyle()
             Qt.callLater(root.applyNativeWindowStyle)

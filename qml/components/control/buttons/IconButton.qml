@@ -101,9 +101,6 @@ AbstractButton {
             Layout.alignment: Qt.AlignVCenter
         }
     }
-    QtObject {
-        Component.onCompleted: Debug.log("IconButton", "created")
-    }
 
 }
 

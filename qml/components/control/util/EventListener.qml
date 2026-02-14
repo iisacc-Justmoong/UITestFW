@@ -16,7 +16,7 @@ Item {
     property int contextDedupMs: 180
     property real contextDedupTolerancePx: 2.0
     property bool includeUiHit: true
-    property bool preferBackendState: true
+    property bool preferBackendState: false
     property bool includeBackendSummary: false
     property double lastContextTimestamp: -1
     property real lastContextX: -1
@@ -216,7 +216,6 @@ Item {
     onEnabledChanged: root.ensureKeyFocus()
     Component.onCompleted: {
         root.ensureKeyFocus()
-        root.ensureBackendHooked()
     }
 
     Connections {

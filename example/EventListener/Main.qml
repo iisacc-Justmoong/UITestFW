@@ -6,6 +6,7 @@ LV.ApplicationWindow {
     visible: true
     width: 920
     height: 920
+    autoAttachRuntimeEvents: true
     title: "EventListener Examples"
     subtitle: "Real-time monitor enabled"
     navigationEnabled: false

@@ -115,10 +115,6 @@ Rectangle {
             control.listItemExpanded(item, hierarchyList.effectiveItemId(item, index), index, expanded)
         }
     }
-
-    QtObject {
-        Component.onCompleted: Debug.log("Hierarchy", "created")
-    }
 }
 
 // API usage (external):

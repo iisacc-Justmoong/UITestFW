@@ -267,10 +267,6 @@ Controls.Popup {
             }
         }
     }
-
-    QtObject {
-        Component.onCompleted: Debug.log("ContextMenu", "created")
-    }
 }
 
 // API usage (external):

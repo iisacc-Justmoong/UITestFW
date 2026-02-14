@@ -77,9 +77,6 @@ ToolBar {
             Layout.alignment: Qt.AlignVCenter | Qt.AlignRight
         }
     }
-    QtObject {
-        Component.onCompleted: Debug.log("AppHeader", "created")
-    }
 
 }
 

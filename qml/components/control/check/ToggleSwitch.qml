@@ -100,10 +100,6 @@ Controls.Switch {
         elide: Text.ElideRight
     }
 
-    QtObject {
-        Component.onCompleted: Debug.log("ToggleSwitch", "created")
-    }
-
 }
 
 // API usage (external):

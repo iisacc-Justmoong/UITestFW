@@ -31,6 +31,9 @@ Controls.ApplicationWindow {
     property int safeMargin: usePlatformSafeMargin && isMobilePlatform ? 12 : 0
     property color windowColor: Theme.window
     property bool forceNativeDarkTitleBar: Theme.dark
+    property bool autoAttachRuntimeEvents: false
+    property bool autoHookBackendUserEvents: false
+    property bool globalEventListenersEnabled: true
 
     property string subtitle: ""
     property var navItems: ["Overview", "Suites", "Runs", "Devices", "Reports", "Settings"]
@@ -88,6 +91,18 @@ Controls.ApplicationWindow {
     }
     onWindowColorChanged: applyNativeWindowStyle()
     onForceNativeDarkTitleBarChanged: applyNativeWindowStyle()
+    onAutoAttachRuntimeEventsChanged: {
+        if (!autoAttachRuntimeEvents)
+            return
+        RuntimeEvents.start()
+        RuntimeEvents.attachWindow(root)
+    }
+    onAutoHookBackendUserEventsChanged: {
+        if (!autoHookBackendUserEvents)
+            return
+        if (!Backend.hookUserEvents())
+            Debug.warn("ApplicationWindow", "io-event-hook-failed", Backend.lastError)
+    }
 
     readonly property real effectiveSupersampleScale: RenderQuality.enabled
         ? Math.max(RenderQuality.minimumSupersampleScale,
@@ -122,6 +137,7 @@ Controls.ApplicationWindow {
     EventListener {
         id: globalPressedListener
         anchors.fill: parent
+        enabled: root.globalEventListenersEnabled
         trigger: "globalPressed"
         action: function(eventData) {
             root.lastGlobalPressedEventData = eventData || ({})
@@ -132,6 +148,7 @@ Controls.ApplicationWindow {
     EventListener {
         id: globalContextListener
         anchors.fill: parent
+        enabled: root.globalEventListenersEnabled
         trigger: "globalContextRequested"
         action: function(eventData) {
             root.lastGlobalContextEventData = eventData || ({})
@@ -145,13 +162,16 @@ Controls.ApplicationWindow {
             RenderQuality.applyWindow(root)
             if (SvgManager.minimumScale < root.effectiveSupersampleScale)
                 SvgManager.minimumScale = root.effectiveSupersampleScale
-            RuntimeEvents.start()
-            RuntimeEvents.attachWindow(root)
-            if (!Backend.hookUserEvents())
-                Debug.log("ApplicationWindow", "io-event-hook-failed", Backend.lastError)
-            else
-                Debug.log("ApplicationWindow", "io-event-hooked", Backend.hookedEventCount)
-            Debug.log("ApplicationWindow", "created")
+            if (root.autoAttachRuntimeEvents) {
+                RuntimeEvents.start()
+                RuntimeEvents.attachWindow(root)
+            }
+            if (root.autoHookBackendUserEvents) {
+                if (!Backend.hookUserEvents())
+                    Debug.warn("ApplicationWindow", "io-event-hook-failed", Backend.lastError)
+                else
+                    Debug.log("ApplicationWindow", "io-event-hooked", Backend.hookedEventCount)
+            }
             Debug.log("ApplicationWindow", "supersample-scale", root.effectiveSupersampleScale)
             root.applyNativeWindowStyle()
             Qt.callLater(root.applyNativeWindowStyle)

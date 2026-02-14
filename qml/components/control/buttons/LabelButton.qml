@@ -22,9 +22,6 @@ AbstractButton {
         verticalAlignment: Text.AlignVCenter
         elide: Text.ElideRight
     }
-    QtObject {
-        Component.onCompleted: Debug.log("LabelButton", "created")
-    }
 
 }
 

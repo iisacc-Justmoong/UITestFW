@@ -549,9 +549,6 @@ Item {
             setPathInternal(nextPush)
         }
     }
-    QtObject {
-        Component.onCompleted: Debug.log("PageRouter", "created")
-    }
 
 }
 

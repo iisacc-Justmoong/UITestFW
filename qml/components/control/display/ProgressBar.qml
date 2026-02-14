@@ -58,10 +58,6 @@ Item {
         border.color: "#14000000"
         antialiasing: true
     }
-
-    QtObject {
-        Component.onCompleted: Debug.log("ProgressBar", "created")
-    }
 }
 
 // API usage (external):

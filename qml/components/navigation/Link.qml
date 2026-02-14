@@ -73,9 +73,6 @@ AbstractButton {
             anchors.left: parent.left
         }
     }
-    QtObject {
-        Component.onCompleted: Debug.log("Link", "created")
-    }
 
 }
 

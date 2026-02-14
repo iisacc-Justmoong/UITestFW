@@ -105,9 +105,6 @@ Item {
             root.updateStackAxis()
         }
     }
-    QtObject {
-        Component.onCompleted: Debug.log("HStack", "created")
-    }
 
 }
 

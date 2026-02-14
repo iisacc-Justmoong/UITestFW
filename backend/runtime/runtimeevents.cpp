@@ -43,6 +43,20 @@ RuntimeEvents::RuntimeEvents(QObject *parent)
     m_osTimer.setTimerType(Qt::CoarseTimer);
     connect(&m_osTimer, &QTimer::timeout, this, &RuntimeEvents::handleOsTick);
 
+    m_stateSignalTimer.setSingleShot(true);
+    m_stateSignalTimer.setInterval(m_runtimeStateSignalMinIntervalMs);
+    m_stateSignalTimer.setTimerType(Qt::CoarseTimer);
+    connect(&m_stateSignalTimer,
+            &QTimer::timeout,
+            this,
+            [this]() {
+                if (!m_runtimeStateSignalDirty)
+                    return;
+                m_runtimeStateSignalDirty = false;
+                emit daemonStateChanged();
+                emit eventLogChanged();
+            });
+
     m_uptimeTimer.start();
     m_daemonBootEpochMs = nowEpochMs();
     m_lastActivityMonotonicMs = 0;
@@ -528,6 +542,8 @@ void RuntimeEvents::resetCounters()
     m_lastUiObjectName.clear();
     m_lastUiClassName.clear();
     emit uiChanged();
+
+    m_lastEventRecordedEpochByType.clear();
 
     m_idleForMs = 0;
     emit idleForMsChanged();
@@ -1236,13 +1252,45 @@ qint64 RuntimeEvents::sampleResidentSetBytes() const
 #endif
 }
 
+bool RuntimeEvents::isHighFrequencyEventType(const QString &eventType) const
+{
+    return eventType == QLatin1String("mouse-move")
+        || eventType == QLatin1String("hover-move");
+}
+
+bool RuntimeEvents::shouldSkipHighFrequencyRecord(const QString &eventType, qint64 epochMs)
+{
+    if (m_highFrequencyEventMinIntervalMs <= 0)
+        return false;
+    if (!isHighFrequencyEventType(eventType))
+        return false;
+
+    const qint64 lastEpochMs = m_lastEventRecordedEpochByType.value(eventType, -1);
+    if (lastEpochMs >= 0 && (epochMs - lastEpochMs) < m_highFrequencyEventMinIntervalMs)
+        return true;
+
+    m_lastEventRecordedEpochByType.insert(eventType, epochMs);
+    return false;
+}
+
+void RuntimeEvents::scheduleRuntimeStateSignals()
+{
+    m_runtimeStateSignalDirty = true;
+    if (!m_stateSignalTimer.isActive())
+        m_stateSignalTimer.start();
+}
+
 void RuntimeEvents::recordRuntimeEvent(const QString &eventType, const QVariantMap &payload)
 {
+    const qint64 epochMs = nowEpochMs();
+    if (shouldSkipHighFrequencyRecord(eventType, epochMs))
+        return;
+
     QVariantMap eventData;
     m_eventSequence += 1;
     eventData.insert(QStringLiteral("sequence"), QVariant::fromValue(m_eventSequence));
     eventData.insert(QStringLiteral("type"), eventType);
-    eventData.insert(QStringLiteral("timestampEpochMs"), QVariant::fromValue(nowEpochMs()));
+    eventData.insert(QStringLiteral("timestampEpochMs"), QVariant::fromValue(epochMs));
     eventData.insert(QStringLiteral("uptimeMs"),
                      QVariant::fromValue(m_uptimeTimer.isValid() ? m_uptimeTimer.elapsed() : 0));
     if (!payload.isEmpty())
@@ -1250,10 +1298,8 @@ void RuntimeEvents::recordRuntimeEvent(const QString &eventType, const QVariantM
 
     m_lastEvent = eventData;
     pushRecentEvent(eventData);
-
-    emit daemonStateChanged();
     emit eventRecorded(eventData);
-    emit eventLogChanged();
+    scheduleRuntimeStateSignals();
 }
 
 void RuntimeEvents::pushRecentEvent(const QVariantMap &eventData)

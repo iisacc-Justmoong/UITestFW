@@ -322,10 +322,12 @@ void DebugLogger::attachRuntimeEvents()
                                           [this](const QVariantMap &eventData) {
                                               if (!m_runtimeCaptureEnabled)
                                                   return;
+                                              if (!m_enabled)
+                                                  return;
                                               const QVariantMap appended = appendEntry(makeRuntimeEntry(eventData));
                                               if (appended.isEmpty())
                                                   return;
-                                              if (!m_enabled || !m_runtimeEchoEnabled)
+                                              if (!m_runtimeEchoEnabled)
                                                   return;
                                               const qint64 nowMs = appended.value(QStringLiteral("timestampEpochMs"))
                                                                     .toLongLong();
@@ -469,9 +471,11 @@ int DebugLogger::levelPriority(const QString &level)
     return 1;
 }
 
-QVariantMap DebugLogger::appendEntry(const QVariantMap &entry)
+QVariantMap DebugLogger::appendEntry(const QVariantMap &entry, bool forceAppend)
 {
     if (m_paused || entry.isEmpty())
+        return QVariantMap();
+    if (!forceAppend && !m_enabled)
         return QVariantMap();
 
     QVariantMap normalized = entry;
@@ -770,6 +774,8 @@ void DebugLogger::printEntryToStdout(const QVariantMap &entry)
 
 void DebugLogger::output(const QString &level, const QString &component, const QString &event, const QVariant &data)
 {
+    if (!m_enabled)
+        return;
     const QVariantMap entry = makeLogEntry(level, component, event, data);
     const QVariantMap appended = appendEntry(entry);
     if (appended.isEmpty())

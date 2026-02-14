@@ -271,10 +271,6 @@ FocusScope {
             consumeInside: true
         }
     }
-
-    QtObject {
-        Component.onCompleted: Debug.log("TextEditor", "created")
-    }
 }
 
 // API usage (external):

@@ -26,7 +26,6 @@ IconButton {
         Component.onCompleted: {
             if (control.toolbar && control.toolbar.registerButton)
                 control.toolbar.registerButton(control)
-            Debug.log("ToolbarButton", "created")
         }
     }
 }

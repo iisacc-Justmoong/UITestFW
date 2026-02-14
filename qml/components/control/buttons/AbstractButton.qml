@@ -107,10 +107,6 @@ Controls.AbstractButton {
         hoverEnabled: enabled
     }
 
-    QtObject {
-        Component.onCompleted: Debug.log("AbstractButton", "created")
-    }
-
 }
 
 // API usage (external):

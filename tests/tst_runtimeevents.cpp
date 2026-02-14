@@ -83,6 +83,10 @@ LV.ApplicationWindow {
         const health = LV.RuntimeEvents.daemonHealth()
         return !!health.running
     }
+
+    function inputStateSnapshot() {
+        return LV.RuntimeEvents.inputState()
+    }
 }
 )";
     return QScopedPointer<QObject>(createFromQml(engine, qml));
@@ -137,10 +141,12 @@ void RuntimeEventsTests::keyboard_and_mouse_events_are_captured()
     const int mouseReleaseBefore = root->property("mouseReleaseCount").toInt();
     const int seqBefore = root->property("eventSequence").toInt();
 
-    QKeyEvent keyPress(QEvent::KeyPress, Qt::Key_A, Qt::NoModifier, QStringLiteral("a"));
+    QKeyEvent keyPressShift(QEvent::KeyPress, Qt::Key_Shift, Qt::ShiftModifier, QString());
+    QKeyEvent keyPress(QEvent::KeyPress, Qt::Key_A, Qt::ShiftModifier, QStringLiteral("A"));
     QKeyEvent keyRelease(QEvent::KeyRelease, Qt::Key_A, Qt::NoModifier, QStringLiteral("a"));
+    QKeyEvent keyReleaseShift(QEvent::KeyRelease, Qt::Key_Shift, Qt::NoModifier, QString());
+    QCoreApplication::sendEvent(window, &keyPressShift);
     QCoreApplication::sendEvent(window, &keyPress);
-    QCoreApplication::sendEvent(window, &keyRelease);
 
     QMouseEvent mouseMove(QEvent::MouseMove,
                           QPointF(24.0, 20.0),
@@ -160,11 +166,28 @@ void RuntimeEventsTests::keyboard_and_mouse_events_are_captured()
                              QPointF(24.0, 20.0),
                              QPointF(24.0, 20.0),
                              QPointF(24.0, 20.0),
-                             Qt::LeftButton,
-                             Qt::NoButton,
-                             Qt::NoModifier);
+                           Qt::LeftButton,
+                           Qt::NoButton,
+                           Qt::NoModifier);
     QCoreApplication::sendEvent(window, &mouseMove);
     QCoreApplication::sendEvent(window, &mousePress);
+
+    QVariant inputStateValue;
+    QVERIFY(QMetaObject::invokeMethod(root.data(),
+                                      "inputStateSnapshot",
+                                      Q_RETURN_ARG(QVariant, inputStateValue)));
+    const QVariantMap inputState = inputStateValue.toMap();
+    QVERIFY(!inputState.isEmpty());
+    QVERIFY(inputState.value(QStringLiteral("anyKeyPressed")).toBool());
+    QVERIFY(inputState.value(QStringLiteral("mouseButtonPressed")).toBool());
+    QVERIFY(inputState.value(QStringLiteral("activePressDurationMs")).toLongLong() >= 0);
+    const QVariantMap pointerUi = inputState.value(QStringLiteral("pointerUi")).toMap();
+    QVERIFY(pointerUi.contains(QStringLiteral("objectName")));
+    const QVariantList pressedKeyCodes = inputState.value(QStringLiteral("pressedKeyCodes")).toList();
+    QVERIFY(pressedKeyCodes.contains(QVariant::fromValue(static_cast<int>(Qt::Key_A))));
+
+    QCoreApplication::sendEvent(window, &keyRelease);
+    QCoreApplication::sendEvent(window, &keyReleaseShift);
     QCoreApplication::sendEvent(window, &mouseRelease);
 
     QTRY_VERIFY(root->property("keyPressCount").toInt() > keyPressBefore);

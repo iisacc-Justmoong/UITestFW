@@ -1,5 +1,6 @@
 #include "backend/runtime/runtimeevents.h"
 
+#include <algorithm>
 #include <QChildEvent>
 #include <QCoreApplication>
 #include <QContextMenuEvent>
@@ -9,6 +10,7 @@
 #include <QGuiApplication>
 #include <QHoverEvent>
 #include <QKeyEvent>
+#include <QKeySequence>
 #include <QMouseEvent>
 #include <QQuickItem>
 #include <QQuickWindow>
@@ -95,6 +97,28 @@ bool RuntimeEvents::anyKeyPressed() const
     return !m_pressedKeys.isEmpty();
 }
 
+QStringList RuntimeEvents::pressedKeys() const
+{
+    QList<int> keys = m_pressedKeys.values();
+    std::sort(keys.begin(), keys.end());
+    QStringList names;
+    names.reserve(keys.size());
+    for (int key : keys)
+        names.append(keyLabelForCode(key));
+    return names;
+}
+
+QVariantList RuntimeEvents::pressedKeyCodes() const
+{
+    QList<int> keys = m_pressedKeys.values();
+    std::sort(keys.begin(), keys.end());
+    QVariantList codes;
+    codes.reserve(keys.size());
+    for (int key : keys)
+        codes.append(key);
+    return codes;
+}
+
 bool RuntimeEvents::isKeyPressed(int key) const
 {
     return m_pressedKeys.contains(key);
@@ -138,6 +162,89 @@ int RuntimeEvents::lastMouseModifiers() const
 bool RuntimeEvents::mouseButtonPressed() const
 {
     return m_mouseButtonPressed;
+}
+
+QVariantMap RuntimeEvents::pointerUi() const
+{
+    if (m_pointerUi.isEmpty())
+        return fallbackUiAt(m_lastMouseX, m_lastMouseY);
+    return m_pointerUi;
+}
+
+qint64 RuntimeEvents::lastMousePressEpochMs() const
+{
+    return m_lastMousePressEpochMs;
+}
+
+qint64 RuntimeEvents::lastMouseReleaseEpochMs() const
+{
+    return m_lastMouseReleaseEpochMs;
+}
+
+qint64 RuntimeEvents::mousePressElapsedMs() const
+{
+    return elapsedSinceEpoch(m_lastMousePressEpochMs);
+}
+
+qint64 RuntimeEvents::mouseReleaseElapsedMs() const
+{
+    return elapsedSinceEpoch(m_lastMouseReleaseEpochMs);
+}
+
+qint64 RuntimeEvents::activePressDurationMs() const
+{
+    if (!m_mouseButtonPressed || m_lastMousePressEpochMs < 0)
+        return 0;
+    return elapsedSinceEpoch(m_lastMousePressEpochMs);
+}
+
+QStringList RuntimeEvents::pressedMouseButtonNames() const
+{
+    return mouseButtonNames(m_lastMouseButtons);
+}
+
+int RuntimeEvents::activeModifiers() const
+{
+    int modifiers = m_lastMouseModifiers | m_lastKeyModifiers;
+    if (m_pressedKeys.contains(Qt::Key_Shift))
+        modifiers |= Qt::ShiftModifier;
+    if (m_pressedKeys.contains(Qt::Key_Control))
+        modifiers |= Qt::ControlModifier;
+    if (m_pressedKeys.contains(Qt::Key_Alt) || m_pressedKeys.contains(Qt::Key_AltGr))
+        modifiers |= Qt::AltModifier;
+    if (m_pressedKeys.contains(Qt::Key_Meta))
+        modifiers |= Qt::MetaModifier;
+    return modifiers;
+}
+
+QStringList RuntimeEvents::activeModifierNames() const
+{
+    return modifierNames(activeModifiers());
+}
+
+QVariantMap RuntimeEvents::inputState() const
+{
+    QVariantMap state;
+    state.insert(QStringLiteral("pointerGlobalX"), m_lastMouseX);
+    state.insert(QStringLiteral("pointerGlobalY"), m_lastMouseY);
+    state.insert(QStringLiteral("mouseButtons"), m_lastMouseButtons);
+    state.insert(QStringLiteral("mouseButtonPressed"), m_mouseButtonPressed);
+    state.insert(QStringLiteral("pressedMouseButtons"), mouseButtonNames(m_lastMouseButtons));
+    state.insert(QStringLiteral("lastMousePressEpochMs"), QVariant::fromValue(m_lastMousePressEpochMs));
+    state.insert(QStringLiteral("lastMouseReleaseEpochMs"), QVariant::fromValue(m_lastMouseReleaseEpochMs));
+    state.insert(QStringLiteral("mousePressElapsedMs"), QVariant::fromValue(mousePressElapsedMs()));
+    state.insert(QStringLiteral("mouseReleaseElapsedMs"), QVariant::fromValue(mouseReleaseElapsedMs()));
+    state.insert(QStringLiteral("activePressDurationMs"), QVariant::fromValue(activePressDurationMs()));
+    state.insert(QStringLiteral("pointerUi"), pointerUi());
+    state.insert(QStringLiteral("anyKeyPressed"), anyKeyPressed());
+    state.insert(QStringLiteral("pressedKeys"), pressedKeys());
+    state.insert(QStringLiteral("pressedKeyCodes"), pressedKeyCodes());
+    state.insert(QStringLiteral("activeModifiers"), activeModifiers());
+    state.insert(QStringLiteral("activeModifierNames"), activeModifierNames());
+    state.insert(QStringLiteral("lastKey"), m_lastKey);
+    state.insert(QStringLiteral("lastKeyText"), m_lastKeyText);
+    state.insert(QStringLiteral("lastKeyModifiers"), m_lastKeyModifiers);
+    return state;
 }
 
 quint64 RuntimeEvents::uiCreatedCount() const
@@ -318,6 +425,7 @@ void RuntimeEvents::stop()
     m_window.clear();
 
     detachTrackedObjects();
+    m_pointerUi = fallbackUiAt(m_lastMouseX, m_lastMouseY);
 
     m_idleTimer.stop();
     m_osTimer.stop();
@@ -355,11 +463,13 @@ void RuntimeEvents::attachWindow(QObject *window)
             [this]() {
                 m_window.clear();
                 detachTrackedObjects();
+                m_pointerUi = fallbackUiAt(m_lastMouseX, m_lastMouseY);
                 recordRuntimeEvent(QStringLiteral("window-detached"));
                 emit daemonStateChanged();
             });
 
     trackUiObjectRecursive(m_window);
+    updatePointerUiSnapshot();
 }
 
 void RuntimeEvents::markActivity()
@@ -391,6 +501,9 @@ void RuntimeEvents::resetCounters()
     m_lastMouseButtons = 0;
     m_lastMouseModifiers = 0;
     m_mouseButtonPressed = false;
+    m_lastMousePressEpochMs = -1;
+    m_lastMouseReleaseEpochMs = -1;
+    m_pointerUi = fallbackUiAt(m_lastMouseX, m_lastMouseY);
     emit mouseChanged();
 
     m_uiCreatedCount = 0;
@@ -430,6 +543,7 @@ QVariantMap RuntimeEvents::snapshot() const
     map.insert(QStringLiteral("eventSequence"), QVariant::fromValue(m_eventSequence));
     map.insert(QStringLiteral("recentEventCount"), QVariant::fromValue(m_recentEvents.size()));
     map.insert(QStringLiteral("lastEvent"), m_lastEvent);
+    map.insert(QStringLiteral("input"), inputState());
     return map;
 }
 
@@ -446,6 +560,7 @@ QVariantMap RuntimeEvents::daemonHealth() const
     map.insert(QStringLiteral("idleForMs"), QVariant::fromValue(m_idleForMs));
     map.insert(QStringLiteral("pid"), pid());
     map.insert(QStringLiteral("lastEvent"), m_lastEvent);
+    map.insert(QStringLiteral("input"), inputState());
     return map;
 }
 
@@ -467,15 +582,7 @@ QVariantMap RuntimeEvents::hitTestUiAt(qreal globalX, qreal globalY) const
     QVariantMap hit = describeQuickItemAtGlobal(globalX, globalY);
     if (!hit.isEmpty())
         return hit;
-
-    QVariantMap fallback;
-    fallback.insert(QStringLiteral("globalX"), globalX);
-    fallback.insert(QStringLiteral("globalY"), globalY);
-    fallback.insert(QStringLiteral("insideWindow"), false);
-    fallback.insert(QStringLiteral("objectName"), QStringLiteral("unknown"));
-    fallback.insert(QStringLiteral("className"), QStringLiteral("unknown"));
-    fallback.insert(QStringLiteral("path"), QStringLiteral("unknown"));
-    return fallback;
+    return fallbackUiAt(globalX, globalY);
 }
 
 bool RuntimeEvents::eventFilter(QObject *watched, QEvent *event)
@@ -499,9 +606,15 @@ bool RuntimeEvents::eventFilter(QObject *watched, QEvent *event)
         {
             QVariantMap payload;
             payload.insert(QStringLiteral("key"), keyEvent->key());
+            payload.insert(QStringLiteral("keyName"), keyLabelForCode(keyEvent->key()));
             payload.insert(QStringLiteral("modifiers"), static_cast<int>(keyEvent->modifiers()));
             payload.insert(QStringLiteral("autoRepeat"), keyEvent->isAutoRepeat());
             payload.insert(QStringLiteral("text"), keyEvent->text());
+            payload.insert(QStringLiteral("anyKeyPressed"), anyKeyPressed());
+            payload.insert(QStringLiteral("pressedKeys"), pressedKeys());
+            payload.insert(QStringLiteral("pressedKeyCodes"), pressedKeyCodes());
+            payload.insert(QStringLiteral("activeModifiers"), activeModifiers());
+            payload.insert(QStringLiteral("activeModifierNames"), activeModifierNames());
             recordRuntimeEvent(QStringLiteral("key-press"), payload);
         }
         markActivity();
@@ -522,9 +635,15 @@ bool RuntimeEvents::eventFilter(QObject *watched, QEvent *event)
         {
             QVariantMap payload;
             payload.insert(QStringLiteral("key"), keyEvent->key());
+            payload.insert(QStringLiteral("keyName"), keyLabelForCode(keyEvent->key()));
             payload.insert(QStringLiteral("modifiers"), static_cast<int>(keyEvent->modifiers()));
             payload.insert(QStringLiteral("autoRepeat"), keyEvent->isAutoRepeat());
             payload.insert(QStringLiteral("text"), keyEvent->text());
+            payload.insert(QStringLiteral("anyKeyPressed"), anyKeyPressed());
+            payload.insert(QStringLiteral("pressedKeys"), pressedKeys());
+            payload.insert(QStringLiteral("pressedKeyCodes"), pressedKeyCodes());
+            payload.insert(QStringLiteral("activeModifiers"), activeModifiers());
+            payload.insert(QStringLiteral("activeModifierNames"), activeModifierNames());
             recordRuntimeEvent(QStringLiteral("key-release"), payload);
         }
         markActivity();
@@ -544,7 +663,16 @@ bool RuntimeEvents::eventFilter(QObject *watched, QEvent *event)
             payload.insert(QStringLiteral("x"), m_lastMouseX);
             payload.insert(QStringLiteral("y"), m_lastMouseY);
             payload.insert(QStringLiteral("buttons"), m_lastMouseButtons);
+            payload.insert(QStringLiteral("pressedMouseButtons"), pressedMouseButtonNames());
             payload.insert(QStringLiteral("modifiers"), m_lastMouseModifiers);
+            payload.insert(QStringLiteral("activeModifiers"), activeModifiers());
+            payload.insert(QStringLiteral("activeModifierNames"), activeModifierNames());
+            payload.insert(QStringLiteral("mouseButtonPressed"), m_mouseButtonPressed);
+            const QVariantMap pointer = pointerUi();
+            payload.insert(QStringLiteral("pointerUi"), pointer);
+            payload.insert(QStringLiteral("pointerObjectName"), pointer.value(QStringLiteral("objectName")));
+            payload.insert(QStringLiteral("pointerClassName"), pointer.value(QStringLiteral("className")));
+            payload.insert(QStringLiteral("pointerPath"), pointer.value(QStringLiteral("path")));
             recordRuntimeEvent(QStringLiteral("mouse-move"), payload);
         }
         markActivity();
@@ -552,6 +680,7 @@ bool RuntimeEvents::eventFilter(QObject *watched, QEvent *event)
     }
     case QEvent::MouseButtonPress: {
         auto *mouseEvent = static_cast<QMouseEvent *>(event);
+        m_lastMousePressEpochMs = nowEpochMs();
         m_mousePressCount += 1;
         m_mouseButtonPressed = true;
         updateMouseFromEvent(mouseEvent->globalPosition().x(),
@@ -565,8 +694,18 @@ bool RuntimeEvents::eventFilter(QObject *watched, QEvent *event)
             payload.insert(QStringLiteral("x"), m_lastMouseX);
             payload.insert(QStringLiteral("y"), m_lastMouseY);
             payload.insert(QStringLiteral("buttons"), m_lastMouseButtons);
+            payload.insert(QStringLiteral("pressedMouseButtons"), pressedMouseButtonNames());
             payload.insert(QStringLiteral("modifiers"), m_lastMouseModifiers);
             payload.insert(QStringLiteral("button"), static_cast<int>(mouseEvent->button()));
+            payload.insert(QStringLiteral("mouseButtonPressed"), m_mouseButtonPressed);
+            payload.insert(QStringLiteral("lastMousePressEpochMs"), QVariant::fromValue(m_lastMousePressEpochMs));
+            payload.insert(QStringLiteral("mousePressElapsedMs"), QVariant::fromValue(mousePressElapsedMs()));
+            payload.insert(QStringLiteral("activePressDurationMs"), QVariant::fromValue(activePressDurationMs()));
+            const QVariantMap pointer = pointerUi();
+            payload.insert(QStringLiteral("pointerUi"), pointer);
+            payload.insert(QStringLiteral("pointerObjectName"), pointer.value(QStringLiteral("objectName")));
+            payload.insert(QStringLiteral("pointerClassName"), pointer.value(QStringLiteral("className")));
+            payload.insert(QStringLiteral("pointerPath"), pointer.value(QStringLiteral("path")));
             recordRuntimeEvent(QStringLiteral("mouse-press"), payload);
         }
         markActivity();
@@ -574,6 +713,7 @@ bool RuntimeEvents::eventFilter(QObject *watched, QEvent *event)
     }
     case QEvent::MouseButtonRelease: {
         auto *mouseEvent = static_cast<QMouseEvent *>(event);
+        m_lastMouseReleaseEpochMs = nowEpochMs();
         m_mouseReleaseCount += 1;
         m_mouseButtonPressed = false;
         updateMouseFromEvent(mouseEvent->globalPosition().x(),
@@ -587,8 +727,17 @@ bool RuntimeEvents::eventFilter(QObject *watched, QEvent *event)
             payload.insert(QStringLiteral("x"), m_lastMouseX);
             payload.insert(QStringLiteral("y"), m_lastMouseY);
             payload.insert(QStringLiteral("buttons"), m_lastMouseButtons);
+            payload.insert(QStringLiteral("pressedMouseButtons"), pressedMouseButtonNames());
             payload.insert(QStringLiteral("modifiers"), m_lastMouseModifiers);
             payload.insert(QStringLiteral("button"), static_cast<int>(mouseEvent->button()));
+            payload.insert(QStringLiteral("mouseButtonPressed"), m_mouseButtonPressed);
+            payload.insert(QStringLiteral("lastMouseReleaseEpochMs"), QVariant::fromValue(m_lastMouseReleaseEpochMs));
+            payload.insert(QStringLiteral("mouseReleaseElapsedMs"), QVariant::fromValue(mouseReleaseElapsedMs()));
+            const QVariantMap pointer = pointerUi();
+            payload.insert(QStringLiteral("pointerUi"), pointer);
+            payload.insert(QStringLiteral("pointerObjectName"), pointer.value(QStringLiteral("objectName")));
+            payload.insert(QStringLiteral("pointerClassName"), pointer.value(QStringLiteral("className")));
+            payload.insert(QStringLiteral("pointerPath"), pointer.value(QStringLiteral("path")));
             recordRuntimeEvent(QStringLiteral("mouse-release"), payload);
         }
         markActivity();
@@ -615,7 +764,13 @@ bool RuntimeEvents::eventFilter(QObject *watched, QEvent *event)
             payload.insert(QStringLiteral("y"), m_lastMouseY);
             payload.insert(QStringLiteral("modifiers"), m_lastMouseModifiers);
             payload.insert(QStringLiteral("buttons"), buttons);
+            payload.insert(QStringLiteral("pressedMouseButtons"), pressedMouseButtonNames());
             payload.insert(QStringLiteral("reason"), static_cast<int>(contextEvent->reason()));
+            const QVariantMap pointer = pointerUi();
+            payload.insert(QStringLiteral("pointerUi"), pointer);
+            payload.insert(QStringLiteral("pointerObjectName"), pointer.value(QStringLiteral("objectName")));
+            payload.insert(QStringLiteral("pointerClassName"), pointer.value(QStringLiteral("className")));
+            payload.insert(QStringLiteral("pointerPath"), pointer.value(QStringLiteral("path")));
             recordRuntimeEvent(QStringLiteral("context-requested"), payload);
         }
         markActivity();
@@ -635,7 +790,14 @@ bool RuntimeEvents::eventFilter(QObject *watched, QEvent *event)
             payload.insert(QStringLiteral("x"), m_lastMouseX);
             payload.insert(QStringLiteral("y"), m_lastMouseY);
             payload.insert(QStringLiteral("buttons"), m_lastMouseButtons);
+            payload.insert(QStringLiteral("pressedMouseButtons"), pressedMouseButtonNames());
             payload.insert(QStringLiteral("modifiers"), m_lastMouseModifiers);
+            payload.insert(QStringLiteral("mouseButtonPressed"), m_mouseButtonPressed);
+            const QVariantMap pointer = pointerUi();
+            payload.insert(QStringLiteral("pointerUi"), pointer);
+            payload.insert(QStringLiteral("pointerObjectName"), pointer.value(QStringLiteral("objectName")));
+            payload.insert(QStringLiteral("pointerClassName"), pointer.value(QStringLiteral("className")));
+            payload.insert(QStringLiteral("pointerPath"), pointer.value(QStringLiteral("path")));
             recordRuntimeEvent(QStringLiteral("hover-move"), payload);
         }
         markActivity();
@@ -756,6 +918,13 @@ void RuntimeEvents::updateMouseFromEvent(qreal x, qreal y, int buttons, int modi
     m_lastMouseY = y;
     m_lastMouseButtons = buttons;
     m_lastMouseModifiers = modifiers;
+    updatePointerUiSnapshot();
+}
+
+void RuntimeEvents::updatePointerUiSnapshot()
+{
+    QVariantMap hit = describeQuickItemAtGlobal(m_lastMouseX, m_lastMouseY);
+    m_pointerUi = hit.isEmpty() ? fallbackUiAt(m_lastMouseX, m_lastMouseY) : hit;
 }
 
 void RuntimeEvents::handleIdleTick()
@@ -815,6 +984,13 @@ void RuntimeEvents::updateIdleState(bool nextIdle)
 qint64 RuntimeEvents::nowEpochMs() const
 {
     return QDateTime::currentMSecsSinceEpoch();
+}
+
+qint64 RuntimeEvents::elapsedSinceEpoch(qint64 epochMs) const
+{
+    if (epochMs < 0)
+        return -1;
+    return qMax<qint64>(0, nowEpochMs() - epochMs);
 }
 
 qint64 RuntimeEvents::sampleResidentSetBytes() const
@@ -933,6 +1109,62 @@ QVariantMap RuntimeEvents::describeQuickItemAtGlobal(qreal globalX, qreal global
         map.insert(QStringLiteral("title"), titleProp.toString());
 
     return map;
+}
+
+QVariantMap RuntimeEvents::fallbackUiAt(qreal globalX, qreal globalY) const
+{
+    QVariantMap fallback;
+    fallback.insert(QStringLiteral("globalX"), globalX);
+    fallback.insert(QStringLiteral("globalY"), globalY);
+    fallback.insert(QStringLiteral("insideWindow"), false);
+    fallback.insert(QStringLiteral("objectName"), QStringLiteral("unknown"));
+    fallback.insert(QStringLiteral("className"), QStringLiteral("unknown"));
+    fallback.insert(QStringLiteral("path"), QStringLiteral("unknown"));
+    return fallback;
+}
+
+QString RuntimeEvents::keyLabelForCode(int key) const
+{
+    const QString named = QKeySequence(key).toString(QKeySequence::PortableText).trimmed();
+    if (!named.isEmpty())
+        return named;
+    return QStringLiteral("Key(%1)").arg(key);
+}
+
+QStringList RuntimeEvents::mouseButtonNames(int buttons) const
+{
+    QStringList names;
+    if (buttons & Qt::LeftButton)
+        names.append(QStringLiteral("Left"));
+    if (buttons & Qt::RightButton)
+        names.append(QStringLiteral("Right"));
+    if (buttons & Qt::MiddleButton)
+        names.append(QStringLiteral("Middle"));
+    if (buttons & Qt::BackButton)
+        names.append(QStringLiteral("Back"));
+    if (buttons & Qt::ForwardButton)
+        names.append(QStringLiteral("Forward"));
+    if (buttons & Qt::ExtraButton1)
+        names.append(QStringLiteral("Extra1"));
+    if (buttons & Qt::ExtraButton2)
+        names.append(QStringLiteral("Extra2"));
+    return names;
+}
+
+QStringList RuntimeEvents::modifierNames(int modifiers) const
+{
+    QStringList names;
+    if (modifiers & Qt::ShiftModifier)
+        names.append(QStringLiteral("Shift"));
+    if (modifiers & Qt::ControlModifier)
+        names.append(QStringLiteral("Ctrl"));
+    if (modifiers & Qt::AltModifier)
+        names.append(QStringLiteral("Alt"));
+    if (modifiers & Qt::MetaModifier)
+        names.append(QStringLiteral("Meta"));
+    if (modifiers & Qt::KeypadModifier)
+        names.append(QStringLiteral("Keypad"));
+    return names;
 }
 
 QQuickItem *RuntimeEvents::deepestVisibleChildAt(QQuickItem *item, const QPointF &scenePos) const

@@ -6,6 +6,7 @@
 #include <QPointer>
 #include <QPointF>
 #include <QSet>
+#include <QStringList>
 #include <QTimer>
 #include <QVariantList>
 #include <QVariantMap>
@@ -28,6 +29,8 @@ class RuntimeEvents : public QObject
     Q_PROPERTY(QString lastKeyText READ lastKeyText NOTIFY keyboardChanged)
     Q_PROPERTY(int lastKeyModifiers READ lastKeyModifiers NOTIFY keyboardChanged)
     Q_PROPERTY(bool anyKeyPressed READ anyKeyPressed NOTIFY keyboardChanged)
+    Q_PROPERTY(QStringList pressedKeys READ pressedKeys NOTIFY keyboardChanged)
+    Q_PROPERTY(QVariantList pressedKeyCodes READ pressedKeyCodes NOTIFY keyboardChanged)
 
     Q_PROPERTY(quint64 mouseMoveCount READ mouseMoveCount NOTIFY mouseChanged)
     Q_PROPERTY(quint64 mousePressCount READ mousePressCount NOTIFY mouseChanged)
@@ -37,6 +40,16 @@ class RuntimeEvents : public QObject
     Q_PROPERTY(int lastMouseButtons READ lastMouseButtons NOTIFY mouseChanged)
     Q_PROPERTY(int lastMouseModifiers READ lastMouseModifiers NOTIFY mouseChanged)
     Q_PROPERTY(bool mouseButtonPressed READ mouseButtonPressed NOTIFY mouseChanged)
+    Q_PROPERTY(QVariantMap pointerUi READ pointerUi NOTIFY mouseChanged)
+    Q_PROPERTY(qint64 lastMousePressEpochMs READ lastMousePressEpochMs NOTIFY mouseChanged)
+    Q_PROPERTY(qint64 lastMouseReleaseEpochMs READ lastMouseReleaseEpochMs NOTIFY mouseChanged)
+    Q_PROPERTY(qint64 mousePressElapsedMs READ mousePressElapsedMs NOTIFY daemonStateChanged)
+    Q_PROPERTY(qint64 mouseReleaseElapsedMs READ mouseReleaseElapsedMs NOTIFY daemonStateChanged)
+    Q_PROPERTY(qint64 activePressDurationMs READ activePressDurationMs NOTIFY daemonStateChanged)
+    Q_PROPERTY(QStringList pressedMouseButtonNames READ pressedMouseButtonNames NOTIFY mouseChanged)
+    Q_PROPERTY(int activeModifiers READ activeModifiers NOTIFY daemonStateChanged)
+    Q_PROPERTY(QStringList activeModifierNames READ activeModifierNames NOTIFY daemonStateChanged)
+    Q_PROPERTY(QVariantMap inputState READ inputState NOTIFY daemonStateChanged)
 
     Q_PROPERTY(quint64 uiCreatedCount READ uiCreatedCount NOTIFY uiChanged)
     Q_PROPERTY(quint64 uiShownCount READ uiShownCount NOTIFY uiChanged)
@@ -76,6 +89,8 @@ public:
     QString lastKeyText() const;
     int lastKeyModifiers() const;
     bool anyKeyPressed() const;
+    QStringList pressedKeys() const;
+    QVariantList pressedKeyCodes() const;
     Q_INVOKABLE bool isKeyPressed(int key) const;
 
     quint64 mouseMoveCount() const;
@@ -86,6 +101,16 @@ public:
     int lastMouseButtons() const;
     int lastMouseModifiers() const;
     bool mouseButtonPressed() const;
+    QVariantMap pointerUi() const;
+    qint64 lastMousePressEpochMs() const;
+    qint64 lastMouseReleaseEpochMs() const;
+    qint64 mousePressElapsedMs() const;
+    qint64 mouseReleaseElapsedMs() const;
+    qint64 activePressDurationMs() const;
+    QStringList pressedMouseButtonNames() const;
+    int activeModifiers() const;
+    QStringList activeModifierNames() const;
+    Q_INVOKABLE QVariantMap inputState() const;
 
     quint64 uiCreatedCount() const;
     quint64 uiShownCount() const;
@@ -170,14 +195,20 @@ private:
     void handleTrackedDestroyed(const QObject *object);
     void recordUiEvent(const QString &eventType, const QObject *object, bool visible);
     void updateMouseFromEvent(qreal x, qreal y, int buttons, int modifiers);
+    void updatePointerUiSnapshot();
     void handleIdleTick();
     void handleOsTick();
     void updateIdleState(bool nextIdle);
     qint64 nowEpochMs() const;
+    qint64 elapsedSinceEpoch(qint64 epochMs) const;
     qint64 sampleResidentSetBytes() const;
     void recordRuntimeEvent(const QString &eventType, const QVariantMap &payload = QVariantMap());
     void pushRecentEvent(const QVariantMap &eventData);
     QVariantMap describeQuickItemAtGlobal(qreal globalX, qreal globalY) const;
+    QVariantMap fallbackUiAt(qreal globalX, qreal globalY) const;
+    QString keyLabelForCode(int key) const;
+    QStringList mouseButtonNames(int buttons) const;
+    QStringList modifierNames(int modifiers) const;
     QQuickItem *deepestVisibleChildAt(QQuickItem *item, const QPointF &scenePos) const;
     QString quickItemPath(const QQuickItem *item, const QQuickItem *rootItem) const;
 
@@ -207,6 +238,9 @@ private:
     int m_lastMouseButtons = 0;
     int m_lastMouseModifiers = 0;
     bool m_mouseButtonPressed = false;
+    qint64 m_lastMousePressEpochMs = -1;
+    qint64 m_lastMouseReleaseEpochMs = -1;
+    QVariantMap m_pointerUi;
 
     quint64 m_uiCreatedCount = 0;
     quint64 m_uiShownCount = 0;

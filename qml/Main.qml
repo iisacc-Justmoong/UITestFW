@@ -115,7 +115,7 @@ LV.ApplicationWindow {
     readonly property int runtimeConsoleRenderCount: runtimeConsoleCountByCategory("render")
     readonly property int runtimeConsoleNavigationCount: runtimeConsoleCountByCategory("navigation")
     readonly property int runtimeConsoleSystemCount: runtimeConsoleCountByCategory("system")
-    property int demoPageIndex: 0
+    property int demoPageIndex: 2
     readonly property var demoPages: [
         {
             tab: "Overview",
@@ -134,8 +134,8 @@ LV.ApplicationWindow {
             checklist: "텍스트 계층 대비, 폰트 fallback, 줄바꿈 시 lineHeight 유지"
         },
         {
-            tab: "Console",
-            component: "Runtime Event Daemon Console",
+            tab: "EventListener",
+            component: "Event Listener Runtime Console",
             pageDoc: "앱 런타임 시작부터 입력/우클릭/컨텍스트/UI 생성·소멸/렌더/내비게이션까지 모든 핵심 이벤트를 단일 콘솔로 감시하는 페이지이다.",
             componentDoc: "RuntimeEvents 대몬의 eventSequence, daemonHealth, recentEvents를 중심으로 RenderMonitor·PageMonitor·ViewStateTracker 신호를 합류시켜 운영 콘솔을 구성한다.",
             apiDoc: "핵심 API: LV.RuntimeEvents(daemonHealth/eventRecorded/recentEvents), LV.RenderMonitor(statsChanged), LV.PageMonitor(history), globalPressedEvent/globalContextEvent",
@@ -224,6 +224,18 @@ LV.ApplicationWindow {
 
     function nudgeProgress(delta) {
         LV.AppState.nudgeProgress(delta)
+    }
+
+    function eventListenerPageIndex() {
+        for (let i = 0; i < demoPages.length; i++) {
+            if (String(demoPages[i].tab) === "EventListener")
+                return i
+        }
+        return 0
+    }
+
+    function openEventListenerConsole() {
+        demoPageIndex = eventListenerPageIndex()
     }
 
     function openDemoContextMenuAtGlobal(globalX, globalY) {
@@ -343,9 +355,10 @@ LV.ApplicationWindow {
     function runtimeConsoleSummaryForEvent(eventType, payload) {
         const type = String(eventType || "unknown")
         if (type === "key-press" || type === "key-release")
-            return type + " key=" + (payload.key !== undefined ? payload.key : "n/a")
+            return type + " key=" + (payload.keyName !== undefined ? payload.keyName : (payload.key !== undefined ? payload.key : "n/a"))
         if (type === "mouse-press" || type === "mouse-release" || type === "mouse-move" || type === "hover-move")
             return type + " @" + Math.round(payload.x || 0) + "," + Math.round(payload.y || 0)
+                + " -> " + (payload.pointerObjectName || payload.objectName || "unknown")
         if (type === "context-requested" || type === "global-context")
             return type + " reason=" + (payload.reason !== undefined ? payload.reason : "n/a")
         if (type === "ui-event")
@@ -375,12 +388,24 @@ LV.ApplicationWindow {
             tokens.push("class=" + payload.className)
         if (payload.path)
             tokens.push("path=" + payload.path)
+        if (payload.pointerPath)
+            tokens.push("pointerPath=" + payload.pointerPath)
         if (payload.text)
             tokens.push("text=" + payload.text)
         if (payload.modifiers !== undefined)
             tokens.push("mod=" + payload.modifiers)
+        if (payload.activeModifiers !== undefined)
+            tokens.push("activeMod=" + payload.activeModifiers)
         if (payload.buttons !== undefined)
             tokens.push("buttons=" + payload.buttons)
+        if (payload.pressedMouseButtons && payload.pressedMouseButtons.length !== undefined)
+            tokens.push("mouse=" + payload.pressedMouseButtons.join("+"))
+        if (payload.pressedKeys && payload.pressedKeys.length !== undefined)
+            tokens.push("keys=" + payload.pressedKeys.join("+"))
+        if (payload.mouseButtonPressed !== undefined)
+            tokens.push("mousePressed=" + payload.mouseButtonPressed)
+        if (payload.activePressDurationMs !== undefined)
+            tokens.push("pressAgeMs=" + payload.activePressDurationMs)
         if (payload.frameCount !== undefined)
             tokens.push("frames=" + payload.frameCount)
         if (payload.lastFrameMs !== undefined)
@@ -479,6 +504,8 @@ LV.ApplicationWindow {
         if (!eventData)
             return
         const ui = eventData.ui || ({})
+        const input = eventData.input || ({})
+        const inputPointerUi = input.pointerUi || ({})
         const payload = {
             globalX: eventData.globalX !== undefined ? eventData.globalX : eventData.x,
             globalY: eventData.globalY !== undefined ? eventData.globalY : eventData.y,
@@ -488,7 +515,19 @@ LV.ApplicationWindow {
             objectName: ui.objectName || "",
             className: ui.className || "",
             path: ui.path || "",
-            text: ui.text || ""
+            text: ui.text || "",
+            mouseButtonPressed: input.mouseButtonPressed !== undefined ? input.mouseButtonPressed : false,
+            pressedKeys: input.pressedKeys || [],
+            pressedMouseButtons: input.pressedMouseButtons || [],
+            activeModifiers: input.activeModifiers !== undefined ? input.activeModifiers : 0,
+            activeModifierNames: input.activeModifierNames || [],
+            anyKeyPressed: input.anyKeyPressed !== undefined ? input.anyKeyPressed : false,
+            activePressDurationMs: input.activePressDurationMs !== undefined ? input.activePressDurationMs : -1,
+            pointerObjectName: inputPointerUi.objectName || "",
+            pointerClassName: inputPointerUi.className || "",
+            pointerPath: inputPointerUi.path || "",
+            pointerWindowX: inputPointerUi.windowX !== undefined ? inputPointerUi.windowX : -1,
+            pointerWindowY: inputPointerUi.windowY !== undefined ? inputPointerUi.windowY : -1
         }
         runtimeConsoleRecord("input", "ApplicationWindow", type, payload, runtimeConsoleLastIngestedSequence + 1)
     }
@@ -516,6 +555,40 @@ LV.ApplicationWindow {
         const sequence = lastEvent.sequence !== undefined ? String(lastEvent.sequence) : "-"
         const stamp = lastEvent.timestampEpochMs ? runtimeConsoleTimestamp(lastEvent.timestampEpochMs) : "--:--:--.---"
         return "#" + sequence + " " + type + " @ " + stamp
+    }
+
+    function runtimeConsoleInputState() {
+        const health = runtimeConsoleHealth || ({})
+        return health.input || ({})
+    }
+
+    function runtimeConsoleListText(values) {
+        if (!values || values.length === undefined || values.length === 0)
+            return "none"
+        return values.join(" + ")
+    }
+
+    function runtimeConsolePointerTargetText() {
+        const input = runtimeConsoleInputState()
+        const ui = input.pointerUi || ({})
+        const path = ui.path ? String(ui.path) : ""
+        const objectName = ui.objectName ? String(ui.objectName) : ""
+        const className = ui.className ? String(ui.className) : ""
+        if (path.length > 0)
+            return path
+        if (objectName.length > 0 && className.length > 0)
+            return className + ":" + objectName
+        if (objectName.length > 0)
+            return objectName
+        if (className.length > 0)
+            return className
+        return "unknown"
+    }
+
+    function runtimeConsoleElapsedText(value) {
+        if (value === undefined || value === null || Number(value) < 0)
+            return "n/a"
+        return Number(value).toFixed(0) + "ms"
     }
 
     function runtimeConsoleRefreshHealth() {
@@ -678,7 +751,7 @@ LV.ApplicationWindow {
     }
 
     Timer {
-        interval: 1000
+        interval: 120
         running: true
         repeat: true
         onTriggered: root.runtimeConsoleRefreshHealth()
@@ -841,6 +914,40 @@ LV.ApplicationWindow {
                     wrapMode: Text.WordWrap
                     text: "검증 체크포인트: " + (root.currentDemoPage.checklist || "")
                 }
+
+                Rectangle {
+                    width: parent.width
+                    radius: LV.Theme.radiusSm
+                    color: LV.Theme.surfaceGhost
+                    border.width: 1
+                    border.color: root.runtimeConsoleHealth.running ? LV.Theme.success : LV.Theme.danger
+                    implicitHeight: runtimeBriefRow.implicitHeight + LV.Theme.gap8 * 2
+
+                    RowLayout {
+                        id: runtimeBriefRow
+                        x: LV.Theme.gap8
+                        y: LV.Theme.gap8
+                        width: parent.width - LV.Theme.gap8 * 2
+                        spacing: LV.Theme.gap8
+
+                        LV.Label {
+                            Layout.fillWidth: true
+                            style: description
+                            color: LV.Theme.textPrimary
+                            text: "EventListener Console | running="
+                                + (!!root.runtimeConsoleHealth.running)
+                                + " seq=" + (root.runtimeConsoleHealth.eventSequence !== undefined ? root.runtimeConsoleHealth.eventSequence : 0)
+                                + " rows=" + root.runtimeConsoleVisibleCount + "/" + root.runtimeConsoleTotalCount
+                                + " dropped=" + root.runtimeConsoleDroppedCount
+                        }
+
+                        LV.LabelButton {
+                            text: "Open EventListener Console"
+                            tone: LV.AbstractButton.Default
+                            onClicked: root.openEventListenerConsole()
+                        }
+                    }
+                }
             }
         }
 
@@ -994,7 +1101,7 @@ LV.ApplicationWindow {
                 }
 
                 LV.AppCard {
-                    title: "Runtime Event Daemon Console"
+                    title: "Event Listener Runtime Console"
                     subtitle: "앱 런타임, UI 구조, 렌더, 입력 이벤트 실시간 통합 감시"
                     visible: root.demoPageIndex === 2
                     Layout.fillWidth: true
@@ -1399,22 +1506,39 @@ LV.ApplicationWindow {
                                             style: disabled
                                             color: LV.Theme.textTertiary
                                             wrapMode: Text.WordWrap
-                                            text: "lastPressedTarget=" + root.runtimeConsoleUiTargetText(root.lastGlobalPressedEventData)
-                                                + " | lastContextTarget=" + root.runtimeConsoleUiTargetText(root.lastGlobalContextEventData)
+                                            text: "pointerTarget=" + root.runtimeConsolePointerTargetText()
+                                                + " | pointerXY="
+                                                + Math.round((root.runtimeConsoleInputState().pointerGlobalX !== undefined ? root.runtimeConsoleInputState().pointerGlobalX : 0))
+                                                + ","
+                                                + Math.round((root.runtimeConsoleInputState().pointerGlobalY !== undefined ? root.runtimeConsoleInputState().pointerGlobalY : 0))
                                         }
                                         LV.Label {
                                             width: parent.width
                                             style: disabled
                                             color: LV.Theme.textTertiary
                                             wrapMode: Text.WordWrap
-                                            text: "lastPressedXY="
-                                                + (root.lastGlobalPressedEventData.globalX !== undefined ? Math.round(root.lastGlobalPressedEventData.globalX) : "-")
-                                                + ","
-                                                + (root.lastGlobalPressedEventData.globalY !== undefined ? Math.round(root.lastGlobalPressedEventData.globalY) : "-")
-                                                + " | lastContextXY="
-                                                + (root.lastGlobalContextEventData.globalX !== undefined ? Math.round(root.lastGlobalContextEventData.globalX) : "-")
-                                                + ","
-                                                + (root.lastGlobalContextEventData.globalY !== undefined ? Math.round(root.lastGlobalContextEventData.globalY) : "-")
+                                            text: "mousePressed=" + (!!root.runtimeConsoleInputState().mouseButtonPressed)
+                                                + " buttons=" + root.runtimeConsoleListText(root.runtimeConsoleInputState().pressedMouseButtons)
+                                                + " pressAge=" + root.runtimeConsoleElapsedText(root.runtimeConsoleInputState().activePressDurationMs)
+                                                + " lastPressAgo=" + root.runtimeConsoleElapsedText(root.runtimeConsoleInputState().mousePressElapsedMs)
+                                                + " lastReleaseAgo=" + root.runtimeConsoleElapsedText(root.runtimeConsoleInputState().mouseReleaseElapsedMs)
+                                        }
+                                        LV.Label {
+                                            width: parent.width
+                                            style: disabled
+                                            color: LV.Theme.textTertiary
+                                            wrapMode: Text.WordWrap
+                                            text: "keyboardDown=" + (!!root.runtimeConsoleInputState().anyKeyPressed)
+                                                + " keys=" + root.runtimeConsoleListText(root.runtimeConsoleInputState().pressedKeys)
+                                                + " modifiers=" + root.runtimeConsoleListText(root.runtimeConsoleInputState().activeModifierNames)
+                                        }
+                                        LV.Label {
+                                            width: parent.width
+                                            style: disabled
+                                            color: LV.Theme.textTertiary
+                                            wrapMode: Text.WordWrap
+                                            text: "lastPressedTarget=" + root.runtimeConsoleUiTargetText(root.lastGlobalPressedEventData)
+                                                + " | lastContextTarget=" + root.runtimeConsoleUiTargetText(root.lastGlobalContextEventData)
                                         }
                                     }
                                 }

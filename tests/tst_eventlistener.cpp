@@ -78,11 +78,15 @@ LV.ApplicationWindow {
     property bool runtimeRunning: LV.RuntimeEvents.running
     property string lastSource: ""
     property int lastReason: -2
+    property bool hasInputState: false
+    property bool hasPointerState: false
 
     function resetMonitor() {
         contextCount = 0
         lastSource = ""
         lastReason = -2
+        hasInputState = false
+        hasPointerState = false
         LV.RuntimeEvents.resetCounters()
     }
 
@@ -93,6 +97,8 @@ LV.ApplicationWindow {
             root.contextCount += 1
             root.lastSource = mouse.source || ""
             root.lastReason = mouse.reason === undefined ? -2 : mouse.reason
+            root.hasInputState = !!(mouse.input && mouse.input.activeModifierNames !== undefined)
+            root.hasPointerState = !!(mouse.input && mouse.input.pointerUi && mouse.input.pointerUi.objectName !== undefined)
         }
     }
 }
@@ -120,6 +126,8 @@ LV.ApplicationWindow {
     QCoreApplication::sendEvent(window, &mousePress);
     QTRY_VERIFY(object->property("contextCount").toInt() >= 1);
     QCOMPARE(object->property("lastSource").toString(), QStringLiteral("mouse"));
+    QVERIFY(object->property("hasInputState").toBool());
+    QVERIFY(object->property("hasPointerState").toBool());
 
     const QPoint local(34, 22);
     const QPoint global(460, 360);

@@ -61,6 +61,7 @@ Item {
         }
         if (root.includeUiHit)
             data.ui = root.resolveUiAt(x, y)
+        data.input = root.resolveInputState()
         return data
     }
 
@@ -68,6 +69,12 @@ Item {
         if (!root.includeUiHit || !RuntimeEvents || !RuntimeEvents.hitTestUiAt)
             return ({})
         return RuntimeEvents.hitTestUiAt(globalX, globalY)
+    }
+
+    function resolveInputState() {
+        if (!RuntimeEvents || !RuntimeEvents.inputState)
+            return ({})
+        return RuntimeEvents.inputState()
     }
 
     function pointerGlobalPosition(mouse) {
@@ -94,6 +101,7 @@ Item {
         }
         if (root.includeUiHit)
             data.ui = root.resolveUiAt(globalPoint.x, globalPoint.y)
+        data.input = root.resolveInputState()
         return data
     }
 

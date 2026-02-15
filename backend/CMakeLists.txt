@@ -37,7 +37,7 @@ set(LVRS_BACKEND_HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/text/textmarkup.h
 )
 
-if(APPLE)
+if(APPLE AND NOT IOS)
     list(APPEND LVRS_BACKEND_SOURCES
         ${CMAKE_CURRENT_LIST_DIR}/platform/nativewindowstyle.mm
     )

@@ -498,6 +498,35 @@ function(_lvrs_internal_create_platform_bootstrap_targets target)
             set(_lvrs_android_serial "emulator-5554")
         endif()
 
+        set(_lvrs_bootstrap_lvrs_build_examples "")
+        if(DEFINED LVRS_BOOTSTRAP_LVRS_BUILD_EXAMPLES)
+            set(_lvrs_bootstrap_lvrs_build_examples "${LVRS_BOOTSTRAP_LVRS_BUILD_EXAMPLES}")
+        elseif(DEFINED ENV{LVRS_BOOTSTRAP_LVRS_BUILD_EXAMPLES} AND NOT "$ENV{LVRS_BOOTSTRAP_LVRS_BUILD_EXAMPLES}" STREQUAL "")
+            set(_lvrs_bootstrap_lvrs_build_examples "$ENV{LVRS_BOOTSTRAP_LVRS_BUILD_EXAMPLES}")
+        endif()
+
+        set(_lvrs_bootstrap_lvrs_build_tests "")
+        if(DEFINED LVRS_BOOTSTRAP_LVRS_BUILD_TESTS)
+            set(_lvrs_bootstrap_lvrs_build_tests "${LVRS_BOOTSTRAP_LVRS_BUILD_TESTS}")
+        elseif(DEFINED ENV{LVRS_BOOTSTRAP_LVRS_BUILD_TESTS} AND NOT "$ENV{LVRS_BOOTSTRAP_LVRS_BUILD_TESTS}" STREQUAL "")
+            set(_lvrs_bootstrap_lvrs_build_tests "$ENV{LVRS_BOOTSTRAP_LVRS_BUILD_TESTS}")
+        endif()
+
+        set(_lvrs_bootstrap_lvrs_build_shared_libs "")
+        if(DEFINED LVRS_BOOTSTRAP_LVRS_BUILD_SHARED_LIBS)
+            set(_lvrs_bootstrap_lvrs_build_shared_libs "${LVRS_BOOTSTRAP_LVRS_BUILD_SHARED_LIBS}")
+        elseif(DEFINED ENV{LVRS_BOOTSTRAP_LVRS_BUILD_SHARED_LIBS}
+               AND NOT "$ENV{LVRS_BOOTSTRAP_LVRS_BUILD_SHARED_LIBS}" STREQUAL "")
+            set(_lvrs_bootstrap_lvrs_build_shared_libs "$ENV{LVRS_BOOTSTRAP_LVRS_BUILD_SHARED_LIBS}")
+        endif()
+
+        set(_lvrs_ios_architectures "")
+        if(DEFINED LVRS_BOOTSTRAP_IOS_ARCHITECTURES)
+            set(_lvrs_ios_architectures "${LVRS_BOOTSTRAP_IOS_ARCHITECTURES}")
+        elseif(DEFINED ENV{LVRS_BOOTSTRAP_IOS_ARCHITECTURES} AND NOT "$ENV{LVRS_BOOTSTRAP_IOS_ARCHITECTURES}" STREQUAL "")
+            set(_lvrs_ios_architectures "$ENV{LVRS_BOOTSTRAP_IOS_ARCHITECTURES}")
+        endif()
+
         add_custom_target("${_lvrs_bootstrap_target}"
             COMMAND "${CMAKE_COMMAND}"
                 "-DLVRS_BOOTSTRAP_SOURCE_DIR=${_lvrs_bootstrap_source_dir}"
@@ -522,6 +551,10 @@ function(_lvrs_internal_create_platform_bootstrap_targets target)
                 "-DLVRS_BOOTSTRAP_FIND_USE_PACKAGE_REGISTRY=${_lvrs_bootstrap_find_use_pkg_registry}"
                 "-DLVRS_BOOTSTRAP_IOS_SIMULATOR_NAME=${_lvrs_ios_simulator_name}"
                 "-DLVRS_BOOTSTRAP_ANDROID_SERIAL=${_lvrs_android_serial}"
+                "-DLVRS_BOOTSTRAP_LVRS_BUILD_EXAMPLES=${_lvrs_bootstrap_lvrs_build_examples}"
+                "-DLVRS_BOOTSTRAP_LVRS_BUILD_TESTS=${_lvrs_bootstrap_lvrs_build_tests}"
+                "-DLVRS_BOOTSTRAP_LVRS_BUILD_SHARED_LIBS=${_lvrs_bootstrap_lvrs_build_shared_libs}"
+                "-DLVRS_BOOTSTRAP_IOS_ARCHITECTURES=${_lvrs_ios_architectures}"
                 -P "${_lvrs_bootstrap_script}"
             USES_TERMINAL
         )

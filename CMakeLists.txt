@@ -93,7 +93,7 @@ elseif(WIN32 OR ANDROID OR CMAKE_SYSTEM_NAME STREQUAL "Linux")
     set(LVRS_FORCED_BACKEND "vulkan")
 endif()
 
-if(APPLE AND LVRS_ENABLE_APPLE_GL_LINK_SHIM)
+if(APPLE AND NOT IOS AND LVRS_ENABLE_APPLE_GL_LINK_SHIM)
     if(NOT EXISTS "/System/Library/Frameworks/AGL.framework/AGL")
         set(_uifw_framework_root "${CMAKE_CURRENT_BINARY_DIR}/frameworks")
         set(_uifw_agl_framework "${_uifw_framework_root}/AGL.framework")
@@ -286,6 +286,12 @@ qt_add_qml_module(LVRSCore
         ${LVRS_QML_FILES}
     RESOURCES
         ${LVRS_RESOURCE_FILES}
+)
+
+# LVRSCore is a library target; QML plugin import scanning is performed on
+# consuming app targets via lvrs_configure_qml_app().
+set_target_properties(LVRSCore PROPERTIES
+    QT_QML_MODULE_NO_IMPORT_SCAN TRUE
 )
 
 if(TARGET LVRSCoreplugin)

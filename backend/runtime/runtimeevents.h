@@ -2,6 +2,7 @@
 
 #include <QElapsedTimer>
 #include <QHash>
+#include <QMetaObject>
 #include <QObject>
 #include <QPointer>
 #include <QPointF>
@@ -217,6 +218,7 @@ private:
     QString quickItemPath(const QQuickItem *item, const QQuickItem *rootItem) const;
 
     QPointer<QQuickWindow> m_window;
+    QMetaObject::Connection m_windowDestroyedConnection;
     QSet<QObject *> m_trackedObjects;
     QHash<const QObject *, UiObjectInfo> m_trackedInfo;
     QSet<int> m_pressedKeys;

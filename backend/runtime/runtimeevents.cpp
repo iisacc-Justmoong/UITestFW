@@ -450,6 +450,10 @@ void RuntimeEvents::stop()
     if (qApp)
         qApp->removeEventFilter(this);
 
+    if (m_windowDestroyedConnection) {
+        disconnect(m_windowDestroyedConnection);
+        m_windowDestroyedConnection = QMetaObject::Connection();
+    }
     m_window.clear();
 
     detachTrackedObjects();
@@ -474,6 +478,10 @@ void RuntimeEvents::attachWindow(QObject *window)
     if (m_window == quickWindow)
         return;
 
+    if (m_windowDestroyedConnection) {
+        disconnect(m_windowDestroyedConnection);
+        m_windowDestroyedConnection = QMetaObject::Connection();
+    }
     detachTrackedObjects();
 
     m_window = quickWindow;
@@ -485,16 +493,17 @@ void RuntimeEvents::attachWindow(QObject *window)
         recordRuntimeEvent(QStringLiteral("window-attached"), payload);
     }
     emit daemonStateChanged();
-    connect(m_window,
-            &QObject::destroyed,
-            this,
-            [this]() {
-                m_window.clear();
-                detachTrackedObjects();
-                m_pointerUi = fallbackUiAt(m_lastMouseX, m_lastMouseY);
-                recordRuntimeEvent(QStringLiteral("window-detached"));
-                emit daemonStateChanged();
-            });
+    m_windowDestroyedConnection = connect(m_window,
+                                          &QObject::destroyed,
+                                          this,
+                                          [this]() {
+                                              m_windowDestroyedConnection = QMetaObject::Connection();
+                                              m_window.clear();
+                                              detachTrackedObjects();
+                                              m_pointerUi = fallbackUiAt(m_lastMouseX, m_lastMouseY);
+                                              recordRuntimeEvent(QStringLiteral("window-detached"));
+                                              emit daemonStateChanged();
+                                          });
 
     trackUiObjectRecursive(m_window);
     updatePointerUiSnapshot();

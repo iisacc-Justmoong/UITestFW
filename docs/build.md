@@ -79,7 +79,7 @@ lvrs_add_qml_app(
 )
 ```
 
-Set `CMAKE_PREFIX_PATH` to the install prefix (`/path/to/lvrs-prefix`) when configuring the downstream project.
+Set `CMAKE_PREFIX_PATH` to the install root (`/path/to/lvrs-prefix`) when configuring the downstream project.
 `lvrs_configure_qml_app()` sets `QT_QML_IMPORT_PATH` for installed-package consumption, applies a default executable output directory (`<build>/bin`) when unset, and auto-links/imports LVRS static QML plugin artifacts for static package builds.
 It also creates cross-platform runtime targets automatically:
 - `run_<target>_macos`
@@ -95,6 +95,11 @@ It also creates cross-platform bootstrap targets:
 - `bootstrap_<target>_ios`
 - `bootstrap_<target>_android`
 - `bootstrap_<target>_all`
+It also creates launch/export convenience targets:
+- `launch_<target>_ios`
+- `launch_<target>_android`
+- `export_<target>_xcodeproj`
+- `export_<target>_android_studio`
 `bootstrap_<target>_all` triggers all platform bootstrap actions in one build invocation.
 Desktop bootstrap targets produce executable artifacts.
 iOS bootstrap generates an Xcode project by default and installs a simulator app via `xcrun simctl`.
@@ -112,12 +117,22 @@ Toolchain/prefix overrides:
 - `LVRS_IOS_SIMULATOR_NAME` (default: `iPhone 17 Pro`)
 - `LVRS_ANDROID_EMULATOR_SERIAL` (default: `emulator-5554`)
 `LVRS_DIR` and package-registry policy (`CMAKE_FIND_PACKAGE_NO_PACKAGE_REGISTRY`, `CMAKE_FIND_USE_PACKAGE_REGISTRY`) are propagated automatically from the host configure cache to per-platform bootstrap reconfigure.
+LVRS package config exports platform/toolchain hint variables for scripts:
+- `LVRS_LAYOUT_VERSION`
+- `LVRS_ACTIVE_PLATFORM`
+- `LVRS_ACTIVE_PREFIX`
+- `LVRS_QT_HOST_PREFIX_HINT`
+- `LVRS_QT_IOS_PREFIX_HINT`
+- `LVRS_QT_ANDROID_PREFIX_HINT`
+- `LVRS_ANDROID_SDK_HINT`
+- `LVRS_ANDROID_NDK_HINT`
 Example one-shot bootstrap command:
 ```bash
 cmake --build build --target bootstrap_MyApp_all
 ```
 Use `lvrs_configure_qml_app(<target> NO_PLATFORM_RUNTIME_TARGETS)` to disable this behavior.
 `lvrs_add_qml_app()` can generate a ready-to-run entrypoint automatically when `SOURCES` is omitted.
+Use `lvrs_configure_project_defaults()` to centralize Apple bundle/plist/entitlements, Android package source dir/package id, and iOS plugin exclusion defaults.
 
 Framework-only bootstrap targets are generated at project root:
 - `bootstrap_lvrs_macos`

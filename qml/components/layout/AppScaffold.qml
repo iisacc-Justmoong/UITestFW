@@ -28,7 +28,7 @@ Item {
     default property alias content: contentArea.data
 
     readonly property bool wide: width >= wideBreakpoint
-    readonly property bool hasNav: navigationEnabled && navModel && (navModel.length !== undefined ? navModel.length > 0 : navModel.count > 0)
+    readonly property bool hasNav: navigationEnabled && root.navModelCount() > 0
 
     implicitWidth: 1200
     implicitHeight: 760
@@ -75,11 +75,21 @@ Item {
     function itemAt(index) {
         if (!navModel)
             return null
-        if (navModel.length !== undefined)
+        if (typeof navModel.length === "number")
             return navModel[index]
-        if (navModel.get !== undefined)
+        if (typeof navModel.get === "function")
             return navModel.get(index)
         return null
+    }
+
+    function navModelCount() {
+        if (!navModel)
+            return 0
+        if (typeof navModel.length === "number")
+            return navModel.length
+        if (typeof navModel.count === "number")
+            return navModel.count
+        return 0
     }
 
     function syncNavIndexToCurrentPath() {
@@ -94,9 +104,7 @@ Item {
             return
         }
 
-        var count = navModel && navModel.length !== undefined
-            ? navModel.length
-            : (navModel && navModel.count !== undefined ? navModel.count : 0)
+        var count = root.navModelCount()
         var matchedIndex = -1
         for (var i = 0; i < count; i++) {
             var candidate = normalizedPath(routeForItem(itemAt(i)))
@@ -135,7 +143,7 @@ Item {
 
         ItemDelegate {
             id: control
-            property var item: modelData
+            property var item: root.itemAt(index)
             property string itemLabel: typeof item === "string" ? item : (item.label || item.title || item.text || "")
             property string itemIcon: typeof item === "object" ? (item.icon || item.iconName || item.symbol || "") : ""
             property string itemBadge: typeof item === "object" && item.badge !== undefined ? String(item.badge) : ""
@@ -202,7 +210,7 @@ Item {
 
         ItemDelegate {
             id: control
-            property var item: modelData
+            property var item: root.itemAt(index)
             property string itemLabel: typeof item === "string" ? item : (item.label || item.title || item.text || "")
             property string itemIcon: typeof item === "object" ? (item.icon || item.iconName || item.symbol || "") : ""
             property string itemBadge: typeof item === "object" && item.badge !== undefined ? String(item.badge) : ""

@@ -174,12 +174,16 @@ FocusScope {
                     if ((event.modifiers & Qt.ControlModifier) || (event.modifiers & Qt.MetaModifier)) {
                         control.submitted(text)
                         event.accepted = true
+                    } else {
+                        event.accepted = false
                     }
                 }
                 Keys.onEnterPressed: function(event) {
                     if ((event.modifiers & Qt.ControlModifier) || (event.modifiers & Qt.MetaModifier)) {
                         control.submitted(text)
                         event.accepted = true
+                    } else {
+                        event.accepted = false
                     }
                 }
             }

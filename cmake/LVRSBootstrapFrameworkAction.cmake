@@ -276,13 +276,12 @@ endif()
 set(_lvrs_build_cmd
     "${CMAKE_COMMAND}"
     --build "${LVRS_BOOTSTRAP_BINARY_DIR}"
-    --target LVRSCore
 )
 if(NOT LVRS_BOOTSTRAP_BUILD_TYPE STREQUAL "")
     list(APPEND _lvrs_build_cmd --config "${LVRS_BOOTSTRAP_BUILD_TYPE}")
 endif()
 
-message(STATUS "LVRS framework bootstrap: build 'LVRSCore' for '${LVRS_BOOTSTRAP_PLATFORM}'")
+message(STATUS "LVRS framework bootstrap: build default targets for '${LVRS_BOOTSTRAP_PLATFORM}'")
 execute_process(
     COMMAND ${_lvrs_build_cmd}
     RESULT_VARIABLE _lvrs_build_result
@@ -314,6 +313,19 @@ endif()
 if(NOT EXISTS "${LVRS_BOOTSTRAP_INSTALL_PREFIX}/lib/cmake/LVRS/LVRSConfig.cmake"
    AND NOT EXISTS "${LVRS_BOOTSTRAP_INSTALL_PREFIX}/LVRSConfig.cmake")
     _lvrs_bootstrap_fail("installed package config not found under '${LVRS_BOOTSTRAP_INSTALL_PREFIX}'.")
+endif()
+
+if(LVRS_BOOTSTRAP_INSTALL_PREFIX MATCHES "/platforms/${LVRS_BOOTSTRAP_PLATFORM}$")
+    get_filename_component(_lvrs_platforms_root "${LVRS_BOOTSTRAP_INSTALL_PREFIX}" DIRECTORY)
+    get_filename_component(_lvrs_install_root "${_lvrs_platforms_root}" DIRECTORY)
+    set(_lvrs_platform_config "${LVRS_BOOTSTRAP_INSTALL_PREFIX}/lib/cmake/LVRS/LVRSConfig.cmake")
+    set(_lvrs_platform_config_version "${LVRS_BOOTSTRAP_INSTALL_PREFIX}/lib/cmake/LVRS/LVRSConfigVersion.cmake")
+    if(EXISTS "${_lvrs_platform_config}")
+        file(COPY_FILE "${_lvrs_platform_config}" "${_lvrs_install_root}/LVRSConfig.cmake" ONLY_IF_DIFFERENT)
+    endif()
+    if(EXISTS "${_lvrs_platform_config_version}")
+        file(COPY_FILE "${_lvrs_platform_config_version}" "${_lvrs_install_root}/LVRSConfigVersion.cmake" ONLY_IF_DIFFERENT)
+    endif()
 endif()
 
 message(STATUS "LVRS framework bootstrap: install completed for '${LVRS_BOOTSTRAP_PLATFORM}'")

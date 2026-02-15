@@ -28,7 +28,8 @@ cd LVRS
 
 `install.sh` now performs a single multi-platform bootstrap build (`bootstrap_lvrs_all`) and installs LVRS for all runtime platforms in one run.
 Default install layout is `<prefix>/platforms/<platform>` for `macos`, `linux`, `windows`, `ios`, `android`.
-After install, `env.sh` points `CMAKE_PREFIX_PATH` and `QML2_IMPORT_PATH` to the host platform package path so downstream projects can use `find_package(LVRS CONFIG REQUIRED)` immediately.
+After install, `env.sh` points `CMAKE_PREFIX_PATH` to the install root (`<prefix>`) and `QML2_IMPORT_PATH` to the host platform package path.
+`find_package(LVRS CONFIG REQUIRED)` then resolves the active platform package via LVRS dispatcher logic.
 The installer always performs a clean reinstall (build directory and previously installed LVRS artifacts are removed before configure/build).
 Use `./install.sh --without-examples --without-tests` to disable host configure-time example/test targets.
 
@@ -115,6 +116,11 @@ In addition, LVRS generates bootstrap targets for cross-platform output/installa
 - `bootstrap_<YourTarget>_ios`
 - `bootstrap_<YourTarget>_android`
 - `bootstrap_<YourTarget>_all`
+LVRS also generates launch/export convenience targets:
+- `launch_<YourTarget>_ios`
+- `launch_<YourTarget>_android`
+- `export_<YourTarget>_xcodeproj`
+- `export_<YourTarget>_android_studio`
 `bootstrap_*` targets configure isolated per-platform build trees under `<build>/lvrs-bootstrap/<target>/...`, build the app target, then:
 - desktop targets emit executable artifact paths (`macOS`/`Linux` binaries, `Windows .exe`)
 - `ios` generates an Xcode project by default and installs the built `.app` to the iOS Simulator via `xcrun simctl`
@@ -125,11 +131,29 @@ Android Studio output path can be overridden with `LVRS_ANDROID_STUDIO_PROJECT_D
 `androiddeployqt` lookup can be pinned with `LVRS_BOOTSTRAP_ANDROIDDEPLOYQT` (or `LVRS_BOOTSTRAP_QT_HOST_PREFIX`).
 Android SDK/NDK auto-detection can be overridden with `LVRS_BOOTSTRAP_ANDROID_SDK_ROOT` and `LVRS_BOOTSTRAP_ANDROID_NDK`.
 `LVRS_DIR` and package-registry policy cache values are forwarded automatically to bootstrap reconfigure.
+LVRS package config exports toolchain hint variables for downstream scripts:
+- `LVRS_QT_HOST_PREFIX_HINT`
+- `LVRS_QT_IOS_PREFIX_HINT`
+- `LVRS_QT_ANDROID_PREFIX_HINT`
+- `LVRS_ANDROID_SDK_HINT`
+- `LVRS_ANDROID_NDK_HINT`
 Example:
 ```bash
 cmake --build build --target bootstrap_MyApp_all
 ```
 `lvrs_add_qml_app()` further reduces bootstrap overhead by auto-generating an app entrypoint when `SOURCES` is omitted.
+Project-wide platform defaults can be configured through:
+```cmake
+lvrs_configure_project_defaults(
+    TARGET MyApp
+    APPLE_BUNDLE_ID com.example.myapp
+    APPLE_INFO_PLIST ${CMAKE_SOURCE_DIR}/platform/apple/Info.plist
+    APPLE_ENTITLEMENTS ${CMAKE_SOURCE_DIR}/platform/apple/MyApp.entitlements
+    ANDROID_PACKAGE_ID com.example.myapp
+    ANDROID_PACKAGE_SOURCE_DIR ${CMAKE_SOURCE_DIR}/platform/android/package
+    IOS_EXCLUDE_QMLTOOLING
+)
+```
 
 For framework-only multi-platform install, LVRS also generates:
 - `bootstrap_lvrs_macos`

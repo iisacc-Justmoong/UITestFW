@@ -27,4 +27,51 @@ if(NOT TARGET LVRS::LVRS)
     endif()
 endif()
 
+set(_LVRS_QML_MODULE_PATH "${_IMPORT_PREFIX}/@LVRS_QML_MODULE_INSTALL_DIR@")
+if(NOT TARGET LVRS::LVRSCoreplugin)
+    set(_lvrs_plugin_location "")
+    set(_lvrs_plugin_candidates
+        "${_LVRS_QML_MODULE_PATH}/${CMAKE_STATIC_LIBRARY_PREFIX}LVRSCoreplugin${CMAKE_STATIC_LIBRARY_SUFFIX}"
+        "${_LVRS_QML_MODULE_PATH}/LVRSCoreplugin${CMAKE_STATIC_LIBRARY_SUFFIX}"
+        "${_LVRS_QML_MODULE_PATH}/${CMAKE_SHARED_LIBRARY_PREFIX}LVRSCoreplugin${CMAKE_SHARED_LIBRARY_SUFFIX}"
+        "${_LVRS_QML_MODULE_PATH}/LVRSCoreplugin${CMAKE_SHARED_LIBRARY_SUFFIX}"
+    )
+    foreach(_lvrs_plugin_candidate IN LISTS _lvrs_plugin_candidates)
+        if(EXISTS "${_lvrs_plugin_candidate}")
+            set(_lvrs_plugin_location "${_lvrs_plugin_candidate}")
+            break()
+        endif()
+    endforeach()
+
+    if(_lvrs_plugin_location STREQUAL "")
+        file(GLOB _lvrs_plugin_globbed
+            "${_LVRS_QML_MODULE_PATH}/*LVRSCoreplugin*${CMAKE_STATIC_LIBRARY_SUFFIX}"
+            "${_LVRS_QML_MODULE_PATH}/*LVRSCoreplugin*${CMAKE_SHARED_LIBRARY_SUFFIX}"
+        )
+        list(SORT _lvrs_plugin_globbed)
+        if(_lvrs_plugin_globbed)
+            list(GET _lvrs_plugin_globbed 0 _lvrs_plugin_location)
+        endif()
+    endif()
+
+    if(NOT _lvrs_plugin_location STREQUAL "")
+        add_library(LVRS::LVRSCoreplugin UNKNOWN IMPORTED)
+        set_target_properties(LVRS::LVRSCoreplugin PROPERTIES
+            IMPORTED_LOCATION "${_lvrs_plugin_location}"
+            INTERFACE_LINK_LIBRARIES "LVRS::LVRS"
+        )
+    else()
+        add_library(LVRS::LVRSCoreplugin INTERFACE IMPORTED)
+        set_target_properties(LVRS::LVRSCoreplugin PROPERTIES
+            INTERFACE_LINK_LIBRARIES "LVRS::LVRS"
+        )
+    endif()
+
+    unset(_lvrs_plugin_candidate)
+    unset(_lvrs_plugin_candidates)
+    unset(_lvrs_plugin_globbed)
+    unset(_lvrs_plugin_location)
+endif()
+unset(_LVRS_QML_MODULE_PATH)
+
 unset(_IMPORT_PREFIX)

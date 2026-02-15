@@ -29,6 +29,7 @@ private slots:
     void runtime_events_idle_and_reset_signal_contract();
     void runtime_events_context_menu_signal_contract();
     void runtime_events_single_input_event_is_counted_once();
+    void runtime_events_window_replacement_survives_old_window_destruction();
     void render_monitor_counts_frames_when_swapped();
     void render_monitor_active_signal_and_destroy_path();
     void debug_logger_enabled_signal_and_message_format();
@@ -257,6 +258,36 @@ void RuntimeServicesTests::runtime_events_single_input_event_is_counted_once()
     QCOMPARE(events.mouseReleaseCount(), 1u);
     QCOMPARE(events.lastMouseX(), 30.0);
     QCOMPARE(events.lastMouseY(), 22.0);
+}
+
+void RuntimeServicesTests::runtime_events_window_replacement_survives_old_window_destruction()
+{
+    RuntimeEvents events;
+
+    auto *firstWindow = new QQuickWindow;
+    firstWindow->setWidth(640);
+    firstWindow->setHeight(360);
+    events.attachWindow(firstWindow);
+    QTRY_VERIFY(events.running());
+
+    auto *secondWindow = new QQuickWindow;
+    secondWindow->setWidth(640);
+    secondWindow->setHeight(360);
+    events.attachWindow(secondWindow);
+    QTRY_VERIFY(events.daemonHealth().value(QStringLiteral("attachedWindow")).toBool());
+
+    delete firstWindow;
+    QCoreApplication::processEvents();
+    QTRY_VERIFY(events.daemonHealth().value(QStringLiteral("attachedWindow")).toBool());
+
+    const quint64 sequenceBefore = events.eventSequence();
+    QKeyEvent keyPress(QEvent::KeyPress, Qt::Key_R, Qt::NoModifier, QStringLiteral("r"));
+    QCoreApplication::sendEvent(secondWindow, &keyPress);
+    QTRY_VERIFY(events.eventSequence() > sequenceBefore);
+
+    delete secondWindow;
+    QCoreApplication::processEvents();
+    QTRY_VERIFY(!events.daemonHealth().value(QStringLiteral("attachedWindow")).toBool());
 }
 
 void RuntimeServicesTests::render_monitor_counts_frames_when_swapped()

@@ -61,6 +61,21 @@ void AppStateTests::route_tracking_updates_models()
     QVERIFY(listItems.size() >= 2);
     QCOMPARE(listItems.at(0).toMap().value(QStringLiteral("selected")).toBool(), false);
     QCOMPARE(listItems.at(1).toMap().value(QStringLiteral("selected")).toBool(), true);
+
+    state.recordNavigation(QStringLiteral("/reports"));
+    QCOMPARE(state.pageHistory().size(), 2);
+    QCOMPARE(state.pageHistory().last(), QStringLiteral("/reports"));
+
+    QString reportsBadge;
+    const QVariantList navItems = state.navItems();
+    for (const QVariant &entry : navItems) {
+        const QVariantMap map = entry.toMap();
+        if (map.value(QStringLiteral("path")).toString() == QStringLiteral("/reports")) {
+            reportsBadge = map.value(QStringLiteral("badge")).toString();
+            break;
+        }
+    }
+    QCOMPARE(reportsBadge, QStringLiteral("2"));
 }
 
 void AppStateTests::snapshot_sync_bridges_backend_state()

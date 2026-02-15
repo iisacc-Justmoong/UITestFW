@@ -398,6 +398,15 @@ if(LVRS_BUILD_SHARED_LIBS)
         INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/LVRS
     )
 
+    if(LVRS_INSTALL_QML_MODULE AND TARGET LVRSCoreplugin)
+        install(TARGETS LVRSCoreplugin
+            EXPORT LVRSTargets
+            ARCHIVE DESTINATION ${LVRS_QML_MODULE_INSTALL_DIR}
+            LIBRARY DESTINATION ${LVRS_QML_MODULE_INSTALL_DIR}
+            RUNTIME DESTINATION ${LVRS_QML_MODULE_INSTALL_DIR}
+        )
+    endif()
+
     install(EXPORT LVRSTargets
         NAMESPACE LVRS::
         DESTINATION ${LVRS_INSTALL_CMAKE_DIR}
@@ -432,6 +441,7 @@ if(LVRS_INSTALL_QML_MODULE)
     install(
         DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/LVRS/"
         DESTINATION "${LVRS_QML_MODULE_INSTALL_DIR}"
+        PATTERN "*LVRSCoreplugin*" EXCLUDE
     )
 endif()
 
@@ -474,6 +484,7 @@ install(FILES
     "${CMAKE_CURRENT_BINARY_DIR}/LVRSConfigVersion.cmake"
     "${CMAKE_CURRENT_LIST_DIR}/cmake/LVRSHelpers.cmake"
     "${CMAKE_CURRENT_LIST_DIR}/cmake/LVRSBootstrapAction.cmake"
+    "${CMAKE_CURRENT_LIST_DIR}/cmake/LVRSBootstrapExportAction.cmake"
     "${CMAKE_CURRENT_LIST_DIR}/cmake/LVRSBootstrapFrameworkAction.cmake"
     "${CMAKE_CURRENT_LIST_DIR}/cmake/LVRSAppEntryPoint.cpp.in"
     DESTINATION ${LVRS_INSTALL_CMAKE_DIR}

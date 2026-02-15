@@ -6,7 +6,7 @@ Item {
 
     property var target: null
     property bool guardEnabled: true
-    property bool commitOnLocaleChanged: true
+    property bool commitOnLocaleChanged: false
     property bool commitOnVisibilityLost: true
     property bool commitOnFocusLost: true
     property bool logCommitEvents: false

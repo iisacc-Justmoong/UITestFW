@@ -965,6 +965,148 @@ function(_lvrs_internal_create_platform_runtime_targets target)
     endforeach()
 endfunction()
 
+function(_lvrs_internal_bootstrap_root_dir out_var)
+    set(_lvrs_bootstrap_root "")
+    if(DEFINED LVRS_BOOTSTRAP_ROOT_DIR AND NOT LVRS_BOOTSTRAP_ROOT_DIR STREQUAL "")
+        set(_lvrs_bootstrap_root "${LVRS_BOOTSTRAP_ROOT_DIR}")
+    elseif(DEFINED ENV{LVRS_BOOTSTRAP_ROOT_DIR} AND NOT "$ENV{LVRS_BOOTSTRAP_ROOT_DIR}" STREQUAL "")
+        set(_lvrs_bootstrap_root "$ENV{LVRS_BOOTSTRAP_ROOT_DIR}")
+    else()
+        set(_lvrs_bootstrap_root "${CMAKE_BINARY_DIR}/lvrs-bootstrap")
+    endif()
+    set(${out_var} "${_lvrs_bootstrap_root}" PARENT_SCOPE)
+endfunction()
+
+function(lvrs_add_bootstrap_targets)
+    set(_lvrs_one_value_args TARGET)
+    cmake_parse_arguments(LVRS_BOOT "" "${_lvrs_one_value_args}" "" ${ARGN})
+
+    if(NOT LVRS_BOOT_TARGET)
+        message(FATAL_ERROR "lvrs_add_bootstrap_targets() requires TARGET")
+    endif()
+    if(NOT TARGET "${LVRS_BOOT_TARGET}")
+        message(FATAL_ERROR "lvrs_add_bootstrap_targets() target not found: ${LVRS_BOOT_TARGET}")
+    endif()
+
+    _lvrs_internal_create_platform_bootstrap_targets("${LVRS_BOOT_TARGET}")
+    _lvrs_internal_bootstrap_root_dir(_lvrs_bootstrap_root)
+
+    set(_lvrs_ios_bootstrap_target "bootstrap_${LVRS_BOOT_TARGET}_ios")
+    if(TARGET "${_lvrs_ios_bootstrap_target}")
+        set(_lvrs_ios_launch_target "launch_${LVRS_BOOT_TARGET}_ios")
+        if(NOT TARGET "${_lvrs_ios_launch_target}")
+            add_custom_target("${_lvrs_ios_launch_target}" DEPENDS "${_lvrs_ios_bootstrap_target}")
+            set_property(TARGET "${_lvrs_ios_launch_target}" PROPERTY FOLDER "LVRS/BootstrapTargets")
+        endif()
+
+        set(_lvrs_ios_export_target "export_${LVRS_BOOT_TARGET}_xcodeproj")
+        if(NOT TARGET "${_lvrs_ios_export_target}")
+            add_custom_target("${_lvrs_ios_export_target}"
+                COMMAND "${CMAKE_COMMAND}"
+                    "-DLVRS_EXPORT_KIND=xcodeproj"
+                    "-DLVRS_EXPORT_TARGET=${LVRS_BOOT_TARGET}"
+                    "-DLVRS_EXPORT_SOURCE_DIR=${_lvrs_bootstrap_root}/${LVRS_BOOT_TARGET}/ios"
+                    "-DLVRS_EXPORT_OUTPUT_DIR=${CMAKE_BINARY_DIR}/lvrs-export/${LVRS_BOOT_TARGET}/xcodeproj"
+                    -P "${CMAKE_CURRENT_FUNCTION_LIST_DIR}/LVRSBootstrapExportAction.cmake"
+                DEPENDS "${_lvrs_ios_bootstrap_target}"
+                USES_TERMINAL
+            )
+            set_property(TARGET "${_lvrs_ios_export_target}" PROPERTY FOLDER "LVRS/BootstrapTargets")
+        endif()
+    endif()
+
+    set(_lvrs_android_bootstrap_target "bootstrap_${LVRS_BOOT_TARGET}_android")
+    if(TARGET "${_lvrs_android_bootstrap_target}")
+        set(_lvrs_android_launch_target "launch_${LVRS_BOOT_TARGET}_android")
+        if(NOT TARGET "${_lvrs_android_launch_target}")
+            add_custom_target("${_lvrs_android_launch_target}" DEPENDS "${_lvrs_android_bootstrap_target}")
+            set_property(TARGET "${_lvrs_android_launch_target}" PROPERTY FOLDER "LVRS/BootstrapTargets")
+        endif()
+
+        set(_lvrs_android_export_target "export_${LVRS_BOOT_TARGET}_android_studio")
+        if(NOT TARGET "${_lvrs_android_export_target}")
+            add_custom_target("${_lvrs_android_export_target}"
+                COMMAND "${CMAKE_COMMAND}"
+                    "-DLVRS_EXPORT_KIND=android_studio"
+                    "-DLVRS_EXPORT_TARGET=${LVRS_BOOT_TARGET}"
+                    "-DLVRS_EXPORT_SOURCE_DIR=${_lvrs_bootstrap_root}/${LVRS_BOOT_TARGET}/android/android-studio"
+                    "-DLVRS_EXPORT_OUTPUT_DIR=${CMAKE_BINARY_DIR}/lvrs-export/${LVRS_BOOT_TARGET}/android_studio"
+                    -P "${CMAKE_CURRENT_FUNCTION_LIST_DIR}/LVRSBootstrapExportAction.cmake"
+                DEPENDS "${_lvrs_android_bootstrap_target}"
+                USES_TERMINAL
+            )
+            set_property(TARGET "${_lvrs_android_export_target}" PROPERTY FOLDER "LVRS/BootstrapTargets")
+        endif()
+    endif()
+endfunction()
+
+function(lvrs_configure_project_defaults)
+    set(_lvrs_options IOS_EXCLUDE_QMLTOOLING)
+    set(_lvrs_one_value_args
+        TARGET
+        APPLE_BUNDLE_ID
+        APPLE_INFO_PLIST
+        APPLE_ENTITLEMENTS
+        ANDROID_PACKAGE_ID
+        ANDROID_PACKAGE_SOURCE_DIR
+        IOS_EXCLUDED_PLUGIN_TYPES
+    )
+    cmake_parse_arguments(LVRS_DEFAULTS
+        "${_lvrs_options}"
+        "${_lvrs_one_value_args}"
+        ""
+        ${ARGN}
+    )
+
+    if(NOT LVRS_DEFAULTS_TARGET)
+        message(FATAL_ERROR "lvrs_configure_project_defaults() requires TARGET")
+    endif()
+    if(NOT TARGET "${LVRS_DEFAULTS_TARGET}")
+        message(FATAL_ERROR "lvrs_configure_project_defaults() target not found: ${LVRS_DEFAULTS_TARGET}")
+    endif()
+
+    if(APPLE)
+        if(NOT LVRS_DEFAULTS_APPLE_BUNDLE_ID STREQUAL "")
+            set_target_properties("${LVRS_DEFAULTS_TARGET}" PROPERTIES
+                MACOSX_BUNDLE_GUI_IDENTIFIER "${LVRS_DEFAULTS_APPLE_BUNDLE_ID}"
+                XCODE_ATTRIBUTE_PRODUCT_BUNDLE_IDENTIFIER "${LVRS_DEFAULTS_APPLE_BUNDLE_ID}"
+            )
+        endif()
+        if(NOT LVRS_DEFAULTS_APPLE_INFO_PLIST STREQUAL "")
+            set_target_properties("${LVRS_DEFAULTS_TARGET}" PROPERTIES
+                MACOSX_BUNDLE_INFO_PLIST "${LVRS_DEFAULTS_APPLE_INFO_PLIST}"
+                XCODE_ATTRIBUTE_INFOPLIST_FILE "${LVRS_DEFAULTS_APPLE_INFO_PLIST}"
+            )
+        endif()
+        if(NOT LVRS_DEFAULTS_APPLE_ENTITLEMENTS STREQUAL "")
+            set_property(TARGET "${LVRS_DEFAULTS_TARGET}" PROPERTY
+                XCODE_ATTRIBUTE_CODE_SIGN_ENTITLEMENTS "${LVRS_DEFAULTS_APPLE_ENTITLEMENTS}")
+        endif()
+    endif()
+
+    if(ANDROID)
+        if(NOT LVRS_DEFAULTS_ANDROID_PACKAGE_SOURCE_DIR STREQUAL "")
+            set_target_properties("${LVRS_DEFAULTS_TARGET}" PROPERTIES
+                QT_ANDROID_PACKAGE_SOURCE_DIR "${LVRS_DEFAULTS_ANDROID_PACKAGE_SOURCE_DIR}"
+            )
+        endif()
+        if(NOT LVRS_DEFAULTS_ANDROID_PACKAGE_ID STREQUAL "")
+            set_target_properties("${LVRS_DEFAULTS_TARGET}" PROPERTIES
+                QT_ANDROID_PACKAGE_NAME "${LVRS_DEFAULTS_ANDROID_PACKAGE_ID}"
+            )
+        endif()
+    endif()
+
+    set(_lvrs_ios_excluded_plugin_types "${LVRS_DEFAULTS_IOS_EXCLUDED_PLUGIN_TYPES}")
+    if(_lvrs_ios_excluded_plugin_types STREQUAL "" AND LVRS_DEFAULTS_IOS_EXCLUDE_QMLTOOLING)
+        set(_lvrs_ios_excluded_plugin_types "qmltooling")
+    endif()
+    if(NOT _lvrs_ios_excluded_plugin_types STREQUAL "")
+        set_property(TARGET "${LVRS_DEFAULTS_TARGET}" PROPERTY
+            _LVRS_IOS_EXCLUDED_PLUGIN_TYPES "${_lvrs_ios_excluded_plugin_types}")
+    endif()
+endfunction()
+
 function(lvrs_configure_qml_app target)
     set(_lvrs_options NO_PLATFORM_RUNTIME_TARGETS)
     cmake_parse_arguments(LVRS_CFG
@@ -1011,7 +1153,12 @@ function(lvrs_configure_qml_app target)
     # downstream bootstrap builds runnable without per-project patching.
     if(_lvrs_is_ios_simulator AND COMMAND qt_import_plugins)
         set(_lvrs_ios_excluded_plugin_types "qmltooling;networkinformation;tls;imageformats;iconengines;platforms")
-        if(DEFINED LVRS_IOS_SIMULATOR_EXCLUDED_PLUGIN_TYPES
+        get_target_property(_lvrs_ios_excluded_plugin_types_target "${target}" _LVRS_IOS_EXCLUDED_PLUGIN_TYPES)
+        if(_lvrs_ios_excluded_plugin_types_target
+           AND NOT _lvrs_ios_excluded_plugin_types_target STREQUAL "_LVRS_IOS_EXCLUDED_PLUGIN_TYPES-NOTFOUND"
+           AND NOT _lvrs_ios_excluded_plugin_types_target STREQUAL "")
+            set(_lvrs_ios_excluded_plugin_types "${_lvrs_ios_excluded_plugin_types_target}")
+        elseif(DEFINED LVRS_IOS_SIMULATOR_EXCLUDED_PLUGIN_TYPES
            AND NOT LVRS_IOS_SIMULATOR_EXCLUDED_PLUGIN_TYPES STREQUAL "")
             set(_lvrs_ios_excluded_plugin_types "${LVRS_IOS_SIMULATOR_EXCLUDED_PLUGIN_TYPES}")
         elseif(DEFINED ENV{LVRS_IOS_SIMULATOR_EXCLUDED_PLUGIN_TYPES}
@@ -1037,7 +1184,7 @@ function(lvrs_configure_qml_app target)
 
     if(NOT LVRS_CFG_NO_PLATFORM_RUNTIME_TARGETS)
         _lvrs_internal_create_platform_runtime_targets("${target}")
-        _lvrs_internal_create_platform_bootstrap_targets("${target}")
+        lvrs_add_bootstrap_targets(TARGET "${target}")
     endif()
 
 endfunction()

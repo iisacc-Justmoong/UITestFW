@@ -113,6 +113,15 @@ LV.ApplicationWindow {
     QVERIFY(textEdit);
 
     QVERIFY(QMetaObject::invokeMethod(editor, "forceEditorFocus"));
+    const QString beforeReturnText = editor->property("text").toString();
+    const int submitBeforeReturn = root->property("submitCount").toInt();
+    QKeyEvent returnEvent(QEvent::KeyPress, Qt::Key_Return, Qt::NoModifier, QStringLiteral("\n"));
+    QCoreApplication::sendEvent(textEdit, &returnEvent);
+    const QString afterReturnText = editor->property("text").toString();
+    QTRY_COMPARE(afterReturnText.size(), beforeReturnText.size() + 1);
+    QVERIFY(afterReturnText.contains(QLatin1Char('\n')));
+    QCOMPARE(root->property("submitCount").toInt(), submitBeforeReturn);
+
     QKeyEvent submitEvent(QEvent::KeyPress, Qt::Key_Return, Qt::ControlModifier, QStringLiteral("\n"));
     QCoreApplication::sendEvent(textEdit, &submitEvent);
     QTRY_COMPARE(root->property("submitCount").toInt(), 1);

@@ -213,8 +213,12 @@ QString AppState::currentRoute() const
 void AppState::setCurrentRoute(const QString &value)
 {
     const QString normalized = normalizeRoutePath(value);
-    if (normalized.isEmpty() || m_currentRoute == normalized)
+    if (normalized.isEmpty())
         return;
+    if (m_currentRoute == normalized) {
+        rebuildAllModels();
+        return;
+    }
     m_currentRoute = normalized;
     updateScaffoldIndexFromRoute();
     rebuildAllModels();

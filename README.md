@@ -105,6 +105,22 @@ Only CMake configure/build/install is required. Manual file copy or custom plugi
 `lvrs_configure_qml_app()` applies a safe default runtime output directory (`<build>/bin`) when none is set, and auto-links/imports LVRS static QML plugin artifacts when the package is consumed as a static build.
 `lvrs_configure_qml_app()` now also generates platform runtime targets automatically: `run_<YourTarget>_macos`, `run_<YourTarget>_linux`, `run_<YourTarget>_windows`, `run_<YourTarget>_ios`, `run_<YourTarget>_android`.
 On the configured host desktop platform, the matching runtime target directly launches the built executable; non-host targets provide an immediate reconfigure hint via `CMAKE_SYSTEM_NAME`.
+In addition, LVRS generates bootstrap targets for cross-platform output/installation:
+- `bootstrap_<YourTarget>_macos`
+- `bootstrap_<YourTarget>_linux`
+- `bootstrap_<YourTarget>_windows`
+- `bootstrap_<YourTarget>_ios`
+- `bootstrap_<YourTarget>_android`
+- `bootstrap_<YourTarget>_all`
+`bootstrap_*` targets configure isolated per-platform build trees under `<build>/lvrs-bootstrap/<target>/...`, build the app target, then:
+- desktop targets emit executable artifact paths (`macOS`/`Linux` binaries, `Windows .exe`)
+- `ios` installs the built `.app` to the iOS Simulator via `xcrun simctl`
+- `android` installs the built `.apk` to emulator/device via `adb`
+Override paths/toolchains with `LVRS_BOOTSTRAP_QT_PREFIX_<PLATFORM>` and `LVRS_BOOTSTRAP_TOOLCHAIN_FILE_<PLATFORM>` (`PLATFORM`: `MACOS`, `LINUX`, `WINDOWS`, `IOS`, `ANDROID`).
+Example:
+```bash
+cmake --build build --target bootstrap_MyApp_all
+```
 `lvrs_add_qml_app()` further reduces bootstrap overhead by auto-generating an app entrypoint when `SOURCES` is omitted.
 
 ## Rendering Backend Policy

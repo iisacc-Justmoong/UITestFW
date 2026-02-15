@@ -83,26 +83,36 @@ function(_lvrs_internal_known_runtime_platforms out_var)
     )
 endfunction()
 
-function(_lvrs_internal_detect_host_runtime_platform out_var)
-    set(_lvrs_host_platform unknown)
+function(_lvrs_internal_runtime_platform_from_system_name system_name osx_sysroot out_var)
+    set(_lvrs_platform unknown)
 
-    if(CMAKE_SYSTEM_NAME STREQUAL "Android")
-        set(_lvrs_host_platform android)
-    elseif(CMAKE_SYSTEM_NAME STREQUAL "iOS")
-        set(_lvrs_host_platform ios)
-    elseif(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
-        if(CMAKE_OSX_SYSROOT MATCHES "iphone")
-            set(_lvrs_host_platform ios)
+    if(system_name STREQUAL "Android")
+        set(_lvrs_platform android)
+    elseif(system_name STREQUAL "iOS")
+        set(_lvrs_platform ios)
+    elseif(system_name STREQUAL "Darwin")
+        if(osx_sysroot MATCHES "iphone")
+            set(_lvrs_platform ios)
         else()
-            set(_lvrs_host_platform macos)
+            set(_lvrs_platform macos)
         endif()
-    elseif(CMAKE_SYSTEM_NAME STREQUAL "Windows")
-        set(_lvrs_host_platform windows)
-    elseif(CMAKE_SYSTEM_NAME STREQUAL "Linux")
-        set(_lvrs_host_platform linux)
+    elseif(system_name STREQUAL "Windows")
+        set(_lvrs_platform windows)
+    elseif(system_name STREQUAL "Linux")
+        set(_lvrs_platform linux)
     endif()
 
+    set(${out_var} "${_lvrs_platform}" PARENT_SCOPE)
+endfunction()
+
+function(_lvrs_internal_detect_host_runtime_platform out_var)
+    _lvrs_internal_runtime_platform_from_system_name("${CMAKE_HOST_SYSTEM_NAME}" "" _lvrs_host_platform)
     set(${out_var} "${_lvrs_host_platform}" PARENT_SCOPE)
+endfunction()
+
+function(_lvrs_internal_detect_target_runtime_platform out_var)
+    _lvrs_internal_runtime_platform_from_system_name("${CMAKE_SYSTEM_NAME}" "${CMAKE_OSX_SYSROOT}" _lvrs_target_platform)
+    set(${out_var} "${_lvrs_target_platform}" PARENT_SCOPE)
 endfunction()
 
 function(_lvrs_internal_platform_to_cmake_system_name platform out_var)
@@ -131,12 +141,321 @@ function(_lvrs_internal_platform_supports_direct_run platform out_var)
     endif()
 endfunction()
 
+function(_lvrs_internal_escape_list_for_cache in_value out_var)
+    set(_lvrs_value "${in_value}")
+    string(REPLACE ";" "\\;" _lvrs_value "${_lvrs_value}")
+    set(${out_var} "${_lvrs_value}" PARENT_SCOPE)
+endfunction()
+
+function(_lvrs_internal_platform_qt_dir_candidates platform out_var)
+    if(platform STREQUAL "macos")
+        set(_lvrs_candidates macos)
+    elseif(platform STREQUAL "linux")
+        set(_lvrs_candidates gcc_64 linux)
+    elseif(platform STREQUAL "windows")
+        set(_lvrs_candidates msvc2022_64 msvc2019_64 mingw_64 windows)
+    elseif(platform STREQUAL "ios")
+        set(_lvrs_candidates ios)
+    elseif(platform STREQUAL "android")
+        set(_lvrs_candidates android_arm64_v8a android)
+    else()
+        set(_lvrs_candidates)
+    endif()
+
+    set(${out_var} ${_lvrs_candidates} PARENT_SCOPE)
+endfunction()
+
+function(_lvrs_internal_detect_qt_prefix_for_platform platform out_var)
+    string(TOUPPER "${platform}" _lvrs_upper)
+    set(_lvrs_override_var "LVRS_BOOTSTRAP_QT_PREFIX_${_lvrs_upper}")
+    set(_lvrs_qt_prefix "")
+
+    if(DEFINED ${_lvrs_override_var})
+        set(_lvrs_qt_prefix "${${_lvrs_override_var}}")
+    endif()
+    if(_lvrs_qt_prefix STREQUAL "" AND DEFINED ENV{${_lvrs_override_var}})
+        set(_lvrs_qt_prefix "$ENV{${_lvrs_override_var}}")
+    endif()
+    if(_lvrs_qt_prefix STREQUAL "" AND DEFINED LVRS_BOOTSTRAP_QT_PREFIX)
+        set(_lvrs_qt_prefix "${LVRS_BOOTSTRAP_QT_PREFIX}")
+    endif()
+    if(_lvrs_qt_prefix STREQUAL "" AND DEFINED ENV{LVRS_BOOTSTRAP_QT_PREFIX})
+        set(_lvrs_qt_prefix "$ENV{LVRS_BOOTSTRAP_QT_PREFIX}")
+    endif()
+
+    if(NOT _lvrs_qt_prefix STREQUAL "")
+        if(EXISTS "${_lvrs_qt_prefix}/lib/cmake/Qt6/Qt6Config.cmake")
+            set(${out_var} "${_lvrs_qt_prefix}" PARENT_SCOPE)
+            return()
+        endif()
+    endif()
+
+    if(NOT DEFINED Qt6_DIR)
+        set(${out_var} "" PARENT_SCOPE)
+        return()
+    endif()
+
+    get_filename_component(_lvrs_current_qt_prefix "${Qt6_DIR}/../../.." ABSOLUTE)
+    get_filename_component(_lvrs_qt_version_root "${_lvrs_current_qt_prefix}" DIRECTORY)
+
+    _lvrs_internal_platform_qt_dir_candidates("${platform}" _lvrs_qt_candidates)
+    foreach(_lvrs_candidate_name IN LISTS _lvrs_qt_candidates)
+        set(_lvrs_candidate_prefix "${_lvrs_qt_version_root}/${_lvrs_candidate_name}")
+        if(EXISTS "${_lvrs_candidate_prefix}/lib/cmake/Qt6/Qt6Config.cmake")
+            set(${out_var} "${_lvrs_candidate_prefix}" PARENT_SCOPE)
+            return()
+        endif()
+    endforeach()
+
+    set(${out_var} "" PARENT_SCOPE)
+endfunction()
+
+function(_lvrs_internal_default_toolchain_for_qt_prefix qt_prefix out_var)
+    if(qt_prefix STREQUAL "")
+        set(${out_var} "" PARENT_SCOPE)
+        return()
+    endif()
+
+    set(_lvrs_toolchain_candidate "${qt_prefix}/lib/cmake/Qt6/qt.toolchain.cmake")
+    if(EXISTS "${_lvrs_toolchain_candidate}")
+        set(${out_var} "${_lvrs_toolchain_candidate}" PARENT_SCOPE)
+        return()
+    endif()
+
+    set(${out_var} "" PARENT_SCOPE)
+endfunction()
+
+function(_lvrs_internal_bootstrap_toolchain_for_platform platform qt_prefix out_var)
+    string(TOUPPER "${platform}" _lvrs_upper)
+    set(_lvrs_override_var "LVRS_BOOTSTRAP_TOOLCHAIN_FILE_${_lvrs_upper}")
+    set(_lvrs_toolchain "")
+
+    if(DEFINED ${_lvrs_override_var})
+        set(_lvrs_toolchain "${${_lvrs_override_var}}")
+    endif()
+    if(_lvrs_toolchain STREQUAL "" AND DEFINED ENV{${_lvrs_override_var}})
+        set(_lvrs_toolchain "$ENV{${_lvrs_override_var}}")
+    endif()
+    if(_lvrs_toolchain STREQUAL "" AND DEFINED LVRS_BOOTSTRAP_TOOLCHAIN_FILE)
+        set(_lvrs_toolchain "${LVRS_BOOTSTRAP_TOOLCHAIN_FILE}")
+    endif()
+    if(_lvrs_toolchain STREQUAL "" AND DEFINED ENV{LVRS_BOOTSTRAP_TOOLCHAIN_FILE})
+        set(_lvrs_toolchain "$ENV{LVRS_BOOTSTRAP_TOOLCHAIN_FILE}")
+    endif()
+
+    if(_lvrs_toolchain STREQUAL "" AND (platform STREQUAL "ios" OR platform STREQUAL "android"))
+        _lvrs_internal_default_toolchain_for_qt_prefix("${qt_prefix}" _lvrs_toolchain)
+    endif()
+
+    set(${out_var} "${_lvrs_toolchain}" PARENT_SCOPE)
+endfunction()
+
+function(_lvrs_internal_bootstrap_generator_for_platform platform out_var)
+    string(TOUPPER "${platform}" _lvrs_upper)
+    set(_lvrs_override_var "LVRS_BOOTSTRAP_GENERATOR_${_lvrs_upper}")
+    set(_lvrs_generator "")
+
+    if(DEFINED ${_lvrs_override_var})
+        set(_lvrs_generator "${${_lvrs_override_var}}")
+    endif()
+    if(_lvrs_generator STREQUAL "" AND DEFINED ENV{${_lvrs_override_var}})
+        set(_lvrs_generator "$ENV{${_lvrs_override_var}}")
+    endif()
+    if(_lvrs_generator STREQUAL "" AND DEFINED LVRS_BOOTSTRAP_GENERATOR)
+        set(_lvrs_generator "${LVRS_BOOTSTRAP_GENERATOR}")
+    endif()
+    if(_lvrs_generator STREQUAL "" AND DEFINED ENV{LVRS_BOOTSTRAP_GENERATOR})
+        set(_lvrs_generator "$ENV{LVRS_BOOTSTRAP_GENERATOR}")
+    endif()
+
+    if(_lvrs_generator STREQUAL "" AND platform STREQUAL "ios")
+        set(_lvrs_generator "Xcode")
+    endif()
+
+    set(${out_var} "${_lvrs_generator}" PARENT_SCOPE)
+endfunction()
+
+function(_lvrs_internal_bootstrap_system_name_for_platform platform out_var)
+    if(platform STREQUAL "macos")
+        set(_lvrs_system_name "Darwin")
+    elseif(platform STREQUAL "linux")
+        set(_lvrs_system_name "Linux")
+    elseif(platform STREQUAL "windows")
+        set(_lvrs_system_name "Windows")
+    elseif(platform STREQUAL "ios")
+        set(_lvrs_system_name "iOS")
+    elseif(platform STREQUAL "android")
+        set(_lvrs_system_name "Android")
+    else()
+        set(_lvrs_system_name "Unknown")
+    endif()
+
+    set(${out_var} "${_lvrs_system_name}" PARENT_SCOPE)
+endfunction()
+
+function(_lvrs_internal_bootstrap_osx_sysroot_for_platform platform out_var)
+    string(TOUPPER "${platform}" _lvrs_upper)
+    set(_lvrs_override_var "LVRS_BOOTSTRAP_OSX_SYSROOT_${_lvrs_upper}")
+    set(_lvrs_sysroot "")
+
+    if(DEFINED ${_lvrs_override_var})
+        set(_lvrs_sysroot "${${_lvrs_override_var}}")
+    endif()
+    if(_lvrs_sysroot STREQUAL "" AND DEFINED ENV{${_lvrs_override_var}})
+        set(_lvrs_sysroot "$ENV{${_lvrs_override_var}}")
+    endif()
+
+    if(_lvrs_sysroot STREQUAL "" AND platform STREQUAL "ios")
+        set(_lvrs_sysroot "iphonesimulator")
+    endif()
+
+    set(${out_var} "${_lvrs_sysroot}" PARENT_SCOPE)
+endfunction()
+
+function(_lvrs_internal_bootstrap_android_abi_for_platform platform out_var)
+    if(NOT platform STREQUAL "android")
+        set(${out_var} "" PARENT_SCOPE)
+        return()
+    endif()
+
+    if(DEFINED LVRS_BOOTSTRAP_ANDROID_ABI)
+        set(${out_var} "${LVRS_BOOTSTRAP_ANDROID_ABI}" PARENT_SCOPE)
+        return()
+    endif()
+    if(DEFINED ENV{LVRS_BOOTSTRAP_ANDROID_ABI})
+        set(${out_var} "$ENV{LVRS_BOOTSTRAP_ANDROID_ABI}" PARENT_SCOPE)
+        return()
+    endif()
+
+    set(${out_var} "arm64-v8a" PARENT_SCOPE)
+endfunction()
+
+function(_lvrs_internal_bootstrap_build_type out_var)
+    if(DEFINED LVRS_BOOTSTRAP_BUILD_TYPE AND NOT LVRS_BOOTSTRAP_BUILD_TYPE STREQUAL "")
+        set(${out_var} "${LVRS_BOOTSTRAP_BUILD_TYPE}" PARENT_SCOPE)
+        return()
+    endif()
+    if(CMAKE_BUILD_TYPE AND NOT CMAKE_BUILD_TYPE STREQUAL "")
+        set(${out_var} "${CMAKE_BUILD_TYPE}" PARENT_SCOPE)
+        return()
+    endif()
+    set(${out_var} "Release" PARENT_SCOPE)
+endfunction()
+
+function(_lvrs_internal_create_platform_bootstrap_targets target)
+    _lvrs_internal_known_runtime_platforms(_lvrs_runtime_platforms)
+
+    set(_lvrs_bootstrap_root "")
+    if(DEFINED LVRS_BOOTSTRAP_ROOT_DIR AND NOT LVRS_BOOTSTRAP_ROOT_DIR STREQUAL "")
+        set(_lvrs_bootstrap_root "${LVRS_BOOTSTRAP_ROOT_DIR}")
+    elseif(DEFINED ENV{LVRS_BOOTSTRAP_ROOT_DIR} AND NOT "$ENV{LVRS_BOOTSTRAP_ROOT_DIR}" STREQUAL "")
+        set(_lvrs_bootstrap_root "$ENV{LVRS_BOOTSTRAP_ROOT_DIR}")
+    else()
+        set(_lvrs_bootstrap_root "${CMAKE_BINARY_DIR}/lvrs-bootstrap")
+    endif()
+
+    set(_lvrs_bootstrap_source_dir "")
+    if(DEFINED LVRS_BOOTSTRAP_SOURCE_DIR AND NOT LVRS_BOOTSTRAP_SOURCE_DIR STREQUAL "")
+        set(_lvrs_bootstrap_source_dir "${LVRS_BOOTSTRAP_SOURCE_DIR}")
+    elseif(DEFINED ENV{LVRS_BOOTSTRAP_SOURCE_DIR} AND NOT "$ENV{LVRS_BOOTSTRAP_SOURCE_DIR}" STREQUAL "")
+        set(_lvrs_bootstrap_source_dir "$ENV{LVRS_BOOTSTRAP_SOURCE_DIR}")
+    else()
+        set(_lvrs_bootstrap_source_dir "${CMAKE_SOURCE_DIR}")
+    endif()
+
+    set(_lvrs_bootstrap_script "${CMAKE_CURRENT_FUNCTION_LIST_DIR}/LVRSBootstrapAction.cmake")
+    if(NOT EXISTS "${_lvrs_bootstrap_script}")
+        message(FATAL_ERROR "LVRS bootstrap helper script not found: ${_lvrs_bootstrap_script}")
+    endif()
+
+    _lvrs_internal_bootstrap_build_type(_lvrs_bootstrap_build_type)
+
+    set(_lvrs_all_bootstrap_targets "")
+    foreach(_lvrs_platform IN LISTS _lvrs_runtime_platforms)
+        set(_lvrs_bootstrap_target "bootstrap_${target}_${_lvrs_platform}")
+        if(TARGET "${_lvrs_bootstrap_target}")
+            list(APPEND _lvrs_all_bootstrap_targets "${_lvrs_bootstrap_target}")
+            continue()
+        endif()
+
+        _lvrs_internal_bootstrap_system_name_for_platform("${_lvrs_platform}" _lvrs_system_name)
+        _lvrs_internal_bootstrap_osx_sysroot_for_platform("${_lvrs_platform}" _lvrs_osx_sysroot)
+        _lvrs_internal_bootstrap_android_abi_for_platform("${_lvrs_platform}" _lvrs_android_abi)
+        _lvrs_internal_detect_qt_prefix_for_platform("${_lvrs_platform}" _lvrs_qt_prefix)
+        _lvrs_internal_bootstrap_toolchain_for_platform("${_lvrs_platform}" "${_lvrs_qt_prefix}" _lvrs_toolchain_file)
+        _lvrs_internal_bootstrap_generator_for_platform("${_lvrs_platform}" _lvrs_generator)
+
+        set(_lvrs_combined_prefix_path "")
+        if(NOT _lvrs_qt_prefix STREQUAL "")
+            set(_lvrs_combined_prefix_path "${_lvrs_qt_prefix}")
+        endif()
+        if(NOT CMAKE_PREFIX_PATH STREQUAL "")
+            if(_lvrs_combined_prefix_path STREQUAL "")
+                set(_lvrs_combined_prefix_path "${CMAKE_PREFIX_PATH}")
+            else()
+                set(_lvrs_combined_prefix_path "${_lvrs_combined_prefix_path};${CMAKE_PREFIX_PATH}")
+            endif()
+        endif()
+
+        _lvrs_internal_escape_list_for_cache("${_lvrs_combined_prefix_path}" _lvrs_combined_prefix_path_escaped)
+
+        set(_lvrs_platform_build_dir "${_lvrs_bootstrap_root}/${target}/${_lvrs_platform}")
+
+        set(_lvrs_ios_simulator_name "")
+        if(DEFINED LVRS_IOS_SIMULATOR_NAME AND NOT LVRS_IOS_SIMULATOR_NAME STREQUAL "")
+            set(_lvrs_ios_simulator_name "${LVRS_IOS_SIMULATOR_NAME}")
+        elseif(DEFINED ENV{LVRS_IOS_SIMULATOR_NAME} AND NOT "$ENV{LVRS_IOS_SIMULATOR_NAME}" STREQUAL "")
+            set(_lvrs_ios_simulator_name "$ENV{LVRS_IOS_SIMULATOR_NAME}")
+        else()
+            set(_lvrs_ios_simulator_name "iPhone 17 Pro")
+        endif()
+
+        set(_lvrs_android_serial "")
+        if(DEFINED LVRS_ANDROID_EMULATOR_SERIAL AND NOT LVRS_ANDROID_EMULATOR_SERIAL STREQUAL "")
+            set(_lvrs_android_serial "${LVRS_ANDROID_EMULATOR_SERIAL}")
+        elseif(DEFINED ENV{LVRS_ANDROID_EMULATOR_SERIAL} AND NOT "$ENV{LVRS_ANDROID_EMULATOR_SERIAL}" STREQUAL "")
+            set(_lvrs_android_serial "$ENV{LVRS_ANDROID_EMULATOR_SERIAL}")
+        else()
+            set(_lvrs_android_serial "emulator-5554")
+        endif()
+
+        add_custom_target("${_lvrs_bootstrap_target}"
+            COMMAND "${CMAKE_COMMAND}"
+                "-DLVRS_BOOTSTRAP_SOURCE_DIR=${_lvrs_bootstrap_source_dir}"
+                "-DLVRS_BOOTSTRAP_BINARY_DIR=${_lvrs_platform_build_dir}"
+                "-DLVRS_BOOTSTRAP_APP_TARGET=${target}"
+                "-DLVRS_BOOTSTRAP_PLATFORM=${_lvrs_platform}"
+                "-DLVRS_BOOTSTRAP_SYSTEM_NAME=${_lvrs_system_name}"
+                "-DLVRS_BOOTSTRAP_PREFIX_PATH=${_lvrs_combined_prefix_path_escaped}"
+                "-DLVRS_BOOTSTRAP_TOOLCHAIN_FILE=${_lvrs_toolchain_file}"
+                "-DLVRS_BOOTSTRAP_GENERATOR=${_lvrs_generator}"
+                "-DLVRS_BOOTSTRAP_BUILD_TYPE=${_lvrs_bootstrap_build_type}"
+                "-DLVRS_BOOTSTRAP_OSX_SYSROOT=${_lvrs_osx_sysroot}"
+                "-DLVRS_BOOTSTRAP_ANDROID_ABI=${_lvrs_android_abi}"
+                "-DLVRS_BOOTSTRAP_IOS_SIMULATOR_NAME=${_lvrs_ios_simulator_name}"
+                "-DLVRS_BOOTSTRAP_ANDROID_SERIAL=${_lvrs_android_serial}"
+                -P "${_lvrs_bootstrap_script}"
+            USES_TERMINAL
+        )
+        set_property(TARGET "${_lvrs_bootstrap_target}" PROPERTY FOLDER "LVRS/BootstrapTargets")
+        list(APPEND _lvrs_all_bootstrap_targets "${_lvrs_bootstrap_target}")
+    endforeach()
+
+    set(_lvrs_bootstrap_all_target "bootstrap_${target}_all")
+    if(NOT TARGET "${_lvrs_bootstrap_all_target}")
+        add_custom_target("${_lvrs_bootstrap_all_target}" DEPENDS ${_lvrs_all_bootstrap_targets})
+        set_property(TARGET "${_lvrs_bootstrap_all_target}" PROPERTY FOLDER "LVRS/BootstrapTargets")
+    endif()
+endfunction()
+
 function(_lvrs_internal_create_platform_runtime_targets target)
     _lvrs_internal_known_runtime_platforms(_lvrs_runtime_platforms)
     _lvrs_internal_detect_host_runtime_platform(_lvrs_host_platform)
+    _lvrs_internal_detect_target_runtime_platform(_lvrs_target_platform)
 
     set_property(TARGET "${target}" PROPERTY LVRS_RUNTIME_TARGETS "${_lvrs_runtime_platforms}")
     set_property(TARGET "${target}" PROPERTY LVRS_HOST_RUNTIME_TARGET "${_lvrs_host_platform}")
+    set_property(TARGET "${target}" PROPERTY LVRS_BUILD_TARGET_RUNTIME_PLATFORM "${_lvrs_target_platform}")
 
     foreach(_lvrs_platform IN LISTS _lvrs_runtime_platforms)
         set(_lvrs_run_target "run_${target}_${_lvrs_platform}")
@@ -147,7 +466,9 @@ function(_lvrs_internal_create_platform_runtime_targets target)
         _lvrs_internal_platform_to_cmake_system_name("${_lvrs_platform}" _lvrs_platform_system_name)
         _lvrs_internal_platform_supports_direct_run("${_lvrs_platform}" _lvrs_direct_run_supported)
 
-        if(_lvrs_platform STREQUAL _lvrs_host_platform AND _lvrs_direct_run_supported)
+        if(_lvrs_platform STREQUAL _lvrs_target_platform
+           AND _lvrs_platform STREQUAL _lvrs_host_platform
+           AND _lvrs_direct_run_supported)
             add_custom_target("${_lvrs_run_target}"
                 COMMAND "$<TARGET_FILE:${target}>"
                 DEPENDS "${target}"
@@ -211,6 +532,7 @@ function(lvrs_configure_qml_app target)
 
     if(NOT LVRS_CFG_NO_PLATFORM_RUNTIME_TARGETS)
         _lvrs_internal_create_platform_runtime_targets("${target}")
+        _lvrs_internal_create_platform_bootstrap_targets("${target}")
     endif()
 
 endfunction()

@@ -1,0 +1,273 @@
+cmake_minimum_required(VERSION 3.21)
+
+function(_lvrs_bootstrap_fail message_text)
+    message(FATAL_ERROR "LVRS bootstrap: ${message_text}")
+endfunction()
+
+macro(_lvrs_bootstrap_append_cache_arg cmd_list key value)
+    if(NOT "${value}" STREQUAL "")
+        list(APPEND ${cmd_list} "-D${key}=${value}")
+    endif()
+endmacro()
+
+function(_lvrs_bootstrap_find_desktop_executable build_dir app_target out_var)
+    set(_lvrs_matches)
+    file(GLOB_RECURSE _lvrs_candidates
+        "${build_dir}/${app_target}"
+        "${build_dir}/${app_target}.exe"
+    )
+
+    foreach(_lvrs_candidate IN LISTS _lvrs_candidates)
+        if(IS_DIRECTORY "${_lvrs_candidate}")
+            continue()
+        endif()
+        if(_lvrs_candidate MATCHES "/CMakeFiles/")
+            continue()
+        endif()
+        list(APPEND _lvrs_matches "${_lvrs_candidate}")
+    endforeach()
+
+    if(_lvrs_matches)
+        list(SORT _lvrs_matches)
+        list(GET _lvrs_matches 0 _lvrs_selected)
+        set(${out_var} "${_lvrs_selected}" PARENT_SCOPE)
+        return()
+    endif()
+
+    set(${out_var} "" PARENT_SCOPE)
+endfunction()
+
+function(_lvrs_bootstrap_find_ios_app_bundle build_dir app_target out_var)
+    set(_lvrs_matches)
+    file(GLOB_RECURSE _lvrs_candidates LIST_DIRECTORIES true "${build_dir}/*.app")
+
+    foreach(_lvrs_candidate IN LISTS _lvrs_candidates)
+        if(NOT IS_DIRECTORY "${_lvrs_candidate}")
+            continue()
+        endif()
+        get_filename_component(_lvrs_name "${_lvrs_candidate}" NAME)
+        if(NOT _lvrs_name STREQUAL "${app_target}.app")
+            continue()
+        endif()
+        list(APPEND _lvrs_matches "${_lvrs_candidate}")
+    endforeach()
+
+    if(NOT _lvrs_matches)
+        set(${out_var} "" PARENT_SCOPE)
+        return()
+    endif()
+
+    foreach(_lvrs_candidate IN LISTS _lvrs_matches)
+        if(_lvrs_candidate MATCHES "iphonesimulator")
+            set(${out_var} "${_lvrs_candidate}" PARENT_SCOPE)
+            return()
+        endif()
+    endforeach()
+
+    list(SORT _lvrs_matches)
+    list(GET _lvrs_matches 0 _lvrs_selected)
+    set(${out_var} "${_lvrs_selected}" PARENT_SCOPE)
+endfunction()
+
+function(_lvrs_bootstrap_find_android_apk build_dir out_var)
+    set(_lvrs_matches)
+    file(GLOB_RECURSE _lvrs_candidates "${build_dir}/*.apk")
+
+    foreach(_lvrs_candidate IN LISTS _lvrs_candidates)
+        if(IS_DIRECTORY "${_lvrs_candidate}")
+            continue()
+        endif()
+        list(APPEND _lvrs_matches "${_lvrs_candidate}")
+    endforeach()
+
+    if(NOT _lvrs_matches)
+        set(${out_var} "" PARENT_SCOPE)
+        return()
+    endif()
+
+    foreach(_lvrs_candidate IN LISTS _lvrs_matches)
+        if(_lvrs_candidate MATCHES "/debug/" OR _lvrs_candidate MATCHES "-debug\\.apk$")
+            set(${out_var} "${_lvrs_candidate}" PARENT_SCOPE)
+            return()
+        endif()
+    endforeach()
+
+    list(SORT _lvrs_matches)
+    list(GET _lvrs_matches 0 _lvrs_selected)
+    set(${out_var} "${_lvrs_selected}" PARENT_SCOPE)
+endfunction()
+
+if(NOT DEFINED LVRS_BOOTSTRAP_SOURCE_DIR OR LVRS_BOOTSTRAP_SOURCE_DIR STREQUAL "")
+    _lvrs_bootstrap_fail("LVRS_BOOTSTRAP_SOURCE_DIR is required.")
+endif()
+if(NOT DEFINED LVRS_BOOTSTRAP_BINARY_DIR OR LVRS_BOOTSTRAP_BINARY_DIR STREQUAL "")
+    _lvrs_bootstrap_fail("LVRS_BOOTSTRAP_BINARY_DIR is required.")
+endif()
+if(NOT DEFINED LVRS_BOOTSTRAP_APP_TARGET OR LVRS_BOOTSTRAP_APP_TARGET STREQUAL "")
+    _lvrs_bootstrap_fail("LVRS_BOOTSTRAP_APP_TARGET is required.")
+endif()
+if(NOT DEFINED LVRS_BOOTSTRAP_PLATFORM OR LVRS_BOOTSTRAP_PLATFORM STREQUAL "")
+    _lvrs_bootstrap_fail("LVRS_BOOTSTRAP_PLATFORM is required.")
+endif()
+
+if(NOT DEFINED LVRS_BOOTSTRAP_SYSTEM_NAME OR LVRS_BOOTSTRAP_SYSTEM_NAME STREQUAL "")
+    set(LVRS_BOOTSTRAP_SYSTEM_NAME "Unknown")
+endif()
+if(NOT DEFINED LVRS_BOOTSTRAP_BUILD_TYPE OR LVRS_BOOTSTRAP_BUILD_TYPE STREQUAL "")
+    set(LVRS_BOOTSTRAP_BUILD_TYPE "Release")
+endif()
+if(NOT DEFINED LVRS_BOOTSTRAP_IOS_SIMULATOR_NAME OR LVRS_BOOTSTRAP_IOS_SIMULATOR_NAME STREQUAL "")
+    set(LVRS_BOOTSTRAP_IOS_SIMULATOR_NAME "iPhone 17 Pro")
+endif()
+if(NOT DEFINED LVRS_BOOTSTRAP_ANDROID_SERIAL)
+    set(LVRS_BOOTSTRAP_ANDROID_SERIAL "")
+endif()
+
+file(MAKE_DIRECTORY "${LVRS_BOOTSTRAP_BINARY_DIR}")
+
+set(_lvrs_configure_cmd "${CMAKE_COMMAND}")
+if(DEFINED LVRS_BOOTSTRAP_GENERATOR AND NOT LVRS_BOOTSTRAP_GENERATOR STREQUAL "")
+    list(APPEND _lvrs_configure_cmd -G "${LVRS_BOOTSTRAP_GENERATOR}")
+endif()
+list(APPEND _lvrs_configure_cmd
+    -S "${LVRS_BOOTSTRAP_SOURCE_DIR}"
+    -B "${LVRS_BOOTSTRAP_BINARY_DIR}"
+)
+if(NOT LVRS_BOOTSTRAP_SYSTEM_NAME STREQUAL "Unknown")
+    _lvrs_bootstrap_append_cache_arg(_lvrs_configure_cmd "CMAKE_SYSTEM_NAME" "${LVRS_BOOTSTRAP_SYSTEM_NAME}")
+endif()
+_lvrs_bootstrap_append_cache_arg(_lvrs_configure_cmd "CMAKE_PREFIX_PATH" "${LVRS_BOOTSTRAP_PREFIX_PATH}")
+_lvrs_bootstrap_append_cache_arg(_lvrs_configure_cmd "CMAKE_TOOLCHAIN_FILE" "${LVRS_BOOTSTRAP_TOOLCHAIN_FILE}")
+_lvrs_bootstrap_append_cache_arg(_lvrs_configure_cmd "CMAKE_BUILD_TYPE" "${LVRS_BOOTSTRAP_BUILD_TYPE}")
+_lvrs_bootstrap_append_cache_arg(_lvrs_configure_cmd "CMAKE_OSX_SYSROOT" "${LVRS_BOOTSTRAP_OSX_SYSROOT}")
+_lvrs_bootstrap_append_cache_arg(_lvrs_configure_cmd "CMAKE_ANDROID_ARCH_ABI" "${LVRS_BOOTSTRAP_ANDROID_ABI}")
+_lvrs_bootstrap_append_cache_arg(_lvrs_configure_cmd "LVRS_BUILD_EXAMPLES" "OFF")
+_lvrs_bootstrap_append_cache_arg(_lvrs_configure_cmd "LVRS_BUILD_TESTS" "OFF")
+
+message(STATUS "LVRS bootstrap: configure '${LVRS_BOOTSTRAP_PLATFORM}' -> ${LVRS_BOOTSTRAP_BINARY_DIR}")
+execute_process(
+    COMMAND ${_lvrs_configure_cmd}
+    RESULT_VARIABLE _lvrs_configure_result
+    COMMAND_ECHO STDOUT
+)
+if(NOT _lvrs_configure_result EQUAL 0)
+    _lvrs_bootstrap_fail("configure failed for platform '${LVRS_BOOTSTRAP_PLATFORM}' (exit=${_lvrs_configure_result}).")
+endif()
+
+set(_lvrs_build_cmd
+    "${CMAKE_COMMAND}"
+    --build "${LVRS_BOOTSTRAP_BINARY_DIR}"
+    --target "${LVRS_BOOTSTRAP_APP_TARGET}"
+)
+if(NOT LVRS_BOOTSTRAP_BUILD_TYPE STREQUAL "")
+    list(APPEND _lvrs_build_cmd --config "${LVRS_BOOTSTRAP_BUILD_TYPE}")
+endif()
+
+message(STATUS "LVRS bootstrap: build '${LVRS_BOOTSTRAP_APP_TARGET}' for '${LVRS_BOOTSTRAP_PLATFORM}'")
+execute_process(
+    COMMAND ${_lvrs_build_cmd}
+    RESULT_VARIABLE _lvrs_build_result
+    COMMAND_ECHO STDOUT
+)
+if(NOT _lvrs_build_result EQUAL 0)
+    _lvrs_bootstrap_fail("build failed for platform '${LVRS_BOOTSTRAP_PLATFORM}' (exit=${_lvrs_build_result}).")
+endif()
+
+if(LVRS_BOOTSTRAP_PLATFORM STREQUAL "macos"
+   OR LVRS_BOOTSTRAP_PLATFORM STREQUAL "linux"
+   OR LVRS_BOOTSTRAP_PLATFORM STREQUAL "windows")
+    _lvrs_bootstrap_find_desktop_executable(
+        "${LVRS_BOOTSTRAP_BINARY_DIR}"
+        "${LVRS_BOOTSTRAP_APP_TARGET}"
+        _lvrs_executable
+    )
+    if(_lvrs_executable STREQUAL "")
+        _lvrs_bootstrap_fail("desktop executable artifact was not found after build.")
+    endif()
+    message(STATUS "LVRS bootstrap: desktop artifact ready -> ${_lvrs_executable}")
+    return()
+endif()
+
+if(LVRS_BOOTSTRAP_PLATFORM STREQUAL "ios")
+    _lvrs_bootstrap_find_ios_app_bundle(
+        "${LVRS_BOOTSTRAP_BINARY_DIR}"
+        "${LVRS_BOOTSTRAP_APP_TARGET}"
+        _lvrs_ios_app_bundle
+    )
+    if(_lvrs_ios_app_bundle STREQUAL "")
+        _lvrs_bootstrap_fail("iOS Simulator app bundle (*.app) was not found after build.")
+    endif()
+
+    find_program(_lvrs_xcrun xcrun)
+    if(NOT _lvrs_xcrun)
+        _lvrs_bootstrap_fail("xcrun is required for iOS simulator installation.")
+    endif()
+
+    execute_process(
+        COMMAND "${_lvrs_xcrun}" simctl boot "${LVRS_BOOTSTRAP_IOS_SIMULATOR_NAME}"
+        RESULT_VARIABLE _lvrs_boot_result
+        OUTPUT_VARIABLE _lvrs_boot_output
+        ERROR_VARIABLE _lvrs_boot_error
+    )
+    if(NOT _lvrs_boot_result EQUAL 0)
+        if(NOT _lvrs_boot_error MATCHES "Booted")
+            message(STATUS "LVRS bootstrap: simctl boot output: ${_lvrs_boot_output}")
+            message(STATUS "LVRS bootstrap: simctl boot error: ${_lvrs_boot_error}")
+        endif()
+    endif()
+
+    execute_process(
+        COMMAND "${_lvrs_xcrun}" simctl bootstatus "${LVRS_BOOTSTRAP_IOS_SIMULATOR_NAME}" -b
+        RESULT_VARIABLE _lvrs_bootstatus_result
+        COMMAND_ECHO STDOUT
+    )
+    if(NOT _lvrs_bootstatus_result EQUAL 0)
+        _lvrs_bootstrap_fail("failed to reach booted iOS simulator state for '${LVRS_BOOTSTRAP_IOS_SIMULATOR_NAME}'.")
+    endif()
+
+    execute_process(
+        COMMAND "${_lvrs_xcrun}" simctl install booted "${_lvrs_ios_app_bundle}"
+        RESULT_VARIABLE _lvrs_install_result
+        COMMAND_ECHO STDOUT
+    )
+    if(NOT _lvrs_install_result EQUAL 0)
+        _lvrs_bootstrap_fail("failed to install iOS app bundle to simulator.")
+    endif()
+
+    message(STATUS "LVRS bootstrap: iOS simulator install completed -> ${_lvrs_ios_app_bundle}")
+    return()
+endif()
+
+if(LVRS_BOOTSTRAP_PLATFORM STREQUAL "android")
+    _lvrs_bootstrap_find_android_apk("${LVRS_BOOTSTRAP_BINARY_DIR}" _lvrs_android_apk)
+    if(_lvrs_android_apk STREQUAL "")
+        _lvrs_bootstrap_fail("Android APK artifact was not found after build.")
+    endif()
+
+    find_program(_lvrs_adb adb)
+    if(NOT _lvrs_adb)
+        _lvrs_bootstrap_fail("adb is required for Android emulator installation.")
+    endif()
+
+    if(NOT LVRS_BOOTSTRAP_ANDROID_SERIAL STREQUAL "")
+        set(_lvrs_android_install_cmd
+            "${_lvrs_adb}" -s "${LVRS_BOOTSTRAP_ANDROID_SERIAL}" install -r "${_lvrs_android_apk}")
+    else()
+        set(_lvrs_android_install_cmd
+            "${_lvrs_adb}" install -r "${_lvrs_android_apk}")
+    endif()
+
+    execute_process(
+        COMMAND ${_lvrs_android_install_cmd}
+        RESULT_VARIABLE _lvrs_android_install_result
+        COMMAND_ECHO STDOUT
+    )
+    if(NOT _lvrs_android_install_result EQUAL 0)
+        _lvrs_bootstrap_fail("failed to install APK to Android emulator/device.")
+    endif()
+
+    message(STATUS "LVRS bootstrap: Android install completed -> ${_lvrs_android_apk}")
+    return()
+endif()
+
+_lvrs_bootstrap_fail("unsupported platform '${LVRS_BOOTSTRAP_PLATFORM}'.")

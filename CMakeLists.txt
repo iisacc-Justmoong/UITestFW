@@ -409,6 +409,7 @@ install(FILES
     "${CMAKE_CURRENT_BINARY_DIR}/LVRSConfig.cmake"
     "${CMAKE_CURRENT_BINARY_DIR}/LVRSConfigVersion.cmake"
     "${CMAKE_CURRENT_LIST_DIR}/cmake/LVRSHelpers.cmake"
+    "${CMAKE_CURRENT_LIST_DIR}/cmake/LVRSBootstrapAction.cmake"
     "${CMAKE_CURRENT_LIST_DIR}/cmake/LVRSAppEntryPoint.cpp.in"
     DESTINATION ${LVRS_INSTALL_CMAKE_DIR}
 )

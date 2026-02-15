@@ -11,6 +11,35 @@ macro(_lvrs_bootstrap_append_cache_arg cmd_list key value)
     endif()
 endmacro()
 
+function(_lvrs_bootstrap_filter_apple_x86_architectures architectures out_var)
+    if(architectures STREQUAL "")
+        set(${out_var} "" PARENT_SCOPE)
+        return()
+    endif()
+
+    string(REPLACE "," ";" _lvrs_arch_list "${architectures}")
+    set(_lvrs_filtered_arches "")
+    foreach(_lvrs_arch IN LISTS _lvrs_arch_list)
+        string(STRIP "${_lvrs_arch}" _lvrs_arch)
+        if(_lvrs_arch STREQUAL "")
+            continue()
+        endif()
+        string(TOLOWER "${_lvrs_arch}" _lvrs_arch_lower)
+        if(_lvrs_arch_lower MATCHES "^(x86|x86_64|amd64|i386)$")
+            continue()
+        endif()
+        list(APPEND _lvrs_filtered_arches "${_lvrs_arch}")
+    endforeach()
+    list(REMOVE_DUPLICATES _lvrs_filtered_arches)
+
+    if(_lvrs_filtered_arches)
+        list(JOIN _lvrs_filtered_arches ";" _lvrs_filtered_joined)
+        set(${out_var} "${_lvrs_filtered_joined}" PARENT_SCOPE)
+    else()
+        set(${out_var} "" PARENT_SCOPE)
+    endif()
+endfunction()
+
 function(_lvrs_bootstrap_detect_android_sdk_root out_var)
     if(DEFINED LVRS_BOOTSTRAP_ANDROID_SDK_ROOT
        AND NOT LVRS_BOOTSTRAP_ANDROID_SDK_ROOT STREQUAL ""
@@ -151,23 +180,24 @@ if(NOT DEFINED LVRS_BOOTSTRAP_IOS_BUNDLE_IDENTIFIER)
 endif()
 
 if(LVRS_BOOTSTRAP_PLATFORM STREQUAL "ios")
-    if(LVRS_BOOTSTRAP_IOS_ARCHITECTURES STREQUAL ""
-       AND LVRS_BOOTSTRAP_OSX_SYSROOT MATCHES "iphonesimulator")
-        set(_lvrs_host_processor "${CMAKE_HOST_SYSTEM_PROCESSOR}")
-        if(_lvrs_host_processor STREQUAL "")
-            execute_process(
-                COMMAND uname -m
-                OUTPUT_VARIABLE _lvrs_host_processor
-                OUTPUT_STRIP_TRAILING_WHITESPACE
-                ERROR_QUIET
-            )
-        endif()
-        string(TOLOWER "${_lvrs_host_processor}" _lvrs_host_processor)
+    string(TOUPPER "${LVRS_BOOTSTRAP_LVRS_BUILD_SHARED_LIBS}" _lvrs_ios_shared_libs_upper)
+    if(NOT _lvrs_ios_shared_libs_upper MATCHES "^(0|OFF|NO|FALSE)$")
+        message(STATUS "LVRS framework bootstrap: forcing LVRS_BUILD_SHARED_LIBS=OFF for iOS.")
+        set(LVRS_BOOTSTRAP_LVRS_BUILD_SHARED_LIBS "OFF")
+    endif()
 
-        if(_lvrs_host_processor MATCHES "^(arm64|aarch64)$")
+    if(CMAKE_HOST_SYSTEM_NAME STREQUAL "Darwin")
+        _lvrs_bootstrap_filter_apple_x86_architectures(
+            "${LVRS_BOOTSTRAP_IOS_ARCHITECTURES}"
+            _lvrs_ios_architectures_filtered
+        )
+        if(NOT LVRS_BOOTSTRAP_IOS_ARCHITECTURES STREQUAL "${_lvrs_ios_architectures_filtered}")
+            message(STATUS "LVRS framework bootstrap: removed Apple x86 iOS architectures.")
+        endif()
+        if(_lvrs_ios_architectures_filtered STREQUAL "")
             set(LVRS_BOOTSTRAP_IOS_ARCHITECTURES "arm64")
-        elseif(_lvrs_host_processor MATCHES "^(x86_64|amd64)$")
-            set(LVRS_BOOTSTRAP_IOS_ARCHITECTURES "x86_64")
+        else()
+            set(LVRS_BOOTSTRAP_IOS_ARCHITECTURES "${_lvrs_ios_architectures_filtered}")
         endif()
     endif()
 
@@ -209,9 +239,9 @@ _lvrs_bootstrap_append_cache_arg(_lvrs_configure_cmd "CMAKE_PREFIX_PATH" "${LVRS
 _lvrs_bootstrap_append_cache_arg(_lvrs_configure_cmd "CMAKE_TOOLCHAIN_FILE" "${LVRS_BOOTSTRAP_TOOLCHAIN_FILE}")
 _lvrs_bootstrap_append_cache_arg(_lvrs_configure_cmd "CMAKE_BUILD_TYPE" "${LVRS_BOOTSTRAP_BUILD_TYPE}")
 _lvrs_bootstrap_append_cache_arg(_lvrs_configure_cmd "CMAKE_OSX_SYSROOT" "${LVRS_BOOTSTRAP_OSX_SYSROOT}")
-_lvrs_bootstrap_append_cache_arg(_lvrs_configure_cmd "CMAKE_OSX_ARCHITECTURES" "${LVRS_BOOTSTRAP_IOS_ARCHITECTURES}")
-_lvrs_bootstrap_append_cache_arg(_lvrs_configure_cmd "CMAKE_XCODE_ATTRIBUTE_PRODUCT_BUNDLE_IDENTIFIER" "${LVRS_BOOTSTRAP_IOS_BUNDLE_IDENTIFIER}")
 if(LVRS_BOOTSTRAP_PLATFORM STREQUAL "ios")
+    _lvrs_bootstrap_append_cache_arg(_lvrs_configure_cmd "CMAKE_OSX_ARCHITECTURES" "${LVRS_BOOTSTRAP_IOS_ARCHITECTURES}")
+    _lvrs_bootstrap_append_cache_arg(_lvrs_configure_cmd "CMAKE_XCODE_ATTRIBUTE_PRODUCT_BUNDLE_IDENTIFIER" "${LVRS_BOOTSTRAP_IOS_BUNDLE_IDENTIFIER}")
     string(TOUPPER "${LVRS_BOOTSTRAP_IOS_CODE_SIGNING}" _lvrs_ios_code_signing_upper)
     if(_lvrs_ios_code_signing_upper MATCHES "^(0|OFF|NO|FALSE)$")
         _lvrs_bootstrap_append_cache_arg(_lvrs_configure_cmd "CMAKE_XCODE_ATTRIBUTE_CODE_SIGNING_ALLOWED" "NO")

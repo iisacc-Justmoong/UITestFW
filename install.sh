@@ -9,7 +9,7 @@ set -eu
 usage() {
     cat <<'EOF'
 Usage: ./install.sh [options]
-Builds and installs LVRS for all runtime platforms via bootstrap_lvrs_all.
+Builds and installs LVRS for selected runtime platforms via bootstrap_lvrs_all.
 
 Options:
   --prefix <path>      Install prefix (default: ~/.local/LVRS)
@@ -18,7 +18,7 @@ Options:
   --clean              Deprecated no-op (clean reinstall is always enabled)
   --without-examples   Disable host configure-time example targets
   --without-tests      Disable host configure-time test targets
-  --force-x86-qt-tools Force Qt host tools to run as x86_64 on macOS
+  --force-x86-qt-tools Deprecated (unsupported): Apple x86 paths are disabled
   --no-source-snapshot Skip source snapshot copy into <prefix>/src/LVRS
   --no-registry        Skip CMake user package registry registration
   --                   Pass remaining args to cmake configure
@@ -41,6 +41,18 @@ detect_host_platform() {
     esac
 }
 
+detect_bootstrap_framework_platforms() {
+    host_platform="$1"
+    case "${host_platform}" in
+        macos|linux|windows)
+            echo "${host_platform};ios;android"
+            ;;
+        *)
+            echo "ios;android"
+            ;;
+    esac
+}
+
 SCRIPT_DIR=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
 PROJECT_ROOT="$SCRIPT_DIR"
 BUILD_DIR="${PROJECT_ROOT}/build-install"
@@ -59,11 +71,11 @@ PLATFORM_INSTALL_ROOT="${INSTALL_PREFIX}/platforms"
 BUILD_TYPE="${CMAKE_BUILD_TYPE:-Release}"
 SOURCE_SNAPSHOT=1
 REGISTER_CMAKE_REGISTRY=1
-FORCE_X86_QT_TOOLS=0
 BUILD_EXAMPLES=1
 BUILD_TESTS=1
 HOST_PLATFORM="$(detect_host_platform)"
 HOST_INSTALL_PREFIX="${PLATFORM_INSTALL_ROOT}/${HOST_PLATFORM}"
+BOOTSTRAP_FRAMEWORK_PLATFORMS="$(detect_bootstrap_framework_platforms "${HOST_PLATFORM}")"
 
 while [ "$#" -gt 0 ]; do
     case "$1" in
@@ -95,8 +107,8 @@ while [ "$#" -gt 0 ]; do
             shift
             ;;
         --force-x86-qt-tools)
-            FORCE_X86_QT_TOOLS=1
-            shift
+            echo "[LVRS] --force-x86-qt-tools is unsupported. Apple x86 paths are disabled." >&2
+            exit 1
             ;;
         --no-source-snapshot)
             SOURCE_SNAPSHOT=0
@@ -124,6 +136,7 @@ done
 
 PLATFORM_INSTALL_ROOT="${INSTALL_PREFIX}/platforms"
 HOST_INSTALL_PREFIX="${PLATFORM_INSTALL_ROOT}/${HOST_PLATFORM}"
+BOOTSTRAP_FRAMEWORK_PLATFORMS="$(detect_bootstrap_framework_platforms "${HOST_PLATFORM}")"
 
 SOURCE_INSTALL_DIR="${INSTALL_PREFIX}/src/LVRS"
 PACKAGE_CONFIG_DIR="${HOST_INSTALL_PREFIX}/lib/cmake/LVRS"
@@ -138,10 +151,10 @@ echo "[LVRS] Build dir    : ${BUILD_DIR}"
 echo "[LVRS] Install dir  : ${INSTALL_PREFIX}"
 echo "[LVRS] Platforms dir: ${PLATFORM_INSTALL_ROOT}"
 echo "[LVRS] Host platform: ${HOST_PLATFORM}"
+echo "[LVRS] Bootstrap targets: ${BOOTSTRAP_FRAMEWORK_PLATFORMS}"
 echo "[LVRS] Build type   : ${BUILD_TYPE}"
 echo "[LVRS] Registry     : ${REGISTER_CMAKE_REGISTRY}"
 echo "[LVRS] Snapshot     : ${SOURCE_SNAPSHOT}"
-echo "[LVRS] X86 Qt tools : ${FORCE_X86_QT_TOOLS}"
 echo "[LVRS] Examples     : ${BUILD_EXAMPLES}"
 echo "[LVRS] Tests        : ${BUILD_TESTS}"
 echo "[LVRS] Clean mode   : forced reinstall"
@@ -170,10 +183,6 @@ do
     fi
 done
 
-if [ "${FORCE_X86_QT_TOOLS}" -eq 1 ]; then
-    set -- -DLVRS_FORCE_X86_QT_TOOLS=ON "$@"
-fi
-
 if [ "${BUILD_EXAMPLES}" -eq 1 ]; then
     LVRS_BUILD_EXAMPLES_VALUE=ON
 else
@@ -193,6 +202,7 @@ if ! cmake -S "${PROJECT_ROOT}" -B "${BUILD_DIR}" \
     -DLVRS_BUILD_EXAMPLES="${LVRS_BUILD_EXAMPLES_VALUE}" \
     -DLVRS_BUILD_TESTS="${LVRS_BUILD_TESTS_VALUE}" \
     -DLVRS_BOOTSTRAP_INSTALL_ROOT="${PLATFORM_INSTALL_ROOT}" \
+    -DLVRS_BOOTSTRAP_FRAMEWORK_PLATFORMS="${BOOTSTRAP_FRAMEWORK_PLATFORMS}" \
     -DLVRS_BOOTSTRAP_LVRS_BUILD_EXAMPLES=OFF \
     -DLVRS_BOOTSTRAP_LVRS_BUILD_TESTS=OFF \
     -DLVRS_BOOTSTRAP_LVRS_BUILD_SHARED_LIBS=ON \
@@ -206,8 +216,7 @@ fi
 
 if ! cmake --build "${BUILD_DIR}" --config "${BUILD_TYPE}" --target bootstrap_lvrs_all; then
     echo "[LVRS] Build failed." >&2
-    echo "[LVRS] On macOS, if log contains 'requires neon', retry with:" >&2
-    echo "       ./install.sh --force-x86-qt-tools" >&2
+    echo "[LVRS] Apple targets never use x86. Check iOS/Qt kit architecture (arm64) and retry." >&2
     exit 1
 fi
 

@@ -16,7 +16,7 @@ option(LVRS_ENABLE_FRAMEWORK_BOOTSTRAP_TARGETS
     ON
 )
 
-option(LVRS_FORCE_X86_QT_TOOLS "Force Qt host tools to run under x86_64 (Rosetta)" OFF)
+option(LVRS_FORCE_X86_QT_TOOLS "Deprecated option (ignored): Apple x86 paths are disabled" OFF)
 option(LVRS_ENABLE_APPLE_GL_LINK_SHIM "Provide a minimal AGL shim only for Apple linker compatibility" ON)
 option(LVRS_ENFORCE_VULKAN "Fail configure if Vulkan-capable Qt/runtime are unavailable" ON)
 
@@ -177,6 +177,11 @@ if(APPLE AND NOT IOS AND LVRS_ENABLE_APPLE_GL_LINK_SHIM)
         set(CMAKE_FRAMEWORK_PATH "${_uifw_framework_root}" ${CMAKE_FRAMEWORK_PATH})
         add_link_options("-F${_uifw_framework_root}")
     endif()
+endif()
+
+if(APPLE AND LVRS_FORCE_X86_QT_TOOLS)
+    message(WARNING "LVRS_FORCE_X86_QT_TOOLS is ignored because Apple x86 paths are disabled.")
+    set(LVRS_FORCE_X86_QT_TOOLS OFF CACHE BOOL "Deprecated option (ignored): Apple x86 paths are disabled" FORCE)
 endif()
 
 if(APPLE AND LVRS_FORCE_X86_QT_TOOLS)

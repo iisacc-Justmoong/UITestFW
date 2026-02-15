@@ -384,6 +384,31 @@ function(_lvrs_internal_create_platform_bootstrap_targets target)
     _lvrs_internal_bootstrap_build_type(_lvrs_bootstrap_build_type)
     _lvrs_internal_detect_qt_host_prefix(_lvrs_qt_host_prefix)
 
+    set(_lvrs_bootstrap_lvrs_dir "")
+    if(DEFINED LVRS_DIR AND NOT LVRS_DIR STREQUAL "")
+        set(_lvrs_bootstrap_lvrs_dir "${LVRS_DIR}")
+    elseif(DEFINED ENV{LVRS_DIR} AND NOT "$ENV{LVRS_DIR}" STREQUAL "")
+        set(_lvrs_bootstrap_lvrs_dir "$ENV{LVRS_DIR}")
+    endif()
+
+    set(_lvrs_bootstrap_find_no_pkg_registry "")
+    if(DEFINED CMAKE_FIND_PACKAGE_NO_PACKAGE_REGISTRY)
+        if(CMAKE_FIND_PACKAGE_NO_PACKAGE_REGISTRY)
+            set(_lvrs_bootstrap_find_no_pkg_registry "ON")
+        else()
+            set(_lvrs_bootstrap_find_no_pkg_registry "OFF")
+        endif()
+    endif()
+
+    set(_lvrs_bootstrap_find_use_pkg_registry "")
+    if(DEFINED CMAKE_FIND_USE_PACKAGE_REGISTRY)
+        if(CMAKE_FIND_USE_PACKAGE_REGISTRY)
+            set(_lvrs_bootstrap_find_use_pkg_registry "ON")
+        else()
+            set(_lvrs_bootstrap_find_use_pkg_registry "OFF")
+        endif()
+    endif()
+
     set(_lvrs_all_bootstrap_targets "")
     foreach(_lvrs_platform IN LISTS _lvrs_runtime_platforms)
         set(_lvrs_bootstrap_target "bootstrap_${target}_${_lvrs_platform}")
@@ -477,6 +502,7 @@ function(_lvrs_internal_create_platform_bootstrap_targets target)
             COMMAND "${CMAKE_COMMAND}"
                 "-DLVRS_BOOTSTRAP_SOURCE_DIR=${_lvrs_bootstrap_source_dir}"
                 "-DLVRS_BOOTSTRAP_BINARY_DIR=${_lvrs_platform_build_dir}"
+                "-DLVRS_BOOTSTRAP_HOST_BUILD_DIR=${CMAKE_BINARY_DIR}"
                 "-DLVRS_BOOTSTRAP_APP_TARGET=${target}"
                 "-DLVRS_BOOTSTRAP_PLATFORM=${_lvrs_platform}"
                 "-DLVRS_BOOTSTRAP_SYSTEM_NAME=${_lvrs_system_name}"
@@ -491,6 +517,9 @@ function(_lvrs_internal_create_platform_bootstrap_targets target)
                 "-DLVRS_BOOTSTRAP_GENERATE_ANDROID_STUDIO_PROJECT=${_lvrs_generate_android_studio_project}"
                 "-DLVRS_BOOTSTRAP_ANDROID_STUDIO_PROJECT_DIR=${_lvrs_android_studio_project_dir}"
                 "-DLVRS_BOOTSTRAP_ANDROIDDEPLOYQT=${_lvrs_androiddeployqt_path}"
+                "-DLVRS_BOOTSTRAP_LVRS_DIR=${_lvrs_bootstrap_lvrs_dir}"
+                "-DLVRS_BOOTSTRAP_FIND_PACKAGE_NO_PACKAGE_REGISTRY=${_lvrs_bootstrap_find_no_pkg_registry}"
+                "-DLVRS_BOOTSTRAP_FIND_USE_PACKAGE_REGISTRY=${_lvrs_bootstrap_find_use_pkg_registry}"
                 "-DLVRS_BOOTSTRAP_IOS_SIMULATOR_NAME=${_lvrs_ios_simulator_name}"
                 "-DLVRS_BOOTSTRAP_ANDROID_SERIAL=${_lvrs_android_serial}"
                 -P "${_lvrs_bootstrap_script}"

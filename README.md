@@ -120,6 +120,8 @@ Override paths/toolchains with `LVRS_BOOTSTRAP_QT_PREFIX_<PLATFORM>` and `LVRS_B
 Project-generation defaults can be controlled with `LVRS_BOOTSTRAP_GENERATE_IOS_XCODE_PROJECT` and `LVRS_BOOTSTRAP_GENERATE_ANDROID_STUDIO_PROJECT`.
 Android Studio output path can be overridden with `LVRS_ANDROID_STUDIO_PROJECT_DIR`.
 `androiddeployqt` lookup can be pinned with `LVRS_BOOTSTRAP_ANDROIDDEPLOYQT` (or `LVRS_BOOTSTRAP_QT_HOST_PREFIX`).
+Android SDK/NDK auto-detection can be overridden with `LVRS_BOOTSTRAP_ANDROID_SDK_ROOT` and `LVRS_BOOTSTRAP_ANDROID_NDK`.
+`LVRS_DIR` and package-registry policy cache values are forwarded automatically to bootstrap reconfigure.
 Example:
 ```bash
 cmake --build build --target bootstrap_MyApp_all

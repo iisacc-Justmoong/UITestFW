@@ -103,8 +103,10 @@ Toolchain/prefix overrides:
 - `LVRS_BOOTSTRAP_GENERATE_ANDROID_STUDIO_PROJECT` (default `ON` for Android bootstrap)
 - `LVRS_ANDROID_STUDIO_PROJECT_DIR` (default: `<platform-build>/android-studio`)
 - `LVRS_BOOTSTRAP_ANDROIDDEPLOYQT` (explicit path override for `androiddeployqt`)
+- `LVRS_BOOTSTRAP_ANDROID_SDK_ROOT` / `LVRS_BOOTSTRAP_ANDROID_NDK` (Android SDK/NDK explicit override)
 - `LVRS_IOS_SIMULATOR_NAME` (default: `iPhone 17 Pro`)
 - `LVRS_ANDROID_EMULATOR_SERIAL` (default: `emulator-5554`)
+`LVRS_DIR` and package-registry policy (`CMAKE_FIND_PACKAGE_NO_PACKAGE_REGISTRY`, `CMAKE_FIND_USE_PACKAGE_REGISTRY`) are propagated automatically from the host configure cache to per-platform bootstrap reconfigure.
 Example one-shot bootstrap command:
 ```bash
 cmake --build build --target bootstrap_MyApp_all

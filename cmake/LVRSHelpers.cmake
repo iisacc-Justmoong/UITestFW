@@ -612,10 +612,44 @@ function(lvrs_configure_qml_app target)
         endif()
     endif()
 
+    set(_lvrs_is_ios_simulator FALSE)
+    if(IOS AND CMAKE_OSX_SYSROOT MATCHES "iphonesimulator")
+        set(_lvrs_is_ios_simulator TRUE)
+    endif()
+
     # Ensure static QML plugins referenced by LVRS imports are linked/imported
     # when the consuming target is finalized.
     if(COMMAND qt_import_qml_plugins)
         qt_import_qml_plugins("${target}")
+    endif()
+
+    # Some Qt iOS kits ship simulator-incompatible static plugin init objects
+    # for these plugin types. Excluding them for simulator builds keeps
+    # downstream bootstrap builds runnable without per-project patching.
+    if(_lvrs_is_ios_simulator AND COMMAND qt_import_plugins)
+        set(_lvrs_ios_excluded_plugin_types "qmltooling;networkinformation;tls;imageformats;iconengines;platforms")
+        if(DEFINED LVRS_IOS_SIMULATOR_EXCLUDED_PLUGIN_TYPES
+           AND NOT LVRS_IOS_SIMULATOR_EXCLUDED_PLUGIN_TYPES STREQUAL "")
+            set(_lvrs_ios_excluded_plugin_types "${LVRS_IOS_SIMULATOR_EXCLUDED_PLUGIN_TYPES}")
+        elseif(DEFINED ENV{LVRS_IOS_SIMULATOR_EXCLUDED_PLUGIN_TYPES}
+               AND NOT "$ENV{LVRS_IOS_SIMULATOR_EXCLUDED_PLUGIN_TYPES}" STREQUAL "")
+            set(_lvrs_ios_excluded_plugin_types "$ENV{LVRS_IOS_SIMULATOR_EXCLUDED_PLUGIN_TYPES}")
+        endif()
+        qt_import_plugins("${target}" EXCLUDE_BY_TYPE ${_lvrs_ios_excluded_plugin_types})
+
+        # If platforms are excluded from Qt's auto-import path, register the
+        # iOS platform integration plugin explicitly using a local source file.
+        if(_lvrs_ios_excluded_plugin_types MATCHES "(^|;)platforms(;|$)"
+           AND TARGET Qt6::QIOSIntegrationPlugin)
+            target_link_libraries("${target}" PRIVATE Qt6::QIOSIntegrationPlugin)
+            set(_lvrs_ios_platform_plugin_import_source
+                "${CMAKE_CURRENT_BINARY_DIR}/${target}_lvrs_ios_platform_plugin_import.cpp")
+            file(WRITE "${_lvrs_ios_platform_plugin_import_source}"
+                "#include <QtPlugin>\n"
+                "Q_IMPORT_PLUGIN(QIOSIntegrationPlugin)\n"
+            )
+            target_sources("${target}" PRIVATE "${_lvrs_ios_platform_plugin_import_source}")
+        endif()
     endif()
 
     if(NOT LVRS_CFG_NO_PLATFORM_RUNTIME_TARGETS)

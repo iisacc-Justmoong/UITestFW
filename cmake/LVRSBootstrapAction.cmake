@@ -130,6 +130,76 @@ function(_lvrs_bootstrap_find_xcode_project build_dir app_target out_var)
     set(${out_var} "" PARENT_SCOPE)
 endfunction()
 
+function(_lvrs_bootstrap_resolve_ios_simulator requested_name out_var)
+    set(_lvrs_resolved_name "${requested_name}")
+
+    find_program(_lvrs_xcrun xcrun)
+    if(NOT _lvrs_xcrun)
+        set(${out_var} "${_lvrs_resolved_name}" PARENT_SCOPE)
+        return()
+    endif()
+
+    execute_process(
+        COMMAND "${_lvrs_xcrun}" simctl list devices available
+        RESULT_VARIABLE _lvrs_list_result
+        OUTPUT_VARIABLE _lvrs_list_output
+        ERROR_QUIET
+    )
+    if(NOT _lvrs_list_result EQUAL 0)
+        set(${out_var} "${_lvrs_resolved_name}" PARENT_SCOPE)
+        return()
+    endif()
+
+    string(REPLACE "\n" ";" _lvrs_lines "${_lvrs_list_output}")
+    set(_lvrs_requested_found FALSE)
+    set(_lvrs_first_booted "")
+    set(_lvrs_first_iphone "")
+    set(_lvrs_first_any "")
+
+    foreach(_lvrs_line IN LISTS _lvrs_lines)
+        string(STRIP "${_lvrs_line}" _lvrs_line)
+        if(_lvrs_line STREQUAL "" OR _lvrs_line MATCHES "^--")
+            continue()
+        endif()
+        if(NOT _lvrs_line MATCHES "^(.+) \\(([0-9A-Fa-f-]+)\\) \\((Booted|Shutdown)\\)$")
+            continue()
+        endif()
+
+        set(_lvrs_device_name "${CMAKE_MATCH_1}")
+        set(_lvrs_device_state "${CMAKE_MATCH_3}")
+        string(STRIP "${_lvrs_device_name}" _lvrs_device_name)
+
+        if(_lvrs_first_any STREQUAL "")
+            set(_lvrs_first_any "${_lvrs_device_name}")
+        endif()
+        if(_lvrs_first_iphone STREQUAL "" AND _lvrs_device_name MATCHES "^iPhone")
+            set(_lvrs_first_iphone "${_lvrs_device_name}")
+        endif()
+        if(_lvrs_first_booted STREQUAL "" AND _lvrs_device_state STREQUAL "Booted")
+            set(_lvrs_first_booted "${_lvrs_device_name}")
+        endif()
+        if(_lvrs_device_name STREQUAL "${requested_name}")
+            set(_lvrs_requested_found TRUE)
+        endif()
+    endforeach()
+
+    if(NOT _lvrs_requested_found)
+        if(NOT _lvrs_first_booted STREQUAL "")
+            set(_lvrs_resolved_name "${_lvrs_first_booted}")
+        elseif(NOT _lvrs_first_iphone STREQUAL "")
+            set(_lvrs_resolved_name "${_lvrs_first_iphone}")
+        elseif(NOT _lvrs_first_any STREQUAL "")
+            set(_lvrs_resolved_name "${_lvrs_first_any}")
+        endif()
+
+        if(NOT _lvrs_resolved_name STREQUAL "${requested_name}")
+            message(STATUS "LVRS bootstrap: requested iOS simulator '${requested_name}' is unavailable; using '${_lvrs_resolved_name}'.")
+        endif()
+    endif()
+
+    set(${out_var} "${_lvrs_resolved_name}" PARENT_SCOPE)
+endfunction()
+
 function(_lvrs_bootstrap_find_android_deployment_settings build_dir app_target out_var)
     set(_lvrs_matches)
     file(GLOB_RECURSE _lvrs_candidates
@@ -320,10 +390,18 @@ if(NOT DEFINED LVRS_BOOTSTRAP_QT_HOST_PREFIX)
     set(LVRS_BOOTSTRAP_QT_HOST_PREFIX "")
 endif()
 if(NOT DEFINED LVRS_BOOTSTRAP_GENERATE_IOS_XCODE_PROJECT)
-    set(LVRS_BOOTSTRAP_GENERATE_IOS_XCODE_PROJECT OFF)
+    if(LVRS_BOOTSTRAP_PLATFORM STREQUAL "ios")
+        set(LVRS_BOOTSTRAP_GENERATE_IOS_XCODE_PROJECT ON)
+    else()
+        set(LVRS_BOOTSTRAP_GENERATE_IOS_XCODE_PROJECT OFF)
+    endif()
 endif()
 if(NOT DEFINED LVRS_BOOTSTRAP_GENERATE_ANDROID_STUDIO_PROJECT)
-    set(LVRS_BOOTSTRAP_GENERATE_ANDROID_STUDIO_PROJECT OFF)
+    if(LVRS_BOOTSTRAP_PLATFORM STREQUAL "android")
+        set(LVRS_BOOTSTRAP_GENERATE_ANDROID_STUDIO_PROJECT ON)
+    else()
+        set(LVRS_BOOTSTRAP_GENERATE_ANDROID_STUDIO_PROJECT OFF)
+    endif()
 endif()
 if(NOT DEFINED LVRS_BOOTSTRAP_ANDROID_STUDIO_PROJECT_DIR)
     set(LVRS_BOOTSTRAP_ANDROID_STUDIO_PROJECT_DIR "")
@@ -348,6 +426,53 @@ if(NOT DEFINED LVRS_BOOTSTRAP_ANDROID_SDK_ROOT)
 endif()
 if(NOT DEFINED LVRS_BOOTSTRAP_ANDROID_NDK)
     set(LVRS_BOOTSTRAP_ANDROID_NDK "")
+endif()
+if(NOT DEFINED LVRS_BOOTSTRAP_IOS_ARCHITECTURES)
+    set(LVRS_BOOTSTRAP_IOS_ARCHITECTURES "")
+endif()
+if(NOT DEFINED LVRS_BOOTSTRAP_IOS_CODE_SIGNING)
+    set(LVRS_BOOTSTRAP_IOS_CODE_SIGNING "")
+endif()
+if(NOT DEFINED LVRS_BOOTSTRAP_IOS_BUNDLE_IDENTIFIER)
+    set(LVRS_BOOTSTRAP_IOS_BUNDLE_IDENTIFIER "")
+endif()
+
+if(LVRS_BOOTSTRAP_PLATFORM STREQUAL "ios")
+    if(LVRS_BOOTSTRAP_IOS_ARCHITECTURES STREQUAL ""
+       AND LVRS_BOOTSTRAP_OSX_SYSROOT MATCHES "iphonesimulator")
+        set(_lvrs_host_processor "${CMAKE_HOST_SYSTEM_PROCESSOR}")
+        if(_lvrs_host_processor STREQUAL "")
+            execute_process(
+                COMMAND uname -m
+                OUTPUT_VARIABLE _lvrs_host_processor
+                OUTPUT_STRIP_TRAILING_WHITESPACE
+                ERROR_QUIET
+            )
+        endif()
+        string(TOLOWER "${_lvrs_host_processor}" _lvrs_host_processor)
+
+        if(_lvrs_host_processor MATCHES "^(arm64|aarch64)$")
+            set(LVRS_BOOTSTRAP_IOS_ARCHITECTURES "arm64")
+        elseif(_lvrs_host_processor MATCHES "^(x86_64|amd64)$")
+            set(LVRS_BOOTSTRAP_IOS_ARCHITECTURES "x86_64")
+        endif()
+    endif()
+
+    if(LVRS_BOOTSTRAP_IOS_CODE_SIGNING STREQUAL "")
+        set(LVRS_BOOTSTRAP_IOS_CODE_SIGNING "OFF")
+    endif()
+
+    if(LVRS_BOOTSTRAP_IOS_BUNDLE_IDENTIFIER STREQUAL "")
+        string(TOLOWER "${LVRS_BOOTSTRAP_APP_TARGET}" _lvrs_bundle_suffix)
+        string(REGEX REPLACE "[^a-z0-9.-]" "-" _lvrs_bundle_suffix "${_lvrs_bundle_suffix}")
+        string(REGEX REPLACE "[-.]{2,}" "." _lvrs_bundle_suffix "${_lvrs_bundle_suffix}")
+        string(REGEX REPLACE "^[.-]+" "" _lvrs_bundle_suffix "${_lvrs_bundle_suffix}")
+        string(REGEX REPLACE "[.-]+$" "" _lvrs_bundle_suffix "${_lvrs_bundle_suffix}")
+        if(_lvrs_bundle_suffix STREQUAL "")
+            set(_lvrs_bundle_suffix "app")
+        endif()
+        set(LVRS_BOOTSTRAP_IOS_BUNDLE_IDENTIFIER "com.lvrs.${_lvrs_bundle_suffix}")
+    endif()
 endif()
 
 file(MAKE_DIRECTORY "${LVRS_BOOTSTRAP_BINARY_DIR}")
@@ -378,6 +503,15 @@ _lvrs_bootstrap_append_cache_arg(_lvrs_configure_cmd "CMAKE_PREFIX_PATH" "${LVRS
 _lvrs_bootstrap_append_cache_arg(_lvrs_configure_cmd "CMAKE_TOOLCHAIN_FILE" "${LVRS_BOOTSTRAP_TOOLCHAIN_FILE}")
 _lvrs_bootstrap_append_cache_arg(_lvrs_configure_cmd "CMAKE_BUILD_TYPE" "${LVRS_BOOTSTRAP_BUILD_TYPE}")
 _lvrs_bootstrap_append_cache_arg(_lvrs_configure_cmd "CMAKE_OSX_SYSROOT" "${LVRS_BOOTSTRAP_OSX_SYSROOT}")
+if(LVRS_BOOTSTRAP_PLATFORM STREQUAL "ios")
+    _lvrs_bootstrap_append_cache_arg(_lvrs_configure_cmd "CMAKE_OSX_ARCHITECTURES" "${LVRS_BOOTSTRAP_IOS_ARCHITECTURES}")
+    _lvrs_bootstrap_append_cache_arg(_lvrs_configure_cmd "CMAKE_XCODE_ATTRIBUTE_PRODUCT_BUNDLE_IDENTIFIER" "${LVRS_BOOTSTRAP_IOS_BUNDLE_IDENTIFIER}")
+    string(TOUPPER "${LVRS_BOOTSTRAP_IOS_CODE_SIGNING}" _lvrs_ios_code_signing_upper)
+    if(_lvrs_ios_code_signing_upper MATCHES "^(0|OFF|NO|FALSE)$")
+        _lvrs_bootstrap_append_cache_arg(_lvrs_configure_cmd "CMAKE_XCODE_ATTRIBUTE_CODE_SIGNING_ALLOWED" "NO")
+        _lvrs_bootstrap_append_cache_arg(_lvrs_configure_cmd "CMAKE_XCODE_ATTRIBUTE_CODE_SIGNING_REQUIRED" "NO")
+    endif()
+endif()
 _lvrs_bootstrap_append_cache_arg(_lvrs_configure_cmd "CMAKE_ANDROID_ARCH_ABI" "${LVRS_BOOTSTRAP_ANDROID_ABI}")
 _lvrs_bootstrap_append_cache_arg(_lvrs_configure_cmd "CMAKE_ANDROID_NDK" "${LVRS_BOOTSTRAP_ANDROID_NDK}")
 _lvrs_bootstrap_append_cache_arg(_lvrs_configure_cmd "ANDROID_NDK_ROOT" "${LVRS_BOOTSTRAP_ANDROID_NDK}")
@@ -463,8 +597,13 @@ if(LVRS_BOOTSTRAP_PLATFORM STREQUAL "ios")
         _lvrs_bootstrap_fail("xcrun is required for iOS simulator installation.")
     endif()
 
+    _lvrs_bootstrap_resolve_ios_simulator(
+        "${LVRS_BOOTSTRAP_IOS_SIMULATOR_NAME}"
+        _lvrs_ios_simulator_name_resolved
+    )
+
     execute_process(
-        COMMAND "${_lvrs_xcrun}" simctl boot "${LVRS_BOOTSTRAP_IOS_SIMULATOR_NAME}"
+        COMMAND "${_lvrs_xcrun}" simctl boot "${_lvrs_ios_simulator_name_resolved}"
         RESULT_VARIABLE _lvrs_boot_result
         OUTPUT_VARIABLE _lvrs_boot_output
         ERROR_VARIABLE _lvrs_boot_error
@@ -477,12 +616,12 @@ if(LVRS_BOOTSTRAP_PLATFORM STREQUAL "ios")
     endif()
 
     execute_process(
-        COMMAND "${_lvrs_xcrun}" simctl bootstatus "${LVRS_BOOTSTRAP_IOS_SIMULATOR_NAME}" -b
+        COMMAND "${_lvrs_xcrun}" simctl bootstatus "${_lvrs_ios_simulator_name_resolved}" -b
         RESULT_VARIABLE _lvrs_bootstatus_result
         COMMAND_ECHO STDOUT
     )
     if(NOT _lvrs_bootstatus_result EQUAL 0)
-        _lvrs_bootstrap_fail("failed to reach booted iOS simulator state for '${LVRS_BOOTSTRAP_IOS_SIMULATOR_NAME}'.")
+        _lvrs_bootstrap_fail("failed to reach booted iOS simulator state for '${_lvrs_ios_simulator_name_resolved}'.")
     endif()
 
     execute_process(

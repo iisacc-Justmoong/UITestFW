@@ -433,6 +433,18 @@ write_basic_package_version_file(
     COMPATIBILITY SameMajorVersion
 )
 
+configure_file(
+    "${CMAKE_CURRENT_LIST_DIR}/cmake/LVRSConfigRoot.cmake.in"
+    "${CMAKE_CURRENT_BINARY_DIR}/LVRSConfigRoot.cmake"
+    @ONLY
+)
+
+configure_file(
+    "${CMAKE_CURRENT_LIST_DIR}/cmake/LVRSConfigVersionRoot.cmake.in"
+    "${CMAKE_CURRENT_BINARY_DIR}/LVRSConfigVersionRoot.cmake"
+    @ONLY
+)
+
 install(FILES
     "${CMAKE_CURRENT_BINARY_DIR}/LVRSConfig.cmake"
     "${CMAKE_CURRENT_BINARY_DIR}/LVRSConfigVersion.cmake"
@@ -440,4 +452,16 @@ install(FILES
     "${CMAKE_CURRENT_LIST_DIR}/cmake/LVRSBootstrapAction.cmake"
     "${CMAKE_CURRENT_LIST_DIR}/cmake/LVRSAppEntryPoint.cpp.in"
     DESTINATION ${LVRS_INSTALL_CMAKE_DIR}
+)
+
+install(FILES
+    "${CMAKE_CURRENT_BINARY_DIR}/LVRSConfigRoot.cmake"
+    DESTINATION "."
+    RENAME "LVRSConfig.cmake"
+)
+
+install(FILES
+    "${CMAKE_CURRENT_BINARY_DIR}/LVRSConfigVersionRoot.cmake"
+    DESTINATION "."
+    RENAME "LVRSConfigVersion.cmake"
 )

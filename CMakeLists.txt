@@ -11,6 +11,10 @@ option(LVRS_BUILD_SHARED_LIBS "Build LVRS as shared library for dynamic consumpt
 option(LVRS_BUILD_EXAMPLES "Build runnable example applications" OFF)
 option(LVRS_BUILD_TESTS "Build LVRS tests" OFF)
 option(LVRS_INSTALL_QML_MODULE "Install LVRS QML module directory for downstream imports" ON)
+option(LVRS_ENABLE_FRAMEWORK_BOOTSTRAP_TARGETS
+    "Generate bootstrap_lvrs_* targets that build/install LVRS for all runtime platforms"
+    ON
+)
 
 option(LVRS_FORCE_X86_QT_TOOLS "Force Qt host tools to run under x86_64 (Rosetta)" OFF)
 option(LVRS_ENABLE_APPLE_GL_LINK_SHIM "Provide a minimal AGL shim only for Apple linker compatibility" ON)
@@ -28,6 +32,11 @@ set(LVRS_RUNTIME_PLATFORMS
     windows
     ios
     android
+)
+set(LVRS_BOOTSTRAP_INSTALL_ROOT
+    "${CMAKE_BINARY_DIR}/lvrs-install"
+    CACHE PATH
+    "Root directory where bootstrap_lvrs_* installs per-platform LVRS packages"
 )
 set(LVRS_APPLE_AGL_SHIM_ACTIVE OFF)
 set(LVRS_APPLE_AGL_FRAMEWORK_ROOT "")
@@ -371,6 +380,10 @@ if(LVRS_BUILD_TESTS)
     add_subdirectory(tests)
 endif()
 
+if(LVRS_ENABLE_FRAMEWORK_BOOTSTRAP_TARGETS)
+    lvrs_create_framework_bootstrap_targets()
+endif()
+
 if(LVRS_BUILD_SHARED_LIBS)
     install(TARGETS LVRSCore
         EXPORT LVRSTargets
@@ -456,6 +469,7 @@ install(FILES
     "${CMAKE_CURRENT_BINARY_DIR}/LVRSConfigVersion.cmake"
     "${CMAKE_CURRENT_LIST_DIR}/cmake/LVRSHelpers.cmake"
     "${CMAKE_CURRENT_LIST_DIR}/cmake/LVRSBootstrapAction.cmake"
+    "${CMAKE_CURRENT_LIST_DIR}/cmake/LVRSBootstrapFrameworkAction.cmake"
     "${CMAKE_CURRENT_LIST_DIR}/cmake/LVRSAppEntryPoint.cpp.in"
     DESTINATION ${LVRS_INSTALL_CMAKE_DIR}
 )

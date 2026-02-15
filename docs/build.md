@@ -6,9 +6,10 @@
 ./install.sh
 ```
 
-The installer configures/builds/installs LVRS in shared framework mode and registers the package in the user CMake package registry, so downstream `find_package(LVRS CONFIG REQUIRED)` works without manually adding the LVRS prefix path.
+The installer runs one multi-platform bootstrap build (`bootstrap_lvrs_all`) and installs LVRS for every runtime platform in one pass.
+Installed packages are written to `<prefix>/platforms/<platform>` (`macos`, `linux`, `windows`, `ios`, `android`), then the host platform path is registered in the CMake user package registry.
 The installer always performs a clean reinstall by removing the previous build directory and installed LVRS artifact paths before configuring.
-`install.sh` builds examples/tests by default to minimize omitted targets; pass `--without-examples --without-tests` for a minimal install build.
+`install.sh` configures examples/tests on the host build by default; pass `--without-examples --without-tests` to disable them.
 
 ## Configure
 
@@ -48,6 +49,8 @@ ctest --test-dir build-dev --output-on-failure
 - `LVRS_INSTALL_QML_MODULE` (`ON`): install QML module artifacts (`qmldir`, qmltypes, plugin, QML files) under `<prefix>/lib/qt6/qml/LVRS`.
 - `LVRS_ENFORCE_VULKAN` (`ON`): fail CMake configure when the platform-fixed graphics backend requirements are missing.
 - `LVRS_FORCE_X86_QT_TOOLS` (`OFF`): run Qt host tools through Rosetta when required.
+- `LVRS_ENABLE_FRAMEWORK_BOOTSTRAP_TARGETS` (`ON`): generate `bootstrap_lvrs_*` framework multi-platform targets.
+- `LVRS_BOOTSTRAP_INSTALL_ROOT` (`<build>/lvrs-install`): install root used by `bootstrap_lvrs_*`.
 
 ## Downstream CMake Integration
 
@@ -115,6 +118,17 @@ cmake --build build --target bootstrap_MyApp_all
 ```
 Use `lvrs_configure_qml_app(<target> NO_PLATFORM_RUNTIME_TARGETS)` to disable this behavior.
 `lvrs_add_qml_app()` can generate a ready-to-run entrypoint automatically when `SOURCES` is omitted.
+
+Framework-only bootstrap targets are generated at project root:
+- `bootstrap_lvrs_macos`
+- `bootstrap_lvrs_linux`
+- `bootstrap_lvrs_windows`
+- `bootstrap_lvrs_ios`
+- `bootstrap_lvrs_android`
+- `bootstrap_lvrs_all`
+`bootstrap_lvrs_all` configures each platform build under `<build>/lvrs-bootstrap/framework/<platform>`, builds `LVRSCore`, and installs to `${LVRS_BOOTSTRAP_INSTALL_ROOT}/<platform>`.
+Override per-platform install paths with `LVRS_BOOTSTRAP_INSTALL_PREFIX_<PLATFORM>`.
+For cross-host platforms, provide matching Qt kits/toolchains through `LVRS_BOOTSTRAP_QT_PREFIX_<PLATFORM>` and `LVRS_BOOTSTRAP_TOOLCHAIN_FILE_<PLATFORM>`.
 
 ## Rendering Backend Enforcement
 

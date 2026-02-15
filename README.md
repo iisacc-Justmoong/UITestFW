@@ -26,11 +26,11 @@ cd LVRS
 ./install.sh
 ```
 
-`install.sh` installs LVRS as a shared framework package and registers it in the user CMake package registry.
-After this step, downstream projects can use `find_package(LVRS CONFIG REQUIRED)` without manually appending LVRS to `CMAKE_PREFIX_PATH`.
-The installer always performs a clean reinstall (build directory and previously installed LVRS artifacts are removed before configure/install).
-The installer now builds examples/tests by default to avoid omitted targets during package installation.
-Use `./install.sh --without-examples --without-tests` for a minimal install build.
+`install.sh` now performs a single multi-platform bootstrap build (`bootstrap_lvrs_all`) and installs LVRS for all runtime platforms in one run.
+Default install layout is `<prefix>/platforms/<platform>` for `macos`, `linux`, `windows`, `ios`, `android`.
+After install, `env.sh` points `CMAKE_PREFIX_PATH` and `QML2_IMPORT_PATH` to the host platform package path so downstream projects can use `find_package(LVRS CONFIG REQUIRED)` immediately.
+The installer always performs a clean reinstall (build directory and previously installed LVRS artifacts are removed before configure/build).
+Use `./install.sh --without-examples --without-tests` to disable host configure-time example/test targets.
 
 ## Build (Framework-First Default)
 
@@ -130,6 +130,17 @@ Example:
 cmake --build build --target bootstrap_MyApp_all
 ```
 `lvrs_add_qml_app()` further reduces bootstrap overhead by auto-generating an app entrypoint when `SOURCES` is omitted.
+
+For framework-only multi-platform install, LVRS also generates:
+- `bootstrap_lvrs_macos`
+- `bootstrap_lvrs_linux`
+- `bootstrap_lvrs_windows`
+- `bootstrap_lvrs_ios`
+- `bootstrap_lvrs_android`
+- `bootstrap_lvrs_all`
+`bootstrap_lvrs_*` targets configure isolated per-platform build trees under `<build>/lvrs-bootstrap/framework/...`, build `LVRSCore`, and install each platform package into `${LVRS_BOOTSTRAP_INSTALL_ROOT}/<platform>` (default: `<build>/lvrs-install/<platform>`).
+Per-platform install prefixes can be overridden with `LVRS_BOOTSTRAP_INSTALL_PREFIX_<PLATFORM>`.
+Cross-host targets (`linux`, `windows`, `android`, `ios`) require matching Qt kits and toolchains; set `LVRS_BOOTSTRAP_QT_PREFIX_<PLATFORM>` and `LVRS_BOOTSTRAP_TOOLCHAIN_FILE_<PLATFORM>` as needed.
 
 ## Rendering Backend Policy
 

@@ -6,6 +6,10 @@
 #include <QVariantMap>
 #include <QtQml/qqml.h>
 
+#if defined(linux)
+#undef linux
+#endif
+
 class PlatformInfo : public QObject
 {
     Q_OBJECT

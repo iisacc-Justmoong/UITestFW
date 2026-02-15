@@ -355,6 +355,253 @@ function(_lvrs_internal_detect_qt_host_prefix out_var)
     set(${out_var} "${_lvrs_qt_host_prefix}" PARENT_SCOPE)
 endfunction()
 
+function(_lvrs_internal_framework_bootstrap_install_root out_var)
+    set(_lvrs_install_root "")
+    if(DEFINED LVRS_BOOTSTRAP_INSTALL_ROOT AND NOT LVRS_BOOTSTRAP_INSTALL_ROOT STREQUAL "")
+        set(_lvrs_install_root "${LVRS_BOOTSTRAP_INSTALL_ROOT}")
+    elseif(DEFINED ENV{LVRS_BOOTSTRAP_INSTALL_ROOT} AND NOT "$ENV{LVRS_BOOTSTRAP_INSTALL_ROOT}" STREQUAL "")
+        set(_lvrs_install_root "$ENV{LVRS_BOOTSTRAP_INSTALL_ROOT}")
+    elseif(DEFINED LVRS_BOOTSTRAP_INSTALL_PREFIX AND NOT LVRS_BOOTSTRAP_INSTALL_PREFIX STREQUAL "")
+        # Backward-compatible alias: treat LVRS_BOOTSTRAP_INSTALL_PREFIX as install root.
+        set(_lvrs_install_root "${LVRS_BOOTSTRAP_INSTALL_PREFIX}")
+    elseif(DEFINED ENV{LVRS_BOOTSTRAP_INSTALL_PREFIX} AND NOT "$ENV{LVRS_BOOTSTRAP_INSTALL_PREFIX}" STREQUAL "")
+        set(_lvrs_install_root "$ENV{LVRS_BOOTSTRAP_INSTALL_PREFIX}")
+    else()
+        set(_lvrs_install_root "${CMAKE_BINARY_DIR}/lvrs-install")
+    endif()
+
+    set(${out_var} "${_lvrs_install_root}" PARENT_SCOPE)
+endfunction()
+
+function(_lvrs_internal_framework_bootstrap_install_prefix_for_platform platform install_root out_var)
+    string(TOUPPER "${platform}" _lvrs_upper)
+    set(_lvrs_override_var "LVRS_BOOTSTRAP_INSTALL_PREFIX_${_lvrs_upper}")
+    set(_lvrs_install_prefix "")
+
+    if(DEFINED ${_lvrs_override_var} AND NOT "${${_lvrs_override_var}}" STREQUAL "")
+        set(_lvrs_install_prefix "${${_lvrs_override_var}}")
+    elseif(DEFINED ENV{${_lvrs_override_var}} AND NOT "$ENV{${_lvrs_override_var}}" STREQUAL "")
+        set(_lvrs_install_prefix "$ENV{${_lvrs_override_var}}")
+    endif()
+
+    if(_lvrs_install_prefix STREQUAL "")
+        set(_lvrs_install_prefix "${install_root}/${platform}")
+    endif()
+
+    set(${out_var} "${_lvrs_install_prefix}" PARENT_SCOPE)
+endfunction()
+
+function(lvrs_create_framework_bootstrap_targets)
+    _lvrs_internal_known_runtime_platforms(_lvrs_runtime_platforms)
+
+    set(_lvrs_bootstrap_root "")
+    if(DEFINED LVRS_BOOTSTRAP_ROOT_DIR AND NOT LVRS_BOOTSTRAP_ROOT_DIR STREQUAL "")
+        set(_lvrs_bootstrap_root "${LVRS_BOOTSTRAP_ROOT_DIR}")
+    elseif(DEFINED ENV{LVRS_BOOTSTRAP_ROOT_DIR} AND NOT "$ENV{LVRS_BOOTSTRAP_ROOT_DIR}" STREQUAL "")
+        set(_lvrs_bootstrap_root "$ENV{LVRS_BOOTSTRAP_ROOT_DIR}")
+    else()
+        set(_lvrs_bootstrap_root "${CMAKE_BINARY_DIR}/lvrs-bootstrap")
+    endif()
+
+    set(_lvrs_bootstrap_source_dir "")
+    if(DEFINED LVRS_BOOTSTRAP_SOURCE_DIR AND NOT LVRS_BOOTSTRAP_SOURCE_DIR STREQUAL "")
+        set(_lvrs_bootstrap_source_dir "${LVRS_BOOTSTRAP_SOURCE_DIR}")
+    elseif(DEFINED ENV{LVRS_BOOTSTRAP_SOURCE_DIR} AND NOT "$ENV{LVRS_BOOTSTRAP_SOURCE_DIR}" STREQUAL "")
+        set(_lvrs_bootstrap_source_dir "$ENV{LVRS_BOOTSTRAP_SOURCE_DIR}")
+    else()
+        set(_lvrs_bootstrap_source_dir "${CMAKE_SOURCE_DIR}")
+    endif()
+
+    set(_lvrs_bootstrap_script "${CMAKE_CURRENT_FUNCTION_LIST_DIR}/LVRSBootstrapFrameworkAction.cmake")
+    if(NOT EXISTS "${_lvrs_bootstrap_script}")
+        message(FATAL_ERROR "LVRS framework bootstrap helper script not found: ${_lvrs_bootstrap_script}")
+    endif()
+
+    _lvrs_internal_bootstrap_build_type(_lvrs_bootstrap_build_type)
+    _lvrs_internal_framework_bootstrap_install_root(_lvrs_framework_install_root)
+
+    set(_lvrs_bootstrap_find_no_pkg_registry "")
+    if(DEFINED CMAKE_FIND_PACKAGE_NO_PACKAGE_REGISTRY)
+        if(CMAKE_FIND_PACKAGE_NO_PACKAGE_REGISTRY)
+            set(_lvrs_bootstrap_find_no_pkg_registry "ON")
+        else()
+            set(_lvrs_bootstrap_find_no_pkg_registry "OFF")
+        endif()
+    endif()
+
+    set(_lvrs_bootstrap_find_use_pkg_registry "")
+    if(DEFINED CMAKE_FIND_USE_PACKAGE_REGISTRY)
+        if(CMAKE_FIND_USE_PACKAGE_REGISTRY)
+            set(_lvrs_bootstrap_find_use_pkg_registry "ON")
+        else()
+            set(_lvrs_bootstrap_find_use_pkg_registry "OFF")
+        endif()
+    endif()
+
+    set(_lvrs_bootstrap_lvrs_build_examples "OFF")
+    if(DEFINED LVRS_BOOTSTRAP_LVRS_BUILD_EXAMPLES)
+        set(_lvrs_bootstrap_lvrs_build_examples "${LVRS_BOOTSTRAP_LVRS_BUILD_EXAMPLES}")
+    elseif(DEFINED ENV{LVRS_BOOTSTRAP_LVRS_BUILD_EXAMPLES} AND NOT "$ENV{LVRS_BOOTSTRAP_LVRS_BUILD_EXAMPLES}" STREQUAL "")
+        set(_lvrs_bootstrap_lvrs_build_examples "$ENV{LVRS_BOOTSTRAP_LVRS_BUILD_EXAMPLES}")
+    endif()
+
+    set(_lvrs_bootstrap_lvrs_build_tests "OFF")
+    if(DEFINED LVRS_BOOTSTRAP_LVRS_BUILD_TESTS)
+        set(_lvrs_bootstrap_lvrs_build_tests "${LVRS_BOOTSTRAP_LVRS_BUILD_TESTS}")
+    elseif(DEFINED ENV{LVRS_BOOTSTRAP_LVRS_BUILD_TESTS} AND NOT "$ENV{LVRS_BOOTSTRAP_LVRS_BUILD_TESTS}" STREQUAL "")
+        set(_lvrs_bootstrap_lvrs_build_tests "$ENV{LVRS_BOOTSTRAP_LVRS_BUILD_TESTS}")
+    endif()
+
+    set(_lvrs_bootstrap_lvrs_build_shared_libs "")
+    if(DEFINED LVRS_BOOTSTRAP_LVRS_BUILD_SHARED_LIBS)
+        set(_lvrs_bootstrap_lvrs_build_shared_libs "${LVRS_BOOTSTRAP_LVRS_BUILD_SHARED_LIBS}")
+    elseif(DEFINED ENV{LVRS_BOOTSTRAP_LVRS_BUILD_SHARED_LIBS}
+           AND NOT "$ENV{LVRS_BOOTSTRAP_LVRS_BUILD_SHARED_LIBS}" STREQUAL "")
+        set(_lvrs_bootstrap_lvrs_build_shared_libs "$ENV{LVRS_BOOTSTRAP_LVRS_BUILD_SHARED_LIBS}")
+    elseif(DEFINED LVRS_BUILD_SHARED_LIBS)
+        if(LVRS_BUILD_SHARED_LIBS)
+            set(_lvrs_bootstrap_lvrs_build_shared_libs "ON")
+        else()
+            set(_lvrs_bootstrap_lvrs_build_shared_libs "OFF")
+        endif()
+    endif()
+
+    set(_lvrs_bootstrap_lvrs_install_qml_module "")
+    if(DEFINED LVRS_BOOTSTRAP_LVRS_INSTALL_QML_MODULE)
+        set(_lvrs_bootstrap_lvrs_install_qml_module "${LVRS_BOOTSTRAP_LVRS_INSTALL_QML_MODULE}")
+    elseif(DEFINED ENV{LVRS_BOOTSTRAP_LVRS_INSTALL_QML_MODULE}
+           AND NOT "$ENV{LVRS_BOOTSTRAP_LVRS_INSTALL_QML_MODULE}" STREQUAL "")
+        set(_lvrs_bootstrap_lvrs_install_qml_module "$ENV{LVRS_BOOTSTRAP_LVRS_INSTALL_QML_MODULE}")
+    elseif(DEFINED LVRS_INSTALL_QML_MODULE)
+        if(LVRS_INSTALL_QML_MODULE)
+            set(_lvrs_bootstrap_lvrs_install_qml_module "ON")
+        else()
+            set(_lvrs_bootstrap_lvrs_install_qml_module "OFF")
+        endif()
+    endif()
+
+    set(_lvrs_bootstrap_lvrs_enforce_vulkan "")
+    if(DEFINED LVRS_BOOTSTRAP_LVRS_ENFORCE_VULKAN)
+        set(_lvrs_bootstrap_lvrs_enforce_vulkan "${LVRS_BOOTSTRAP_LVRS_ENFORCE_VULKAN}")
+    elseif(DEFINED ENV{LVRS_BOOTSTRAP_LVRS_ENFORCE_VULKAN}
+           AND NOT "$ENV{LVRS_BOOTSTRAP_LVRS_ENFORCE_VULKAN}" STREQUAL "")
+        set(_lvrs_bootstrap_lvrs_enforce_vulkan "$ENV{LVRS_BOOTSTRAP_LVRS_ENFORCE_VULKAN}")
+    elseif(DEFINED LVRS_ENFORCE_VULKAN)
+        if(LVRS_ENFORCE_VULKAN)
+            set(_lvrs_bootstrap_lvrs_enforce_vulkan "ON")
+        else()
+            set(_lvrs_bootstrap_lvrs_enforce_vulkan "OFF")
+        endif()
+    endif()
+
+    set(_lvrs_bootstrap_android_sdk_root "")
+    if(DEFINED LVRS_BOOTSTRAP_ANDROID_SDK_ROOT AND NOT LVRS_BOOTSTRAP_ANDROID_SDK_ROOT STREQUAL "")
+        set(_lvrs_bootstrap_android_sdk_root "${LVRS_BOOTSTRAP_ANDROID_SDK_ROOT}")
+    elseif(DEFINED ENV{LVRS_BOOTSTRAP_ANDROID_SDK_ROOT} AND NOT "$ENV{LVRS_BOOTSTRAP_ANDROID_SDK_ROOT}" STREQUAL "")
+        set(_lvrs_bootstrap_android_sdk_root "$ENV{LVRS_BOOTSTRAP_ANDROID_SDK_ROOT}")
+    endif()
+
+    set(_lvrs_bootstrap_android_ndk "")
+    if(DEFINED LVRS_BOOTSTRAP_ANDROID_NDK AND NOT LVRS_BOOTSTRAP_ANDROID_NDK STREQUAL "")
+        set(_lvrs_bootstrap_android_ndk "${LVRS_BOOTSTRAP_ANDROID_NDK}")
+    elseif(DEFINED ENV{LVRS_BOOTSTRAP_ANDROID_NDK} AND NOT "$ENV{LVRS_BOOTSTRAP_ANDROID_NDK}" STREQUAL "")
+        set(_lvrs_bootstrap_android_ndk "$ENV{LVRS_BOOTSTRAP_ANDROID_NDK}")
+    endif()
+
+    set(_lvrs_ios_architectures "")
+    if(DEFINED LVRS_BOOTSTRAP_IOS_ARCHITECTURES)
+        set(_lvrs_ios_architectures "${LVRS_BOOTSTRAP_IOS_ARCHITECTURES}")
+    elseif(DEFINED ENV{LVRS_BOOTSTRAP_IOS_ARCHITECTURES} AND NOT "$ENV{LVRS_BOOTSTRAP_IOS_ARCHITECTURES}" STREQUAL "")
+        set(_lvrs_ios_architectures "$ENV{LVRS_BOOTSTRAP_IOS_ARCHITECTURES}")
+    endif()
+
+    set(_lvrs_ios_code_signing "")
+    if(DEFINED LVRS_BOOTSTRAP_IOS_CODE_SIGNING)
+        set(_lvrs_ios_code_signing "${LVRS_BOOTSTRAP_IOS_CODE_SIGNING}")
+    elseif(DEFINED ENV{LVRS_BOOTSTRAP_IOS_CODE_SIGNING} AND NOT "$ENV{LVRS_BOOTSTRAP_IOS_CODE_SIGNING}" STREQUAL "")
+        set(_lvrs_ios_code_signing "$ENV{LVRS_BOOTSTRAP_IOS_CODE_SIGNING}")
+    endif()
+
+    set(_lvrs_ios_bundle_identifier "")
+    if(DEFINED LVRS_BOOTSTRAP_IOS_BUNDLE_IDENTIFIER)
+        set(_lvrs_ios_bundle_identifier "${LVRS_BOOTSTRAP_IOS_BUNDLE_IDENTIFIER}")
+    elseif(DEFINED ENV{LVRS_BOOTSTRAP_IOS_BUNDLE_IDENTIFIER} AND NOT "$ENV{LVRS_BOOTSTRAP_IOS_BUNDLE_IDENTIFIER}" STREQUAL "")
+        set(_lvrs_ios_bundle_identifier "$ENV{LVRS_BOOTSTRAP_IOS_BUNDLE_IDENTIFIER}")
+    endif()
+
+    set(_lvrs_all_framework_bootstrap_targets "")
+    foreach(_lvrs_platform IN LISTS _lvrs_runtime_platforms)
+        set(_lvrs_bootstrap_target "bootstrap_lvrs_${_lvrs_platform}")
+        if(TARGET "${_lvrs_bootstrap_target}")
+            list(APPEND _lvrs_all_framework_bootstrap_targets "${_lvrs_bootstrap_target}")
+            continue()
+        endif()
+
+        _lvrs_internal_bootstrap_system_name_for_platform("${_lvrs_platform}" _lvrs_system_name)
+        _lvrs_internal_bootstrap_osx_sysroot_for_platform("${_lvrs_platform}" _lvrs_osx_sysroot)
+        _lvrs_internal_bootstrap_android_abi_for_platform("${_lvrs_platform}" _lvrs_android_abi)
+        _lvrs_internal_detect_qt_prefix_for_platform("${_lvrs_platform}" _lvrs_qt_prefix)
+        _lvrs_internal_bootstrap_toolchain_for_platform("${_lvrs_platform}" "${_lvrs_qt_prefix}" _lvrs_toolchain_file)
+        _lvrs_internal_bootstrap_generator_for_platform("${_lvrs_platform}" _lvrs_generator)
+
+        set(_lvrs_combined_prefix_path "")
+        if(NOT _lvrs_qt_prefix STREQUAL "")
+            set(_lvrs_combined_prefix_path "${_lvrs_qt_prefix}")
+        endif()
+        if(NOT CMAKE_PREFIX_PATH STREQUAL "")
+            if(_lvrs_combined_prefix_path STREQUAL "")
+                set(_lvrs_combined_prefix_path "${CMAKE_PREFIX_PATH}")
+            else()
+                set(_lvrs_combined_prefix_path "${_lvrs_combined_prefix_path};${CMAKE_PREFIX_PATH}")
+            endif()
+        endif()
+        _lvrs_internal_escape_list_for_cache("${_lvrs_combined_prefix_path}" _lvrs_combined_prefix_path_escaped)
+
+        set(_lvrs_platform_build_dir "${_lvrs_bootstrap_root}/framework/${_lvrs_platform}")
+        _lvrs_internal_framework_bootstrap_install_prefix_for_platform(
+            "${_lvrs_platform}"
+            "${_lvrs_framework_install_root}"
+            _lvrs_platform_install_prefix
+        )
+
+        add_custom_target("${_lvrs_bootstrap_target}"
+            COMMAND "${CMAKE_COMMAND}"
+                "-DLVRS_BOOTSTRAP_SOURCE_DIR=${_lvrs_bootstrap_source_dir}"
+                "-DLVRS_BOOTSTRAP_BINARY_DIR=${_lvrs_platform_build_dir}"
+                "-DLVRS_BOOTSTRAP_PLATFORM=${_lvrs_platform}"
+                "-DLVRS_BOOTSTRAP_SYSTEM_NAME=${_lvrs_system_name}"
+                "-DLVRS_BOOTSTRAP_PREFIX_PATH=${_lvrs_combined_prefix_path_escaped}"
+                "-DLVRS_BOOTSTRAP_TOOLCHAIN_FILE=${_lvrs_toolchain_file}"
+                "-DLVRS_BOOTSTRAP_GENERATOR=${_lvrs_generator}"
+                "-DLVRS_BOOTSTRAP_BUILD_TYPE=${_lvrs_bootstrap_build_type}"
+                "-DLVRS_BOOTSTRAP_OSX_SYSROOT=${_lvrs_osx_sysroot}"
+                "-DLVRS_BOOTSTRAP_ANDROID_ABI=${_lvrs_android_abi}"
+                "-DLVRS_BOOTSTRAP_ANDROID_SDK_ROOT=${_lvrs_bootstrap_android_sdk_root}"
+                "-DLVRS_BOOTSTRAP_ANDROID_NDK=${_lvrs_bootstrap_android_ndk}"
+                "-DLVRS_BOOTSTRAP_INSTALL_PREFIX=${_lvrs_platform_install_prefix}"
+                "-DLVRS_BOOTSTRAP_LVRS_BUILD_EXAMPLES=${_lvrs_bootstrap_lvrs_build_examples}"
+                "-DLVRS_BOOTSTRAP_LVRS_BUILD_TESTS=${_lvrs_bootstrap_lvrs_build_tests}"
+                "-DLVRS_BOOTSTRAP_LVRS_BUILD_SHARED_LIBS=${_lvrs_bootstrap_lvrs_build_shared_libs}"
+                "-DLVRS_BOOTSTRAP_LVRS_INSTALL_QML_MODULE=${_lvrs_bootstrap_lvrs_install_qml_module}"
+                "-DLVRS_BOOTSTRAP_LVRS_ENFORCE_VULKAN=${_lvrs_bootstrap_lvrs_enforce_vulkan}"
+                "-DLVRS_BOOTSTRAP_FIND_PACKAGE_NO_PACKAGE_REGISTRY=${_lvrs_bootstrap_find_no_pkg_registry}"
+                "-DLVRS_BOOTSTRAP_FIND_USE_PACKAGE_REGISTRY=${_lvrs_bootstrap_find_use_pkg_registry}"
+                "-DLVRS_BOOTSTRAP_IOS_ARCHITECTURES=${_lvrs_ios_architectures}"
+                "-DLVRS_BOOTSTRAP_IOS_CODE_SIGNING=${_lvrs_ios_code_signing}"
+                "-DLVRS_BOOTSTRAP_IOS_BUNDLE_IDENTIFIER=${_lvrs_ios_bundle_identifier}"
+                -P "${_lvrs_bootstrap_script}"
+            USES_TERMINAL
+        )
+        set_property(TARGET "${_lvrs_bootstrap_target}" PROPERTY FOLDER "LVRS/FrameworkBootstrapTargets")
+        list(APPEND _lvrs_all_framework_bootstrap_targets "${_lvrs_bootstrap_target}")
+    endforeach()
+
+    if(NOT TARGET bootstrap_lvrs_all)
+        add_custom_target(bootstrap_lvrs_all DEPENDS ${_lvrs_all_framework_bootstrap_targets})
+        set_property(TARGET bootstrap_lvrs_all PROPERTY FOLDER "LVRS/FrameworkBootstrapTargets")
+    endif()
+endfunction()
+
 function(_lvrs_internal_create_platform_bootstrap_targets target)
     _lvrs_internal_known_runtime_platforms(_lvrs_runtime_platforms)
 

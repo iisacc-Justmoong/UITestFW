@@ -9,20 +9,36 @@ set -eu
 usage() {
     cat <<'EOF'
 Usage: ./install.sh [options]
+Builds and installs LVRS for all runtime platforms via bootstrap_lvrs_all.
 
 Options:
   --prefix <path>      Install prefix (default: ~/.local/LVRS)
   --build-dir <path>   Build directory (default: <repo>/build-install)
   --build-type <type>  CMake build type (default: Release)
   --clean              Deprecated no-op (clean reinstall is always enabled)
-  --without-examples   Do not build example targets
-  --without-tests      Do not build test targets
+  --without-examples   Disable host configure-time example targets
+  --without-tests      Disable host configure-time test targets
   --force-x86-qt-tools Force Qt host tools to run as x86_64 on macOS
   --no-source-snapshot Skip source snapshot copy into <prefix>/src/LVRS
   --no-registry        Skip CMake user package registry registration
   --                   Pass remaining args to cmake configure
   -h, --help           Show this help
 EOF
+}
+
+detect_host_platform() {
+    if [ "${OS:-}" = "Windows_NT" ]; then
+        echo "windows"
+        return
+    fi
+
+    uname_s=$(uname -s 2>/dev/null || echo unknown)
+    case "${uname_s}" in
+        Darwin) echo "macos" ;;
+        Linux) echo "linux" ;;
+        MINGW*|MSYS*|CYGWIN*) echo "windows" ;;
+        *) echo "unknown" ;;
+    esac
 }
 
 SCRIPT_DIR=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
@@ -39,12 +55,15 @@ else
 fi
 
 INSTALL_PREFIX="${HOME_DIR}/.local/LVRS"
+PLATFORM_INSTALL_ROOT="${INSTALL_PREFIX}/platforms"
 BUILD_TYPE="${CMAKE_BUILD_TYPE:-Release}"
 SOURCE_SNAPSHOT=1
 REGISTER_CMAKE_REGISTRY=1
 FORCE_X86_QT_TOOLS=0
 BUILD_EXAMPLES=1
 BUILD_TESTS=1
+HOST_PLATFORM="$(detect_host_platform)"
+HOST_INSTALL_PREFIX="${PLATFORM_INSTALL_ROOT}/${HOST_PLATFORM}"
 
 while [ "$#" -gt 0 ]; do
     case "$1" in
@@ -103,8 +122,11 @@ while [ "$#" -gt 0 ]; do
     esac
 done
 
+PLATFORM_INSTALL_ROOT="${INSTALL_PREFIX}/platforms"
+HOST_INSTALL_PREFIX="${PLATFORM_INSTALL_ROOT}/${HOST_PLATFORM}"
+
 SOURCE_INSTALL_DIR="${INSTALL_PREFIX}/src/LVRS"
-PACKAGE_CONFIG_DIR="${INSTALL_PREFIX}/lib/cmake/LVRS"
+PACKAGE_CONFIG_DIR="${HOST_INSTALL_PREFIX}/lib/cmake/LVRS"
 
 if ! command -v cmake >/dev/null 2>&1; then
     echo "cmake is required but not found in PATH." >&2
@@ -114,6 +136,8 @@ fi
 echo "[LVRS] Project root : ${PROJECT_ROOT}"
 echo "[LVRS] Build dir    : ${BUILD_DIR}"
 echo "[LVRS] Install dir  : ${INSTALL_PREFIX}"
+echo "[LVRS] Platforms dir: ${PLATFORM_INSTALL_ROOT}"
+echo "[LVRS] Host platform: ${HOST_PLATFORM}"
 echo "[LVRS] Build type   : ${BUILD_TYPE}"
 echo "[LVRS] Registry     : ${REGISTER_CMAKE_REGISTRY}"
 echo "[LVRS] Snapshot     : ${SOURCE_SNAPSHOT}"
@@ -128,6 +152,7 @@ cmake -E make_directory "${BUILD_DIR}"
 
 echo "[LVRS] Cleaning previous LVRS install artifacts..."
 cmake -E rm -rf \
+    "${INSTALL_PREFIX}/platforms" \
     "${INSTALL_PREFIX}/include/LVRS" \
     "${INSTALL_PREFIX}/lib/cmake/LVRS" \
     "${INSTALL_PREFIX}/lib/qt6/qml/LVRS" \
@@ -167,6 +192,11 @@ if ! cmake -S "${PROJECT_ROOT}" -B "${BUILD_DIR}" \
     -DLVRS_BUILD_SHARED_LIBS=ON \
     -DLVRS_BUILD_EXAMPLES="${LVRS_BUILD_EXAMPLES_VALUE}" \
     -DLVRS_BUILD_TESTS="${LVRS_BUILD_TESTS_VALUE}" \
+    -DLVRS_BOOTSTRAP_INSTALL_ROOT="${PLATFORM_INSTALL_ROOT}" \
+    -DLVRS_BOOTSTRAP_LVRS_BUILD_EXAMPLES=OFF \
+    -DLVRS_BOOTSTRAP_LVRS_BUILD_TESTS=OFF \
+    -DLVRS_BOOTSTRAP_LVRS_BUILD_SHARED_LIBS=ON \
+    -DLVRS_BOOTSTRAP_LVRS_INSTALL_QML_MODULE=ON \
     "$@"; then
     echo "[LVRS] Configure failed." >&2
     echo "[LVRS] If Qt is not auto-detected, pass your Qt prefix, e.g.:" >&2
@@ -174,17 +204,14 @@ if ! cmake -S "${PROJECT_ROOT}" -B "${BUILD_DIR}" \
     exit 1
 fi
 
-if ! cmake --build "${BUILD_DIR}" --config "${BUILD_TYPE}"; then
+if ! cmake --build "${BUILD_DIR}" --config "${BUILD_TYPE}" --target bootstrap_lvrs_all; then
     echo "[LVRS] Build failed." >&2
     echo "[LVRS] On macOS, if log contains 'requires neon', retry with:" >&2
     echo "       ./install.sh --force-x86-qt-tools" >&2
     exit 1
 fi
 
-if ! cmake --install "${BUILD_DIR}" --config "${BUILD_TYPE}"; then
-    echo "[LVRS] Install step failed." >&2
-    exit 1
-fi
+echo "[LVRS] Multi-platform framework install completed."
 
 if [ "${SOURCE_SNAPSHOT}" -eq 1 ]; then
     echo "[LVRS] Installing source snapshot..."
@@ -240,21 +267,29 @@ if [ "${REGISTER_CMAKE_REGISTRY}" -eq 1 ]; then
         done
     fi
 
-    REGISTRY_ENTRY="${CMAKE_USER_PACKAGE_DIR}/$(date +%s)-$$"
-    printf '%s\n' "${PACKAGE_CONFIG_DIR}" > "${REGISTRY_ENTRY}"
-    echo "[LVRS] Registered CMake package: ${REGISTRY_ENTRY}"
+    if [ -d "${PACKAGE_CONFIG_DIR}" ]; then
+        REGISTRY_ENTRY="${CMAKE_USER_PACKAGE_DIR}/$(date +%s)-$$"
+        printf '%s\n' "${PACKAGE_CONFIG_DIR}" > "${REGISTRY_ENTRY}"
+        echo "[LVRS] Registered CMake package: ${REGISTRY_ENTRY}"
+    else
+        echo "[LVRS] Registry skip: host package dir not found -> ${PACKAGE_CONFIG_DIR}"
+    fi
 fi
 
 ENV_FILE="${INSTALL_PREFIX}/env.sh"
 {
     echo "#!/usr/bin/env sh"
     echo "# LVRS environment helper"
-    echo "export CMAKE_PREFIX_PATH=\"${INSTALL_PREFIX}:\${CMAKE_PREFIX_PATH:-}\""
-    echo "export QML2_IMPORT_PATH=\"${INSTALL_PREFIX}/lib/qt6/qml:\${QML2_IMPORT_PATH:-}\""
+    echo "export LVRS_PLATFORMS_ROOT=\"${PLATFORM_INSTALL_ROOT}\""
+    echo "export LVRS_HOST_PLATFORM=\"${HOST_PLATFORM}\""
+    echo "export LVRS_HOST_PREFIX=\"${HOST_INSTALL_PREFIX}\""
+    echo "export CMAKE_PREFIX_PATH=\"${HOST_INSTALL_PREFIX}:\${CMAKE_PREFIX_PATH:-}\""
+    echo "export QML2_IMPORT_PATH=\"${HOST_INSTALL_PREFIX}/lib/qt6/qml:\${QML2_IMPORT_PATH:-}\""
 } > "${ENV_FILE}"
 chmod +x "${ENV_FILE}"
 
 echo "[LVRS] Install completed."
 echo "[LVRS] CMake package dir : ${PACKAGE_CONFIG_DIR}"
+echo "[LVRS] Platforms root    : ${PLATFORM_INSTALL_ROOT}"
 echo "[LVRS] Env helper        : ${ENV_FILE}"
 echo "[LVRS] Downstream CMake  : find_package(LVRS CONFIG REQUIRED)"

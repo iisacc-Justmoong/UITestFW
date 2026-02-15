@@ -91,11 +91,18 @@ It also creates cross-platform bootstrap targets:
 - `bootstrap_<target>_android`
 - `bootstrap_<target>_all`
 `bootstrap_<target>_all` triggers all platform bootstrap actions in one build invocation.
-Desktop bootstrap targets produce executable artifacts, iOS bootstrap installs a simulator app via `xcrun simctl`, and Android bootstrap installs an APK via `adb`.
+Desktop bootstrap targets produce executable artifacts.
+iOS bootstrap generates an Xcode project by default and installs a simulator app via `xcrun simctl`.
+Android bootstrap generates an Android Studio (Gradle) project by default and installs an APK via `adb`.
 Toolchain/prefix overrides:
 - `LVRS_BOOTSTRAP_QT_PREFIX_<PLATFORM>`
+- `LVRS_BOOTSTRAP_QT_HOST_PREFIX` (host Qt prefix for Android deploy tooling lookup)
 - `LVRS_BOOTSTRAP_TOOLCHAIN_FILE_<PLATFORM>`
 - `LVRS_BOOTSTRAP_GENERATOR_<PLATFORM>`
+- `LVRS_BOOTSTRAP_GENERATE_IOS_XCODE_PROJECT` (default `ON` for iOS bootstrap)
+- `LVRS_BOOTSTRAP_GENERATE_ANDROID_STUDIO_PROJECT` (default `ON` for Android bootstrap)
+- `LVRS_ANDROID_STUDIO_PROJECT_DIR` (default: `<platform-build>/android-studio`)
+- `LVRS_BOOTSTRAP_ANDROIDDEPLOYQT` (explicit path override for `androiddeployqt`)
 - `LVRS_IOS_SIMULATOR_NAME` (default: `iPhone 17 Pro`)
 - `LVRS_ANDROID_EMULATOR_SERIAL` (default: `emulator-5554`)
 Example one-shot bootstrap command:

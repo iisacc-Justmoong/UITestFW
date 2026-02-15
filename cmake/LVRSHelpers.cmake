@@ -342,6 +342,19 @@ function(_lvrs_internal_bootstrap_build_type out_var)
     set(${out_var} "Release" PARENT_SCOPE)
 endfunction()
 
+function(_lvrs_internal_detect_qt_host_prefix out_var)
+    set(_lvrs_qt_host_prefix "")
+    if(DEFINED LVRS_BOOTSTRAP_QT_HOST_PREFIX AND NOT LVRS_BOOTSTRAP_QT_HOST_PREFIX STREQUAL "")
+        set(_lvrs_qt_host_prefix "${LVRS_BOOTSTRAP_QT_HOST_PREFIX}")
+    elseif(DEFINED ENV{LVRS_BOOTSTRAP_QT_HOST_PREFIX} AND NOT "$ENV{LVRS_BOOTSTRAP_QT_HOST_PREFIX}" STREQUAL "")
+        set(_lvrs_qt_host_prefix "$ENV{LVRS_BOOTSTRAP_QT_HOST_PREFIX}")
+    elseif(DEFINED Qt6_DIR)
+        get_filename_component(_lvrs_qt_host_prefix "${Qt6_DIR}/../../.." ABSOLUTE)
+    endif()
+
+    set(${out_var} "${_lvrs_qt_host_prefix}" PARENT_SCOPE)
+endfunction()
+
 function(_lvrs_internal_create_platform_bootstrap_targets target)
     _lvrs_internal_known_runtime_platforms(_lvrs_runtime_platforms)
 
@@ -369,6 +382,7 @@ function(_lvrs_internal_create_platform_bootstrap_targets target)
     endif()
 
     _lvrs_internal_bootstrap_build_type(_lvrs_bootstrap_build_type)
+    _lvrs_internal_detect_qt_host_prefix(_lvrs_qt_host_prefix)
 
     set(_lvrs_all_bootstrap_targets "")
     foreach(_lvrs_platform IN LISTS _lvrs_runtime_platforms)
@@ -401,6 +415,44 @@ function(_lvrs_internal_create_platform_bootstrap_targets target)
 
         set(_lvrs_platform_build_dir "${_lvrs_bootstrap_root}/${target}/${_lvrs_platform}")
 
+        set(_lvrs_generate_ios_xcode_project OFF)
+        if(_lvrs_platform STREQUAL "ios")
+            if(DEFINED LVRS_BOOTSTRAP_GENERATE_IOS_XCODE_PROJECT)
+                set(_lvrs_generate_ios_xcode_project "${LVRS_BOOTSTRAP_GENERATE_IOS_XCODE_PROJECT}")
+            elseif(DEFINED ENV{LVRS_BOOTSTRAP_GENERATE_IOS_XCODE_PROJECT})
+                set(_lvrs_generate_ios_xcode_project "$ENV{LVRS_BOOTSTRAP_GENERATE_IOS_XCODE_PROJECT}")
+            else()
+                set(_lvrs_generate_ios_xcode_project ON)
+            endif()
+        endif()
+
+        set(_lvrs_generate_android_studio_project OFF)
+        set(_lvrs_android_studio_project_dir "")
+        if(_lvrs_platform STREQUAL "android")
+            if(DEFINED LVRS_BOOTSTRAP_GENERATE_ANDROID_STUDIO_PROJECT)
+                set(_lvrs_generate_android_studio_project "${LVRS_BOOTSTRAP_GENERATE_ANDROID_STUDIO_PROJECT}")
+            elseif(DEFINED ENV{LVRS_BOOTSTRAP_GENERATE_ANDROID_STUDIO_PROJECT})
+                set(_lvrs_generate_android_studio_project "$ENV{LVRS_BOOTSTRAP_GENERATE_ANDROID_STUDIO_PROJECT}")
+            else()
+                set(_lvrs_generate_android_studio_project ON)
+            endif()
+
+            if(DEFINED LVRS_ANDROID_STUDIO_PROJECT_DIR AND NOT LVRS_ANDROID_STUDIO_PROJECT_DIR STREQUAL "")
+                set(_lvrs_android_studio_project_dir "${LVRS_ANDROID_STUDIO_PROJECT_DIR}")
+            elseif(DEFINED ENV{LVRS_ANDROID_STUDIO_PROJECT_DIR} AND NOT "$ENV{LVRS_ANDROID_STUDIO_PROJECT_DIR}" STREQUAL "")
+                set(_lvrs_android_studio_project_dir "$ENV{LVRS_ANDROID_STUDIO_PROJECT_DIR}")
+            else()
+                set(_lvrs_android_studio_project_dir "${_lvrs_platform_build_dir}/android-studio")
+            endif()
+        endif()
+
+        set(_lvrs_androiddeployqt_path "")
+        if(DEFINED LVRS_BOOTSTRAP_ANDROIDDEPLOYQT AND NOT LVRS_BOOTSTRAP_ANDROIDDEPLOYQT STREQUAL "")
+            set(_lvrs_androiddeployqt_path "${LVRS_BOOTSTRAP_ANDROIDDEPLOYQT}")
+        elseif(DEFINED ENV{LVRS_BOOTSTRAP_ANDROIDDEPLOYQT} AND NOT "$ENV{LVRS_BOOTSTRAP_ANDROIDDEPLOYQT}" STREQUAL "")
+            set(_lvrs_androiddeployqt_path "$ENV{LVRS_BOOTSTRAP_ANDROIDDEPLOYQT}")
+        endif()
+
         set(_lvrs_ios_simulator_name "")
         if(DEFINED LVRS_IOS_SIMULATOR_NAME AND NOT LVRS_IOS_SIMULATOR_NAME STREQUAL "")
             set(_lvrs_ios_simulator_name "${LVRS_IOS_SIMULATOR_NAME}")
@@ -415,6 +467,8 @@ function(_lvrs_internal_create_platform_bootstrap_targets target)
             set(_lvrs_android_serial "${LVRS_ANDROID_EMULATOR_SERIAL}")
         elseif(DEFINED ENV{LVRS_ANDROID_EMULATOR_SERIAL} AND NOT "$ENV{LVRS_ANDROID_EMULATOR_SERIAL}" STREQUAL "")
             set(_lvrs_android_serial "$ENV{LVRS_ANDROID_EMULATOR_SERIAL}")
+        elseif(DEFINED ENV{ANDROID_SERIAL} AND NOT "$ENV{ANDROID_SERIAL}" STREQUAL "")
+            set(_lvrs_android_serial "$ENV{ANDROID_SERIAL}")
         else()
             set(_lvrs_android_serial "emulator-5554")
         endif()
@@ -430,8 +484,13 @@ function(_lvrs_internal_create_platform_bootstrap_targets target)
                 "-DLVRS_BOOTSTRAP_TOOLCHAIN_FILE=${_lvrs_toolchain_file}"
                 "-DLVRS_BOOTSTRAP_GENERATOR=${_lvrs_generator}"
                 "-DLVRS_BOOTSTRAP_BUILD_TYPE=${_lvrs_bootstrap_build_type}"
+                "-DLVRS_BOOTSTRAP_QT_HOST_PREFIX=${_lvrs_qt_host_prefix}"
                 "-DLVRS_BOOTSTRAP_OSX_SYSROOT=${_lvrs_osx_sysroot}"
                 "-DLVRS_BOOTSTRAP_ANDROID_ABI=${_lvrs_android_abi}"
+                "-DLVRS_BOOTSTRAP_GENERATE_IOS_XCODE_PROJECT=${_lvrs_generate_ios_xcode_project}"
+                "-DLVRS_BOOTSTRAP_GENERATE_ANDROID_STUDIO_PROJECT=${_lvrs_generate_android_studio_project}"
+                "-DLVRS_BOOTSTRAP_ANDROID_STUDIO_PROJECT_DIR=${_lvrs_android_studio_project_dir}"
+                "-DLVRS_BOOTSTRAP_ANDROIDDEPLOYQT=${_lvrs_androiddeployqt_path}"
                 "-DLVRS_BOOTSTRAP_IOS_SIMULATOR_NAME=${_lvrs_ios_simulator_name}"
                 "-DLVRS_BOOTSTRAP_ANDROID_SERIAL=${_lvrs_android_serial}"
                 -P "${_lvrs_bootstrap_script}"

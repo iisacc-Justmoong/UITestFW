@@ -114,9 +114,12 @@ In addition, LVRS generates bootstrap targets for cross-platform output/installa
 - `bootstrap_<YourTarget>_all`
 `bootstrap_*` targets configure isolated per-platform build trees under `<build>/lvrs-bootstrap/<target>/...`, build the app target, then:
 - desktop targets emit executable artifact paths (`macOS`/`Linux` binaries, `Windows .exe`)
-- `ios` installs the built `.app` to the iOS Simulator via `xcrun simctl`
-- `android` installs the built `.apk` to emulator/device via `adb`
+- `ios` generates an Xcode project by default and installs the built `.app` to the iOS Simulator via `xcrun simctl`
+- `android` generates an Android Studio (Gradle) project by default and installs the built `.apk` to emulator/device via `adb`
 Override paths/toolchains with `LVRS_BOOTSTRAP_QT_PREFIX_<PLATFORM>` and `LVRS_BOOTSTRAP_TOOLCHAIN_FILE_<PLATFORM>` (`PLATFORM`: `MACOS`, `LINUX`, `WINDOWS`, `IOS`, `ANDROID`).
+Project-generation defaults can be controlled with `LVRS_BOOTSTRAP_GENERATE_IOS_XCODE_PROJECT` and `LVRS_BOOTSTRAP_GENERATE_ANDROID_STUDIO_PROJECT`.
+Android Studio output path can be overridden with `LVRS_ANDROID_STUDIO_PROJECT_DIR`.
+`androiddeployqt` lookup can be pinned with `LVRS_BOOTSTRAP_ANDROIDDEPLOYQT` (or `LVRS_BOOTSTRAP_QT_HOST_PREFIX`).
 Example:
 ```bash
 cmake --build build --target bootstrap_MyApp_all

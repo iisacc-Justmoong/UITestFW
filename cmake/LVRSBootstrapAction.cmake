@@ -69,6 +69,94 @@ function(_lvrs_bootstrap_find_ios_app_bundle build_dir app_target out_var)
     set(${out_var} "${_lvrs_selected}" PARENT_SCOPE)
 endfunction()
 
+function(_lvrs_bootstrap_find_xcode_project build_dir app_target out_var)
+    set(_lvrs_matches)
+    file(GLOB_RECURSE _lvrs_candidates LIST_DIRECTORIES true "${build_dir}/*.xcodeproj")
+
+    foreach(_lvrs_candidate IN LISTS _lvrs_candidates)
+        if(NOT IS_DIRECTORY "${_lvrs_candidate}")
+            continue()
+        endif()
+        get_filename_component(_lvrs_name "${_lvrs_candidate}" NAME)
+        if(_lvrs_name STREQUAL "${app_target}.xcodeproj")
+            set(${out_var} "${_lvrs_candidate}" PARENT_SCOPE)
+            return()
+        endif()
+        list(APPEND _lvrs_matches "${_lvrs_candidate}")
+    endforeach()
+
+    if(NOT _lvrs_matches)
+        set(${out_var} "" PARENT_SCOPE)
+        return()
+    endif()
+
+    list(SORT _lvrs_matches)
+    list(GET _lvrs_matches 0 _lvrs_selected)
+    set(${out_var} "${_lvrs_selected}" PARENT_SCOPE)
+endfunction()
+
+function(_lvrs_bootstrap_find_android_deployment_settings build_dir app_target out_var)
+    set(_lvrs_matches)
+    file(GLOB_RECURSE _lvrs_candidates
+        "${build_dir}/*deployment-settings*.json"
+        "${build_dir}/*deployment_settings*.json"
+        "${build_dir}/android-*.json"
+        "${build_dir}/android*.json"
+    )
+
+    foreach(_lvrs_candidate IN LISTS _lvrs_candidates)
+        if(IS_DIRECTORY "${_lvrs_candidate}")
+            continue()
+        endif()
+        get_filename_component(_lvrs_name "${_lvrs_candidate}" NAME)
+        string(TOLOWER "${_lvrs_name}" _lvrs_name_lower)
+        if(_lvrs_name_lower MATCHES "deployment[-_]?settings")
+            if(_lvrs_name STREQUAL "${app_target}-deployment-settings.json"
+               OR _lvrs_name STREQUAL "android-${app_target}-deployment-settings.json")
+                set(${out_var} "${_lvrs_candidate}" PARENT_SCOPE)
+                return()
+            endif()
+            list(APPEND _lvrs_matches "${_lvrs_candidate}")
+        endif()
+    endforeach()
+
+    if(NOT _lvrs_matches)
+        set(${out_var} "" PARENT_SCOPE)
+        return()
+    endif()
+
+    list(SORT _lvrs_matches)
+    list(GET _lvrs_matches 0 _lvrs_selected)
+    set(${out_var} "${_lvrs_selected}" PARENT_SCOPE)
+endfunction()
+
+function(_lvrs_bootstrap_detect_androiddeployqt out_var)
+    if(DEFINED LVRS_BOOTSTRAP_ANDROIDDEPLOYQT
+       AND NOT LVRS_BOOTSTRAP_ANDROIDDEPLOYQT STREQUAL ""
+       AND EXISTS "${LVRS_BOOTSTRAP_ANDROIDDEPLOYQT}")
+        set(${out_var} "${LVRS_BOOTSTRAP_ANDROIDDEPLOYQT}" PARENT_SCOPE)
+        return()
+    endif()
+
+    set(_lvrs_hints)
+    if(DEFINED LVRS_BOOTSTRAP_QT_HOST_PREFIX AND NOT LVRS_BOOTSTRAP_QT_HOST_PREFIX STREQUAL "")
+        list(APPEND _lvrs_hints "${LVRS_BOOTSTRAP_QT_HOST_PREFIX}/bin")
+    endif()
+    if(DEFINED LVRS_BOOTSTRAP_PREFIX_PATH AND NOT LVRS_BOOTSTRAP_PREFIX_PATH STREQUAL "")
+        foreach(_lvrs_prefix IN LISTS LVRS_BOOTSTRAP_PREFIX_PATH)
+            if(NOT _lvrs_prefix STREQUAL "")
+                list(APPEND _lvrs_hints "${_lvrs_prefix}/bin")
+            endif()
+        endforeach()
+    endif()
+
+    find_program(_lvrs_androiddeployqt
+        NAMES androiddeployqt androiddeployqt6
+        HINTS ${_lvrs_hints}
+    )
+    set(${out_var} "${_lvrs_androiddeployqt}" PARENT_SCOPE)
+endfunction()
+
 function(_lvrs_bootstrap_find_android_apk build_dir out_var)
     set(_lvrs_matches)
     file(GLOB_RECURSE _lvrs_candidates "${build_dir}/*.apk")
@@ -122,6 +210,21 @@ endif()
 if(NOT DEFINED LVRS_BOOTSTRAP_ANDROID_SERIAL)
     set(LVRS_BOOTSTRAP_ANDROID_SERIAL "")
 endif()
+if(NOT DEFINED LVRS_BOOTSTRAP_QT_HOST_PREFIX)
+    set(LVRS_BOOTSTRAP_QT_HOST_PREFIX "")
+endif()
+if(NOT DEFINED LVRS_BOOTSTRAP_GENERATE_IOS_XCODE_PROJECT)
+    set(LVRS_BOOTSTRAP_GENERATE_IOS_XCODE_PROJECT OFF)
+endif()
+if(NOT DEFINED LVRS_BOOTSTRAP_GENERATE_ANDROID_STUDIO_PROJECT)
+    set(LVRS_BOOTSTRAP_GENERATE_ANDROID_STUDIO_PROJECT OFF)
+endif()
+if(NOT DEFINED LVRS_BOOTSTRAP_ANDROID_STUDIO_PROJECT_DIR)
+    set(LVRS_BOOTSTRAP_ANDROID_STUDIO_PROJECT_DIR "")
+endif()
+if(NOT DEFINED LVRS_BOOTSTRAP_ANDROIDDEPLOYQT)
+    set(LVRS_BOOTSTRAP_ANDROIDDEPLOYQT "")
+endif()
 
 file(MAKE_DIRECTORY "${LVRS_BOOTSTRAP_BINARY_DIR}")
 
@@ -152,6 +255,18 @@ execute_process(
 )
 if(NOT _lvrs_configure_result EQUAL 0)
     _lvrs_bootstrap_fail("configure failed for platform '${LVRS_BOOTSTRAP_PLATFORM}' (exit=${_lvrs_configure_result}).")
+endif()
+
+if(LVRS_BOOTSTRAP_PLATFORM STREQUAL "ios" AND LVRS_BOOTSTRAP_GENERATE_IOS_XCODE_PROJECT)
+    _lvrs_bootstrap_find_xcode_project(
+        "${LVRS_BOOTSTRAP_BINARY_DIR}"
+        "${LVRS_BOOTSTRAP_APP_TARGET}"
+        _lvrs_xcode_project
+    )
+    if(_lvrs_xcode_project STREQUAL "")
+        _lvrs_bootstrap_fail("Xcode project (*.xcodeproj) was not generated for iOS bootstrap build.")
+    endif()
+    message(STATUS "LVRS bootstrap: Xcode project ready -> ${_lvrs_xcode_project}")
 endif()
 
 set(_lvrs_build_cmd
@@ -239,6 +354,48 @@ if(LVRS_BOOTSTRAP_PLATFORM STREQUAL "ios")
 endif()
 
 if(LVRS_BOOTSTRAP_PLATFORM STREQUAL "android")
+    if(LVRS_BOOTSTRAP_GENERATE_ANDROID_STUDIO_PROJECT)
+        _lvrs_bootstrap_find_android_deployment_settings(
+            "${LVRS_BOOTSTRAP_BINARY_DIR}"
+            "${LVRS_BOOTSTRAP_APP_TARGET}"
+            _lvrs_android_deployment_settings
+        )
+        if(_lvrs_android_deployment_settings STREQUAL "")
+            _lvrs_bootstrap_fail("Android deployment settings JSON was not found for Android Studio project generation.")
+        endif()
+
+        _lvrs_bootstrap_detect_androiddeployqt(_lvrs_androiddeployqt)
+        if(_lvrs_androiddeployqt STREQUAL "")
+            _lvrs_bootstrap_fail("androiddeployqt tool was not found for Android Studio project generation.")
+        endif()
+
+        if(LVRS_BOOTSTRAP_ANDROID_STUDIO_PROJECT_DIR STREQUAL "")
+            set(_lvrs_android_studio_dir "${LVRS_BOOTSTRAP_BINARY_DIR}/android-studio")
+        else()
+            set(_lvrs_android_studio_dir "${LVRS_BOOTSTRAP_ANDROID_STUDIO_PROJECT_DIR}")
+        endif()
+        file(MAKE_DIRECTORY "${_lvrs_android_studio_dir}")
+
+        set(_lvrs_android_studio_cmd
+            "${_lvrs_androiddeployqt}"
+            --input "${_lvrs_android_deployment_settings}"
+            --output "${_lvrs_android_studio_dir}"
+            --aux-mode
+            --verbose
+        )
+
+        execute_process(
+            COMMAND ${_lvrs_android_studio_cmd}
+            RESULT_VARIABLE _lvrs_android_studio_result
+            COMMAND_ECHO STDOUT
+        )
+        if(NOT _lvrs_android_studio_result EQUAL 0)
+            _lvrs_bootstrap_fail("failed to generate Android Studio project with androiddeployqt.")
+        endif()
+
+        message(STATUS "LVRS bootstrap: Android Studio project ready -> ${_lvrs_android_studio_dir}")
+    endif()
+
     _lvrs_bootstrap_find_android_apk("${LVRS_BOOTSTRAP_BINARY_DIR}" _lvrs_android_apk)
     if(_lvrs_android_apk STREQUAL "")
         _lvrs_bootstrap_fail("Android APK artifact was not found after build.")

@@ -7,6 +7,13 @@ include("${CMAKE_CURRENT_LIST_DIR}/LVRSTargets.cmake")
 
 set(LVRS_QML_IMPORT_PATH "@PACKAGE_LVRS_QML_MODULE_INSTALL_BASE@")
 set(LVRS_QML_MODULE_PATH "@PACKAGE_LVRS_QML_MODULE_INSTALL_DIR@")
+set(LVRS_RUNTIME_PLATFORMS
+    macos
+    linux
+    windows
+    ios
+    android
+)
 
 # Qt's qml plugin auto-link path expects a plain target name ("LVRSCoreplugin")
 # from LVRS module metadata. Provide a compatibility imported target so downstream

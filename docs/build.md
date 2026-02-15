@@ -76,6 +76,14 @@ lvrs_add_qml_app(
 
 Set `CMAKE_PREFIX_PATH` to the install prefix (`/path/to/lvrs-prefix`) when configuring the downstream project.
 `lvrs_configure_qml_app()` sets `QT_QML_IMPORT_PATH` for installed-package consumption, applies a default executable output directory (`<build>/bin`) when unset, and auto-links/imports LVRS static QML plugin artifacts for static package builds.
+It also creates cross-platform runtime targets automatically:
+- `run_<target>_macos`
+- `run_<target>_linux`
+- `run_<target>_windows`
+- `run_<target>_ios`
+- `run_<target>_android`
+The host desktop target launches immediately, while non-host targets print a `CMAKE_SYSTEM_NAME` reconfigure hint.
+Use `lvrs_configure_qml_app(<target> NO_PLATFORM_RUNTIME_TARGETS)` to disable this behavior.
 `lvrs_add_qml_app()` can generate a ready-to-run entrypoint automatically when `SOURCES` is omitted.
 
 ## Rendering Backend Enforcement

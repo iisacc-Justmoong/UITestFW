@@ -67,7 +67,121 @@ function(_lvrs_internal_maybe_link_static_lvrs_plugin target)
     endif()
 endfunction()
 
+function(_lvrs_internal_known_runtime_platforms out_var)
+    if(DEFINED LVRS_RUNTIME_PLATFORMS)
+        set(${out_var} ${LVRS_RUNTIME_PLATFORMS} PARENT_SCOPE)
+        return()
+    endif()
+
+    set(${out_var}
+        macos
+        linux
+        windows
+        ios
+        android
+        PARENT_SCOPE
+    )
+endfunction()
+
+function(_lvrs_internal_detect_host_runtime_platform out_var)
+    set(_lvrs_host_platform unknown)
+
+    if(CMAKE_SYSTEM_NAME STREQUAL "Android")
+        set(_lvrs_host_platform android)
+    elseif(CMAKE_SYSTEM_NAME STREQUAL "iOS")
+        set(_lvrs_host_platform ios)
+    elseif(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
+        if(CMAKE_OSX_SYSROOT MATCHES "iphone")
+            set(_lvrs_host_platform ios)
+        else()
+            set(_lvrs_host_platform macos)
+        endif()
+    elseif(CMAKE_SYSTEM_NAME STREQUAL "Windows")
+        set(_lvrs_host_platform windows)
+    elseif(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+        set(_lvrs_host_platform linux)
+    endif()
+
+    set(${out_var} "${_lvrs_host_platform}" PARENT_SCOPE)
+endfunction()
+
+function(_lvrs_internal_platform_to_cmake_system_name platform out_var)
+    if(platform STREQUAL "macos")
+        set(_lvrs_system_name "Darwin")
+    elseif(platform STREQUAL "linux")
+        set(_lvrs_system_name "Linux")
+    elseif(platform STREQUAL "windows")
+        set(_lvrs_system_name "Windows")
+    elseif(platform STREQUAL "ios")
+        set(_lvrs_system_name "iOS")
+    elseif(platform STREQUAL "android")
+        set(_lvrs_system_name "Android")
+    else()
+        set(_lvrs_system_name "Unknown")
+    endif()
+
+    set(${out_var} "${_lvrs_system_name}" PARENT_SCOPE)
+endfunction()
+
+function(_lvrs_internal_platform_supports_direct_run platform out_var)
+    if(platform STREQUAL "macos" OR platform STREQUAL "linux" OR platform STREQUAL "windows")
+        set(${out_var} TRUE PARENT_SCOPE)
+    else()
+        set(${out_var} FALSE PARENT_SCOPE)
+    endif()
+endfunction()
+
+function(_lvrs_internal_create_platform_runtime_targets target)
+    _lvrs_internal_known_runtime_platforms(_lvrs_runtime_platforms)
+    _lvrs_internal_detect_host_runtime_platform(_lvrs_host_platform)
+
+    set_property(TARGET "${target}" PROPERTY LVRS_RUNTIME_TARGETS "${_lvrs_runtime_platforms}")
+    set_property(TARGET "${target}" PROPERTY LVRS_HOST_RUNTIME_TARGET "${_lvrs_host_platform}")
+
+    foreach(_lvrs_platform IN LISTS _lvrs_runtime_platforms)
+        set(_lvrs_run_target "run_${target}_${_lvrs_platform}")
+        if(TARGET "${_lvrs_run_target}")
+            continue()
+        endif()
+
+        _lvrs_internal_platform_to_cmake_system_name("${_lvrs_platform}" _lvrs_platform_system_name)
+        _lvrs_internal_platform_supports_direct_run("${_lvrs_platform}" _lvrs_direct_run_supported)
+
+        if(_lvrs_platform STREQUAL _lvrs_host_platform AND _lvrs_direct_run_supported)
+            add_custom_target("${_lvrs_run_target}"
+                COMMAND "$<TARGET_FILE:${target}>"
+                DEPENDS "${target}"
+                WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
+                USES_TERMINAL
+            )
+        else()
+            if(_lvrs_platform STREQUAL _lvrs_host_platform)
+                set(_lvrs_runtime_target_message
+                    "LVRS generated '${_lvrs_run_target}'. '${_lvrs_platform}' target artifacts are ready; deployment is handled by platform tools.")
+            else()
+                set(_lvrs_runtime_target_message
+                    "LVRS generated '${_lvrs_run_target}'. Reconfigure with -DCMAKE_SYSTEM_NAME=${_lvrs_platform_system_name} to produce runnable '${_lvrs_platform}' artifacts.")
+            endif()
+
+            add_custom_target("${_lvrs_run_target}"
+                COMMAND "${CMAKE_COMMAND}" -E echo "${_lvrs_runtime_target_message}"
+                USES_TERMINAL
+            )
+        endif()
+
+        set_property(TARGET "${_lvrs_run_target}" PROPERTY FOLDER "LVRS/RuntimeTargets")
+    endforeach()
+endfunction()
+
 function(lvrs_configure_qml_app target)
+    set(_lvrs_options NO_PLATFORM_RUNTIME_TARGETS)
+    cmake_parse_arguments(LVRS_CFG
+        "${_lvrs_options}"
+        ""
+        ""
+        ${ARGN}
+    )
+
     if(NOT TARGET "${target}")
         message(FATAL_ERROR "lvrs_configure_qml_app() target not found: ${target}")
     endif()
@@ -95,10 +209,14 @@ function(lvrs_configure_qml_app target)
         qt_import_qml_plugins("${target}")
     endif()
 
+    if(NOT LVRS_CFG_NO_PLATFORM_RUNTIME_TARGETS)
+        _lvrs_internal_create_platform_runtime_targets("${target}")
+    endif()
+
 endfunction()
 
 function(lvrs_add_qml_app)
-    set(_lvrs_options "")
+    set(_lvrs_options NO_PLATFORM_RUNTIME_TARGETS)
     set(_lvrs_one_value_args TARGET URI VERSION ROOT_OBJECT APP_NAME STYLE)
     set(_lvrs_multi_value_args SOURCES QML_FILES RESOURCES)
     cmake_parse_arguments(LVRS_APP
@@ -175,5 +293,10 @@ function(lvrs_add_qml_app)
             Qt6::Quick
             Qt6::QuickControls2
     )
-    lvrs_configure_qml_app(${LVRS_APP_TARGET})
+
+    if(LVRS_APP_NO_PLATFORM_RUNTIME_TARGETS)
+        lvrs_configure_qml_app(${LVRS_APP_TARGET} NO_PLATFORM_RUNTIME_TARGETS)
+    else()
+        lvrs_configure_qml_app(${LVRS_APP_TARGET})
+    endif()
 endfunction()

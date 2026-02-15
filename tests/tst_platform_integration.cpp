@@ -17,6 +17,7 @@ class PlatformIntegrationTests : public QObject
 
 private slots:
     void platform_flags_consistency();
+    void platform_runtime_profiles_are_exposed();
     void application_window_and_main_metrics_are_exposed();
 };
 
@@ -40,6 +41,51 @@ void PlatformIntegrationTests::platform_flags_consistency()
         QCOMPARE(platform.os(), QStringLiteral("windows"));
     if (platform.linux())
         QCOMPARE(platform.os(), QStringLiteral("linux"));
+}
+
+void PlatformIntegrationTests::platform_runtime_profiles_are_exposed()
+{
+    PlatformInfo platform;
+
+    const QStringList expectedTargets = {
+        QStringLiteral("macos"),
+        QStringLiteral("linux"),
+        QStringLiteral("windows"),
+        QStringLiteral("ios"),
+        QStringLiteral("android")
+    };
+    QCOMPARE(platform.runtimeTargets(), expectedTargets);
+    QCOMPARE(platform.desktopTargets(),
+             QStringList({QStringLiteral("macos"), QStringLiteral("linux"), QStringLiteral("windows")}));
+    QCOMPARE(platform.mobileTargets(), QStringList({QStringLiteral("ios"), QStringLiteral("android")}));
+
+    QVERIFY(expectedTargets.contains(platform.canonicalOs()));
+    QVERIFY(!platform.graphicsBackend().isEmpty());
+    QVERIFY(platform.targetMatchesCurrent(platform.canonicalOs()));
+    QVERIFY(platform.supportsTargetGeneration(platform.canonicalOs()));
+
+    QCOMPARE(platform.normalizeTarget(QStringLiteral("osx")), QStringLiteral("macos"));
+    QCOMPARE(platform.normalizeTarget(QStringLiteral("win32")), QStringLiteral("windows"));
+    QVERIFY(platform.normalizeTarget(QStringLiteral("unknown-target")).isEmpty());
+    QVERIFY(!platform.isKnownTarget(QStringLiteral("unknown-target")));
+
+    const QVariantMap currentProfile = platform.runtimeProfile();
+    QVERIFY(currentProfile.value(QStringLiteral("known")).toBool());
+    QCOMPARE(currentProfile.value(QStringLiteral("target")).toString(), platform.canonicalOs());
+    QVERIFY(currentProfile.contains(QStringLiteral("backend")));
+    QVERIFY(currentProfile.contains(QStringLiteral("generationSupported")));
+    QVERIFY(currentProfile.contains(QStringLiteral("backendFeatureReady")));
+    QVERIFY(currentProfile.contains(QStringLiteral("cmakeSystemName")));
+
+    const QVariantList allProfiles = platform.runtimeProfiles();
+    QCOMPARE(allProfiles.size(), expectedTargets.size());
+    for (const QVariant &profileVariant : allProfiles) {
+        const QVariantMap profile = profileVariant.toMap();
+        QVERIFY(profile.value(QStringLiteral("known")).toBool());
+        QVERIFY(expectedTargets.contains(profile.value(QStringLiteral("target")).toString()));
+        QVERIFY(profile.contains(QStringLiteral("backend")));
+        QVERIFY(profile.contains(QStringLiteral("directRunSupported")));
+    }
 }
 
 void PlatformIntegrationTests::application_window_and_main_metrics_are_exposed()

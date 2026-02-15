@@ -7,6 +7,7 @@ set(LVRS_RUNTIME_PLATFORMS
     windows
     ios
     android
+    wasm
 )
 
 function(_lvrs_config_detect_platform out_var)
@@ -15,6 +16,8 @@ function(_lvrs_config_detect_platform out_var)
         set(_lvrs_platform android)
     elseif(CMAKE_SYSTEM_NAME STREQUAL "iOS")
         set(_lvrs_platform ios)
+    elseif(CMAKE_SYSTEM_NAME STREQUAL "Emscripten")
+        set(_lvrs_platform wasm)
     elseif(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
         if(CMAKE_OSX_SYSROOT MATCHES "iphone")
             set(_lvrs_platform ios)
@@ -72,6 +75,14 @@ function(_lvrs_config_default_android_ndk_hint sdk_root out_var)
     set(${out_var} "${_lvrs_ndk_hint}" PARENT_SCOPE)
 endfunction()
 
+function(_lvrs_config_default_emsdk_hint out_var)
+    set(_lvrs_emsdk_hint "")
+    if(DEFINED ENV{EMSDK} AND IS_DIRECTORY "$ENV{EMSDK}")
+        set(_lvrs_emsdk_hint "$ENV{EMSDK}")
+    endif()
+    set(${out_var} "${_lvrs_emsdk_hint}" PARENT_SCOPE)
+endfunction()
+
 if(NOT EXISTS "${CMAKE_CURRENT_LIST_DIR}/LVRSTargets.cmake")
     _lvrs_config_detect_platform(_lvrs_dispatch_platform)
     if(_lvrs_dispatch_platform STREQUAL "unknown")
@@ -111,6 +122,7 @@ set(LVRS_QML_MODULE_PATH "@PACKAGE_LVRS_QML_MODULE_INSTALL_DIR@")
 set(LVRS_QT_HOST_PREFIX_HINT "")
 set(LVRS_QT_IOS_PREFIX_HINT "")
 set(LVRS_QT_ANDROID_PREFIX_HINT "")
+set(LVRS_QT_WASM_PREFIX_HINT "")
 if(DEFINED Qt6_DIR AND NOT Qt6_DIR STREQUAL "")
     get_filename_component(LVRS_QT_HOST_PREFIX_HINT "${Qt6_DIR}/../../.." ABSOLUTE)
     get_filename_component(_lvrs_qt_version_root "${LVRS_QT_HOST_PREFIX_HINT}" DIRECTORY)
@@ -122,6 +134,21 @@ if(DEFINED Qt6_DIR AND NOT Qt6_DIR STREQUAL "")
     elseif(EXISTS "${_lvrs_qt_version_root}/android/lib/cmake/Qt6/Qt6Config.cmake")
         set(LVRS_QT_ANDROID_PREFIX_HINT "${_lvrs_qt_version_root}/android")
     endif()
+
+    set(_lvrs_qt_wasm_candidates
+        wasm_singlethread
+        wasm_multithread
+        wasm_32
+        wasm
+    )
+    foreach(_lvrs_wasm_candidate IN LISTS _lvrs_qt_wasm_candidates)
+        if(EXISTS "${_lvrs_qt_version_root}/${_lvrs_wasm_candidate}/lib/cmake/Qt6/Qt6Config.cmake")
+            set(LVRS_QT_WASM_PREFIX_HINT "${_lvrs_qt_version_root}/${_lvrs_wasm_candidate}")
+            break()
+        endif()
+    endforeach()
+    unset(_lvrs_wasm_candidate)
+    unset(_lvrs_qt_wasm_candidates)
     unset(_lvrs_qt_version_root)
 endif()
 
@@ -129,8 +156,11 @@ _lvrs_config_default_android_sdk_hint(_lvrs_android_sdk_hint)
 set(LVRS_ANDROID_SDK_HINT "${_lvrs_android_sdk_hint}")
 _lvrs_config_default_android_ndk_hint("${LVRS_ANDROID_SDK_HINT}" _lvrs_android_ndk_hint)
 set(LVRS_ANDROID_NDK_HINT "${_lvrs_android_ndk_hint}")
+_lvrs_config_default_emsdk_hint(_lvrs_emsdk_hint)
+set(LVRS_EMSDK_HINT "${_lvrs_emsdk_hint}")
 unset(_lvrs_android_sdk_hint)
 unset(_lvrs_android_ndk_hint)
+unset(_lvrs_emsdk_hint)
 
 # Qt's qml plugin auto-link path expects a plain target name ("LVRSCoreplugin")
 # from LVRS module metadata. Provide a compatibility imported target so downstream

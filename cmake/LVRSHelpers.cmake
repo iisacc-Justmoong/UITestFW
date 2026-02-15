@@ -79,6 +79,7 @@ function(_lvrs_internal_known_runtime_platforms out_var)
         windows
         ios
         android
+        wasm
         PARENT_SCOPE
     )
 endfunction()
@@ -123,6 +124,8 @@ function(_lvrs_internal_runtime_platform_from_system_name system_name osx_sysroo
         set(_lvrs_platform android)
     elseif(system_name STREQUAL "iOS")
         set(_lvrs_platform ios)
+    elseif(system_name STREQUAL "Emscripten")
+        set(_lvrs_platform wasm)
     elseif(system_name STREQUAL "Darwin")
         if(osx_sysroot MATCHES "iphone")
             set(_lvrs_platform ios)
@@ -159,6 +162,8 @@ function(_lvrs_internal_platform_to_cmake_system_name platform out_var)
         set(_lvrs_system_name "iOS")
     elseif(platform STREQUAL "android")
         set(_lvrs_system_name "Android")
+    elseif(platform STREQUAL "wasm")
+        set(_lvrs_system_name "Emscripten")
     else()
         set(_lvrs_system_name "Unknown")
     endif()
@@ -191,6 +196,8 @@ function(_lvrs_internal_platform_qt_dir_candidates platform out_var)
         set(_lvrs_candidates ios)
     elseif(platform STREQUAL "android")
         set(_lvrs_candidates android_arm64_v8a android)
+    elseif(platform STREQUAL "wasm")
+        set(_lvrs_candidates wasm_singlethread wasm_multithread wasm_32 wasm)
     else()
         set(_lvrs_candidates)
     endif()
@@ -276,7 +283,7 @@ function(_lvrs_internal_bootstrap_toolchain_for_platform platform qt_prefix out_
         set(_lvrs_toolchain "$ENV{LVRS_BOOTSTRAP_TOOLCHAIN_FILE}")
     endif()
 
-    if(_lvrs_toolchain STREQUAL "" AND (platform STREQUAL "ios" OR platform STREQUAL "android"))
+    if(_lvrs_toolchain STREQUAL "" AND (platform STREQUAL "ios" OR platform STREQUAL "android" OR platform STREQUAL "wasm"))
         _lvrs_internal_default_toolchain_for_qt_prefix("${qt_prefix}" _lvrs_toolchain)
     endif()
 
@@ -319,6 +326,8 @@ function(_lvrs_internal_bootstrap_system_name_for_platform platform out_var)
         set(_lvrs_system_name "iOS")
     elseif(platform STREQUAL "android")
         set(_lvrs_system_name "Android")
+    elseif(platform STREQUAL "wasm")
+        set(_lvrs_system_name "Emscripten")
     else()
         set(_lvrs_system_name "Unknown")
     endif()
@@ -1036,6 +1045,30 @@ function(lvrs_add_bootstrap_targets)
                 USES_TERMINAL
             )
             set_property(TARGET "${_lvrs_android_export_target}" PROPERTY FOLDER "LVRS/BootstrapTargets")
+        endif()
+    endif()
+
+    set(_lvrs_wasm_bootstrap_target "bootstrap_${LVRS_BOOT_TARGET}_wasm")
+    if(TARGET "${_lvrs_wasm_bootstrap_target}")
+        set(_lvrs_wasm_launch_target "launch_${LVRS_BOOT_TARGET}_wasm")
+        if(NOT TARGET "${_lvrs_wasm_launch_target}")
+            add_custom_target("${_lvrs_wasm_launch_target}" DEPENDS "${_lvrs_wasm_bootstrap_target}")
+            set_property(TARGET "${_lvrs_wasm_launch_target}" PROPERTY FOLDER "LVRS/BootstrapTargets")
+        endif()
+
+        set(_lvrs_wasm_export_target "export_${LVRS_BOOT_TARGET}_wasm_site")
+        if(NOT TARGET "${_lvrs_wasm_export_target}")
+            add_custom_target("${_lvrs_wasm_export_target}"
+                COMMAND "${CMAKE_COMMAND}"
+                    "-DLVRS_EXPORT_KIND=wasm_site"
+                    "-DLVRS_EXPORT_TARGET=${LVRS_BOOT_TARGET}"
+                    "-DLVRS_EXPORT_SOURCE_DIR=${_lvrs_bootstrap_root}/${LVRS_BOOT_TARGET}/wasm"
+                    "-DLVRS_EXPORT_OUTPUT_DIR=${CMAKE_BINARY_DIR}/lvrs-export/${LVRS_BOOT_TARGET}/wasm_site"
+                    -P "${CMAKE_CURRENT_FUNCTION_LIST_DIR}/LVRSBootstrapExportAction.cmake"
+                DEPENDS "${_lvrs_wasm_bootstrap_target}"
+                USES_TERMINAL
+            )
+            set_property(TARGET "${_lvrs_wasm_export_target}" PROPERTY FOLDER "LVRS/BootstrapTargets")
         endif()
     endif()
 endfunction()

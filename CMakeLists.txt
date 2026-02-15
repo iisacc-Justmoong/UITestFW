@@ -32,6 +32,7 @@ set(LVRS_RUNTIME_PLATFORMS
     windows
     ios
     android
+    wasm
 )
 set(LVRS_BOOTSTRAP_INSTALL_ROOT
     "${CMAKE_BINARY_DIR}/lvrs-install"

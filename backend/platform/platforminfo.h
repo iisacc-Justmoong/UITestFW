@@ -29,6 +29,7 @@ class PlatformInfo : public QObject
     Q_PROPERTY(bool macos READ macos CONSTANT)
     Q_PROPERTY(bool windows READ windows CONSTANT)
     Q_PROPERTY(bool linux READ linux CONSTANT)
+    Q_PROPERTY(bool wasm READ wasm CONSTANT)
 
     Q_PROPERTY(bool metalSupported READ metalSupported CONSTANT)
     Q_PROPERTY(bool vulkanSupported READ vulkanSupported CONSTANT)
@@ -54,6 +55,7 @@ public:
     bool macos() const;
     bool windows() const;
     bool linux() const;
+    bool wasm() const;
 
     bool metalSupported() const;
     bool vulkanSupported() const;

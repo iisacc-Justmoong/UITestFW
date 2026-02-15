@@ -27,7 +27,7 @@ cd LVRS
 ```
 
 `install.sh` now performs a single multi-platform bootstrap build (`bootstrap_lvrs_all`) and installs LVRS for all runtime platforms in one run.
-Default install layout is `<prefix>/platforms/<platform>` for `macos`, `linux`, `windows`, `ios`, `android`.
+Default install layout is `<prefix>/platforms/<platform>` for `macos`, `linux`, `windows`, `ios`, `android`, `wasm`.
 After install, `env.sh` points `CMAKE_PREFIX_PATH` to the install root (`<prefix>`) and `QML2_IMPORT_PATH` to the host platform package path.
 `find_package(LVRS CONFIG REQUIRED)` then resolves the active platform package via LVRS dispatcher logic.
 The installer always performs a clean reinstall (build directory and previously installed LVRS artifacts are removed before configure/build).
@@ -107,7 +107,7 @@ import LVRS 1.0 as LV
 
 Only CMake configure/build/install is required. Manual file copy or custom plugin wiring is not required.
 `lvrs_configure_qml_app()` applies a safe default runtime output directory (`<build>/bin`) when none is set, and auto-links/imports LVRS static QML plugin artifacts when the package is consumed as a static build.
-`lvrs_configure_qml_app()` now also generates platform runtime targets automatically: `run_<YourTarget>_macos`, `run_<YourTarget>_linux`, `run_<YourTarget>_windows`, `run_<YourTarget>_ios`, `run_<YourTarget>_android`.
+`lvrs_configure_qml_app()` now also generates platform runtime targets automatically: `run_<YourTarget>_macos`, `run_<YourTarget>_linux`, `run_<YourTarget>_windows`, `run_<YourTarget>_ios`, `run_<YourTarget>_android`, `run_<YourTarget>_wasm`.
 On the configured host desktop platform, the matching runtime target directly launches the built executable; non-host targets provide an immediate reconfigure hint via `CMAKE_SYSTEM_NAME`.
 In addition, LVRS generates bootstrap targets for cross-platform output/installation:
 - `bootstrap_<YourTarget>_macos`
@@ -115,17 +115,21 @@ In addition, LVRS generates bootstrap targets for cross-platform output/installa
 - `bootstrap_<YourTarget>_windows`
 - `bootstrap_<YourTarget>_ios`
 - `bootstrap_<YourTarget>_android`
+- `bootstrap_<YourTarget>_wasm`
 - `bootstrap_<YourTarget>_all`
 LVRS also generates launch/export convenience targets:
 - `launch_<YourTarget>_ios`
 - `launch_<YourTarget>_android`
+- `launch_<YourTarget>_wasm`
 - `export_<YourTarget>_xcodeproj`
 - `export_<YourTarget>_android_studio`
+- `export_<YourTarget>_wasm_site`
 `bootstrap_*` targets configure isolated per-platform build trees under `<build>/lvrs-bootstrap/<target>/...`, build the app target, then:
 - desktop targets emit executable artifact paths (`macOS`/`Linux` binaries, `Windows .exe`)
 - `ios` generates an Xcode project by default and installs the built `.app` to the iOS Simulator via `xcrun simctl`
 - `android` generates an Android Studio (Gradle) project by default and installs the built `.apk` to emulator/device via `adb`
-Override paths/toolchains with `LVRS_BOOTSTRAP_QT_PREFIX_<PLATFORM>` and `LVRS_BOOTSTRAP_TOOLCHAIN_FILE_<PLATFORM>` (`PLATFORM`: `MACOS`, `LINUX`, `WINDOWS`, `IOS`, `ANDROID`).
+- `wasm` emits browser artifacts (`.html`, `.js`, `.wasm`) in the wasm bootstrap build tree
+Override paths/toolchains with `LVRS_BOOTSTRAP_QT_PREFIX_<PLATFORM>` and `LVRS_BOOTSTRAP_TOOLCHAIN_FILE_<PLATFORM>` (`PLATFORM`: `MACOS`, `LINUX`, `WINDOWS`, `IOS`, `ANDROID`, `WASM`).
 Project-generation defaults can be controlled with `LVRS_BOOTSTRAP_GENERATE_IOS_XCODE_PROJECT` and `LVRS_BOOTSTRAP_GENERATE_ANDROID_STUDIO_PROJECT`.
 Android Studio output path can be overridden with `LVRS_ANDROID_STUDIO_PROJECT_DIR`.
 `androiddeployqt` lookup can be pinned with `LVRS_BOOTSTRAP_ANDROIDDEPLOYQT` (or `LVRS_BOOTSTRAP_QT_HOST_PREFIX`).
@@ -135,8 +139,10 @@ LVRS package config exports toolchain hint variables for downstream scripts:
 - `LVRS_QT_HOST_PREFIX_HINT`
 - `LVRS_QT_IOS_PREFIX_HINT`
 - `LVRS_QT_ANDROID_PREFIX_HINT`
+- `LVRS_QT_WASM_PREFIX_HINT`
 - `LVRS_ANDROID_SDK_HINT`
 - `LVRS_ANDROID_NDK_HINT`
+- `LVRS_EMSDK_HINT`
 Example:
 ```bash
 cmake --build build --target bootstrap_MyApp_all
@@ -161,10 +167,11 @@ For framework-only multi-platform install, LVRS also generates:
 - `bootstrap_lvrs_windows`
 - `bootstrap_lvrs_ios`
 - `bootstrap_lvrs_android`
+- `bootstrap_lvrs_wasm`
 - `bootstrap_lvrs_all`
 `bootstrap_lvrs_*` targets configure isolated per-platform build trees under `<build>/lvrs-bootstrap/framework/...`, build `LVRSCore`, and install each platform package into `${LVRS_BOOTSTRAP_INSTALL_ROOT}/<platform>` (default: `<build>/lvrs-install/<platform>`).
 Per-platform install prefixes can be overridden with `LVRS_BOOTSTRAP_INSTALL_PREFIX_<PLATFORM>`.
-Cross-host targets (`linux`, `windows`, `android`, `ios`) require matching Qt kits and toolchains; set `LVRS_BOOTSTRAP_QT_PREFIX_<PLATFORM>` and `LVRS_BOOTSTRAP_TOOLCHAIN_FILE_<PLATFORM>` as needed.
+Cross-host targets (`linux`, `windows`, `android`, `ios`, `wasm`) require matching Qt kits and toolchains; set `LVRS_BOOTSTRAP_QT_PREFIX_<PLATFORM>` and `LVRS_BOOTSTRAP_TOOLCHAIN_FILE_<PLATFORM>` as needed.
 
 ## Rendering Backend Policy
 

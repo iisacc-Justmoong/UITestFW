@@ -32,7 +32,8 @@ void PlatformIntegrationTests::platform_flags_consistency()
         + (platform.ios() ? 1 : 0)
         + (platform.macos() ? 1 : 0)
         + (platform.windows() ? 1 : 0)
-        + (platform.linux() ? 1 : 0);
+        + (platform.linux() ? 1 : 0)
+        + (platform.wasm() ? 1 : 0);
     QCOMPARE(explicitPlatformCount, 1);
 
     if (platform.macos())
@@ -52,11 +53,12 @@ void PlatformIntegrationTests::platform_runtime_profiles_are_exposed()
         QStringLiteral("linux"),
         QStringLiteral("windows"),
         QStringLiteral("ios"),
-        QStringLiteral("android")
+        QStringLiteral("android"),
+        QStringLiteral("wasm")
     };
     QCOMPARE(platform.runtimeTargets(), expectedTargets);
     QCOMPARE(platform.desktopTargets(),
-             QStringList({QStringLiteral("macos"), QStringLiteral("linux"), QStringLiteral("windows")}));
+             QStringList({QStringLiteral("macos"), QStringLiteral("linux"), QStringLiteral("windows"), QStringLiteral("wasm")}));
     QCOMPARE(platform.mobileTargets(), QStringList({QStringLiteral("ios"), QStringLiteral("android")}));
 
     QVERIFY(expectedTargets.contains(platform.canonicalOs()));

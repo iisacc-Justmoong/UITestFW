@@ -110,6 +110,37 @@ function(_lvrs_bootstrap_find_desktop_executable build_dir host_build_dir app_ta
     set(${out_var} "${_lvrs_selected}" PARENT_SCOPE)
 endfunction()
 
+function(_lvrs_bootstrap_find_wasm_entry_html build_dir app_target out_var)
+    set(_lvrs_candidates)
+    file(GLOB_RECURSE _lvrs_html_candidates "${build_dir}/*.html")
+
+    foreach(_lvrs_candidate IN LISTS _lvrs_html_candidates)
+        if(NOT IS_DIRECTORY "${_lvrs_candidate}")
+            if(_lvrs_candidate MATCHES "/CMakeFiles/")
+                continue()
+            endif()
+            list(APPEND _lvrs_candidates "${_lvrs_candidate}")
+        endif()
+    endforeach()
+
+    if(NOT _lvrs_candidates)
+        set(${out_var} "" PARENT_SCOPE)
+        return()
+    endif()
+
+    foreach(_lvrs_candidate IN LISTS _lvrs_candidates)
+        get_filename_component(_lvrs_name "${_lvrs_candidate}" NAME)
+        if(_lvrs_name STREQUAL "${app_target}.html")
+            set(${out_var} "${_lvrs_candidate}" PARENT_SCOPE)
+            return()
+        endif()
+    endforeach()
+
+    list(SORT _lvrs_candidates)
+    list(GET _lvrs_candidates 0 _lvrs_selected)
+    set(${out_var} "${_lvrs_selected}" PARENT_SCOPE)
+endfunction()
+
 function(_lvrs_bootstrap_find_ios_app_bundle build_dir app_target out_var)
     set(_lvrs_matches)
     file(GLOB_RECURSE _lvrs_candidates LIST_DIRECTORIES true "${build_dir}/*.app")
@@ -770,6 +801,22 @@ if(LVRS_BOOTSTRAP_PLATFORM STREQUAL "android")
     endif()
 
     message(STATUS "LVRS bootstrap: Android install completed -> ${_lvrs_android_apk}")
+    return()
+endif()
+
+if(LVRS_BOOTSTRAP_PLATFORM STREQUAL "wasm")
+    _lvrs_bootstrap_find_wasm_entry_html(
+        "${LVRS_BOOTSTRAP_BINARY_DIR}"
+        "${LVRS_BOOTSTRAP_APP_TARGET}"
+        _lvrs_wasm_entry_html
+    )
+    if(_lvrs_wasm_entry_html STREQUAL "")
+        _lvrs_bootstrap_fail("WASM HTML entry artifact (*.html) was not found after build.")
+    endif()
+
+    get_filename_component(_lvrs_wasm_artifact_dir "${_lvrs_wasm_entry_html}" DIRECTORY)
+    message(STATUS "LVRS bootstrap: WASM artifact ready -> ${_lvrs_wasm_entry_html}")
+    message(STATUS "LVRS bootstrap: serve '${_lvrs_wasm_artifact_dir}' with a static HTTP server.")
     return()
 endif()
 

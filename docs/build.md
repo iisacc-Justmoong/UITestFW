@@ -7,7 +7,7 @@
 ```
 
 The installer runs one multi-platform bootstrap build (`bootstrap_lvrs_all`) and installs LVRS for every runtime platform in one pass.
-Installed packages are written to `<prefix>/platforms/<platform>` (`macos`, `linux`, `windows`, `ios`, `android`), then the host platform path is registered in the CMake user package registry.
+Installed packages are written to `<prefix>/platforms/<platform>` (`macos`, `linux`, `windows`, `ios`, `android`, `wasm`), then the host platform path is registered in the CMake user package registry.
 The installer always performs a clean reinstall by removing the previous build directory and installed LVRS artifact paths before configuring.
 `install.sh` configures examples/tests on the host build by default; pass `--without-examples --without-tests` to disable them.
 
@@ -87,6 +87,7 @@ It also creates cross-platform runtime targets automatically:
 - `run_<target>_windows`
 - `run_<target>_ios`
 - `run_<target>_android`
+- `run_<target>_wasm`
 The host desktop target launches immediately, while non-host targets print a `CMAKE_SYSTEM_NAME` reconfigure hint.
 It also creates cross-platform bootstrap targets:
 - `bootstrap_<target>_macos`
@@ -94,12 +95,15 @@ It also creates cross-platform bootstrap targets:
 - `bootstrap_<target>_windows`
 - `bootstrap_<target>_ios`
 - `bootstrap_<target>_android`
+- `bootstrap_<target>_wasm`
 - `bootstrap_<target>_all`
 It also creates launch/export convenience targets:
 - `launch_<target>_ios`
 - `launch_<target>_android`
+- `launch_<target>_wasm`
 - `export_<target>_xcodeproj`
 - `export_<target>_android_studio`
+- `export_<target>_wasm_site`
 `bootstrap_<target>_all` triggers all platform bootstrap actions in one build invocation.
 Desktop bootstrap targets produce executable artifacts.
 iOS bootstrap generates an Xcode project by default and installs a simulator app via `xcrun simctl`.
@@ -124,8 +128,10 @@ LVRS package config exports platform/toolchain hint variables for scripts:
 - `LVRS_QT_HOST_PREFIX_HINT`
 - `LVRS_QT_IOS_PREFIX_HINT`
 - `LVRS_QT_ANDROID_PREFIX_HINT`
+- `LVRS_QT_WASM_PREFIX_HINT`
 - `LVRS_ANDROID_SDK_HINT`
 - `LVRS_ANDROID_NDK_HINT`
+- `LVRS_EMSDK_HINT`
 Example one-shot bootstrap command:
 ```bash
 cmake --build build --target bootstrap_MyApp_all
@@ -140,6 +146,7 @@ Framework-only bootstrap targets are generated at project root:
 - `bootstrap_lvrs_windows`
 - `bootstrap_lvrs_ios`
 - `bootstrap_lvrs_android`
+- `bootstrap_lvrs_wasm`
 - `bootstrap_lvrs_all`
 `bootstrap_lvrs_all` configures each platform build under `<build>/lvrs-bootstrap/framework/<platform>`, builds `LVRSCore`, and installs to `${LVRS_BOOTSTRAP_INSTALL_ROOT}/<platform>`.
 Override per-platform install paths with `LVRS_BOOTSTRAP_INSTALL_PREFIX_<PLATFORM>`.

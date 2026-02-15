@@ -210,6 +210,14 @@ if(LVRS_BOOTSTRAP_PLATFORM STREQUAL "ios")
     endif()
 endif()
 
+if(LVRS_BOOTSTRAP_PLATFORM STREQUAL "wasm")
+    string(TOUPPER "${LVRS_BOOTSTRAP_LVRS_BUILD_SHARED_LIBS}" _lvrs_wasm_shared_libs_upper)
+    if(NOT _lvrs_wasm_shared_libs_upper MATCHES "^(0|OFF|NO|FALSE)$")
+        message(STATUS "LVRS framework bootstrap: forcing LVRS_BUILD_SHARED_LIBS=OFF for WASM.")
+        set(LVRS_BOOTSTRAP_LVRS_BUILD_SHARED_LIBS "OFF")
+    endif()
+endif()
+
 file(MAKE_DIRECTORY "${LVRS_BOOTSTRAP_BINARY_DIR}")
 file(MAKE_DIRECTORY "${LVRS_BOOTSTRAP_INSTALL_PREFIX}")
 

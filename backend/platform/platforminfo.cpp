@@ -35,6 +35,12 @@ const QString &kPlatformAndroid()
     return value;
 }
 
+const QString &kPlatformWasm()
+{
+    static const QString value = QStringLiteral("wasm");
+    return value;
+}
+
 const QStringList &allRuntimeTargetList()
 {
     static const QStringList values = {
@@ -42,7 +48,8 @@ const QStringList &allRuntimeTargetList()
         kPlatformLinux(),
         kPlatformWindows(),
         kPlatformIos(),
-        kPlatformAndroid()
+        kPlatformAndroid(),
+        kPlatformWasm()
     };
     return values;
 }
@@ -52,7 +59,8 @@ const QStringList &desktopRuntimeTargetList()
     static const QStringList values = {
         kPlatformMacos(),
         kPlatformLinux(),
-        kPlatformWindows()
+        kPlatformWindows(),
+        kPlatformWasm()
     };
     return values;
 }
@@ -106,6 +114,12 @@ QString normalizePlatformToken(const QString &value)
         return kPlatformAndroid();
     }
 
+    if (normalized == QStringLiteral("emscripten")
+        || normalized == QStringLiteral("webassembly")
+        || normalized == QStringLiteral("qtwasm")) {
+        return kPlatformWasm();
+    }
+
     return normalized;
 }
 
@@ -130,6 +144,8 @@ QString currentCanonicalPlatform()
     return kPlatformAndroid();
 #elif defined(Q_OS_IOS)
     return kPlatformIos();
+#elif defined(Q_OS_WASM)
+    return kPlatformWasm();
 #elif defined(Q_OS_MACOS)
     return kPlatformMacos();
 #elif defined(Q_OS_WIN)
@@ -147,6 +163,8 @@ QString legacyPlatformName()
     return kPlatformAndroid();
 #elif defined(Q_OS_IOS)
     return kPlatformIos();
+#elif defined(Q_OS_WASM)
+    return kPlatformWasm();
 #elif defined(Q_OS_MACOS)
     return QStringLiteral("osx");
 #elif defined(Q_OS_WIN)
@@ -208,6 +226,8 @@ QString cmakeSystemNameForPlatformToken(const QString &platform)
         return QStringLiteral("iOS");
     if (platform == kPlatformAndroid())
         return QStringLiteral("Android");
+    if (platform == kPlatformWasm())
+        return QStringLiteral("Emscripten");
     return QStringLiteral("Unknown");
 }
 
@@ -215,6 +235,8 @@ QString executableSuffixForPlatformToken(const QString &platform)
 {
     if (platform == kPlatformWindows())
         return QStringLiteral(".exe");
+    if (platform == kPlatformWasm())
+        return QStringLiteral(".html");
     return {};
 }
 
@@ -253,7 +275,7 @@ QVariantMap buildRuntimeProfile(const QString &requested, const QString &hostCan
     profile.insert(QStringLiteral("cmakeSystemName"), known ? cmakeSystemNameForPlatformToken(normalized) : QStringLiteral("Unknown"));
     profile.insert(QStringLiteral("executableSuffix"), known ? executableSuffixForPlatformToken(normalized) : QString());
     profile.insert(QStringLiteral("sharedLibrarySuffix"), known ? sharedLibrarySuffixForPlatformToken(normalized) : QString());
-    profile.insert(QStringLiteral("directRunSupported"), desktop);
+    profile.insert(QStringLiteral("directRunSupported"), desktop && normalized != kPlatformWasm());
     return profile;
 }
 
@@ -333,6 +355,15 @@ bool PlatformInfo::windows() const
 bool PlatformInfo::linux() const
 {
 #if defined(Q_OS_LINUX) && !defined(Q_OS_ANDROID)
+    return true;
+#else
+    return false;
+#endif
+}
+
+bool PlatformInfo::wasm() const
+{
+#if defined(Q_OS_WASM)
     return true;
 #else
     return false;

@@ -486,6 +486,7 @@ install(FILES
     "${CMAKE_CURRENT_LIST_DIR}/cmake/LVRSHelpers.cmake"
     "${CMAKE_CURRENT_LIST_DIR}/cmake/LVRSBootstrapAction.cmake"
     "${CMAKE_CURRENT_LIST_DIR}/cmake/LVRSBootstrapExportAction.cmake"
+    "${CMAKE_CURRENT_LIST_DIR}/cmake/LVRSBootstrapWasmLaunchAction.cmake"
     "${CMAKE_CURRENT_LIST_DIR}/cmake/LVRSBootstrapFrameworkAction.cmake"
     "${CMAKE_CURRENT_LIST_DIR}/cmake/LVRSAppEntryPoint.cpp.in"
     DESTINATION ${LVRS_INSTALL_CMAKE_DIR}

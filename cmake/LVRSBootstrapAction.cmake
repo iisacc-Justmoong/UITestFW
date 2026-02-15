@@ -815,7 +815,18 @@ if(LVRS_BOOTSTRAP_PLATFORM STREQUAL "wasm")
     endif()
 
     get_filename_component(_lvrs_wasm_artifact_dir "${_lvrs_wasm_entry_html}" DIRECTORY)
+    file(RELATIVE_PATH _lvrs_wasm_entry_relative
+        "${LVRS_BOOTSTRAP_BINARY_DIR}"
+        "${_lvrs_wasm_entry_html}"
+    )
+    set(_lvrs_wasm_metadata_file "${LVRS_BOOTSTRAP_BINARY_DIR}/LVRSWasmArtifact.cmake")
+    file(WRITE "${_lvrs_wasm_metadata_file}"
+        "set(LVRS_WASM_ENTRY_HTML \"${_lvrs_wasm_entry_html}\")\n"
+        "set(LVRS_WASM_ENTRY_RELATIVE \"${_lvrs_wasm_entry_relative}\")\n"
+        "set(LVRS_WASM_ARTIFACT_DIR \"${_lvrs_wasm_artifact_dir}\")\n"
+    )
     message(STATUS "LVRS bootstrap: WASM artifact ready -> ${_lvrs_wasm_entry_html}")
+    message(STATUS "LVRS bootstrap: WASM metadata -> ${_lvrs_wasm_metadata_file}")
     message(STATUS "LVRS bootstrap: serve '${_lvrs_wasm_artifact_dir}' with a static HTTP server.")
     return()
 endif()

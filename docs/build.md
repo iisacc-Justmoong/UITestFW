@@ -81,6 +81,14 @@ lvrs_add_qml_app(
 
 Set `CMAKE_PREFIX_PATH` to the install root (`/path/to/lvrs-prefix`) when configuring the downstream project.
 `lvrs_configure_qml_app()` sets `QT_QML_IMPORT_PATH` for installed-package consumption, applies a default executable output directory (`<build>/bin`) when unset, and auto-links/imports LVRS static QML plugin artifacts for static package builds.
+`LV.ApplicationWindow` and `LV.AppScaffold` provide adaptive layout policy APIs for mobile/desktop reordering:
+- `scaffoldLayoutMode` (`auto`, `mobile`, `desktop`)
+- `scaffoldLayoutPlatform` override (default `Qt.platform.os`)
+- `scaffoldForceDesktopOnLargeMobile` + `scaffoldMobileDesktopMinWidth`
+- `scaffoldPreferBottomNavigation` + `scaffoldBottomNavigationMaxItems`
+- runtime state flags: `adaptiveMobileLayout`, `adaptiveDesktopLayout`, `adaptiveRailNavigation`, `adaptiveDrawerNavigation`, `adaptiveBottomNavigation`
+- `matchesMedia()` tokens: `mobile-layout`, `desktop-layout`, `rail-nav`, `drawer-nav`, `bottom-nav`
+Default `auto` mode is mobile-first for `android`/`ios` and prevents wide-screen mobile windows from being forced into desktop rail layout unless explicitly configured.
 It also creates cross-platform runtime targets automatically:
 - `run_<target>_macos`
 - `run_<target>_linux`
@@ -108,6 +116,9 @@ It also creates launch/export convenience targets:
 Desktop bootstrap targets produce executable artifacts.
 iOS bootstrap generates an Xcode project by default and installs a simulator app via `xcrun simctl`.
 Android bootstrap generates an Android Studio (Gradle) project by default and installs an APK via `adb`.
+WASM bootstrap emits browser artifacts and writes `LVRSWasmArtifact.cmake` entry metadata in the wasm bootstrap build tree.
+`launch_<target>_wasm` serves the wasm build tree via a local static HTTP server and can auto-open a browser.
+`export_<target>_wasm_site` recursively collects wasm web assets (nested layout-safe) and generates an `index.html` redirect to the detected entry.
 Toolchain/prefix overrides:
 - `LVRS_BOOTSTRAP_QT_PREFIX_<PLATFORM>`
 - `LVRS_BOOTSTRAP_QT_HOST_PREFIX` (host Qt prefix for Android deploy tooling lookup)
@@ -118,6 +129,7 @@ Toolchain/prefix overrides:
 - `LVRS_ANDROID_STUDIO_PROJECT_DIR` (default: `<platform-build>/android-studio`)
 - `LVRS_BOOTSTRAP_ANDROIDDEPLOYQT` (explicit path override for `androiddeployqt`)
 - `LVRS_BOOTSTRAP_ANDROID_SDK_ROOT` / `LVRS_BOOTSTRAP_ANDROID_NDK` (Android SDK/NDK explicit override)
+- `LVRS_BOOTSTRAP_WASM_HOST` / `LVRS_BOOTSTRAP_WASM_PORT` / `LVRS_BOOTSTRAP_WASM_OPEN_BROWSER` (WASM launch server/browser behavior)
 - `LVRS_IOS_SIMULATOR_NAME` (default: `iPhone 17 Pro`)
 - `LVRS_ANDROID_EMULATOR_SERIAL` (default: `emulator-5554`)
 `LVRS_DIR` and package-registry policy (`CMAKE_FIND_PACKAGE_NO_PACKAGE_REGISTRY`, `CMAKE_FIND_USE_PACKAGE_REGISTRY`) are propagated automatically from the host configure cache to per-platform bootstrap reconfigure.

@@ -109,6 +109,14 @@ Only CMake configure/build/install is required. Manual file copy or custom plugi
 `lvrs_configure_qml_app()` applies a safe default runtime output directory (`<build>/bin`) when none is set, and auto-links/imports LVRS static QML plugin artifacts when the package is consumed as a static build.
 `lvrs_configure_qml_app()` now also generates platform runtime targets automatically: `run_<YourTarget>_macos`, `run_<YourTarget>_linux`, `run_<YourTarget>_windows`, `run_<YourTarget>_ios`, `run_<YourTarget>_android`, `run_<YourTarget>_wasm`.
 On the configured host desktop platform, the matching runtime target directly launches the built executable; non-host targets provide an immediate reconfigure hint via `CMAKE_SYSTEM_NAME`.
+`LV.ApplicationWindow`/`LV.AppScaffold` now include adaptive layout policy properties:
+- `scaffoldLayoutMode` (`auto`, `mobile`, `desktop`)
+- `scaffoldLayoutPlatform` (platform token override; default `Qt.platform.os`)
+- `scaffoldForceDesktopOnLargeMobile` + `scaffoldMobileDesktopMinWidth`
+- `scaffoldPreferBottomNavigation` + `scaffoldBottomNavigationMaxItems`
+- runtime booleans: `adaptiveMobileLayout`, `adaptiveDesktopLayout`, `adaptiveRailNavigation`, `adaptiveDrawerNavigation`, `adaptiveBottomNavigation`
+- `matchesMedia()` extra tokens: `mobile-layout`, `desktop-layout`, `rail-nav`, `drawer-nav`, `bottom-nav`
+By default (`auto`), mobile platforms (`android`, `ios`) stay mobile-first even at wide widths and use bottom navigation when item count allows.
 In addition, LVRS generates bootstrap targets for cross-platform output/installation:
 - `bootstrap_<YourTarget>_macos`
 - `bootstrap_<YourTarget>_linux`
@@ -128,12 +136,15 @@ LVRS also generates launch/export convenience targets:
 - desktop targets emit executable artifact paths (`macOS`/`Linux` binaries, `Windows .exe`)
 - `ios` generates an Xcode project by default and installs the built `.app` to the iOS Simulator via `xcrun simctl`
 - `android` generates an Android Studio (Gradle) project by default and installs the built `.apk` to emulator/device via `adb`
-- `wasm` emits browser artifacts (`.html`, `.js`, `.wasm`) in the wasm bootstrap build tree
+- `wasm` emits browser artifacts (`.html`, `.js`, `.wasm`) in the wasm bootstrap build tree and writes `LVRSWasmArtifact.cmake` entry metadata
+- `launch_<YourTarget>_wasm` serves the wasm build tree with a local static HTTP server and optionally opens the browser
+- `export_<YourTarget>_wasm_site` collects wasm web assets recursively (including nested output layouts) and writes an `index.html` redirect to the detected app entry
 Override paths/toolchains with `LVRS_BOOTSTRAP_QT_PREFIX_<PLATFORM>` and `LVRS_BOOTSTRAP_TOOLCHAIN_FILE_<PLATFORM>` (`PLATFORM`: `MACOS`, `LINUX`, `WINDOWS`, `IOS`, `ANDROID`, `WASM`).
 Project-generation defaults can be controlled with `LVRS_BOOTSTRAP_GENERATE_IOS_XCODE_PROJECT` and `LVRS_BOOTSTRAP_GENERATE_ANDROID_STUDIO_PROJECT`.
 Android Studio output path can be overridden with `LVRS_ANDROID_STUDIO_PROJECT_DIR`.
 `androiddeployqt` lookup can be pinned with `LVRS_BOOTSTRAP_ANDROIDDEPLOYQT` (or `LVRS_BOOTSTRAP_QT_HOST_PREFIX`).
 Android SDK/NDK auto-detection can be overridden with `LVRS_BOOTSTRAP_ANDROID_SDK_ROOT` and `LVRS_BOOTSTRAP_ANDROID_NDK`.
+WASM launch behavior can be overridden with `LVRS_BOOTSTRAP_WASM_HOST`, `LVRS_BOOTSTRAP_WASM_PORT`, `LVRS_BOOTSTRAP_WASM_OPEN_BROWSER`.
 `LVRS_DIR` and package-registry policy cache values are forwarded automatically to bootstrap reconfigure.
 LVRS package config exports toolchain hint variables for downstream scripts:
 - `LVRS_QT_HOST_PREFIX_HINT`

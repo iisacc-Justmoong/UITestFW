@@ -45,12 +45,23 @@ Controls.ApplicationWindow {
     property alias navWidth: scaffold.navWidth
     property alias navDrawerWidth: scaffold.navDrawerWidth
     property alias wideBreakpoint: scaffold.wideBreakpoint
+    property alias scaffoldLayoutMode: scaffold.layoutMode
+    property alias scaffoldLayoutPlatform: scaffold.layoutPlatform
+    property alias scaffoldForceDesktopOnLargeMobile: scaffold.forceDesktopOnLargeMobile
+    property alias scaffoldMobileDesktopMinWidth: scaffold.mobileDesktopMinWidth
+    property alias scaffoldPreferBottomNavigation: scaffold.preferBottomNavigation
+    property alias scaffoldBottomNavigationMaxItems: scaffold.bottomNavigationMaxItems
     property alias navDelegate: scaffold.navDelegate
     property alias navHeader: scaffold.navHeader
     property alias navFooter: scaffold.navFooter
     property alias pageRouter: scaffold.pageRouter
     property alias headerActions: scaffold.headerActions
     default property alias content: scaffold.content
+    readonly property bool adaptiveMobileLayout: scaffold.mobileLayout
+    readonly property bool adaptiveDesktopLayout: scaffold.desktopLayout
+    readonly property bool adaptiveRailNavigation: scaffold.navigationRailEnabled
+    readonly property bool adaptiveDrawerNavigation: scaffold.drawerNavigationEnabled
+    readonly property bool adaptiveBottomNavigation: scaffold.bottomNavigationEnabled
     property var lastGlobalPressedEventData: ({})
     property var lastGlobalContextEventData: ({})
 
@@ -76,6 +87,16 @@ Controls.ApplicationWindow {
             return isExpanded
         if (token === "medium")
             return widthClass === medium || heightClass === medium
+        if (token === "mobile-layout")
+            return adaptiveMobileLayout
+        if (token === "desktop-layout")
+            return adaptiveDesktopLayout
+        if (token === "rail-nav")
+            return adaptiveRailNavigation
+        if (token === "drawer-nav")
+            return adaptiveDrawerNavigation
+        if (token === "bottom-nav")
+            return adaptiveBottomNavigation
         return false
     }
 
@@ -130,6 +151,7 @@ Controls.ApplicationWindow {
             headerTitle: root.title
             headerSubtitle: root.subtitle
             navModel: root.navItems
+            layoutPlatform: root.platform
             onNavActivated: root.navActivated(index, item)
         }
     }

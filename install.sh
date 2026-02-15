@@ -45,10 +45,10 @@ detect_bootstrap_framework_platforms() {
     host_platform="$1"
     case "${host_platform}" in
         macos|linux|windows)
-            echo "${host_platform};ios;android"
+            echo "${host_platform};ios;android;wasm"
             ;;
         *)
-            echo "ios;android"
+            echo "ios;android;wasm"
             ;;
     esac
 }

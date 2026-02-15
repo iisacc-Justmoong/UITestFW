@@ -17,6 +17,7 @@ private slots:
     void versionless_import_application_window_loads();
     void versionless_import_window_loads();
     void appshell_compat_loads();
+    void appscaffold_platform_adaptive_layout_loads();
     void icon_name_mapping_loads();
     void hierarchy_tree_model_api_loads();
     void hierarchy_string_array_model_loads();
@@ -52,11 +53,20 @@ LV.ApplicationWindow {
     visible: false
     title: "API"
     subtitle: "Merged"
+    scaffoldLayoutMode: "mobile"
     navItems: ["Overview", "Runs"]
     navigationEnabled: true
 
     property bool importReady: LV.Theme.dark
     property bool shellApiReady: navItems.length === 2 && navWidth > 0 && navDrawerWidth > 0
+    property bool adaptiveApiReady: adaptiveMobileLayout
+        && !adaptiveDesktopLayout
+        && adaptiveBottomNavigation
+        && !adaptiveRailNavigation
+        && !adaptiveDrawerNavigation
+        && matchesMedia("mobile-layout")
+        && matchesMedia("bottom-nav")
+        && !matchesMedia("rail-nav")
     property bool qualityReady: LV.RenderQuality.enabled && LV.RenderQuality.supersampleScale >= 3.0
     property bool labelStyleApiReady: contentLabel.style === contentLabel.body
         && contentLabel.font.pixelSize === LV.Theme.textBody
@@ -108,6 +118,7 @@ LV.ApplicationWindow {
     QVERIFY(root);
     QVERIFY(root->property("importReady").toBool());
     QVERIFY(root->property("shellApiReady").toBool());
+    QVERIFY(root->property("adaptiveApiReady").toBool());
     QVERIFY(root->property("qualityReady").toBool());
     QVERIFY(root->property("labelStyleApiReady").toBool());
     QVERIFY(root->property("figmaTextDesignReady").toBool());
@@ -177,6 +188,63 @@ LV.AppShell {
     QCOMPARE(root->property("title").toString(), QStringLiteral("Compat"));
     QCOMPARE(root->property("subtitle").toString(), QStringLiteral("Wrapper"));
     QVERIFY(root->property("navItems").isValid());
+}
+
+void ImportApiTests::appscaffold_platform_adaptive_layout_loads()
+{
+    QQmlEngine engine;
+    const QString importBase = QDir::cleanPath(QCoreApplication::applicationDirPath() + "/..");
+    engine.addImportPath(importBase);
+    const QByteArray qml = R"(
+import QtQuick
+import LVRS as LV
+
+Item {
+    width: 1400
+    height: 900
+
+    LV.AppScaffold {
+        id: mobileScaffold
+        width: 1200
+        height: 760
+        layoutMode: "auto"
+        layoutPlatform: "android"
+        navModel: ["Home", "Runs", "Settings"]
+        navigationEnabled: true
+        visible: false
+    }
+
+    LV.AppScaffold {
+        id: desktopScaffold
+        width: 1200
+        height: 760
+        layoutMode: "auto"
+        layoutPlatform: "osx"
+        navModel: ["Home", "Runs", "Settings"]
+        navigationEnabled: true
+        visible: false
+    }
+
+    property bool mobileContract:
+        mobileScaffold.mobileLayout
+        && !mobileScaffold.desktopLayout
+        && mobileScaffold.bottomNavigationEnabled
+        && !mobileScaffold.navigationRailEnabled
+        && !mobileScaffold.drawerNavigationEnabled
+
+    property bool desktopContract:
+        desktopScaffold.desktopLayout
+        && !desktopScaffold.mobileLayout
+        && desktopScaffold.navigationRailEnabled
+        && !desktopScaffold.bottomNavigationEnabled
+        && !desktopScaffold.drawerNavigationEnabled
+}
+)";
+
+    QScopedPointer<QObject> root(createFromQml(engine, qml));
+    QVERIFY(root);
+    QVERIFY(root->property("mobileContract").toBool());
+    QVERIFY(root->property("desktopContract").toBool());
 }
 
 void ImportApiTests::icon_name_mapping_loads()

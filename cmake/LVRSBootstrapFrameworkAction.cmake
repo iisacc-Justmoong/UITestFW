@@ -62,6 +62,18 @@ function(_lvrs_bootstrap_detect_android_ndk sdk_root out_var)
         return()
     endif()
 
+    set(_lvrs_common_ndk_candidates
+        "/opt/homebrew/share/android-ndk"
+        "/usr/local/share/android-ndk"
+        "/opt/android/android-ndk-r26b"
+    )
+    foreach(_lvrs_common_ndk IN LISTS _lvrs_common_ndk_candidates)
+        if(IS_DIRECTORY "${_lvrs_common_ndk}")
+            set(${out_var} "${_lvrs_common_ndk}" PARENT_SCOPE)
+            return()
+        endif()
+    endforeach()
+
     if(NOT "${sdk_root}" STREQUAL "" AND IS_DIRECTORY "${sdk_root}/ndk")
         file(GLOB _lvrs_ndk_versions LIST_DIRECTORIES true "${sdk_root}/ndk/*")
         set(_lvrs_ndk_dirs)

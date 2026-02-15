@@ -28,6 +28,9 @@ cd LVRS
 
 `install.sh` installs LVRS as a shared framework package and registers it in the user CMake package registry.
 After this step, downstream projects can use `find_package(LVRS CONFIG REQUIRED)` without manually appending LVRS to `CMAKE_PREFIX_PATH`.
+The installer always performs a clean reinstall (build directory and previously installed LVRS artifacts are removed before configure/install).
+The installer now builds examples/tests by default to avoid omitted targets during package installation.
+Use `./install.sh --without-examples --without-tests` for a minimal install build.
 
 ## Build (Framework-First Default)
 

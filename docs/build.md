@@ -7,6 +7,8 @@
 ```
 
 The installer configures/builds/installs LVRS in shared framework mode and registers the package in the user CMake package registry, so downstream `find_package(LVRS CONFIG REQUIRED)` works without manually adding the LVRS prefix path.
+The installer always performs a clean reinstall by removing the previous build directory and installed LVRS artifact paths before configuring.
+`install.sh` builds examples/tests by default to minimize omitted targets; pass `--without-examples --without-tests` for a minimal install build.
 
 ## Configure
 

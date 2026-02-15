@@ -172,20 +172,48 @@ endif()
 
 if(APPLE AND LVRS_FORCE_X86_QT_TOOLS)
     function(_uifw_wrap_qt_tool target)
-        get_target_property(_tool_path ${target} IMPORTED_LOCATION)
-        if(NOT _tool_path)
+        if(NOT TARGET ${target})
             return()
         endif()
-        string(REPLACE "::" "_" _tool_name "${target}")
-        set(_wrapper "${CMAKE_CURRENT_BINARY_DIR}/${_tool_name}_x86_wrapper")
-        file(WRITE "${_wrapper}" "#!/bin/sh\nexec arch -x86_64 \"${_tool_path}\" \"$@\"\n")
-        file(CHMOD "${_wrapper}"
-            PERMISSIONS
-                OWNER_READ OWNER_WRITE OWNER_EXECUTE
-                GROUP_READ GROUP_EXECUTE
-                WORLD_READ WORLD_EXECUTE
-        )
-        set_property(TARGET ${target} PROPERTY IMPORTED_LOCATION "${_wrapper}")
+
+        get_target_property(_uifw_imported_configs ${target} IMPORTED_CONFIGURATIONS)
+        set(_uifw_location_props IMPORTED_LOCATION)
+        if(_uifw_imported_configs)
+            foreach(_uifw_config IN LISTS _uifw_imported_configs)
+                string(TOUPPER "${_uifw_config}" _uifw_config_upper)
+                list(APPEND _uifw_location_props "IMPORTED_LOCATION_${_uifw_config_upper}")
+            endforeach()
+        endif()
+
+        string(REPLACE "::" "_" _uifw_tool_name "${target}")
+        set(_uifw_wrapped_any OFF)
+
+        foreach(_uifw_location_prop IN LISTS _uifw_location_props)
+            get_target_property(_uifw_tool_path ${target} ${_uifw_location_prop})
+            if(NOT _uifw_tool_path)
+                continue()
+            endif()
+            get_filename_component(_uifw_tool_realpath "${_uifw_tool_path}" REALPATH)
+            if(NOT EXISTS "${_uifw_tool_realpath}")
+                continue()
+            endif()
+
+            string(TOLOWER "${_uifw_location_prop}" _uifw_prop_suffix)
+            set(_uifw_wrapper "${CMAKE_CURRENT_BINARY_DIR}/${_uifw_tool_name}_${_uifw_prop_suffix}_x86_wrapper")
+            file(WRITE "${_uifw_wrapper}" "#!/bin/sh\nexec arch -x86_64 \"${_uifw_tool_realpath}\" \"$@\"\n")
+            file(CHMOD "${_uifw_wrapper}"
+                PERMISSIONS
+                    OWNER_READ OWNER_WRITE OWNER_EXECUTE
+                    GROUP_READ GROUP_EXECUTE
+                    WORLD_READ WORLD_EXECUTE
+            )
+            set_property(TARGET ${target} PROPERTY ${_uifw_location_prop} "${_uifw_wrapper}")
+            set(_uifw_wrapped_any ON)
+        endforeach()
+
+        if(NOT _uifw_wrapped_any)
+            message(WARNING "LVRS_FORCE_X86_QT_TOOLS requested, but ${target} had no import location to wrap.")
+        endif()
     endfunction()
 
     _uifw_wrap_qt_tool(Qt6::rcc)

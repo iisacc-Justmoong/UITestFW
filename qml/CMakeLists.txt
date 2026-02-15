@@ -10,19 +10,25 @@ set_source_files_properties(qml/Theme.qml PROPERTIES QT_QML_SINGLETON_TYPE TRUE)
 include(${CMAKE_CURRENT_LIST_DIR}/components/CMakeLists.txt)
 list(APPEND LVRS_QML_FILES ${LVRS_COMPONENT_QML_FILES})
 
-set(LVRS_FONT_RESOURCE_FILES
-    resources/font/Pretendard-Black.ttf
-    resources/font/Pretendard-Bold.ttf
-    resources/font/Pretendard-ExtraBold.ttf
-    resources/font/Pretendard-ExtraLight.ttf
-    resources/font/Pretendard-Light.ttf
-    resources/font/Pretendard-Medium.ttf
-    resources/font/Pretendard-Regular.ttf
-    resources/font/Pretendard-SemiBold.ttf
-    resources/font/Pretendard-Thin.ttf
+file(GLOB LVRS_FONT_RESOURCE_FILES
+    CONFIGURE_DEPENDS
+    RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}"
+    "${CMAKE_CURRENT_LIST_DIR}/../resources/font/*.ttf"
 )
+list(SORT LVRS_FONT_RESOURCE_FILES)
+
+file(GLOB_RECURSE LVRS_ICON_RESOURCE_FILES
+    CONFIGURE_DEPENDS
+    LIST_DIRECTORIES FALSE
+    RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}"
+    "${CMAKE_CURRENT_LIST_DIR}/../resources/iconset/*"
+)
+list(FILTER LVRS_ICON_RESOURCE_FILES EXCLUDE REGEX "\\.DS_Store$")
+list(SORT LVRS_ICON_RESOURCE_FILES)
 
 set(LVRS_RESOURCE_FILES
     ${LVRS_COMPONENT_RESOURCE_FILES}
+    ${LVRS_ICON_RESOURCE_FILES}
     ${LVRS_FONT_RESOURCE_FILES}
 )
+list(REMOVE_DUPLICATES LVRS_RESOURCE_FILES)

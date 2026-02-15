@@ -14,9 +14,13 @@ Options:
   --prefix <path>      Install prefix (default: ~/.local/LVRS)
   --build-dir <path>   Build directory (default: <repo>/build-install)
   --build-type <type>  CMake build type (default: Release)
-  --clean              Remove previous build cache before configure
+  --clean              Deprecated no-op (clean reinstall is always enabled)
+  --without-examples   Do not build example targets
+  --without-tests      Do not build test targets
+  --force-x86-qt-tools Force Qt host tools to run as x86_64 on macOS
   --no-source-snapshot Skip source snapshot copy into <prefix>/src/LVRS
   --no-registry        Skip CMake user package registry registration
+  --                   Pass remaining args to cmake configure
   -h, --help           Show this help
 EOF
 }
@@ -38,7 +42,9 @@ INSTALL_PREFIX="${HOME_DIR}/.local/LVRS"
 BUILD_TYPE="${CMAKE_BUILD_TYPE:-Release}"
 SOURCE_SNAPSHOT=1
 REGISTER_CMAKE_REGISTRY=1
-CLEAN_BUILD_CACHE=0
+FORCE_X86_QT_TOOLS=0
+BUILD_EXAMPLES=1
+BUILD_TESTS=1
 
 while [ "$#" -gt 0 ]; do
     case "$1" in
@@ -58,7 +64,19 @@ while [ "$#" -gt 0 ]; do
             shift 2
             ;;
         --clean)
-            CLEAN_BUILD_CACHE=1
+            # Deprecated: keep for backward compatibility.
+            shift
+            ;;
+        --without-examples)
+            BUILD_EXAMPLES=0
+            shift
+            ;;
+        --without-tests)
+            BUILD_TESTS=0
+            shift
+            ;;
+        --force-x86-qt-tools)
+            FORCE_X86_QT_TOOLS=1
             shift
             ;;
         --no-source-snapshot)
@@ -68,6 +86,10 @@ while [ "$#" -gt 0 ]; do
         --no-registry)
             REGISTER_CMAKE_REGISTRY=0
             shift
+            ;;
+        --)
+            shift
+            break
             ;;
         -h|--help)
             usage
@@ -95,31 +117,74 @@ echo "[LVRS] Install dir  : ${INSTALL_PREFIX}"
 echo "[LVRS] Build type   : ${BUILD_TYPE}"
 echo "[LVRS] Registry     : ${REGISTER_CMAKE_REGISTRY}"
 echo "[LVRS] Snapshot     : ${SOURCE_SNAPSHOT}"
+echo "[LVRS] X86 Qt tools : ${FORCE_X86_QT_TOOLS}"
+echo "[LVRS] Examples     : ${BUILD_EXAMPLES}"
+echo "[LVRS] Tests        : ${BUILD_TESTS}"
+echo "[LVRS] Clean mode   : forced reinstall"
 
-if [ "${CLEAN_BUILD_CACHE}" -eq 1 ]; then
-    echo "[LVRS] Cleaning previous build cache..."
-    if [ -f "${BUILD_DIR}/CMakeCache.txt" ]; then
-        cmake -E rm -f "${BUILD_DIR}/CMakeCache.txt"
+echo "[LVRS] Cleaning build directory..."
+cmake -E rm -rf "${BUILD_DIR}"
+cmake -E make_directory "${BUILD_DIR}"
+
+echo "[LVRS] Cleaning previous LVRS install artifacts..."
+cmake -E rm -rf \
+    "${INSTALL_PREFIX}/include/LVRS" \
+    "${INSTALL_PREFIX}/lib/cmake/LVRS" \
+    "${INSTALL_PREFIX}/lib/qt6/qml/LVRS" \
+    "${INSTALL_PREFIX}/lib/AGL.framework" \
+    "${SOURCE_INSTALL_DIR}"
+for _lvrs_binary in \
+    "${INSTALL_PREFIX}/lib/libLVRS.dylib" \
+    "${INSTALL_PREFIX}/lib/libLVRS.so" \
+    "${INSTALL_PREFIX}/lib/libLVRS.a" \
+    "${INSTALL_PREFIX}/lib/LVRS.lib" \
+    "${INSTALL_PREFIX}/bin/LVRS.dll"
+do
+    if [ -e "${_lvrs_binary}" ]; then
+        cmake -E rm -f "${_lvrs_binary}"
     fi
-    if [ -d "${BUILD_DIR}/CMakeFiles" ]; then
-        cmake -E rm -rf "${BUILD_DIR}/CMakeFiles"
-    fi
+done
+
+if [ "${FORCE_X86_QT_TOOLS}" -eq 1 ]; then
+    set -- -DLVRS_FORCE_X86_QT_TOOLS=ON "$@"
+fi
+
+if [ "${BUILD_EXAMPLES}" -eq 1 ]; then
+    LVRS_BUILD_EXAMPLES_VALUE=ON
+else
+    LVRS_BUILD_EXAMPLES_VALUE=OFF
+fi
+
+if [ "${BUILD_TESTS}" -eq 1 ]; then
+    LVRS_BUILD_TESTS_VALUE=ON
+else
+    LVRS_BUILD_TESTS_VALUE=OFF
 fi
 
 if ! cmake -S "${PROJECT_ROOT}" -B "${BUILD_DIR}" \
     -DCMAKE_INSTALL_PREFIX="${INSTALL_PREFIX}" \
     -DCMAKE_BUILD_TYPE="${BUILD_TYPE}" \
     -DLVRS_BUILD_SHARED_LIBS=ON \
-    -DLVRS_BUILD_EXAMPLES=OFF \
-    -DLVRS_BUILD_TESTS=OFF; then
+    -DLVRS_BUILD_EXAMPLES="${LVRS_BUILD_EXAMPLES_VALUE}" \
+    -DLVRS_BUILD_TESTS="${LVRS_BUILD_TESTS_VALUE}" \
+    "$@"; then
     echo "[LVRS] Configure failed." >&2
     echo "[LVRS] If Qt is not auto-detected, pass your Qt prefix, e.g.:" >&2
     echo "       CMAKE_PREFIX_PATH=/path/to/Qt ./install.sh" >&2
     exit 1
 fi
 
-cmake --build "${BUILD_DIR}" --config "${BUILD_TYPE}"
-cmake --install "${BUILD_DIR}" --config "${BUILD_TYPE}"
+if ! cmake --build "${BUILD_DIR}" --config "${BUILD_TYPE}"; then
+    echo "[LVRS] Build failed." >&2
+    echo "[LVRS] On macOS, if log contains 'requires neon', retry with:" >&2
+    echo "       ./install.sh --force-x86-qt-tools" >&2
+    exit 1
+fi
+
+if ! cmake --install "${BUILD_DIR}" --config "${BUILD_TYPE}"; then
+    echo "[LVRS] Install step failed." >&2
+    exit 1
+fi
 
 if [ "${SOURCE_SNAPSHOT}" -eq 1 ]; then
     echo "[LVRS] Installing source snapshot..."

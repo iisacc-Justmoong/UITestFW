@@ -6,7 +6,8 @@ endfunction()
 
 macro(_lvrs_bootstrap_append_cache_arg cmd_list key value)
     if(NOT "${value}" STREQUAL "")
-        list(APPEND ${cmd_list} "-D${key}=${value}")
+        string(REPLACE ";" "\\;" _lvrs_cache_value "${value}")
+        list(APPEND ${cmd_list} "-D${key}=${_lvrs_cache_value}")
     endif()
 endmacro()
 
